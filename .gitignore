@@ -1,0 +1,16 @@
+# IDE / local
+.claude/
+.idea/
+*.local.json
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter (also see TOGESC/togesc/.gitignore)
+**/.dart_tool/
+**/.flutter-plugins-dependencies
+**/build/
+**/coverage/

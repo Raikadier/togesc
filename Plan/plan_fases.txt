@@ -1,0 +1,309 @@
+================================================================================
+PLAN DE FASES — Aplicación de project_context.txt
+Versión: 1.0
+Referencia: Plan/project_context.txt
+Metodología: Ágil (Scrum ligero) + V-model en testing
+Idioma: Español
+================================================================================
+
+CÓMO USAR ESTE DOCUMENTO
+--------------------------------------------------------------------------------
+Cada fase tiene: objetivo, entregables, criterios de aceptación (DoD), tareas
+concretas y dependencias. Avanzar solo cuando la fase anterior cumple DoD.
+
+Leyenda prioridad MoSCoW: [M] Must  [S] Should  [C] Could  [W] Won't (ahora)
+
+
+================================================================================
+FASE 0 — CONSOLIDACIÓN Y ALINEACIÓN DEL REPO
+Estado actual: COMPLETADA (2026-06-13)
+Duración estimada: 1 sprint
+================================================================================
+
+Objetivo:
+  Unificar la verdad del proyecto: Flutter es el ÚNICO producto; eliminar
+  Python del repositorio; documentación coherente.
+
+Entregables:
+  [M] project_context.txt y plan_fases.txt (este plan)
+  [M] README raíz actualizado — solo Flutter (TOGESC/togesc/)
+  [M] Eliminar código Python de la raíz (main.py, core/, audio/, ui/, data/,
+      constants.py, requirements.txt)
+  [S] Git tag opcional pre-borrado (p. ej. v0-python-cli) para historial
+  [S] .cursorrules acortado o reemplazado por reglas específicas TOGESC
+  [C] ADR-001 a ADR-006 en Plan/adr/ (opcional)
+
+Criterios de aceptación (DoD):
+  - Nuevo desarrollador entiende en 10 min: cd TOGESC/togesc && flutter run
+  - No queda código Python en el repo activo (salvo menciones históricas en Plan/)
+  - flutter test pasa en local
+
+Tareas:
+  1. Actualizar README.md raíz (solo Flutter)
+  2. Borrar archivos y carpetas Python de la raíz del repo
+  3. Revisar .cursorrules → referenciar Plan/project_context.txt
+  4. Verificar flutter analyze sin errores críticos
+
+
+================================================================================
+FASE 1 — MVP FLUTTER COMPLETO (SIN BACKEND, SIN CUENTAS)
+Estado actual: COMPLETADA (2026-06-13)
+Duración estimada: 1–2 sprints (pulido + gaps)
+================================================================================
+
+Objetivo:
+  App funcional multiplataforma con toda la pedagogía en cliente y persistencia
+  local. Producto usable para entrenamiento real diario.
+
+Entregables funcionales [M]:
+  - Modos: una nota, intervalo, acorde, aleatorio, velocidad
+  - SRS híbrido operativo con guardado local
+  - Cluster de limpieza entre rondas
+  - Piano interactivo + input texto
+  - Pantalla estadísticas + recomendaciones
+  - Variación octavas + timbres aleatorios
+
+Entregables técnicos [M]:
+  - Suite test: unit + integration + widget + e2e verde
+  - ProgressRepository con migración formato antiguo (si aplica)
+  - AudioPlayerService estable en Windows + Web + al menos un móvil
+
+Entregables técnicos [S]:
+  - Go Router para navegación (reemplazar Navigator imperativo)
+  - Tema visual coherente (Material 3; identidad musical propia)
+  - Modo oscuro
+
+Criterios de aceptación (DoD):
+  - Usuario completa 10 rondas, cierra app, reabre: progreso SRS conservado
+  - flutter test → 0 failures
+  - Audio audible en dispositivo objetivo principal del desarrollador
+  - Flujo home → juego → resultado → cluster → siguiente ronda sin crashes
+
+Tareas pendientes típicas (auditar contra código):
+  1. [x] Confirmar audio_player_service import real de flutter_soloud
+  2. [ ] Probar flutter run -d chrome (web) — manual
+  3. [ ] Probar flutter run en Android/iOS si es target — manual
+  4. [x] Persistencia cross-platform via SharedPreferences
+  5. [x] Onboarding pedagogico (SRS, octavas, cluster)
+  6. [x] Go Router + tema claro/oscuro
+
+
+================================================================================
+FASE 2 — CALIDAD, UX Y PRE-LANZAMIENTO
+Duración estimada: 2 sprints
+Depende de: Fase 1 DoD
+================================================================================
+
+Objetivo:
+  Producto presentable públicamente: estable, accesible, medible, desplegable.
+
+Entregables [M]:
+  - CI GitHub Actions: analyze + test en cada push/PR
+  - Build web automatizado (artefacto deployable)
+  - Sentry o equivalente para crashes [S]
+
+Entregables UX [S]:
+  - Design system mínimo (tokens color, espaciado 8px, tipografía)
+  - Tap targets piano ≥ 48dp en móvil
+  - Estados vacío/error/loading en pantallas clave
+  - Accesibilidad básica: Semantics en piano, contraste WCAG AA
+
+Entregables producto [S]:
+  - Analytics anónimo (PostHog/Firebase): sesiones, modos usados, retención
+  - Pantalla "Acerca de" con explicación pedagógica
+
+Entregables [C]:
+  - PWA: manifest + service worker para web offline parcial
+  - Localización preparada (i18n) aunque solo español al inicio
+
+Criterios de aceptación (DoD):
+  - Pipeline CI verde en repo remoto
+  - Web desplegada en URL de preview (Vercel/Firebase)
+  - Crash rate 0 en smoke test manual de 30 min
+  - Lighthouse accesibilidad ≥ 90 en web [S]
+
+Principios .cursorrules aplicados:
+  - Continuous Integration (merge frecuente, CI obligatorio)
+  - Clean Code: funciones ≤ 20 líneas donde sea razonable en Dart
+  - Regla Boy Scout en archivos tocados
+
+
+================================================================================
+FASE 3 — DISTRIBUCIÓN MÓVIL Y WEB PÚBLICA
+Duración estimada: 2–3 sprints
+Depende de: Fase 2 DoD
+================================================================================
+
+Objetivo:
+  Usuarios reales pueden instalar/usar la app fuera del entorno de desarrollo.
+
+Entregables [M]:
+  - Build release Android (AAB) + firma
+  - Build release iOS (si aplica) + TestFlight
+  - Web en dominio propio o subdominio
+  - Política de privacidad (requerida stores; aun sin cuentas)
+
+Entregables [S]:
+  - Listing stores: descripción, capturas, icono
+  - Windows/macOS desktop build [C] — Flutter ya soporta; útil para práctica con teclado
+
+Criterios de aceptación (DoD):
+  - App instalable desde Play Store / TestFlight / URL web pública
+  - Privacidad publicada (datos locales only en esta fase)
+  - Versión semántica 1.0.0 etiquetada en git
+
+Modelo negocio: GRATIS TOTAL en esta fase (validar producto y retención).
+
+
+================================================================================
+FASE 4 — CUENTAS Y SYNC (SUPABASE)
+Duración estimada: 2–3 sprints
+Depende de: Fase 3 DoD + tracción o necesidad explícita de multi-dispositivo
+================================================================================
+
+Objetivo:
+  Usuario opcional puede crear cuenta y sincronizar progreso SRS entre dispositivos.
+
+Entregables [M]:
+  - Supabase project: Auth (email/OAuth), Postgres, RLS
+  - Esquema: users, note_progress (JSON o filas por nota), sessions_metadata
+  - ProgressRepository remoto implementando misma interface que local
+  - Flujo: "Continuar sin cuenta" vs "Vincular / Crear cuenta"
+  - Migración: importar progreso local al registrarse
+
+Entregables [S]:
+  - Sync incremental offline-first (cola local → push al reconectar)
+  - Recuperación de contraseña, verificación email
+
+Entregables [W por ahora]:
+  - Cualquier backend propio en Python
+  - GraphQL
+
+Criterios de aceptación (DoD):
+  - Mismo usuario en web + móvil ve mismo progreso SRS tras sync
+  - RLS impide leer progreso de otros usuarios
+  - App funciona offline; sync no bloquea juego
+
+Arquitectura:
+  Flutter → supabase_flutter → Postgres (RLS)
+  Audio y SRS siguen en cliente; servidor solo persiste estado.
+
+
+================================================================================
+FASE 5 — MONETIZACIÓN (MODELO DE NEGOCIO)
+Duración estimada: 2 sprints
+Depende de: Fase 4 DoD (cuentas necesarias para sync Pro)
+================================================================================
+
+Objetivo:
+  Plan freemium operativo con pagos reales.
+
+Entregables [M]:
+  - Definición planes: Free vs Pro (qué modos/features gating)
+  - RevenueCat integrado (iOS + Android)
+  - Stripe Checkout o Customer Portal (web)
+  - Paywall UI en Flutter
+  - Entitlements reflejados en Supabase (cache del estado de suscripción)
+
+Entregables [S]:
+  - Trial 7–14 días
+  - Restaurar compras
+  - Pantalla gestión suscripción
+
+Criterios de aceptación (DoD):
+  - Compra sandbox exitosa en iOS/Android + web test mode Stripe
+  - Usuario Free no accede a features Pro; usuario Pro sí
+  - Restaurar compras funciona en segundo dispositivo
+
+Reglas negocio sugeridas (ajustables):
+  Free : una nota, intervalo, SRS local, stats básicas
+  Pro  : acorde, aleatorio, velocidad, stats avanzadas, sync, export [C]
+
+
+================================================================================
+FASE 6 — ESCALA, OPERACIÓN Y EVOLUCIÓN
+Duración estimada: continua
+Depende de: Fase 5 si hay negocio; Fase 3 si permanece gratuito
+================================================================================
+
+Objetivo:
+  Producto sostenible, observable y evolutivo.
+
+Entregables [S]:
+  - Dashboard métricas: retención D1/D7, conversión Free→Pro, modos más usados
+  - Alertas Sentry + uptime web
+  - Backups Supabase automatizados
+  - Dependabot / renovate para deps Flutter
+
+Entregables [C]:
+  - Modo canto/tarareo (respuesta por micrófono)
+  - Solfeo Do/Re/Mi además de C/D/E
+  - Notificaciones push "tienes notas vencidas para repasar"
+  - Export CSV del progreso
+
+Métricas externas (adaptadas de .cursorrules):
+  - Crash rate mobile ≤ 0.1% sesiones
+  - CSAT ≥ 4.2/5 (encuesta in-app ocasional)
+  - Retención D7 ≥ objetivo definido por producto
+
+Deuda técnica:
+  - Revisión trimestral; ratio deuda ≤ 5% del backlog
+
+
+================================================================================
+CRONOGRAMA RESUMIDO
+================================================================================
+
+  Fase 0  Consolidación repo          ████░░░░░░  ~1 sem
+  Fase 1  MVP Flutter pulido          ████████░░  ~2–3 sem  ← ESTÁS AQUÍ
+  Fase 2  Calidad + CI + UX           ██████░░░░  ~3–4 sem
+  Fase 3  Lanzamiento público         ████████░░  ~3–4 sem
+  Fase 4  Supabase + sync             ██████░░░░  ~3–4 sem  (cuando haga falta)
+  Fase 5  Monetización                ████░░░░░░  ~2–3 sem
+  Fase 6  Escala continua             ∞
+
+Total hasta lanzamiento público (Fase 3): ~8–12 semanas según dedicación.
+
+
+================================================================================
+CHECKLIST RÁPIDO POR SPRINT (DoR / DoD)
+================================================================================
+
+Definition of Ready (iniciar sprint):
+  [ ] Fase anterior cumple DoD
+  [ ] Tareas priorizadas MoSCoW
+  [ ] Criterios de aceptación escritos
+
+Definition of Done (cerrar sprint):
+  [ ] flutter test verde
+  [ ] flutter analyze sin issues nuevos
+  [ ] Código revisado (self-review mínimo)
+  [ ] Documentación actualizada si cambió arquitectura
+  [ ] Demo funcional del incremento
+
+
+================================================================================
+MAPEO: Plan/contexto.txt (V-model Flutter) → plan_fases.txt
+================================================================================
+
+  contexto Fase 0–6 (implementación Flutter)  →  plan_fases Fase 1
+  Tests unit/widget/integration/e2e             →  plan_fases Fase 1–2
+  Manual flutter run                            →  plan_fases Fase 1
+  CI + deploy                                   →  plan_fases Fase 2–3
+  Supabase / pagos                              →  plan_fases Fase 4–5
+
+El archivo Plan/contexto.txt sigue siendo referencia técnica detallada del port
+Python→Flutter. Este plan_fases.txt es la hoja de ruta de PRODUCTO y negocio.
+
+
+================================================================================
+PRÓXIMO PASO INMEDIATO RECOMENDADO
+================================================================================
+
+1. Cerrar Fase 2: CI GitHub Actions + deploy web preview
+2. Probar manualmente: flutter run -d windows / -d chrome
+3. Listar gaps de Fase 2 antes de lanzamiento publico
+
+================================================================================
+FIN plan_fases.txt
+================================================================================

@@ -1,0 +1,277 @@
+================================================================================
+PROJECT CONTEXT — TOGESC / Entrenador de Oído Absoluto
+Versión: 1.0
+Idioma: Español
+Última actualización: 2026-06-13
+================================================================================
+
+1. VISIÓN DEL PRODUCTO
+--------------------------------------------------------------------------------
+
+Nombre técnico : TOGESC (TOne GEneration SCript)
+Nombre producto: Entrenador de Oído Absoluto
+
+Propósito:
+  Herramienta para entrenar y consolidar el oído absoluto mediante estrategias
+  pedagógicas comprobadas: repetición espaciada, variación de estímulos y
+  práctica progresiva.
+
+Público objetivo:
+  - Personas que buscan ADQUIRIR oído absoluto (principal).
+  - Personas que ya lo tienen y quieren MANTENER precisión, velocidad y
+    generalización (timbres, octavas, contextos polifónicos).
+
+Propuesta de valor:
+  No es un quiz genérico de intervalos. Es un motor de entrenamiento con SRS
+  adaptativo, limpieza tonal entre ejercicios y progresión pedagógica real.
+
+
+2. DECISIONES ARQUITECTÓNICAS (ADR RESUMIDOS)
+--------------------------------------------------------------------------------
+
+ADR-001 — Cliente único Flutter
+  Decisión : Un solo codebase Flutter para móvil (Android/iOS), web y
+             escritorio opcional (Windows/macOS/Linux).
+  Alternativas descartadas: dos fronts (React web + Flutter móvil), backend
+             Python con REST para lógica de juego.
+  Motivo   : Audio y SRS requieren baja latencia; duplicar lógica en Python
+             y Dart genera deuda. Flutter ya portó el núcleo completo.
+
+ADR-002 — Sin backend en MVP
+  Decisión : Cero servidor propio en la fase inicial.
+  Motivo   : El producto funciona offline-first; no hay cuentas ni pagos aún.
+  Excepción futura: Supabase cuando haya usuarios, sync y negocio.
+
+ADR-003 — Lógica pedagógica y audio en el cliente
+  Decisión : SRS, síntesis de tonos, cluster de limpieza y validación viven
+             en el dispositivo (Dart).
+  Motivo   : Latencia crítica (< 2 s para acierto "rápido" en SRS). Mover
+             audio por HTTP empeora la UX sin beneficio pedagógico.
+
+ADR-004 — Persistencia local obligatoria (sin cuentas)
+  Decisión : Guardar progreso SRS en el dispositivo (SharedPreferences / JSON).
+  Motivo   : El SRS pierde sentido si el progreso se borra al cerrar la app.
+  Nota     : Persistencia local ≠ persistencia en nube. La nube es fase futura.
+
+ADR-005 — Python descartado por completo
+  Decisión : Python NO forma parte del proyecto — ni producción, ni referencia,
+             ni backend futuro. El port a Flutter/Dart está completo; la CLI
+             Python original se elimina del repositorio (Fase 0).
+  Motivo   : Mantener Python genera deuda (doble SRS, doble audio, README
+             desactualizado) sin aportar nada al producto.
+  Historial: Si se quiere conservar el origen, un git tag anteriores al borrado
+             basta; no hace falta carpeta legacy en el repo activo.
+
+ADR-006 — Stack futuro para negocio
+  Decisión : Mismo Flutter + Supabase (auth, sync, Postgres, RLS) +
+             RevenueCat (iOS/Android) + Stripe (web) + Sentry/PostHog.
+  Motivo   : Cubre cuentas, suscripciones y operación sin reescribir el cliente.
+
+
+3. STACK TECNOLÓGICO
+--------------------------------------------------------------------------------
+
+AHORA (MVP — producto completo sin negocio)
+  Cliente        : Flutter (SDK ^3.11)
+  Estado         : flutter_riverpod ^2.5
+  Audio playback : flutter_soloud ^2.0 (motor SoLoud; buffers PCM en memoria)
+  Audio síntesis : AudioGenerator en Dart (síntesis aditiva, ADSR, pink noise)
+  Persistencia   : shared_preferences + path_provider
+  Tests          : flutter_test, mocktail
+  CI (recomendado): GitHub Actions — flutter test, build web/APK
+  Hosting web    : Vercel / Firebase Hosting / GitHub Pages (build estático)
+
+FUTURO (escala + modelo de negocio)
+  Backend/BaaS   : Supabase (Auth, Postgres, RLS, Storage)
+  Pagos móvil    : RevenueCat
+  Pagos web      : Stripe
+  Observabilidad : Sentry (crashes) + PostHog o Firebase Analytics (producto)
+  API propia     : Solo si Supabase no cubre un caso concreto (no prioritario)
+
+DESCARTADO (no usar en este proyecto)
+  - Python en cualquier rol (CLI, backend, FastAPI, scripts de runtime)
+  - Backend propio como cerebro del juego
+  - REST por cada ejercicio de audio
+  - Dos implementaciones paralelas de la misma lógica
+  - Microservicios, Kafka, K8s (innecesario para esta escala)
+
+
+4. DOMINIO PEDAGÓGICO — REGLAS DE NEGOCIO
+--------------------------------------------------------------------------------
+
+RN-001 — Sistema SRS híbrido
+  - Pesos dinámicos para priorizar notas difíciles.
+  - SM-2 para intervalos de revisión en fase de consolidación.
+  - Fase aprendizaje: 5 aciertos consecutivos → graduación.
+  - Respuesta correcta rápida (< 2 s): reduce peso con mayor bonificación.
+  - Respuesta incorrecta: aumenta peso; notas confundidas también penalizadas.
+
+RN-002 — Variación de octavas
+  Las notas no siempre suenan en la misma octava para evitar memorización
+  por frecuencia absoluta en Hz en lugar de clase de altura (C, D, E…).
+
+RN-003 — Variación de timbre
+  Presets de instrumento (7) con armónicos y envolventes ADSR distintos.
+  Modo timbre aleatorio activable; evita aprendizaje ligado a un solo color.
+
+RN-004 — Cluster de limpieza tonal
+  Tras cada ejercicio, sonido caótico (~3 s: sweeps + ruido rosa) para romper
+  anclaje tonal al estímulo anterior.
+
+RN-005 — Modos de juego
+  - Una nota
+  - Intervalo (2 notas simultáneas)
+  - Acorde (3 notas)
+  - Aleatorio (1–5 notas)
+  - Modo velocidad (countdown; tiempo adaptativo)
+
+RN-006 — Entrada de respuesta
+  Piano interactivo táctil + campo de texto alternativo.
+  Parser acepta: espacios, comas, guiones; enarmonías (Db → C#, etc.).
+
+RN-007 — Recomendaciones de práctica
+  Basadas en notas vencidas, en aprendizaje, días desde última sesión y
+  notas críticas (mayor peso / más errores).
+
+
+5. ESTRUCTURA DEL REPOSITORIO
+--------------------------------------------------------------------------------
+
+entrenador_oido/
+├── Plan/
+│   ├── contexto.txt          — Plan de migración Flutter original (V-model)
+│   ├── project_context.txt   — Este documento
+│   └── plan_fases.txt        — Roadmap por fases
+├── TOGESC/togesc/            — ★ PRODUCTO PRINCIPAL (Flutter)
+│   ├── lib/
+│   │   ├── constants/        — notes, srs, audio, game
+│   │   ├── models/           — NoteData, InstrumentPreset
+│   │   ├── services/         — srs_system, audio_generator, progress_repository…
+│   │   ├── providers/        — Riverpod (srs, game, speed, audio)
+│   │   ├── screens/          — home, game, speed, statistics
+│   │   └── widgets/          — piano, result_card, recommendations…
+│   └── test/                 — unit, widget, integration, e2e
+└── README.md                 — Debe describir solo Flutter (TOGESC/togesc)
+
+  ⚠ A ELIMINAR (Fase 0 — ya no pertenecen al proyecto):
+  main.py, constants.py, requirements.txt, core/, audio/, ui/, data/
+  Eran la CLI Python original; toda la lógica vive ahora en Dart.
+
+
+6. ARQUITECTURA FLUTTER (CAPAS)
+--------------------------------------------------------------------------------
+
+  UI (screens + widgets)
+       ↓
+  Providers (Riverpod) — estado de sesión, orquestación
+       ↓
+  Services — SRSSystem, AudioGenerator, AudioPlayerService, NoteParser
+       ↓
+  Models + Constants
+       ↓
+  ProgressRepository (interface → impl local JSON/SharedPreferences)
+
+Flujo de una ronda:
+  idle → escuchar tono(s) → seleccionar notas (piano/texto) → confirmar →
+  resultado (correcto/incorrecto) → cluster limpieza → idle → SRS actualizado
+
+Principio de diseño (de .cursorrules, adaptado):
+  - Simple Design: diseño mínimo que pasa los tests; sin over-engineering.
+  - Repository Pattern: abstraer persistencia para swap local → Supabase futuro.
+  - DIP: providers dependen de servicios; servicios dependen de interfaces.
+
+
+7. REQUISITOS NO FUNCIONALES (ISO 25010 — APLICABLES)
+--------------------------------------------------------------------------------
+
+Adecuación funcional
+  - Identificación correcta de 12 clases de altura (sostenidos + enarmonías).
+  - SRS coherente con reglas RN-001.
+
+Eficiencia de desempeño
+  - Reproducción de audio sin perceptible delay tras tap "escuchar".
+  - Medición de tiempo de respuesta precisa en cliente (< 2 s umbral SRS).
+  - Suite unit tests completa en < 60 s (objetivo).
+
+Usabilidad
+  - Piano táctil usable en móvil (tap targets ≥ 48 dp donde aplique).
+  - Texto de UI en español.
+  - Feedback visual claro (verde/rojo/amarillo en teclas).
+
+Fiabilidad
+  - Progreso persiste entre sesiones (local).
+  - Recuperación ante JSON corrupto (valores por defecto).
+
+Mantenibilidad
+  - Tests por módulo (V-model): unit → integration → widget → e2e.
+  - Una sola fuente de verdad en Dart para lógica pedagógica.
+
+Portabilidad
+  - Mismo código: Android, iOS, Web, Windows (ya configurado en proyecto).
+
+
+8. ESTRATEGIA DE PRUEBAS (PIRÁMIDE ADAPTADA)
+--------------------------------------------------------------------------------
+
+  Unitarias (≥ 80% lógica crítica)
+    srs_system, audio_generator, note_parser, progress_repository, providers
+    Herramienta: flutter test test/unit/
+    Práctica: TDD en lógica de dominio (SRS, parser)
+
+  Integración
+    game + SRS + persistencia; flujo completo con mocks de audio
+    Herramienta: flutter test test/integration/
+
+  Widget
+    piano_keyboard, home_screen, game_screen, note_input_field
+    Herramienta: flutter test test/widget/
+
+  E2E / Smoke
+    App arranca, navega a modo, game screen carga
+    Herramienta: flutter test test/e2e/
+
+  Manual (dispositivo real)
+    Audio flutter_soloud, piano interactivo, flujo completo con auriculares
+    Comando: flutter run -d windows / -d chrome / dispositivo físico
+
+  CI (recomendado)
+    En cada PR: flutter analyze + flutter test
+
+
+9. MODELO DE NEGOCIO FUTURO (REFERENCIA)
+--------------------------------------------------------------------------------
+
+Freemium sugerido:
+  Gratis : modos básicos, SRS local, estadísticas básicas
+  Pro    : modos avanzados, velocidad, stats detalladas, sync multi-dispositivo
+
+Stack de monetización:
+  Móvil → RevenueCat (entitlements)
+  Web   → Stripe
+  Estado de suscripción → Supabase (tabla subscriptions / claims)
+
+No implementar hasta Fase 4+ del plan_fases.txt.
+
+
+10. QUÉ NO HACER
+--------------------------------------------------------------------------------
+
+  ✗ Añadir backend REST para generar o validar cada nota en tiempo real
+  ✗ Conservar o reintroducir código Python en el repo
+  ✗ Lanzar sin persistencia local del SRS
+  ✗ Duplicar fronts (React + Flutter) sin equipo que lo justifique
+  ✗ Aplicar plantilla enterprise completa (.cursorrules genérico) como stack
+    obligatorio — microservicios, K8s, etc. son prematuros
+
+
+11. REFERENCIAS INTERNAS
+--------------------------------------------------------------------------------
+
+  Plan migración (histórico) : Plan/contexto.txt (port Python→Flutter, ya ejecutado)
+  Código producto (único)  : TOGESC/togesc/
+  SRS                      : TOGESC/togesc/lib/services/srs_system.dart
+  Audio                    : TOGESC/togesc/lib/services/audio_generator.dart
+
+================================================================================
+FIN project_context.txt
+================================================================================

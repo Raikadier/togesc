@@ -1,0 +1,246 @@
+Contexto
+TOGESC (TOne GEneration SCript) es un entrenador de oido absoluto escrito en Python con CLI. Se migra a Flutter para tener UI grafica, soporte movil/desktop, y piano interactivo. El proyecto Flutter ya existe en D:/entrenador_oido/TOGESC/togesc/ (boilerplate). Se sigue metodologia V-model: unit tests por modulo, integration tests entre modulos, system tests al final.
+Decisiones tomadas:
+
+State management: Riverpod
+Audio: flutter_soloud (buffers PCM en memoria)
+Piano: Interactivo (teclas tactiles + texto como alternativa)
+
+Arquitectura Flutter
+togesc/lib/
+  main.dart
+  constants/
+    notes.dart              -- Frecuencias, enarmonias
+    srs_constants.dart      -- Config SM-2, pesos, intervalos
+    audio_constants.dart    -- Sample rate, duracion, ADSR, cluster
+    game_constants.dart     -- GameMode enum, speed config
+  models/
+    note_data.dart          -- NoteData con 9 campos, toJson/fromJson
+    instrument_preset.dart  -- Armonicos + ADSR por instrumento
+  services/
+    srs_system.dart         -- Algoritmo SRS hibrido (port exacto)
+    progress_repository.dart -- Persistencia JSON
+    audio_generator.dart    -- Sintesis aditiva, ADSR, pink noise, cluster
+    audio_player_service.dart -- Playback via flutter_soloud
+    note_parser.dart        -- Parseo de input (espacios, comas, enarmonias)
+  providers/
+    srs_provider.dart
+    game_session_provider.dart
+    speed_session_provider.dart
+    audio_provider.dart
+  screens/
+    home_screen.dart
+    game_screen.dart
+    speed_game_screen.dart
+    speed_mode_select_screen.dart
+    statistics_screen.dart
+  widgets/
+    piano_keyboard.dart     -- Piano interactivo tactil
+    note_input_field.dart   -- Input texto alternativo
+    result_card.dart
+    srs_progress_indicator.dart
+    countdown_timer_widget.dart
+    recommendation_card.dart
+Fases de Implementacion
+FASE 0: Setup del proyecto
+
+Actualizar togesc/pubspec.yaml con dependencias:
+
+flutter_riverpod, flutter_soloud, shared_preferences, path_provider
+dev: mocktail
+
+
+Crear estructura de directorios (lib/constants/, lib/models/, etc.)
+Crear estructura de tests (test/unit/, test/integration/, test/widget/, test/e2e/)
+flutter pub get
+
+FASE 1: Constants + Models (Dart puro, sin Flutter)
+Archivos:
+
+lib/constants/notes.dart -- Port de NOTES, ENHARMONICS, SHARP_NOTES
+lib/constants/srs_constants.dart -- Todos los parametros SM-2 y pesos
+lib/constants/audio_constants.dart -- Sample rate, duracion, fade, cluster config, octavas
+lib/constants/game_constants.dart -- GameMode enum con nombres, speed config, random min/max
+lib/models/note_data.dart -- Clase NoteData con toJson()/fromJson() con validacion safe
+lib/models/instrument_preset.dart -- 7 presets con armonicos + ADSR envelopes
+
+Unit Tests:
+
+test/unit/constants_test.dart -- 12 notas, frecuencias correctas, enarmonias bidireccionales
+test/unit/note_data_test.dart -- Roundtrip JSON, campos faltantes, datos corruptos
+test/unit/instrument_preset_test.dart -- 7 presets existen, armonicos no vacios
+
+Fuentes Python: constants.py, core/srs.py:NoteData, audio/generator.py:INSTRUMENT_PRESETS+ENVELOPES
+
+FASE 2: SRS Engine (Dart puro) + Note Parser
+Archivos:
+
+lib/services/srs_system.dart -- Port EXACTO de SRSSystem:
+
+selectNotes(numNotes, {notePool}) -- prioridad: overdue > learning > weighted
+updateAfterResponse(notes, correctNotes, {wrongNotes, responseTime}) -- actualiza weight, ease, intervals
+_scheduleNextReview(note, wasCorrect) -- intervalos learning vs consolidacion
+getOverdueNotes(), getLearningNotes(), getStatistics(), getPracticeRecommendations()
+Inyeccion de DateTime Function() y Random para testing determinista
+
+
+lib/services/progress_repository.dart -- Interface + impl JSON con migracion formato antiguo
+lib/services/note_parser.dart -- parseNotes(): uppercase, split, normalizar enarmonias
+
+Unit Tests:
+
+test/unit/srs_system_test.dart:
+
+selectNotes con overdue, learning, weighted fallback, notePool
+updateAfterResponse correcto: weight baja, ease sube si rapido, consecutive++
+updateAfterResponse incorrecto: weight sube, ease baja, consecutive=0, interval retrocede
+Graduacion: 5 consecutivos -> isLearning=false
+Regresion: error en consolidacion con interval bajo -> vuelve a learning
+Penalizacion wrong_notes externas
+_scheduleNextReview para cada rama
+getStatistics valores agregados correctos
+
+
+test/unit/progress_repository_test.dart -- Save/load roundtrip, migracion formato antiguo, JSON corrupto
+test/unit/note_parser_test.dart -- "C E G", "c,e,g", "C-E-G", "Db"->C#, cadena vacia
+
+Fuente Python: core/srs.py
+
+FASE 3: Audio Synthesis Engine (paralela a Fase 2)
+Archivos:
+
+lib/services/audio_generator.dart -- Port en Dart puro con Float64List:
+
+generateTone(frequency, {duration, instrument}) -- sintesis aditiva + ADSR
+_applyAdsrEnvelope(audio, duration, attack, decay, sustain, release)
+_generatePinkNoise(duration) -- Voss-McCartney
+_generateSweepingTone(duration, fStart, fEnd) -- sweep con fase acumulada
+generateCluster({duration}) -- 50 sweeps + pink noise 70/30, envelope nube
+getNoteFrequencies(noteNames, {varyOctaves}) -- frecuencias con variacion octava
+mixTones(frequencies, {duration, instrument}) -- genera buffer mezclado listo para playback
+
+
+lib/services/audio_player_service.dart -- Wrapper flutter_soloud:
+
+initialize(), playBuffer(Float64List, sampleRate), dispose()
+_float64ListToWavBytes() -- genera WAV header + PCM 16-bit
+
+
+
+Unit Tests:
+
+test/unit/audio_generator_test.dart:
+
+generateTone: longitud correcta (sampleRate * duration)
+generateTone sine: valores aproximan sin(2pif*t)
+ADSR envelope: t=0 ~0, t=attack ~1, sustain ~level
+Pink noise: longitud correcta, valores en [-1, 1]
+Sweeping tone: longitud correcta, no-zero
+Cluster: longitud correcta, dentro de limites clipping
+getNoteFrequencies: A4=440Hz, con octave shift se duplica
+WAV bytes: header RIFF valido
+
+
+
+Fuente Python: audio/generator.py
+
+FASE 4: Providers (State Management con Riverpod)
+Archivos:
+
+lib/providers/audio_provider.dart -- Init flutter_soloud, expone isAvailable
+lib/providers/srs_provider.dart -- Wraps SRSSystem, auto-save, expone stats/recommendations
+lib/providers/game_session_provider.dart -- Estado: idle/listening/waiting/result/cluster. Metodos: startRound, submitAnswer, toggleInstrument
+lib/providers/speed_session_provider.dart -- Timer con Timer.periodic, countdown stream, game over detection
+
+Unit Tests:
+
+test/unit/game_session_provider_test.dart -- Transiciones de estado, respuesta correcta/incorrecta, toggle instrumento
+test/unit/speed_session_provider_test.dart -- Tiempo decrece/incrementa, game over, retry reset
+
+Integration Tests:
+
+test/integration/game_srs_integration_test.dart -- Ronda completa: select -> submit -> SRS actualizado -> progress guardado
+test/integration/audio_playback_test.dart -- initialize + playTones no lanza error (test manual en device)
+
+
+FASE 5: UI -- Screens y Widgets
+Widgets:
+
+lib/widgets/piano_keyboard.dart -- CustomPaint o Stack de Containers. 7 blancas + 5 negras. onNoteTapped(String note). Highlight con colores (verde=correcto, rojo=incorrecto, amarillo=seleccionado)
+lib/widgets/note_input_field.dart -- TextField alternativo para desktop, parsea con note_parser
+lib/widgets/result_card.dart -- Card animada verde/roja, muestra notas, tiempo, emoji
+lib/widgets/srs_progress_indicator.dart -- Barra 5 bloques learning o badge "Consolidada"
+lib/widgets/countdown_timer_widget.dart -- CircularProgressIndicator animado
+lib/widgets/recommendation_card.dart -- Panel recomendaciones con notas criticas
+
+Screens:
+
+lib/screens/home_screen.dart -- Menu con cards/tiles para cada modo, panel recomendaciones arriba
+lib/screens/game_screen.dart -- Flujo: escuchar -> piano interactivo -> confirmar -> resultado -> cluster
+lib/screens/speed_game_screen.dart -- Como game pero con countdown overlay y game over dialog
+lib/screens/speed_mode_select_screen.dart -- Submenu elegir modo para velocidad
+lib/screens/statistics_screen.dart -- Dashboard con precision, progreso, notas dificiles/faciles
+
+Widget Tests:
+
+test/widget/piano_keyboard_test.dart -- 7 blancas + 5 negras, tap callback, highlight
+test/widget/home_screen_test.dart -- 7 opciones menu, navegacion
+test/widget/game_screen_test.dart -- Flujo con providers mockeados
+test/widget/note_input_field_test.dart -- Parseo correcto
+
+Todo el texto en espanol (igual que la version Python).
+
+FASE 6: Integracion Final + main.dart
+Archivos:
+
+lib/main.dart -- ProviderScope, MaterialApp, rutas, tema musical (deepPurple), init audio
+
+System/E2E Tests:
+
+test/integration/full_game_flow_test.dart -- Audio mock, SRS real con persistencia en memoria: inicio -> recomendaciones -> seleccionar modo -> responder -> resultado -> cluster -> siguiente ronda
+test/integration/persistence_test.dart -- Sesion completa, matar provider, recrear desde JSON, verificar estado
+test/e2e/app_smoke_test.dart -- Pump app completa, home renderiza, tap modo, game screen carga
+
+Dependencias pubspec.yaml
+yamldependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.5.0
+  flutter_soloud: ^2.0.0
+  shared_preferences: ^2.3.0
+  path_provider: ^2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  mocktail: ^1.0.0
+```
+
+## Orden de ejecucion
+```
+FASE 0 (setup) -> FASE 1 (constants+models)
+                      |
+                      +--> FASE 2 (SRS) ----+
+                      |                      |
+                      +--> FASE 3 (Audio) ---+--> FASE 4 (providers) --> FASE 5 (UI) --> FASE 6 (wiring+E2E)
+Fases 2 y 3 son paralelas (independientes entre si).
+Verificacion
+
+Unit tests: cd togesc && flutter test test/unit/ despues de cada fase (1, 2, 3, 4)
+Widget tests: flutter test test/widget/ despues de fase 5
+Integration tests: flutter test test/integration/ despues de fase 4 y 6
+E2E: flutter test test/e2e/ despues de fase 6
+Manual: flutter run -d windows para verificar audio, piano interactivo, flujo completo
+Todos: flutter test para correr toda la suite
+
+Archivos Python de referencia (fuentes)
+
+D:/entrenador_oido/TOGESC/constants.py
+D:/entrenador_oido/TOGESC/core/srs.py
+D:/entrenador_oido/TOGESC/core/game.py
+D:/entrenador_oido/TOGESC/audio/generator.py
+D:/entrenador_oido/TOGESC/ui/cli.py
+D:/entrenador_oido/TOGESC/ui/piano.py
+D:/entrenador_oido/TOGESC/data/progress.json

@@ -1,0 +1,33 @@
+# TOGESC — Reglas para Cursor
+
+Lee siempre `Plan/project_context.txt` antes de cambios arquitectónicos o de stack.
+Roadmap: `Plan/plan_fases.txt`.
+
+## Producto
+
+- **TOGESC** / Entrenador de Oído Absoluto — entrenamiento de oído absoluto con SRS pedagógico.
+- Código único en `TOGESC/togesc/` (Flutter). **No usar Python** en este repo.
+
+## Stack (obligatorio)
+
+- Flutter + Riverpod + flutter_soloud + shared_preferences
+- SRS, audio y validación **siempre en el cliente** (Dart)
+- Sin backend en MVP; futuro: Supabase + RevenueCat/Stripe (ver project_context.txt)
+
+## Convenciones
+
+- UI y textos en **español**
+- Tests: unit → integration → widget → e2e (`flutter test`)
+- Persistencia local del SRS es requisito, no opcional
+- Cambios mínimos y focalizados; no over-engineering
+- Repository pattern para persistencia (preparado para sync futuro)
+
+## No hacer
+
+- Reintroducir Python o backend REST para lógica de juego/audio
+- Duplicar fronts (React + Flutter)
+- Microservicios, K8s u infra enterprise prematura
+
+## Referencia histórica
+
+- `Plan/contexto.txt` — plan V-model del port a Flutter (ya ejecutado)
