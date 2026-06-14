@@ -111,7 +111,8 @@ Entregables UX [S]:
 
 Entregables producto [S]:
   - Analytics anónimo (PostHog/Firebase): sesiones, modos usados, retención
-  - Pantalla "Acerca de" con explicación pedagógica
+  - Pantalla "Acerca de" con explicación pedagógica [x]
+  - Politica de privacidad publicada en app [x]
 
 Entregables [C]:
   - PWA: manifest + service worker para web offline parcial

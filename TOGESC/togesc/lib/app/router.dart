@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/game_constants.dart';
+import '../screens/about_screen.dart';
 import '../screens/game_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/onboarding_screen.dart';
+import '../screens/privacy_policy_screen.dart';
 import '../screens/speed_game_screen.dart';
 import '../screens/speed_mode_select_screen.dart';
 import '../screens/statistics_screen.dart';
@@ -16,6 +18,8 @@ abstract final class AppRoutes {
   static const home = '/';
   static const onboarding = '/onboarding';
   static const statistics = '/statistics';
+  static const about = '/about';
+  static const privacy = '/privacy';
   static const speedSelect = '/speed';
   static const game = '/game';
   static const speedGame = '/speed/game';
@@ -50,6 +54,14 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
       GoRoute(
         path: AppRoutes.statistics,
         builder: (_, _) => const StatisticsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.about,
+        builder: (_, _) => const AboutScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.privacy,
+        builder: (_, _) => const PrivacyPolicyScreen(),
       ),
       GoRoute(
         path: AppRoutes.speedSelect,

@@ -53,6 +53,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.bar_chart), findsOneWidget);
+      expect(find.byIcon(Icons.info_outline), findsOneWidget);
     });
 
     testWidgets('muestra panel de recomendaciones', (tester) async {

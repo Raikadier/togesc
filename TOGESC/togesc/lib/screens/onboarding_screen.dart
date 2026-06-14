@@ -7,6 +7,7 @@ import '../app/router.dart';
 import '../providers/audio_provider.dart';
 import '../providers/router_provider.dart';
 import '../services/app_preferences.dart';
+import '../widgets/pedagogy_section_card.dart';
 
 /// Introduccion pedagogica: por que SRS, octavas y cluster de limpieza.
 class OnboardingScreen extends ConsumerWidget {
@@ -32,7 +33,7 @@ class OnboardingScreen extends ConsumerWidget {
             style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 24),
-          _SectionCard(
+          PedagogySectionCard(
             icon: Icons.psychology,
             color: Colors.indigo,
             title: 'Repeticion espaciada (SRS)',
@@ -41,7 +42,7 @@ class OnboardingScreen extends ConsumerWidget {
                 'ya dominas. Asi consolidas memoria a largo plazo, no memorizacion '
                 'de un dia.',
           ),
-          _SectionCard(
+          PedagogySectionCard(
             icon: Icons.tune,
             color: Colors.teal,
             title: 'Variacion de octavas y timbres',
@@ -50,7 +51,7 @@ class OnboardingScreen extends ConsumerWidget {
                 'timbrales para que aprendas la clase de altura (Do, Re, Mi...) '
                 'y no una frecuencia fija en Hz.',
           ),
-          _SectionCard(
+          PedagogySectionCard(
             icon: Icons.blur_on,
             color: Colors.deepOrange,
             title: 'Limpieza tonal',
@@ -77,55 +78,5 @@ class OnboardingScreen extends ConsumerWidget {
     if (context.mounted) {
       context.go(AppRoutes.home);
     }
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String body;
-
-  const _SectionCard({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.body,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              backgroundColor: color.withValues(alpha: 0.15),
-              child: Icon(icon, color: color),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(body),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
