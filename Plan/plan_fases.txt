@@ -90,7 +90,7 @@ Tareas pendientes típicas (auditar contra código):
 
 ================================================================================
 FASE 2 — CALIDAD, UX Y PRE-LANZAMIENTO
-Estado actual: EN PROGRESO (2026-06-14)
+Estado actual: COMPLETADA — alcance web (2026-06-14)
 Duración estimada: 2 sprints
 Depende de: Fase 1 DoD
 ================================================================================
@@ -119,10 +119,14 @@ Entregables [C]:
   - Localización preparada (i18n) aunque solo español al inicio
 
 Criterios de aceptación (DoD):
-  - Pipeline CI verde en repo remoto
-  - Web desplegada en URL de preview (Vercel/Firebase)
-  - Crash rate 0 en smoke test manual de 30 min
-  - Lighthouse accesibilidad ≥ 90 en web [S]
+  - [x] Pipeline CI verde en repo remoto
+  - [x] Web desplegada en URL de preview (Vercel)
+  - [x] Smoke test manual Chrome (visto bueno producto)
+  - [ ] Lighthouse accesibilidad ≥ 90 en web [S] — diferido
+
+Notas alcance cerrado:
+  UX avanzada (design system, Semantics piano, Sentry, analytics) diferida.
+  Entregables producto About + Privacidad completados.
 
 Principios .cursorrules aplicados:
   - Continuous Integration (merge frecuente, CI obligatorio)
@@ -132,6 +136,7 @@ Principios .cursorrules aplicados:
 
 ================================================================================
 FASE 3 — DISTRIBUCIÓN MÓVIL Y WEB PÚBLICA
+Estado actual: COMPLETADA — web v1.0.0 (2026-06-14); movil diferido
 Duración estimada: 2–3 sprints
 Depende de: Fase 2 DoD
 ================================================================================
@@ -140,19 +145,19 @@ Objetivo:
   Usuarios reales pueden instalar/usar la app fuera del entorno de desarrollo.
 
 Entregables [M]:
-  - Build release Android (AAB) + firma
-  - Build release iOS (si aplica) + TestFlight
-  - Web en dominio propio o subdominio
-  - Política de privacidad (requerida stores; aun sin cuentas)
+  - [ ] Build release Android (AAB) + firma — diferido (sin Android SDK)
+  - [ ] Build release iOS (si aplica) + TestFlight — diferido
+  - [x] Web publica: https://togesc.vercel.app (sin dominio propio por ahora)
+  - [x] Politica de privacidad en app (/privacy)
 
 Entregables [S]:
-  - Listing stores: descripción, capturas, icono
-  - Windows/macOS desktop build [C] — Flutter ya soporta; útil para práctica con teclado
+  - [ ] Listing stores: descripcion, capturas, icono — diferido
+  - [ ] Windows/macOS desktop build [C]
 
-Criterios de aceptación (DoD):
-  - App instalable desde Play Store / TestFlight / URL web pública
-  - Privacidad publicada (datos locales only en esta fase)
-  - Versión semántica 1.0.0 etiquetada en git
+Criterios de aceptacion (DoD) — web:
+  - [x] App usable en URL web publica
+  - [x] Privacidad publicada (datos locales only)
+  - [x] Version semantica 1.0.0 etiquetada en git (tag v1.0.0)
 
 Modelo negocio: GRATIS TOTAL en esta fase (validar producto y retención).
 
@@ -258,9 +263,9 @@ CRONOGRAMA RESUMIDO
 
   Fase 0  Consolidación repo          ████░░░░░░  ~1 sem
   Fase 1  MVP Flutter pulido          ████████░░  ~2–3 sem  COMPLETADA
-  Fase 2  Calidad + CI + UX           ████░░░░░░  ~3–4 sem  ← ESTÁS AQUÍ
-  Fase 3  Lanzamiento público         ████████░░  ~3–4 sem
-  Fase 4  Supabase + sync             ██████░░░░  ~3–4 sem  (cuando haga falta)
+  Fase 2  Calidad + CI + UX           ████████░░  COMPLETADA (web)
+  Fase 3  Lanzamiento publico         ████████░░  COMPLETADA (web v1.0.0)
+  Fase 4  Supabase + sync             ██████░░░░  ~3–4 sem  ← ESTÁS AQUÍ (cuando haga falta)
   Fase 5  Monetización                ████░░░░░░  ~2–3 sem
   Fase 6  Escala continua             ∞
 
@@ -302,9 +307,9 @@ Python→Flutter. Este plan_fases.txt es la hoja de ruta de PRODUCTO y negocio.
 PRÓXIMO PASO INMEDIATO RECOMENDADO
 ================================================================================
 
-1. Fase 2 en curso: CI GitHub Actions + deploy web Vercel
-2. Probar manualmente: flutter run -d windows (requiere Visual Studio)
-3. Listar gaps de Fase 2 antes de lanzamiento publico
+1. Fase 4 (opcional): Supabase + sync cuando haya necesidad multi-dispositivo
+2. Fase 3 movil (pendiente): Android SDK / Mac para stores
+3. Mejoras Fase 2 diferidas: UX, accesibilidad, Sentry, dominio propio
 
 ================================================================================
 FIN plan_fases.txt

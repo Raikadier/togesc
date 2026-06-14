@@ -57,6 +57,12 @@ togesc/
 | CI | GitHub Actions |
 | Deploy web | Vercel |
 
+## Versión actual
+
+**v1.0.0** — [Lanzamiento web](https://github.com/Raikadier/togesc/releases/tag/v1.0.0) · **App:** https://togesc.vercel.app
+
+Gratis, sin cuentas, progreso guardado solo en tu dispositivo/navegador.
+
 ## Deploy web (Vercel)
 
 **Producción:** https://togesc.vercel.app
