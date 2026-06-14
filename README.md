@@ -59,9 +59,14 @@ togesc/
 
 ## Deploy web (Vercel)
 
-El build se configura en `vercel.json` en la raíz del repo. Tras conectar el repo en Vercel, cada push a `main` despliega la app.
+**Producción:** https://togesc.vercel.app
 
-Preview local del artefacto web:
+El repo incluye:
+- `.github/workflows/ci.yml` — `flutter analyze` + `flutter test` en cada push/PR
+- `.github/workflows/deploy-web.yml` — build web + deploy a Vercel en push a `main` (requiere secret `VERCEL_TOKEN` en GitHub)
+- `vercel.json` — build remoto alternativo (clone Flutter + `flutter build web`)
+
+Preview local:
 
 ```bash
 cd TOGESC/togesc

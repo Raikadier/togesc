@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$ROOT/TOGESC/togesc"
+export PATH="$ROOT/flutter/bin:$PATH"
 
-../../flutter/bin/flutter build web --release
+cd "$ROOT/TOGESC/togesc"
+flutter build web --release --no-wasm-dry-run

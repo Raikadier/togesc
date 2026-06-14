@@ -1,0 +1,5 @@
+.git
+**/build
+**/.dart_tool
+flutter
+TOGESC/togesc/build
