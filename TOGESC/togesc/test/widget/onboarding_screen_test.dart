@@ -41,11 +41,11 @@ void main() {
       routes: [
         GoRoute(
           path: AppRoutes.onboarding,
-          builder: (_, __) => const OnboardingScreen(),
+          builder: (_, _) => const OnboardingScreen(),
         ),
         GoRoute(
           path: AppRoutes.home,
-          builder: (_, __) => const Scaffold(body: Text('Home')),
+          builder: (_, _) => const Scaffold(body: Text('Home')),
         ),
       ],
     );

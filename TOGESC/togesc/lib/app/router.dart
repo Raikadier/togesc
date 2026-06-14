@@ -41,19 +41,19 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
     routes: [
       GoRoute(
         path: AppRoutes.home,
-        builder: (_, __) => const HomeScreen(),
+        builder: (_, _) => const HomeScreen(),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (_, __) => const OnboardingScreen(),
+        builder: (_, _) => const OnboardingScreen(),
       ),
       GoRoute(
         path: AppRoutes.statistics,
-        builder: (_, __) => const StatisticsScreen(),
+        builder: (_, _) => const StatisticsScreen(),
       ),
       GoRoute(
         path: AppRoutes.speedSelect,
-        builder: (_, __) => const SpeedModeSelectScreen(),
+        builder: (_, _) => const SpeedModeSelectScreen(),
       ),
       GoRoute(
         path: '${AppRoutes.game}/:modeId',

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,14 +14,14 @@ GoRouter buildTestRouter() {
   return GoRouter(
     initialLocation: AppRoutes.home,
     routes: [
-      GoRoute(path: AppRoutes.home, builder: (_, __) => const HomeScreen()),
+      GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
       GoRoute(
         path: AppRoutes.statistics,
-        builder: (_, __) => const StatisticsScreen(),
+        builder: (_, _) => const StatisticsScreen(),
       ),
       GoRoute(
         path: AppRoutes.speedSelect,
-        builder: (_, __) => const SpeedModeSelectScreen(),
+        builder: (_, _) => const SpeedModeSelectScreen(),
       ),
       GoRoute(
         path: '${AppRoutes.game}/:modeId',
