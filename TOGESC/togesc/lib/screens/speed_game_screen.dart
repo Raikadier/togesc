@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/game_constants.dart';
+import '../providers/audio_provider.dart';
 import '../providers/speed_session_provider.dart';
 import '../widgets/piano_keyboard.dart';
 import '../widgets/note_input_field.dart';
@@ -53,6 +54,10 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
   }
 
   Future<void> _startRound() async {
+    final audio = ref.read(audioPlayerServiceProvider);
+    audio.captureUserGesture();
+    await audio.waitUntilReady();
+
     setState(() {
       _selectedNotes.clear();
     });

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../app/router.dart';
+import '../providers/audio_provider.dart';
 import '../providers/router_provider.dart';
 import '../services/app_preferences.dart';
 
 /// Introduccion pedagogica: por que SRS, octavas y cluster de limpieza.
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Como funciona'),
@@ -59,7 +61,7 @@ class OnboardingScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: () => _complete(context),
+            onPressed: () => _complete(context, ref),
             child: const Text('Entendido, empezar'),
           ),
         ],
@@ -67,7 +69,8 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _complete(BuildContext context) async {
+  Future<void> _complete(BuildContext context, WidgetRef ref) async {
+    ref.read(audioPlayerServiceProvider).captureUserGesture();
     final prefs = AppPreferences(await SharedPreferences.getInstance());
     await prefs.setOnboardingComplete(true);
     refreshAppRouter();

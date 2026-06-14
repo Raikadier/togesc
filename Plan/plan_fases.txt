@@ -47,7 +47,7 @@ Tareas:
 
 ================================================================================
 FASE 1 — MVP FLUTTER COMPLETO (SIN BACKEND, SIN CUENTAS)
-Estado actual: COMPLETADA (2026-06-13)
+Estado actual: COMPLETADA (2026-06-14)
 Duración estimada: 1–2 sprints (pulido + gaps)
 ================================================================================
 
@@ -81,7 +81,7 @@ Criterios de aceptación (DoD):
 
 Tareas pendientes típicas (auditar contra código):
   1. [x] Confirmar audio_player_service import real de flutter_soloud
-  2. [ ] Probar flutter run -d chrome (web) — manual
+  2. [x] Probar flutter run -d chrome (web) — manual
   3. [ ] Probar flutter run en Android/iOS si es target — manual
   4. [x] Persistencia cross-platform via SharedPreferences
   5. [x] Onboarding pedagogico (SRS, octavas, cluster)
@@ -90,6 +90,7 @@ Tareas pendientes típicas (auditar contra código):
 
 ================================================================================
 FASE 2 — CALIDAD, UX Y PRE-LANZAMIENTO
+Estado actual: EN PROGRESO (2026-06-14)
 Duración estimada: 2 sprints
 Depende de: Fase 1 DoD
 ================================================================================
@@ -255,8 +256,8 @@ CRONOGRAMA RESUMIDO
 ================================================================================
 
   Fase 0  Consolidación repo          ████░░░░░░  ~1 sem
-  Fase 1  MVP Flutter pulido          ████████░░  ~2–3 sem  ← ESTÁS AQUÍ
-  Fase 2  Calidad + CI + UX           ██████░░░░  ~3–4 sem
+  Fase 1  MVP Flutter pulido          ████████░░  ~2–3 sem  COMPLETADA
+  Fase 2  Calidad + CI + UX           ████░░░░░░  ~3–4 sem  ← ESTÁS AQUÍ
   Fase 3  Lanzamiento público         ████████░░  ~3–4 sem
   Fase 4  Supabase + sync             ██████░░░░  ~3–4 sem  (cuando haga falta)
   Fase 5  Monetización                ████░░░░░░  ~2–3 sem
@@ -300,8 +301,8 @@ Python→Flutter. Este plan_fases.txt es la hoja de ruta de PRODUCTO y negocio.
 PRÓXIMO PASO INMEDIATO RECOMENDADO
 ================================================================================
 
-1. Cerrar Fase 2: CI GitHub Actions + deploy web preview
-2. Probar manualmente: flutter run -d windows / -d chrome
+1. Fase 2 en curso: CI GitHub Actions + deploy web Vercel
+2. Probar manualmente: flutter run -d windows (requiere Visual Studio)
 3. Listar gaps de Fase 2 antes de lanzamiento publico
 
 ================================================================================

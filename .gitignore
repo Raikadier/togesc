@@ -14,3 +14,7 @@ Thumbs.db
 **/.flutter-plugins-dependencies
 **/build/
 **/coverage/
+
+# Vercel local / Flutter SDK clone for remote build
+.vercel/
+flutter/

@@ -51,9 +51,22 @@ togesc/
 | Capa | Tecnología |
 |------|------------|
 | Cliente | Flutter + Riverpod |
-| Audio | flutter_soloud + síntesis Dart |
+| Audio | flutter_soloud (nativo) / Web Audio API (web) |
 | Persistencia | shared_preferences |
 | Backend (futuro) | Supabase — solo cuando haya cuentas/sync |
+| CI | GitHub Actions |
+| Deploy web | Vercel |
+
+## Deploy web (Vercel)
+
+El build se configura en `vercel.json` en la raíz del repo. Tras conectar el repo en Vercel, cada push a `main` despliega la app.
+
+Preview local del artefacto web:
+
+```bash
+cd TOGESC/togesc
+flutter build web --release
+```
 
 ## Licencia
 

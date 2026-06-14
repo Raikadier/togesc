@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../app/router.dart';
 import '../constants/game_constants.dart';
+import '../providers/audio_provider.dart';
 import '../providers/srs_provider.dart';
 import '../widgets/recommendation_card.dart';
 
@@ -14,6 +15,11 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recommendations = ref.watch(practiceRecommendationsProvider);
+
+    void openGame(String route) {
+      ref.read(audioPlayerServiceProvider).captureUserGesture();
+      context.push(route);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -44,42 +50,45 @@ class HomeScreen extends ConsumerWidget {
               title: 'Una sola nota',
               subtitle: 'Identifica notas individuales',
               color: Colors.green,
-              onTap: () => context.push('${AppRoutes.game}/${GameMode.singleNote.id}'),
+              onTap: () => openGame('${AppRoutes.game}/${GameMode.singleNote.id}'),
             ),
             _ModeCard(
               icon: Icons.music_note_outlined,
               title: 'Intervalo (2 notas)',
               subtitle: 'Identifica dos notas simultaneas',
               color: Colors.orange,
-              onTap: () => context.push('${AppRoutes.game}/${GameMode.interval.id}'),
+              onTap: () => openGame('${AppRoutes.game}/${GameMode.interval.id}'),
             ),
             _ModeCard(
               icon: Icons.piano,
               title: 'Acorde (3 notas)',
               subtitle: 'Identifica tres notas simultaneas',
               color: Colors.deepOrange,
-              onTap: () => context.push('${AppRoutes.game}/${GameMode.chord.id}'),
+              onTap: () => openGame('${AppRoutes.game}/${GameMode.chord.id}'),
             ),
             _ModeCard(
               icon: Icons.casino,
               title: 'Aleatorio (1-5 notas)',
               subtitle: 'Numero aleatorio de notas',
               color: Colors.purple,
-              onTap: () => context.push('${AppRoutes.game}/${GameMode.random.id}'),
+              onTap: () => openGame('${AppRoutes.game}/${GameMode.random.id}'),
             ),
             _ModeCard(
               icon: Icons.tag,
               title: 'Solo sostenidos',
               subtitle: 'C#, D#, F#, G#, A#',
               color: Colors.blue,
-              onTap: () => context.push('${AppRoutes.game}/${GameMode.sharpsOnly.id}'),
+              onTap: () => openGame('${AppRoutes.game}/${GameMode.sharpsOnly.id}'),
             ),
             _ModeCard(
               icon: Icons.speed,
               title: 'Entrenamiento de velocidad',
               subtitle: 'Responde antes de que se agote el tiempo',
               color: Colors.red,
-              onTap: () => context.push(AppRoutes.speedSelect),
+              onTap: () {
+                ref.read(audioPlayerServiceProvider).captureUserGesture();
+                context.push(AppRoutes.speedSelect);
+              },
             ),
           ],
         ),

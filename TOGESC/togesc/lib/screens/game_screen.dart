@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/game_constants.dart';
+import '../providers/audio_provider.dart';
 import '../providers/game_session_provider.dart';
 import '../widgets/piano_keyboard.dart';
 import '../widgets/note_input_field.dart';
@@ -55,6 +56,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   }
 
   Future<void> _startRound() async {
+    final audio = ref.read(audioPlayerServiceProvider);
+    audio.captureUserGesture();
+    await audio.waitUntilReady();
+
     setState(() {
       _selectedNotes.clear();
       _roundStartTime = DateTime.now();
@@ -62,6 +67,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     await ref.read(gameSessionProvider.notifier).startRound();
     // Actualizar timestamp despues de que el audio termine
     setState(() => _roundStartTime = DateTime.now());
+  }
+
+  Future<void> _continueAfterResult() async {
+    final audio = ref.read(audioPlayerServiceProvider);
+    audio.captureUserGesture();
+    await audio.waitUntilReady();
+    await ref.read(gameSessionProvider.notifier).playCluster();
+    await _startRound();
   }
 
   @override
@@ -193,9 +206,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ),
               const SizedBox(width: 12),
               OutlinedButton.icon(
-                onPressed: () => ref
-                    .read(gameSessionProvider.notifier)
-                    .startRound(), // Re-reproducir
+                onPressed: _startRound,
                 icon: const Icon(Icons.replay),
                 label: const Text('Repetir'),
               ),
@@ -259,10 +270,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         children: [
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: () async {
-                await ref.read(gameSessionProvider.notifier).playCluster();
-                _startRound();
-              },
+              onPressed: _continueAfterResult,
               icon: const Icon(Icons.skip_next),
               label: const Text('Siguiente'),
               style: ElevatedButton.styleFrom(
