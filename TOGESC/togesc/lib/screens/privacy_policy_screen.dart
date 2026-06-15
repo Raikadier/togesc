@@ -25,9 +25,11 @@ class PrivacyPolicyScreen extends StatelessWidget {
           const _PolicySection(
             title: 'Resumen',
             body:
-                'TOGESC no recopila datos personales en servidores. No hay '
-                'registro de usuarios, inicio de sesion ni sincronizacion en la '
-                'nube en esta version.',
+                'TOGESC guarda tu progreso de entrenamiento en tu dispositivo. '
+                'No hay analitica ni publicidad. Si activas una cuenta '
+                'opcional (Supabase), tu progreso SRS se sincroniza de forma '
+                'cifrada en tránsito con tu email y contrasena; solo tu '
+                'usuario puede leer esos datos.',
           ),
           const _PolicySection(
             title: 'Datos que se guardan',
@@ -39,11 +41,19 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'navegador en web).',
           ),
           const _PolicySection(
+            title: 'Cuenta opcional y sincronizacion',
+            body:
+                'Puedes entrenar sin registrarte. Si creas una cuenta, '
+                'almacenamos en Supabase (Postgres con politicas RLS) un '
+                'JSON con tu progreso SRS vinculado a tu identificador de '
+                'usuario. No vendemos ni compartimos esos datos con terceros '
+                'con fines comerciales.',
+          ),
+          const _PolicySection(
             title: 'Datos que no recopilamos',
             body:
-                'No enviamos tu progreso, respuestas, audio ni identificadores '
-                'a ningun servidor propio. No usamos servicios de analitica ni '
-                'publicidad de terceros en esta version.',
+                'No grabamos microfono ni subimos audio. No usamos servicios '
+                'de analitica ni publicidad de terceros.',
           ),
           const _PolicySection(
             title: 'Audio',
@@ -62,9 +72,8 @@ class PrivacyPolicyScreen extends StatelessWidget {
           const _PolicySection(
             title: 'Cambios futuros',
             body:
-                'Si se anaden cuentas, sincronizacion o analitica, esta politica '
-                'se actualizara y se te informara antes del lanzamiento de '
-                'esas funciones.',
+                'Si se anaden analitica, pagos u otros servicios, esta politica '
+                'se actualizara antes del lanzamiento.',
           ),
           const _PolicySection(
             title: 'Contacto',

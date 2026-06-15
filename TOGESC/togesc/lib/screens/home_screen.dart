@@ -26,6 +26,11 @@ class HomeScreen extends ConsumerWidget {
         title: const Text('Entrenador de Oido Absoluto'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Cuenta',
+            onPressed: () => context.push(AppRoutes.account),
+          ),
+          IconButton(
             icon: const Icon(Icons.info_outline),
             tooltip: 'Acerca de',
             onPressed: () => context.push(AppRoutes.about),

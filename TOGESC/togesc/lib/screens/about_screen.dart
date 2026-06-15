@@ -25,8 +25,9 @@ class AboutScreen extends StatelessWidget {
           Text(
             'TOGESC (TOne GEneration SCript) es una app educativa de codigo '
             'abierto para entrenar identificacion de alturas musicales con '
-            'metodos basados en evidencia. Todo el entrenamiento ocurre en '
-            'tu dispositivo: sin cuentas ni servidor.',
+            'metodos basados en evidencia. El entrenamiento ocurre en tu '
+            'dispositivo; la cuenta en la nube es opcional para sincronizar '
+            'progreso entre dispositivos.',
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -74,9 +75,17 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: 16),
           ListTile(
             contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.person_outline),
+            title: const Text('Cuenta y sincronizacion'),
+            subtitle: const Text('Opcional — vincular progreso entre dispositivos'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.account),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.privacy_tip_outlined),
             title: const Text('Politica de privacidad'),
-            subtitle: const Text('Datos solo en tu dispositivo'),
+            subtitle: const Text('Datos locales y cuenta opcional'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.privacy),
           ),

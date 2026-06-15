@@ -7,6 +7,9 @@ import '../models/note_data.dart';
 abstract class ProgressRepository {
   Future<Map<String, NoteData>?> load();
   Future<void> save(Map<String, NoteData> noteData, {String? lastSession});
+
+  /// ISO8601 de la ultima sesion guardada, si existe.
+  Future<String?> loadLastSessionIso() async => null;
 }
 
 const String progressStorageKey = 'togesc_progress_json';
@@ -73,6 +76,19 @@ class SharedPreferencesProgressRepository implements ProgressRepository {
   }
 
   @override
+  Future<String?> loadLastSessionIso() async {
+    try {
+      final prefs = await _instance;
+      final raw = prefs.getString(progressStorageKey);
+      if (raw == null || raw.isEmpty) return null;
+      final data = json.decode(raw) as Map<String, dynamic>;
+      return data['last_session'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
   Future<void> save(Map<String, NoteData> noteData, {String? lastSession}) async {
     try {
       final prefs = await _instance;
@@ -92,6 +108,11 @@ class InMemoryProgressRepository implements ProgressRepository {
   Future<Map<String, NoteData>?> load() async {
     if (_stored == null) return null;
     return parseProgressPayload(_stored!);
+  }
+
+  @override
+  Future<String?> loadLastSessionIso() async {
+    return _stored?['last_session'] as String?;
   }
 
   @override

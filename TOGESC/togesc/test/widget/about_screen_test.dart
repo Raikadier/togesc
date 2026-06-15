@@ -70,6 +70,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Resumen'), findsOneWidget);
-    expect(find.textContaining('no recopila datos personales'), findsOneWidget);
+    expect(find.textContaining('cuenta opcional (Supabase)'), findsOneWidget);
   });
 }

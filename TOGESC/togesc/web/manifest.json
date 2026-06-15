@@ -1,11 +1,11 @@
 {
-    "name": "togesc",
-    "short_name": "togesc",
+    "name": "TOGESC — Entrenador de Oido Absoluto",
+    "short_name": "TOGESC",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Entrenador de oido absoluto con repeticion espaciada (SRS). Practica notas, intervalos y acordes.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

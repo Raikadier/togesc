@@ -20,9 +20,19 @@ jobs:
 
       - name: Build Flutter web
         working-directory: TOGESC/togesc
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           flutter pub get
-          flutter build web --release --no-wasm-dry-run
+          DART_DEFINES=""
+          if [ -n "$SUPABASE_URL" ]; then
+            DART_DEFINES="$DART_DEFINES --dart-define=SUPABASE_URL=$SUPABASE_URL"
+          fi
+          if [ -n "$SUPABASE_ANON_KEY" ]; then
+            DART_DEFINES="$DART_DEFINES --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
+          fi
+          flutter build web --release --no-wasm-dry-run $DART_DEFINES
 
       - name: Prepare Vercel prebuilt output
         run: |

@@ -164,6 +164,7 @@ Modelo negocio: GRATIS TOTAL en esta fase (validar producto y retención).
 
 ================================================================================
 FASE 4 — CUENTAS Y SYNC (SUPABASE)
+Estado actual: COMPLETADA — alcance Must (2026-06-15); validar sync multi-dispositivo en prod
 Duración estimada: 2–3 sprints
 Depende de: Fase 3 DoD + tracción o necesidad explícita de multi-dispositivo
 ================================================================================
@@ -172,11 +173,11 @@ Objetivo:
   Usuario opcional puede crear cuenta y sincronizar progreso SRS entre dispositivos.
 
 Entregables [M]:
-  - Supabase project: Auth (email/OAuth), Postgres, RLS
-  - Esquema: users, note_progress (JSON o filas por nota), sessions_metadata
-  - ProgressRepository remoto implementando misma interface que local
-  - Flujo: "Continuar sin cuenta" vs "Vincular / Crear cuenta"
-  - Migración: importar progreso local al registrarse
+  - [x] Supabase project: Auth (email/OAuth), Postgres, RLS — proyecto togesc; tabla user_progress verificada (2026-06-15)
+  - [x] Esquema: user_progress (JSON + last_session) — supabase/migrations/
+  - [x] ProgressRepository remoto (SupabaseProgressRepository) + híbrido offline-first
+  - [x] Flujo: "Continuar sin cuenta" vs "Vincular / Crear cuenta" (/account)
+  - [x] Migración: importar progreso local al registrarse (mergeOnSignIn)
 
 Entregables [S]:
   - Sync incremental offline-first (cola local → push al reconectar)
@@ -187,9 +188,11 @@ Entregables [W por ahora]:
   - GraphQL
 
 Criterios de aceptación (DoD):
-  - Mismo usuario en web + móvil ve mismo progreso SRS tras sync
-  - RLS impide leer progreso de otros usuarios
-  - App funciona offline; sync no bloquea juego
+  - [ ] Mismo usuario en web + móvil ve mismo progreso SRS tras sync (probar manual post-deploy)
+  - [x] RLS impide leer progreso de otros usuarios (SQL en migración)
+  - [x] App funciona offline; sync no bloquea juego
+  - [x] Secrets SUPABASE_* en GitHub; deploy web inyecta dart-define
+  - [x] Migración user_progress registrada en proyecto remoto
 
 Arquitectura:
   Flutter → supabase_flutter → Postgres (RLS)
@@ -265,7 +268,7 @@ CRONOGRAMA RESUMIDO
   Fase 1  MVP Flutter pulido          ████████░░  ~2–3 sem  COMPLETADA
   Fase 2  Calidad + CI + UX           ████████░░  COMPLETADA (web)
   Fase 3  Lanzamiento publico         ████████░░  COMPLETADA (web v1.0.0)
-  Fase 4  Supabase + sync             ██████░░░░  ~3–4 sem  ← ESTÁS AQUÍ (cuando haga falta)
+  Fase 4  Supabase + sync             ████████░░  COMPLETADA (Must)
   Fase 5  Monetización                ████░░░░░░  ~2–3 sem
   Fase 6  Escala continua             ∞
 

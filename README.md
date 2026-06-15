@@ -45,6 +45,7 @@ togesc/
 
 - **Contexto del proyecto:** [Plan/project_context.txt](Plan/project_context.txt)
 - **Plan de fases:** [Plan/plan_fases.txt](Plan/plan_fases.txt)
+- **Supabase (Fase 4):** [docs/supabase_setup.md](docs/supabase_setup.md)
 
 ## Stack
 
@@ -52,8 +53,8 @@ togesc/
 |------|------------|
 | Cliente | Flutter + Riverpod |
 | Audio | flutter_soloud (nativo) / Web Audio API (web) |
-| Persistencia | shared_preferences |
-| Backend (futuro) | Supabase — solo cuando haya cuentas/sync |
+| Persistencia | shared_preferences (+ sync opcional Supabase) |
+| Backend (opcional) | Supabase Auth + Postgres (RLS) — ver docs/supabase_setup.md |
 | CI | GitHub Actions |
 | Deploy web | Vercel |
 
@@ -61,7 +62,7 @@ togesc/
 
 **v1.0.0** — [Lanzamiento web](https://github.com/Raikadier/togesc/releases/tag/v1.0.0) · **App:** https://togesc.vercel.app
 
-Gratis, sin cuentas, progreso guardado solo en tu dispositivo/navegador.
+Gratis. Entrena sin cuenta; la sincronización en la nube es opcional (proyecto Supabase `togesc`).
 
 ## Deploy web (Vercel)
 

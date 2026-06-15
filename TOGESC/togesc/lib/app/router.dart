@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/game_constants.dart';
 import '../screens/about_screen.dart';
+import '../screens/account_screen.dart';
 import '../screens/game_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/onboarding_screen.dart';
@@ -20,6 +21,7 @@ abstract final class AppRoutes {
   static const statistics = '/statistics';
   static const about = '/about';
   static const privacy = '/privacy';
+  static const account = '/account';
   static const speedSelect = '/speed';
   static const game = '/game';
   static const speedGame = '/speed/game';
@@ -62,6 +64,10 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
       GoRoute(
         path: AppRoutes.privacy,
         builder: (_, _) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.account,
+        builder: (_, _) => const AccountScreen(),
       ),
       GoRoute(
         path: AppRoutes.speedSelect,
