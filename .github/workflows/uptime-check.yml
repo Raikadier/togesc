@@ -1,0 +1,19 @@
+name: Web Uptime Check
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comprobar https://togesc.vercel.app
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://togesc.vercel.app)
+          echo "HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "La web de produccion no responde 200"
+            exit 1
+          fi
