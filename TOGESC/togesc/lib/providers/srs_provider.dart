@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config/supabase_config.dart';
+import '../models/subscription_status.dart';
 import '../providers/auth_provider.dart';
+import '../providers/subscription_provider.dart';
 import '../services/hybrid_progress_repository.dart';
 import '../services/progress_repository.dart';
+import '../services/subscription_access.dart';
 import '../services/supabase_progress_repository.dart';
 import '../services/srs_system.dart';
 
@@ -19,6 +22,11 @@ final progressRepositoryProvider = Provider<ProgressRepository>((ref) {
       final client = ref.read(supabaseClientProvider);
       final userId = ref.read(currentUserIdProvider);
       if (client == null || userId == null) return null;
+
+      final status = ref.read(subscriptionStatusProvider).valueOrNull ??
+          const SubscriptionStatus.free();
+      if (!SubscriptionAccess.canUseCloudSync(status)) return null;
+
       return SupabaseProgressRepository(client: client, userId: userId);
     },
   );
@@ -30,9 +38,30 @@ final progressSyncOnSignInProvider = Provider<Future<void> Function()>((ref) {
     final repo = ref.read(progressRepositoryProvider);
     if (repo is HybridProgressRepository) {
       await repo.mergeOnSignIn();
+      await repo.flushPendingSync();
       ref.invalidate(srsSystemProvider);
+      ref.invalidate(syncPendingProvider);
     }
   };
+});
+
+/// Flush de sync pendiente (reconexion / resume app).
+final progressFlushPendingProvider = Provider<Future<bool> Function()>((ref) {
+  return () async {
+    final repo = ref.read(progressRepositoryProvider);
+    if (repo is! HybridProgressRepository) return true;
+    final ok = await repo.flushPendingSync();
+    if (ok) ref.invalidate(srsSystemProvider);
+    return ok;
+  };
+});
+
+final syncPendingProvider = FutureProvider<bool>((ref) async {
+  final repo = ref.read(progressRepositoryProvider);
+  if (repo is HybridProgressRepository) {
+    return repo.hasPendingSync;
+  }
+  return false;
 });
 
 /// Provider para el sistema SRS.
@@ -51,6 +80,11 @@ class SRSNotifier extends AsyncNotifier<SRSSystem> {
   Future<void> saveProgress() async {
     final srs = state.valueOrNull;
     if (srs != null) await srs.saveProgress();
+    final repo = ref.read(progressRepositoryProvider);
+    if (repo is HybridProgressRepository) {
+      await repo.flushPendingSync();
+      ref.invalidate(syncPendingProvider);
+    }
   }
 
   Future<void> resetProgress() async {

@@ -63,10 +63,12 @@ void main() {
 
     await tester.scrollUntilVisible(
       find.text('Politica de privacidad'),
-      100,
+      200,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Politica de privacidad'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Politica de privacidad'));
+    await tester.tap(find.text('Politica de privacidad'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(find.text('Resumen'), findsOneWidget);

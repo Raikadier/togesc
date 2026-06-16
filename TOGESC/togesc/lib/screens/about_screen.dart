@@ -75,6 +75,14 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: 16),
           ListTile(
             contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.workspace_premium_outlined),
+            title: const Text('Suscripcion Pro'),
+            subtitle: const Text('Planes, prueba gratis y gestion'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.subscription),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.person_outline),
             title: const Text('Cuenta y sincronizacion'),
             subtitle: const Text('Opcional — vincular progreso entre dispositivos'),

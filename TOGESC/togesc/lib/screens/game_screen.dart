@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/game_constants.dart';
+import '../constants/note_naming.dart';
+import '../providers/app_preferences_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/game_session_provider.dart';
 import '../widgets/piano_keyboard.dart';
@@ -171,6 +173,11 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   Widget _buildAnswerView(GameSessionState session) {
     final correctSet = <String>{};
     final incorrectSet = <String>{};
+    final namingMode =
+        ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
+    final hint = namingMode == NoteNamingMode.solfege
+        ? 'O escribe aqui: Do Re Mi'
+        : 'O escribe aqui: C E G';
 
     return SingleChildScrollView(
       child: Column(
@@ -185,6 +192,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             correctNotes: correctSet,
             incorrectNotes: incorrectSet,
             onNoteTapped: _toggleNote,
+            noteNamingMode: namingMode,
           ),
           const SizedBox(height: 12),
           if (_selectedNotes.isNotEmpty)
@@ -215,7 +223,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           const SizedBox(height: 16),
           NoteInputField(
             onSubmitted: _submitNotes,
-            hintText: 'O escribe aqui: C E G',
+            hintText: hint,
           ),
         ],
       ),
@@ -228,6 +236,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
     final correctSet = result.correctNotes;
     final incorrectSet = _selectedNotes.difference(correctSet);
+    final namingMode =
+        ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
 
     return SingleChildScrollView(
       child: Column(
@@ -236,6 +246,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             correctNotes: correctSet,
             incorrectNotes: incorrectSet,
             disabled: true,
+            noteNamingMode: namingMode,
           ),
           const SizedBox(height: 16),
           ResultCard(

@@ -68,8 +68,9 @@ class SupabaseProgressRepository implements ProgressRepository {
         'progress': payload,
         'last_session': session,
       });
-    } catch (_) {
-      // Sync remoto no debe bloquear el juego offline-first.
+    } catch (e) {
+      // Propaga el error para que el hibrido marque sync pendiente.
+      throw StateError('Error al guardar progreso remoto: $e');
     }
   }
 }

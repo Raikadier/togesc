@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:togesc/providers/srs_provider.dart';
+import 'package:togesc/providers/subscription_provider.dart';
+import 'package:togesc/models/subscription_status.dart';
 import 'package:togesc/services/progress_repository.dart';
 import 'package:togesc/services/srs_system.dart';
 import '../helpers/test_app_router.dart';
@@ -23,6 +25,9 @@ void main() {
       overrides: [
         progressRepositoryProvider.overrideWithValue(InMemoryProgressRepository()),
         srsSystemProvider.overrideWith(() => _FakeSRSNotifier(srs)),
+        subscriptionStatusProvider.overrideWith(
+          () => _TestSubscriptionNotifier(),
+        ),
       ],
       child: MaterialApp.router(routerConfig: buildTestRouter()),
     );
@@ -90,5 +95,15 @@ class _FakeSRSNotifier extends AsyncNotifier<SRSSystem>
   Future<void> resetProgress() async {
     await _srs.resetProgress();
     ref.invalidateSelf();
+  }
+}
+
+class _TestSubscriptionNotifier extends SubscriptionNotifier {
+  @override
+  Future<SubscriptionStatus> build() async {
+    return const SubscriptionStatus(
+      plan: 'pro',
+      status: 'active',
+    );
   }
 }

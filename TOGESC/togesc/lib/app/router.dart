@@ -8,11 +8,14 @@ import '../screens/account_screen.dart';
 import '../screens/game_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/onboarding_screen.dart';
+import '../screens/paywall_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/speed_game_screen.dart';
 import '../screens/speed_mode_select_screen.dart';
 import '../screens/statistics_screen.dart';
+import '../screens/subscription_screen.dart';
 import '../services/app_preferences.dart';
+import '../widgets/pro_route_guard.dart';
 
 /// Rutas de la aplicacion.
 abstract final class AppRoutes {
@@ -22,6 +25,8 @@ abstract final class AppRoutes {
   static const about = '/about';
   static const privacy = '/privacy';
   static const account = '/account';
+  static const subscription = '/subscription';
+  static const paywall = '/paywall';
   static const speedSelect = '/speed';
   static const game = '/game';
   static const speedGame = '/speed/game';
@@ -70,8 +75,22 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
         builder: (_, _) => const AccountScreen(),
       ),
       GoRoute(
+        path: AppRoutes.subscription,
+        builder: (_, _) => const SubscriptionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.paywall,
+        builder: (context, state) {
+          final feature = state.uri.queryParameters['feature'];
+          return PaywallScreen(feature: feature);
+        },
+      ),
+      GoRoute(
         path: AppRoutes.speedSelect,
-        builder: (_, _) => const SpeedModeSelectScreen(),
+        builder: (_, _) => ProRouteGuard(
+          mode: GameMode.speedTraining,
+          child: const SpeedModeSelectScreen(),
+        ),
       ),
       GoRoute(
         path: '${AppRoutes.game}/:modeId',
@@ -81,7 +100,10 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
           if (mode == null || mode == GameMode.exit) {
             return const HomeScreen();
           }
-          return GameScreen(mode: mode);
+          return ProRouteGuard(
+            mode: mode,
+            child: GameScreen(mode: mode),
+          );
         },
       ),
       GoRoute(
@@ -92,7 +114,10 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
           if (mode == null) {
             return const SpeedModeSelectScreen();
           }
-          return SpeedGameScreen(targetMode: mode);
+          return ProRouteGuard(
+            mode: GameMode.speedTraining,
+            child: SpeedGameScreen(targetMode: mode),
+          );
         },
       ),
     ],

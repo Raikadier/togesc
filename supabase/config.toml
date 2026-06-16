@@ -18,3 +18,9 @@ major_version = 15
 enabled = true
 site_url = "https://togesc.vercel.app"
 additional_redirect_urls = ["http://localhost:*", "https://togesc.vercel.app/**"]
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.revenuecat-webhook]
+verify_jwt = false

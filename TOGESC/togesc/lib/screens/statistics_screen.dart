@@ -1,7 +1,16 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../app/router.dart';
+import '../models/subscription_status.dart';
 import '../providers/srs_provider.dart';
+import '../providers/subscription_provider.dart';
+import '../services/progress_export_download.dart';
+import '../services/progress_export_service.dart';
+import '../services/subscription_access.dart';
 
 /// Pantalla de estadisticas del sistema SRS.
 class StatisticsScreen extends ConsumerWidget {
@@ -10,6 +19,10 @@ class StatisticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(srsStatisticsProvider);
+    final status = ref.watch(subscriptionStatusProvider).valueOrNull;
+    final advancedStats = SubscriptionAccess.canViewAdvancedStats(
+      status ?? const SubscriptionStatus.free(),
+    );
 
     if (stats.isEmpty) {
       return Scaffold(
@@ -122,8 +135,19 @@ class StatisticsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // Notas dificiles
-            if (hardestNotes.isNotEmpty)
+            if (!advancedStats)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.lock_outline, color: Colors.amber),
+                  title: const Text('Estadisticas avanzadas (Pro)'),
+                  subtitle: const Text(
+                    'Notas mas dificiles y mas faciles con TOGESC Pro.',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.paywall),
+                ),
+              ),
+            if (advancedStats && hardestNotes.isNotEmpty)
               _NotesSection(
                 title: 'Notas Mas Dificiles',
                 notes: hardestNotes.cast<String>(),
@@ -131,8 +155,7 @@ class StatisticsScreen extends ConsumerWidget {
                 icon: Icons.trending_up,
               ),
             const SizedBox(height: 12),
-            // Notas faciles
-            if (easiestNotes.isNotEmpty)
+            if (advancedStats && easiestNotes.isNotEmpty)
               _NotesSection(
                 title: 'Notas Mas Faciles',
                 notes: easiestNotes.cast<String>(),
@@ -140,6 +163,13 @@ class StatisticsScreen extends ConsumerWidget {
                 icon: Icons.trending_down,
               ),
             const SizedBox(height: 24),
+            if (advancedStats)
+              OutlinedButton.icon(
+                onPressed: () => _exportProgress(context, ref),
+                icon: const Icon(Icons.download_outlined),
+                label: const Text('Exportar progreso (CSV)'),
+              ),
+            if (advancedStats) const SizedBox(height: 12),
             // Boton reset
             OutlinedButton.icon(
               onPressed: () => _showResetDialog(context, ref),
@@ -153,6 +183,24 @@ class StatisticsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _exportProgress(BuildContext context, WidgetRef ref) {
+    final srs = ref.read(srsSystemProvider).valueOrNull;
+    if (srs == null) return;
+
+    final csv = ProgressExportService.buildCsv(srs);
+    if (kIsWeb) {
+      downloadCsvWeb(csv);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Descarga CSV iniciada')),
+      );
+    } else {
+      Clipboard.setData(ClipboardData(text: csv));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Progreso copiado al portapapeles')),
+      );
+    }
   }
 
   void _showResetDialog(BuildContext context, WidgetRef ref) {

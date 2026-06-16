@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/game_constants.dart';
 import '../constants/notes.dart';
+import 'analytics_provider.dart';
 import 'audio_provider.dart';
 import 'srs_provider.dart';
 
@@ -118,6 +119,11 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
       lastResult: null,
     );
 
+    await ref.read(analyticsServiceProvider).modeStarted(
+          state.mode.id.toString(),
+          state.mode.displayName,
+        );
+
     // Reproducir audio
     final audioService = ref.read(audioPlayerServiceProvider);
     final audioGen = ref.read(audioGeneratorProvider);
@@ -158,6 +164,12 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
 
     // Auto-save
     await ref.read(srsSystemProvider.notifier).saveProgress();
+
+    final analytics = ref.read(analyticsServiceProvider);
+    await analytics.roundCompleted(
+      modeId: state.mode.id.toString(),
+      correct: isCorrect,
+    );
 
     state = state.copyWith(
       state: GameState.showingResult,

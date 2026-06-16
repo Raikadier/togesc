@@ -1,5 +1,6 @@
 import '../models/note_data.dart';
 import 'progress_repository.dart';
+import 'sync_pending_store.dart';
 
 DateTime? _parseSession(String? iso) {
   if (iso == null || iso.isEmpty) return null;
@@ -19,13 +20,22 @@ class HybridProgressRepository implements ProgressRepository {
   HybridProgressRepository({
     required ProgressRepository local,
     required Future<ProgressRepository?> Function() remoteFactory,
+    SyncPendingStore? syncPendingStore,
   })  : _local = local,
-        _remoteFactory = remoteFactory;
+        _remoteFactory = remoteFactory,
+        _syncPending = syncPendingStore ?? SyncPendingStore();
 
   final ProgressRepository _local;
   final Future<ProgressRepository?> Function() _remoteFactory;
+  final SyncPendingStore _syncPending;
+
+  /// Repositorio local interno (SharedPreferences).
+  ProgressRepository get local => _local;
 
   Future<ProgressRepository?> _remote() => _remoteFactory();
+
+  /// Hay cambios locales pendientes de subir a la nube.
+  Future<bool> get hasPendingSync => _syncPending.isPending;
 
   @override
   Future<Map<String, NoteData>?> load() async {
@@ -40,11 +50,13 @@ class HybridProgressRepository implements ProgressRepository {
     if (remoteData == null) return localData;
     if (localData == null) {
       await _local.save(remoteData, lastSession: remoteSession);
+      await _syncPending.clear();
       return remoteData;
     }
 
     if (_isRemoteNewer(localSession, remoteSession)) {
       await _local.save(remoteData, lastSession: remoteSession);
+      await _syncPending.clear();
       return remoteData;
     }
 
@@ -70,8 +82,36 @@ class HybridProgressRepository implements ProgressRepository {
     await _local.save(noteData, lastSession: session);
 
     final remote = await _remote();
-    if (remote != null) {
+    if (remote == null) return;
+
+    try {
       await remote.save(noteData, lastSession: session);
+      await _syncPending.clear();
+    } catch (_) {
+      await _syncPending.markPending();
+    }
+  }
+
+  /// Sube progreso local pendiente cuando hay conexion y sesion.
+  Future<bool> flushPendingSync() async {
+    if (!await _syncPending.isPending) return true;
+
+    final remote = await _remote();
+    if (remote == null) return false;
+
+    final localData = await _local.load();
+    if (localData == null) {
+      await _syncPending.clear();
+      return true;
+    }
+
+    try {
+      final session = await _local.loadLastSessionIso();
+      await remote.save(localData, lastSession: session);
+      await _syncPending.clear();
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -87,21 +127,33 @@ class HybridProgressRepository implements ProgressRepository {
         final remoteSession = await remote.loadLastSessionIso();
         await _local.save(remoteData, lastSession: remoteSession);
       }
+      await _syncPending.clear();
       return;
     }
 
     final localSession = await _local.loadLastSessionIso();
     final remoteData = await remote.load();
     if (remoteData == null) {
-      await remote.save(localData, lastSession: localSession);
+      try {
+        await remote.save(localData, lastSession: localSession);
+        await _syncPending.clear();
+      } catch (_) {
+        await _syncPending.markPending();
+      }
       return;
     }
 
     final remoteSession = await remote.loadLastSessionIso();
     if (_isRemoteNewer(localSession, remoteSession)) {
       await _local.save(remoteData, lastSession: remoteSession);
+      await _syncPending.clear();
     } else {
-      await remote.save(localData, lastSession: localSession);
+      try {
+        await remote.save(localData, lastSession: localSession);
+        await _syncPending.clear();
+      } catch (_) {
+        await _syncPending.markPending();
+      }
     }
   }
 }

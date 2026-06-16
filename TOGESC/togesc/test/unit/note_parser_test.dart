@@ -58,5 +58,14 @@ void main() {
     test('nota desconocida pasa sin cambio', () {
       expect(parseNotes('X'), ['X']);
     });
+
+    test('parsea solfeo basico', () {
+      expect(parseNotes('Do Re Mi'), ['C', 'D', 'E']);
+      expect(parseNotes('do sol si'), ['C', 'G', 'B']);
+    });
+
+    test('parsea solfeo con sostenidos', () {
+      expect(parseNotes('Fa# La#'), ['F#', 'A#']);
+    });
   });
 }

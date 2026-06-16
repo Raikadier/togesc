@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/note_naming.dart';
+
 /// Teclado de piano interactivo con 7 teclas blancas y 5 negras.
 ///
 /// Permite seleccionar/deseleccionar notas con tap.
@@ -20,6 +22,9 @@ class PianoKeyboard extends StatelessWidget {
   /// Si el teclado esta deshabilitado (no acepta taps).
   final bool disabled;
 
+  /// Etiquetas en letras o solfeo (Do/Re/Mi).
+  final NoteNamingMode noteNamingMode;
+
   const PianoKeyboard({
     super.key,
     this.selectedNotes = const {},
@@ -27,6 +32,7 @@ class PianoKeyboard extends StatelessWidget {
     this.incorrectNotes = const {},
     this.onNoteTapped,
     this.disabled = false,
+    this.noteNamingMode = NoteNamingMode.letter,
   });
 
   static const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -104,7 +110,7 @@ class PianoKeyboard extends StatelessWidget {
                         alignment: Alignment.bottomCenter,
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
-                          note,
+                          formatNoteLabel(note, noteNamingMode),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -140,7 +146,7 @@ class PianoKeyboard extends StatelessWidget {
                       alignment: Alignment.bottomCenter,
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Text(
-                        sharpNote,
+                        formatNoteLabel(sharpNote, noteNamingMode),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,

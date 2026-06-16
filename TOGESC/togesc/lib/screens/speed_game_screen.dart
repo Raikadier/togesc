@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/game_constants.dart';
+import '../constants/note_naming.dart';
+import '../providers/app_preferences_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/speed_session_provider.dart';
 import '../widgets/piano_keyboard.dart';
@@ -177,6 +179,12 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
   }
 
   Widget _buildAnswerView(SpeedSessionState session) {
+    final namingMode =
+        ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
+    final hint = namingMode == NoteNamingMode.solfege
+        ? 'Do Re Mi o C E G'
+        : 'C E G o Do Re Mi';
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -193,6 +201,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
           PianoKeyboard(
             selectedNotes: _selectedNotes,
             onNoteTapped: _toggleNote,
+            noteNamingMode: namingMode,
           ),
           const SizedBox(height: 8),
           if (_selectedNotes.isNotEmpty)
@@ -212,7 +221,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
           const SizedBox(height: 12),
           NoteInputField(
             onSubmitted: _submitNotes,
-            hintText: 'O escribe aqui',
+            hintText: hint,
           ),
         ],
       ),
