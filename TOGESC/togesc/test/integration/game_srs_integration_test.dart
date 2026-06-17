@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:togesc/constants/game_constants.dart';
 import 'package:togesc/constants/srs_constants.dart';
@@ -33,12 +34,15 @@ class _TestSRSNotifier extends AsyncNotifier<SRSSystem>
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('Integracion: Game Session + SRS', () {
     late ProviderContainer container;
     late SRSSystem srs;
     late InMemoryProgressRepository repo;
 
     setUp(() async {
+      SharedPreferences.setMockInitialValues({});
       repo = InMemoryProgressRepository();
       srs = SRSSystem(
         repository: repo,

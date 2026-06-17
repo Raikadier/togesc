@@ -1,11 +1,14 @@
-import 'dart:math';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/game_constants.dart';
 import '../constants/notes.dart';
+import '../models/audio_preferences.dart';
+import '../models/last_practice_session.dart';
 import 'analytics_provider.dart';
+import 'audio_preferences_provider.dart';
 import 'audio_provider.dart';
+import 'last_practice_provider.dart';
+import 'practice_focus_provider.dart';
 import 'srs_provider.dart';
 
 /// Estados posibles de la sesion de juego.
@@ -32,7 +35,8 @@ class GameSessionState {
   final GameMode mode;
   final List<String> currentNotes;
   final int numNotes;
-  final bool useRandomInstrument;
+  /// null = preferencias globales; [AudioPreferences.sessionOverrideRandom] o id fijo.
+  final String? sessionInstrumentOverride;
   final String? lastInstrument;
   final RoundResult? lastResult;
 
@@ -41,7 +45,7 @@ class GameSessionState {
     this.mode = GameMode.singleNote,
     this.currentNotes = const [],
     this.numNotes = 1,
-    this.useRandomInstrument = true,
+    this.sessionInstrumentOverride,
     this.lastInstrument,
     this.lastResult,
   });
@@ -51,7 +55,8 @@ class GameSessionState {
     GameMode? mode,
     List<String>? currentNotes,
     int? numNotes,
-    bool? useRandomInstrument,
+    String? sessionInstrumentOverride,
+    bool clearSessionInstrumentOverride = false,
     String? lastInstrument,
     RoundResult? lastResult,
   }) {
@@ -60,7 +65,9 @@ class GameSessionState {
       mode: mode ?? this.mode,
       currentNotes: currentNotes ?? this.currentNotes,
       numNotes: numNotes ?? this.numNotes,
-      useRandomInstrument: useRandomInstrument ?? this.useRandomInstrument,
+      sessionInstrumentOverride: clearSessionInstrumentOverride
+          ? null
+          : (sessionInstrumentOverride ?? this.sessionInstrumentOverride),
       lastInstrument: lastInstrument ?? this.lastInstrument,
       lastResult: lastResult ?? this.lastResult,
     );
@@ -77,30 +84,35 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
   GameSessionState build() => const GameSessionState();
 
   void setMode(GameMode mode) {
-    state = state.copyWith(mode: mode, state: GameState.idle);
+    final fixed = fixedNoteCountForMode(mode);
+    state = state.copyWith(
+      mode: mode,
+      state: GameState.idle,
+      numNotes: fixed ?? randomMinNotes,
+    );
+    ref.read(lastPracticeSessionProvider.notifier).record(
+          mode: mode,
+          kind: PracticeKind.game,
+        );
   }
 
-  void toggleInstrument() {
-    state = state.copyWith(useRandomInstrument: !state.useRandomInstrument);
+  void setSessionInstrumentOverride(String? overrideKey) {
+    state = state.copyWith(
+      sessionInstrumentOverride: overrideKey,
+      clearSessionInstrumentOverride: overrideKey == null,
+    );
+  }
+
+  Future<AudioPreferences> _readAudioPreferences() async {
+    return ref.read(audioPreferencesProvider.future);
+  }
+
+  void _applyMasterVolume(AudioPreferences prefs) {
+    ref.read(audioPlayerServiceProvider).setMasterVolume(prefs.masterVolume);
   }
 
   /// Calcula cuantas notas reproducir segun el modo.
-  int _getNumNotes(GameMode mode) {
-    switch (mode) {
-      case GameMode.singleNote:
-        return 1;
-      case GameMode.interval:
-        return 2;
-      case GameMode.chord:
-        return 3;
-      case GameMode.random:
-        return Random().nextInt(randomMaxNotes) + randomMinNotes;
-      case GameMode.sharpsOnly:
-        return 1;
-      default:
-        return 1;
-    }
-  }
+  int _getNumNotes(GameMode mode) => noteCountForGameMode(mode);
 
   /// Inicia una nueva ronda: selecciona notas y reproduce audio.
   Future<void> startRound() async {
@@ -109,7 +121,13 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
     if (srs == null) return;
 
     final numNotes = _getNumNotes(state.mode);
-    final notePool = state.mode == GameMode.sharpsOnly ? sharpNotes : null;
+    final focusNote = ref.read(practiceFocusNoteProvider);
+    List<String>? notePool;
+    if (state.mode == GameMode.sharpsOnly) {
+      notePool = sharpNotes;
+    } else if (focusNote != null && notes.containsKey(focusNote)) {
+      notePool = [focusNote];
+    }
     final selectedNotes = srs.selectNotes(numNotes, notePool: notePool);
 
     state = state.copyWith(
@@ -129,7 +147,11 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
     final audioGen = ref.read(audioGeneratorProvider);
     final (frequencies, _) = audioGen.getNoteFrequencies(selectedNotes);
 
-    final instrument = state.useRandomInstrument ? null : 'sine';
+    final audioPrefs = await _readAudioPreferences();
+    _applyMasterVolume(audioPrefs);
+    final instrument = audioPrefs.playbackInstrument(
+      sessionOverrideKey: state.sessionInstrumentOverride,
+    );
     final instUsed = await audioService.playTones(
       frequencies,
       instrument: instrument,
@@ -184,10 +206,17 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
 
   /// Reproduce cluster de limpieza y vuelve a idle.
   Future<void> playCluster() async {
+    final audioPrefs = await _readAudioPreferences();
+    if (!audioPrefs.clusterEnabled) {
+      state = state.copyWith(state: GameState.idle);
+      return;
+    }
+
     state = state.copyWith(state: GameState.playingCluster);
 
+    _applyMasterVolume(audioPrefs);
     final audioService = ref.read(audioPlayerServiceProvider);
-    await audioService.playCluster();
+    await audioService.playCluster(duration: audioPrefs.clusterDurationSec);
 
     state = state.copyWith(state: GameState.idle);
   }

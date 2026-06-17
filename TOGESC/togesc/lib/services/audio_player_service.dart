@@ -16,9 +16,15 @@ class AudioPlayerService {
   bool _unlockedByUserGesture = false;
   Future<bool>? _initFuture;
   int _playCounter = 0;
+  double _masterVolume = 1.0;
 
   bool get isInitialized => _initialized;
   bool get isAvailable => _initialized;
+  double get masterVolume => _masterVolume;
+
+  void setMasterVolume(double volume) {
+    _masterVolume = volume.clamp(0.0, 1.0);
+  }
 
   AudioPlayerService({
     AudioGenerator? generator,
@@ -90,9 +96,15 @@ class AudioPlayerService {
   Future<void> playBuffer(Float64List samples, {int? sampleRate}) async {
     if (!await _ensureInitialized()) return;
 
+    final scaled = _masterVolume >= 0.999
+        ? samples
+        : Float64List.fromList(
+            samples.map((s) => s * _masterVolume).toList(),
+          );
+
     final wavBytes = Uint8List.fromList(
       generator.float64ListToWavBytes(
-        samples,
+        scaled,
         sr: sampleRate ?? generator.sampleRate,
       ),
     );
@@ -108,16 +120,25 @@ class AudioPlayerService {
 
     if (_soloud == null) return;
 
+    AudioSource? source;
     try {
       final key = 'tone_${_playCounter++}.wav';
-      final source = await _soloud!.loadMem(
+      source = await _soloud!.loadMem(
         key,
         wavBytes,
         mode: LoadMode.memory,
       );
+      final finished = source.allInstancesFinished.first;
       await _soloud!.play(source, volume: 1.0);
+      await finished;
     } catch (_) {
       // Reproduccion fallida: no interrumpir el flujo del juego
+    } finally {
+      if (source != null) {
+        try {
+          await _soloud!.disposeSource(source);
+        } catch (_) {}
+      }
     }
   }
 

@@ -1,0 +1,61 @@
+import 'package:flutter/material.dart';
+
+/// Tokens del design system Harmonic Precision (Stitch / Material 3).
+abstract final class DesignTokens {
+  // --- Marca y superficies ---
+  static const Color background = Color(0xFFFFF7FC);
+  static const Color onBackground = Color(0xFF1E1B1E);
+  static const Color surface = Color(0xFFFFF7FC);
+  static const Color onSurface = Color(0xFF1E1B1E);
+  static const Color onSurfaceVariant = Color(0xFF4D4351);
+  static const Color surfaceContainerLow = Color(0xFFF9F1F6);
+  static const Color surfaceContainer = Color(0xFFF3ECF1);
+  static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
+  static const Color outline = Color(0xFF7F7383);
+  static const Color outlineVariant = Color(0xFFD0C2D3);
+
+  // --- Primarios ---
+  static const Color primary = Color(0xFF4E0078);
+  static const Color onPrimary = Color(0xFFFFFFFF);
+  static const Color primaryContainer = Color(0xFF6A1B9A);
+  static const Color onPrimaryContainer = Color(0xFFDA9CFF);
+
+  // --- Secundarios ---
+  static const Color secondary = Color(0xFF9A25AE);
+  static const Color onSecondary = Color(0xFFFFFFFF);
+  static const Color secondaryContainer = Color(0xFFED76FD);
+  static const Color onSecondaryContainer = Color(0xFF69007A);
+
+  // --- Terciarios ---
+  static const Color tertiary = Color(0xFF402747);
+  static const Color onTertiary = Color(0xFFFFFFFF);
+  static const Color tertiaryContainer = Color(0xFF573D5F);
+  static const Color onTertiaryContainer = Color(0xFFCBAAD2);
+
+  // --- Error ---
+  static const Color error = Color(0xFFBA1A1A);
+  static const Color onError = Color(0xFFFFFFFF);
+  static const Color errorContainer = Color(0xFFFFDAD6);
+  static const Color onErrorContainer = Color(0xFF93000A);
+
+  // --- Feedback musical (semánticos Stitch) ---
+  static const Color correct = Color(0xFF2E7D32);
+  static const Color incorrect = Color(0xFFC62828);
+  static const Color selection = Color(0xFFFFB300);
+
+  // --- Piano ---
+  static const Color pianoWhite = Color(0xFFFFFFFF);
+  static const Color pianoBlack = Color(0xFF212121);
+
+  // --- Forma y espaciado ---
+  static const double radiusMd = 12;
+  static const double touchTargetMin = 48;
+  static const double spacingXs = 4;
+  static const double spacingSm = 8;
+  static const double spacingMd = 12;
+  static const double spacingLg = 16;
+  static const double marginMobile = 16;
+
+  static BorderRadius get borderRadiusMd =>
+      BorderRadius.circular(radiusMd);
+}

@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../config/subscription_config.dart';
 import '../constants/subscription_constants.dart';
 import '../providers/analytics_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
+import '../widgets/account_monetization_views.dart';
+import '../widgets/togesc_ui.dart';
 
 /// Pantalla de paywall (Fase 5).
 class PaywallScreen extends ConsumerStatefulWidget {
@@ -113,101 +116,80 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     final feature = widget.feature;
-    final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('TOGESC Pro'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => context.pop(),
-        ),
+    return TogescScaffold(
+      title: 'TOGESC Pro',
+      automaticallyImplyLeading: false,
+      leading: IconButton(
+        icon: const Icon(Icons.close_rounded),
+        onPressed: () => context.pop(),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(DesignTokens.marginMobile),
         children: [
-          Icon(Icons.workspace_premium, size: 64, color: primary),
-          const SizedBox(height: 16),
-          Text(
-            feature != null ? 'Desbloquea $feature' : 'Pasa a TOGESC Pro',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+          PaywallHero(
+            title: feature != null ? 'Desbloquea $feature' : 'Pasa a TOGESC Pro',
+            subtitle:
+                'Entrena con todos los modos, estadisticas avanzadas y '
+                'sincronizacion entre dispositivos.',
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Entrena con todos los modos, estadisticas avanzadas y '
-            'sincronizacion entre dispositivos.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 24),
-          _FeatureRow(
-            icon: Icons.piano,
+          const SizedBox(height: DesignTokens.spacingLg),
+          const ProFeatureRow(
+            icon: Icons.piano_rounded,
             text: 'Acordes, aleatorio y modo velocidad',
           ),
-          _FeatureRow(
-            icon: Icons.sync,
+          const ProFeatureRow(
+            icon: Icons.sync_rounded,
             text: 'Sincronizacion SRS en la nube',
           ),
-          _FeatureRow(
-            icon: Icons.analytics,
+          const ProFeatureRow(
+            icon: Icons.analytics_rounded,
             text: 'Estadisticas avanzadas',
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: DesignTokens.spacingLg * 2),
           if (SubscriptionConfig.isActive) ...[
-            FilledButton(
-              onPressed: _busy ? null : _purchase,
-              child: Text(kIsWeb ? 'Suscribirme (Stripe)' : 'Suscribirme'),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: _busy ? null : _startTrial,
-              child: Text(
-                'Probar ${SubscriptionConstants.trialDays} dias gratis',
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _busy ? null : _purchase,
+                child: Text(kIsWeb ? 'Suscribirme (Stripe)' : 'Suscribirme'),
               ),
             ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: _busy ? null : _restore,
-              child: const Text('Restaurar compras'),
+            const SizedBox(height: DesignTokens.spacingSm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: _busy ? null : _startTrial,
+                child: Text(
+                  'Probar ${SubscriptionConstants.trialDays} dias gratis',
+                ),
+              ),
+            ),
+            const SizedBox(height: DesignTokens.spacingSm),
+            Center(
+              child: TextButton(
+                onPressed: _busy ? null : _restore,
+                child: const Text('Restaurar compras'),
+              ),
             ),
           ] else ...[
-            const Text(
+            Text(
               'Monetizacion no activa en este build. Todos los modos estan '
               'disponibles.',
               textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: DesignTokens.onSurfaceVariant,
+                  ),
             ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () => context.pop(),
-              child: const Text('Continuar'),
+            const SizedBox(height: DesignTokens.spacingLg),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => context.pop(),
+                child: const Text('Continuar'),
+              ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _FeatureRow extends StatelessWidget {
-  const _FeatureRow({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 22, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 12),
-          Expanded(child: Text(text)),
         ],
       ),
     );

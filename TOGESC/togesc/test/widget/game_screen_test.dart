@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:togesc/constants/game_constants.dart';
 import 'package:togesc/providers/audio_provider.dart';
@@ -36,6 +37,8 @@ void main() {
   late ProviderContainer container;
 
   setUp(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({});
     srs = SRSSystem(
       repository: InMemoryProgressRepository(),
       random: Random(42),
@@ -88,7 +91,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.music_note), findsAtLeast(1));
+      expect(find.byTooltip('Preferencias: aleatorio'), findsOneWidget);
     });
 
     testWidgets('tap en Reproducir transiciona a vista de respuesta',

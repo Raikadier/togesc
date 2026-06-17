@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../app/design_tokens.dart';
+import '../widgets/info_views.dart';
+import '../widgets/togesc_ui.dart';
+
 /// Politica de privacidad (fase sin cuentas ni backend).
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
@@ -8,21 +12,21 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Politica de privacidad'),
-      ),
+    return TogescScaffold(
+      title: 'Politica de privacidad',
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(DesignTokens.marginMobile),
         children: [
           Text(
             'Ultima actualizacion: $_lastUpdated',
-            style: TextStyle(color: muted, fontSize: 13),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: DesignTokens.onSurfaceVariant,
+            ),
           ),
-          const SizedBox(height: 16),
-          const _PolicySection(
+          const SizedBox(height: DesignTokens.spacingLg),
+          const PolicySection(
             title: 'Resumen',
             body:
                 'TOGESC guarda tu progreso de entrenamiento en tu dispositivo. '
@@ -31,7 +35,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'cifrada en tránsito con tu email y contrasena; solo tu '
                 'usuario puede leer esos datos.',
           ),
-          const _PolicySection(
+          const PolicySection(
             title: 'Datos que se guardan',
             body:
                 'Tu progreso de entrenamiento (pesos SRS, estadisticas y '
@@ -40,7 +44,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 '(SharedPreferences en movil/escritorio; almacenamiento del '
                 'navegador en web).',
           ),
-          const _PolicySection(
+          const PolicySection(
             title: 'Cuenta opcional y sincronizacion',
             body:
                 'Puedes entrenar sin registrarte. Si creas una cuenta, '
@@ -49,19 +53,19 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'usuario. No vendemos ni compartimos esos datos con terceros '
                 'con fines comerciales.',
           ),
-          const _PolicySection(
+          const PolicySection(
             title: 'Datos que no recopilamos',
             body:
                 'No grabamos microfono ni subimos audio. No usamos servicios '
                 'de analitica ni publicidad de terceros.',
           ),
-          const _PolicySection(
+          const PolicySection(
             title: 'Audio',
             body:
                 'Los ejercicios se sintetizan en tu dispositivo. No se graba '
                 'microfono ni se sube audio a internet.',
           ),
-          const _PolicySection(
+          const PolicySection(
             title: 'Eliminacion de datos',
             body:
                 'Puedes borrar tu progreso desinstalando la app o limpiando '
@@ -69,46 +73,18 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'En futuras versiones puede anadirse un boton de restablecer '
                 'progreso en la app.',
           ),
-          const _PolicySection(
+          const PolicySection(
             title: 'Cambios futuros',
             body:
                 'Si se anaden analitica, pagos u otros servicios, esta politica '
                 'se actualizara antes del lanzamiento.',
           ),
-          const _PolicySection(
+          const PolicySection(
             title: 'Contacto',
             body:
                 'Proyecto open source en GitHub (Raikadier/togesc). Para '
                 'consultas o incidencias, abre un issue en el repositorio.',
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PolicySection extends StatelessWidget {
-  final String title;
-  final String body;
-
-  const _PolicySection({
-    required this.title,
-    required this.body,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          Text(body),
         ],
       ),
     );

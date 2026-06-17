@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/game_constants.dart';
 import '../constants/notes.dart';
+import '../models/audio_preferences.dart';
+import '../models/last_practice_session.dart';
+import 'audio_preferences_provider.dart';
+import 'last_practice_provider.dart';
 import 'audio_provider.dart';
 import 'srs_provider.dart';
 
@@ -21,7 +25,7 @@ class SpeedSessionState {
   final int numNotes;
   final int consecutiveCorrect;
   final List<double> responseTimes;
-  final bool useRandomInstrument;
+  final String? sessionInstrumentOverride;
 
   const SpeedSessionState({
     this.state = SpeedState.idle,
@@ -32,7 +36,7 @@ class SpeedSessionState {
     this.numNotes = 1,
     this.consecutiveCorrect = 0,
     this.responseTimes = const [],
-    this.useRandomInstrument = true,
+    this.sessionInstrumentOverride,
   });
 
   double get averageTime =>
@@ -50,7 +54,8 @@ class SpeedSessionState {
     int? numNotes,
     int? consecutiveCorrect,
     List<double>? responseTimes,
-    bool? useRandomInstrument,
+    String? sessionInstrumentOverride,
+    bool clearSessionInstrumentOverride = false,
   }) {
     return SpeedSessionState(
       state: state ?? this.state,
@@ -61,7 +66,9 @@ class SpeedSessionState {
       numNotes: numNotes ?? this.numNotes,
       consecutiveCorrect: consecutiveCorrect ?? this.consecutiveCorrect,
       responseTimes: responseTimes ?? this.responseTimes,
-      useRandomInstrument: useRandomInstrument ?? this.useRandomInstrument,
+      sessionInstrumentOverride: clearSessionInstrumentOverride
+          ? null
+          : (sessionInstrumentOverride ?? this.sessionInstrumentOverride),
     );
   }
 }
@@ -81,25 +88,33 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
   }
 
   void setTargetMode(GameMode mode) {
-    state = state.copyWith(targetMode: mode);
+    final fixed = fixedNoteCountForMode(mode);
+    state = state.copyWith(
+      targetMode: mode,
+      numNotes: fixed ?? randomMinNotes,
+    );
+    ref.read(lastPracticeSessionProvider.notifier).record(
+          mode: mode,
+          kind: PracticeKind.speed,
+        );
   }
 
-  int _getNumNotes(GameMode mode) {
-    switch (mode) {
-      case GameMode.singleNote:
-        return 1;
-      case GameMode.interval:
-        return 2;
-      case GameMode.chord:
-        return 3;
-      case GameMode.random:
-        return Random().nextInt(randomMaxNotes) + randomMinNotes;
-      case GameMode.sharpsOnly:
-        return 1;
-      default:
-        return 1;
-    }
+  void setSessionInstrumentOverride(String? overrideKey) {
+    state = state.copyWith(
+      sessionInstrumentOverride: overrideKey,
+      clearSessionInstrumentOverride: overrideKey == null,
+    );
   }
+
+  Future<AudioPreferences> _readAudioPreferences() async {
+    return ref.read(audioPreferencesProvider.future);
+  }
+
+  void _applyMasterVolume(AudioPreferences prefs) {
+    ref.read(audioPlayerServiceProvider).setMasterVolume(prefs.masterVolume);
+  }
+
+  int _getNumNotes(GameMode mode) => noteCountForGameMode(mode);
 
   /// Inicia una ronda de velocidad.
   Future<void> startRound() async {
@@ -122,7 +137,11 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
     final audioService = ref.read(audioPlayerServiceProvider);
     final audioGen = ref.read(audioGeneratorProvider);
     final (frequencies, _) = audioGen.getNoteFrequencies(selectedNotes);
-    final instrument = state.useRandomInstrument ? null : 'sine';
+    final audioPrefs = await _readAudioPreferences();
+    _applyMasterVolume(audioPrefs);
+    final instrument = audioPrefs.playbackInstrument(
+      sessionOverrideKey: state.sessionInstrumentOverride,
+    );
     await audioService.playTones(frequencies, instrument: instrument);
 
     // Iniciar countdown

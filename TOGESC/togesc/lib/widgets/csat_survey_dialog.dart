@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../app/design_tokens.dart';
+
 /// Encuesta CSAT ocasional (Fase 6): valoracion 1-5 estrellas.
 class CsatSurveyDialog extends StatefulWidget {
   const CsatSurveyDialog({super.key});
@@ -20,6 +22,8 @@ class _CsatSurveyDialogState extends State<CsatSurveyDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return AlertDialog(
       title: const Text('Como va tu experiencia?'),
       content: SingleChildScrollView(
@@ -27,11 +31,13 @@ class _CsatSurveyDialogState extends State<CsatSurveyDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Tu opinion nos ayuda a mejorar TOGESC. '
-              'Califica del 1 al 5.',
+            Text(
+              'Tu opinion nos ayuda a mejorar TOGESC. Califica del 1 al 5.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: DesignTokens.onSurfaceVariant,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spacingLg),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(5, (index) {
@@ -41,20 +47,22 @@ class _CsatSurveyDialogState extends State<CsatSurveyDialog> {
                   tooltip: '$star estrella${star > 1 ? 's' : ''}',
                   onPressed: () => setState(() => _rating = star),
                   icon: Icon(
-                    selected ? Icons.star : Icons.star_border,
-                    color: selected ? Colors.amber : null,
+                    selected ? Icons.star_rounded : Icons.star_outline_rounded,
+                    color: selected
+                        ? DesignTokens.selection
+                        : DesignTokens.outlineVariant,
                     size: 32,
                   ),
                 );
               }),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: DesignTokens.spacingSm),
             TextField(
               controller: _commentController,
               maxLines: 3,
               decoration: const InputDecoration(
                 labelText: 'Comentario (opcional)',
-                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
               ),
             ),
           ],

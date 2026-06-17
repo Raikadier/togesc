@@ -1,70 +1,78 @@
-name: Deploy Web
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Build Flutter web
-        working-directory: TOGESC/togesc
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          MONETIZATION_ENABLED: ${{ secrets.MONETIZATION_ENABLED }}
-          STRIPE_CHECKOUT_URL: ${{ secrets.STRIPE_CHECKOUT_URL }}
-          STRIPE_PORTAL_URL: ${{ secrets.STRIPE_PORTAL_URL }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: |
-          flutter pub get
-          DART_DEFINES=""
-          if [ -n "$SUPABASE_URL" ]; then
-            DART_DEFINES="$DART_DEFINES --dart-define=SUPABASE_URL=$SUPABASE_URL"
-          fi
-          if [ -n "$SUPABASE_ANON_KEY" ]; then
-            DART_DEFINES="$DART_DEFINES --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
-          fi
-          # Activa monetizacion si hay URL Stripe y no se desactivo explicitamente
-          if [ -n "$STRIPE_CHECKOUT_URL" ] && [ "$MONETIZATION_ENABLED" != "false" ]; then
-            DART_DEFINES="$DART_DEFINES --dart-define=MONETIZATION_ENABLED=true"
-          elif [ -n "$MONETIZATION_ENABLED" ]; then
-            DART_DEFINES="$DART_DEFINES --dart-define=MONETIZATION_ENABLED=$MONETIZATION_ENABLED"
-          fi
-          if [ -n "$STRIPE_CHECKOUT_URL" ]; then
-            DART_DEFINES="$DART_DEFINES --dart-define=STRIPE_CHECKOUT_URL=$STRIPE_CHECKOUT_URL"
-          fi
-          if [ -n "$STRIPE_PORTAL_URL" ]; then
-            DART_DEFINES="$DART_DEFINES --dart-define=STRIPE_PORTAL_URL=$STRIPE_PORTAL_URL"
-          fi
-          if [ -n "$SENTRY_DSN" ]; then
-            DART_DEFINES="$DART_DEFINES --dart-define=SENTRY_DSN=$SENTRY_DSN"
-          fi
-          DART_DEFINES="$DART_DEFINES --dart-define=ANALYTICS_ENABLED=true"
-          flutter build web --release --no-wasm-dry-run $DART_DEFINES
-
-      - name: Prepare Vercel prebuilt output
-        run: |
-          mkdir -p .vercel/output/static
-          cp -r TOGESC/togesc/build/web/* .vercel/output/static/
-          echo '{"version":3}' > .vercel/output/config.json
-
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
-      - name: Deploy to Vercel
-        run: vercel deploy --prebuilt --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" --scope raikadiers-projects
-        env:
-          VERCEL_ORG_ID: team_Onzafu620lCGiGTiRG2q6EqI
-          VERCEL_PROJECT_ID: prj_mcEytSx6ejlf20aWtIutrGayXyUn
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Build Flutter web
+        working-directory: TOGESC/togesc
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          MONETIZATION_ENABLED: ${{ secrets.MONETIZATION_ENABLED }}
+          STRIPE_CHECKOUT_URL: ${{ secrets.STRIPE_CHECKOUT_URL }}
+          STRIPE_PORTAL_URL: ${{ secrets.STRIPE_PORTAL_URL }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          flutter pub get
+          DART_DEFINES=""
+          if [ -n "$SUPABASE_URL" ]; then
+            DART_DEFINES="$DART_DEFINES --dart-define=SUPABASE_URL=$SUPABASE_URL"
+          fi
+          if [ -n "$SUPABASE_ANON_KEY" ]; then
+            DART_DEFINES="$DART_DEFINES --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
+          fi
+          # Activa monetizacion si hay URL Stripe y no se desactivo explicitamente
+          if [ -n "$STRIPE_CHECKOUT_URL" ] && [ "$MONETIZATION_ENABLED" != "false" ]; then
+            DART_DEFINES="$DART_DEFINES --dart-define=MONETIZATION_ENABLED=true"
+          elif [ -n "$MONETIZATION_ENABLED" ]; then
+            DART_DEFINES="$DART_DEFINES --dart-define=MONETIZATION_ENABLED=$MONETIZATION_ENABLED"
+          fi
+          if [ -n "$STRIPE_CHECKOUT_URL" ]; then
+            DART_DEFINES="$DART_DEFINES --dart-define=STRIPE_CHECKOUT_URL=$STRIPE_CHECKOUT_URL"
+          fi
+          if [ -n "$STRIPE_PORTAL_URL" ]; then
+            DART_DEFINES="$DART_DEFINES --dart-define=STRIPE_PORTAL_URL=$STRIPE_PORTAL_URL"
+          fi
+          if [ -n "$SENTRY_DSN" ]; then
+            DART_DEFINES="$DART_DEFINES --dart-define=SENTRY_DSN=$SENTRY_DSN"
+          fi
+          DART_DEFINES="$DART_DEFINES --dart-define=ANALYTICS_ENABLED=true"
+          flutter build web --release --no-wasm-dry-run $DART_DEFINES
+
+      - name: Prepare Vercel prebuilt output
+        run: |
+          mkdir -p .vercel/output/static
+          cp -r TOGESC/togesc/build/web/* .vercel/output/static/
+          cat > .vercel/output/config.json <<'EOF'
+          {
+            "version": 3,
+            "routes": [
+              { "handle": "filesystem" },
+              { "src": "/promo", "dest": "/landing.html" }
+            ]
+          }
+          EOF
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prebuilt --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" --scope raikadiers-projects
+        env:
+          VERCEL_ORG_ID: team_Onzafu620lCGiGTiRG2q6EqI
+          VERCEL_PROJECT_ID: prj_mcEytSx6ejlf20aWtIutrGayXyUn

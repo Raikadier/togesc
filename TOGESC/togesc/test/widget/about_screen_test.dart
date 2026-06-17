@@ -41,6 +41,7 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Politica de privacidad'), findsOneWidget);
+    expect(find.text('Ver tutorial de nuevo'), findsOneWidget);
   });
 
   testWidgets('AboutScreen navega a politica de privacidad', (tester) async {

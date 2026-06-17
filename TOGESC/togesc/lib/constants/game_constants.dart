@@ -1,6 +1,8 @@
 /// Constantes y modos de juego.
 library;
 
+import 'dart:math';
+
 enum GameMode {
   singleNote(1, 'Una sola nota'),
   interval(2, 'Dos notas simultaneas (Intervalo)'),
@@ -26,6 +28,31 @@ enum GameMode {
 // Limites para modo aleatorio
 const int randomMinNotes = 1;
 const int randomMaxNotes = 5;
+
+/// Notas requeridas por modo fijo (null = aleatorio por ronda).
+int? fixedNoteCountForMode(GameMode mode) {
+  switch (mode) {
+    case GameMode.singleNote:
+    case GameMode.sharpsOnly:
+      return 1;
+    case GameMode.interval:
+      return 2;
+    case GameMode.chord:
+      return 3;
+    case GameMode.random:
+      return null;
+    default:
+      return 1;
+  }
+}
+
+/// Notas de una ronda segun modo (aleatorio elige en el momento).
+int noteCountForGameMode(GameMode mode, {Random? random}) {
+  final fixed = fixedNoteCountForMode(mode);
+  if (fixed != null) return fixed;
+  final rng = random ?? Random();
+  return rng.nextInt(randomMaxNotes) + randomMinNotes;
+}
 
 // Configuracion del modo velocidad
 const double speedInitialTime = 10.0;

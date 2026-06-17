@@ -18,3 +18,6 @@ Thumbs.db
 # Vercel local / Flutter SDK clone for remote build
 .vercel/
 flutter/
+
+# Stitch export descomprimido (el zip en raíz es la referencia)
+stitch_export/

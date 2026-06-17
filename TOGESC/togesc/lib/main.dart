@@ -63,9 +63,11 @@ class TogescApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Entrenador de Oido Absoluto',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      // Harmonic Precision esta definido en tema claro; evita M3 generico en dark.
+      themeMode: ThemeMode.light,
       routerConfig: router,
     );
   }

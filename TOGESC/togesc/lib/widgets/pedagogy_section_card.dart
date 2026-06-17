@@ -1,47 +1,51 @@
 import 'package:flutter/material.dart';
 
+import '../app/design_tokens.dart';
+import 'togesc_ui.dart';
+
 /// Tarjeta de seccion pedagogica (onboarding, acerca de, etc.).
 class PedagogySectionCard extends StatelessWidget {
   final IconData icon;
-  final Color color;
+  final Color? accentColor;
   final String title;
   final String body;
 
   const PedagogySectionCard({
     super.key,
     required this.icon,
-    required this.color,
+    this.accentColor,
     required this.title,
     required this.body,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    final theme = Theme.of(context);
+    final color = accentColor ?? DesignTokens.primaryContainer;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: DesignTokens.spacingMd),
+      child: TogescCard(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              backgroundColor: color.withValues(alpha: 0.15),
+              backgroundColor: color.withValues(alpha: 0.12),
               child: Icon(icon, color: color),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: DesignTokens.spacingMd),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(title, style: theme.textTheme.titleLarge?.copyWith(fontSize: 18)),
+                  const SizedBox(height: DesignTokens.spacingSm),
                   Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                    body,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: DesignTokens.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(body),
                 ],
               ),
             ),

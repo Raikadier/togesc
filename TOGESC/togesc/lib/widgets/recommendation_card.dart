@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../app/design_tokens.dart';
+import 'togesc_ui.dart';
+
 /// Panel de recomendaciones de practica basado en el estado SRS.
 class RecommendationCard extends StatelessWidget {
   final Map<String, dynamic> recommendations;
@@ -18,32 +21,23 @@ class RecommendationCard extends StatelessWidget {
     final criticalNotes =
         recommendations['critical_notes'] as List<dynamic>? ?? [];
 
-    return Card(
-      shape: RoundedRectangleBorder(
-        side: const BorderSide(color: Colors.blue, width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.lightbulb, color: Colors.blue),
-                const SizedBox(width: 8),
-                const Text(
-                  'Recomendaciones',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+    return TogescCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.lightbulb, color: DesignTokens.primaryContainer),
+              const SizedBox(width: 8),
+              Text(
+                'Recomendaciones',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ],
+          ),
             const SizedBox(height: 8),
-            Text(message, style: const TextStyle(fontSize: 14)),
+            Text(message, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 12),
             _buildStatRow('Notas pendientes', '$totalOverdue'),
             _buildStatRow('En aprendizaje', '$learningCount'),
@@ -55,7 +49,7 @@ class RecommendationCard extends StatelessWidget {
                 'Notas criticas:',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.red,
+                  color: DesignTokens.incorrect,
                 ),
               ),
               const SizedBox(height: 4),
@@ -66,14 +60,13 @@ class RecommendationCard extends StatelessWidget {
                   final note = item is (String, int) ? item.$1 : '$item';
                   return Chip(
                     label: Text(note),
-                    backgroundColor: Colors.red.shade50,
-                    side: BorderSide(color: Colors.red.shade200),
+                    backgroundColor: DesignTokens.errorContainer,
+                    side: const BorderSide(color: DesignTokens.incorrect),
                   );
                 }).toList(),
               ),
             ],
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -84,7 +77,7 @@ class RecommendationCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
+          Text(label, style: TextStyle(color: DesignTokens.onSurfaceVariant)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),

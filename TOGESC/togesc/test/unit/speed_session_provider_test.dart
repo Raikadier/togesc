@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:togesc/constants/game_constants.dart';
 import 'package:togesc/providers/audio_provider.dart';
@@ -36,6 +37,7 @@ void main() {
   late SRSSystem srs;
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues({});
     final repo = InMemoryProgressRepository();
     srs = SRSSystem(
       repository: repo,
@@ -74,7 +76,7 @@ void main() {
       expect(state.currentNotes, isEmpty);
       expect(state.consecutiveCorrect, 0);
       expect(state.responseTimes, isEmpty);
-      expect(state.useRandomInstrument, true);
+      expect(state.sessionInstrumentOverride, isNull);
     });
 
     test('averageTime es 0 cuando no hay tiempos', () {

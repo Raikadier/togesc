@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../config/subscription_config.dart';
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
+import '../widgets/account_monetization_views.dart';
+import '../widgets/togesc_ui.dart';
 
 /// Gestion de suscripcion Pro.
 class SubscriptionScreen extends ConsumerStatefulWidget {
@@ -59,63 +62,71 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   Widget build(BuildContext context) {
     final statusAsync = ref.watch(subscriptionStatusProvider);
     final signedIn = ref.watch(currentUserIdProvider) != null;
-    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Suscripcion')),
+    return TogescScaffold(
+      title: 'Suscripcion',
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(DesignTokens.marginMobile),
         children: [
           if (!SubscriptionConfig.isActive) ...[
-            const Text(
-              'Monetizacion desactivada en este build.',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            TogescCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Monetizacion desactivada en este build.',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: DesignTokens.spacingSm),
+                  Text(
+                    'Activa MONETIZATION_ENABLED y las claves de tienda en '
+                    'produccion para habilitar planes Free/Pro.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: DesignTokens.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Activa MONETIZATION_ENABLED y las claves de tienda en '
-              'produccion para habilitar planes Free/Pro.',
-              style: TextStyle(color: muted),
-            ),
-          ] else ...[
+          ] else
             statusAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (_, _) => const Text('Error al cargar suscripcion.'),
               data: (status) {
-                final planLabel = status.isPro ? 'Pro' : 'Gratis';
+                final subtitle = status.isTrialing
+                    ? 'Periodo de prueba activo'
+                    : status.isPro
+                        ? 'Acceso completo'
+                        : 'Modos basicos y SRS local';
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        status.isPro
-                            ? Icons.workspace_premium
-                            : Icons.person_outline,
-                        color: status.isPro ? Colors.amber : null,
-                      ),
-                      title: Text('Plan $planLabel'),
-                      subtitle: Text(
-                        status.isTrialing
-                            ? 'Periodo de prueba activo'
-                            : status.isPro
-                                ? 'Acceso completo'
-                                : 'Modos basicos y SRS local',
-                      ),
+                    SubscriptionPlanCard(
+                      isPro: status.isPro,
+                      subtitle: subtitle,
                     ),
-                    if (!status.isPro) ...[
-                      FilledButton(
-                        onPressed: () => context.push(AppRoutes.paywall),
-                        child: const Text('Ver planes Pro'),
+                    const SizedBox(height: DesignTokens.spacingLg),
+                    if (!status.isPro)
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () => context.push(AppRoutes.paywall),
+                          child: const Text('Ver planes Pro'),
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                    ],
                     if (status.isPro && signedIn) ...[
-                      OutlinedButton.icon(
-                        onPressed: _busy ? null : _manageBilling,
-                        icon: const Icon(Icons.payment),
-                        label: Text(
-                          kIsWeb ? 'Gestionar pago (Stripe)' : 'Restaurar compras',
+                      const SizedBox(height: DesignTokens.spacingSm),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _busy ? null : _manageBilling,
+                          icon: const Icon(Icons.payment_rounded),
+                          label: Text(
+                            kIsWeb
+                                ? 'Gestionar pago (Stripe)'
+                                : 'Restaurar compras',
+                          ),
                         ),
                       ),
                     ],
@@ -123,12 +134,14 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 );
               },
             ),
-            const SizedBox(height: 16),
-            if (!signedIn)
-              Text(
-                'Inicia sesion para sincronizar tu suscripcion entre dispositivos.',
-                style: TextStyle(color: muted),
-              ),
+          if (SubscriptionConfig.isActive && !signedIn) ...[
+            const SizedBox(height: DesignTokens.spacingLg),
+            Text(
+              'Inicia sesion para sincronizar tu suscripcion entre dispositivos.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: DesignTokens.onSurfaceVariant,
+                  ),
+            ),
           ],
         ],
       ),

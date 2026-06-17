@@ -1,0 +1,110 @@
+================================================================================
+FASE 7 — IA/UX COMPLETA (Preferencias, sesión, reflexión SRS)
+Versión: 1.0
+Referencia: Plan/gui_information_architecture.md, Plan/project_context.txt
+Depende de: Fases 1–6 completadas
+================================================================================
+
+OBJETIVO
+  Exponer al usuario el control pedagógico que hoy vive hardcodeado (timbre,
+  cluster, volumen) y reducir fricción en práctica y reflexión SRS.
+
+METODOLOGÍA
+  Entregas en PRs pequeños; cada PR: flutter test verde + actualizar
+  gui_information_architecture.md si cambia inventario UI.
+
+SUBFASES
+  7A  Sonido y estímulo          [HECHO — S1]
+  7B  Sesión y hub               [EN CURSO — S2: 7B-1/4/5 hechos]
+  7C  Reflexión SRS              [EN CURSO — 7C-1 hecho]
+  7D  Ajustes y accesibilidad    [PENDIENTE]
+  7E  Cuenta, legal, avanzado    [PENDIENTE]
+
+================================================================================
+7A — SONIDO Y ESTÍMULO
+================================================================================
+
+PR 7A-1 [M] Modelo AudioPreferences + persistencia
+  - instrumentMode: random | fixed
+  - fixedInstrumentId: sine|piano|…|organ
+  - masterVolume: 0.0–1.0
+  - clusterEnabled, clusterDurationSec (2|3|5)
+  DoD: unit tests serialización; defaults compatibles con comportamiento previo
+
+PR 7A-2 [M] UI Sonido en Cuenta (AudioSettingsSection)
+  - Segmented: Aleatorio / Fijo + chips 7 timbres
+  - Slider volumen, switch cluster + duración
+  DoD: widget test; persistencia tras reinicio
+
+PR 7A-3 [M] Sesión unificada + velocidad
+  - Providers leen audioPreferencesProvider
+  - AppBar: bottom sheet override sesión
+  - Modo velocidad: mismo control timbre
+  DoD: tests unit instrument resolution
+
+PR 7A-4 [S] Octavas y duración del tono
+  - octaveVariation, toneDuration en prefs + audio_generator
+
+================================================================================
+7B — SESIÓN Y HUB
+================================================================================
+
+PR 7B-1 [M] Continuar práctica en Home (último modo + CTA)
+PR 7B-2 [S] Objetivo de sesión (5/10/20 rondas)
+PR 7B-3 [S] Pausa, saltar nota, auto-repro tras cluster
+PR 7B-4 [M] Test de audio (onboarding o Cuenta)
+PR 7B-5 [S] Notación en onboarding + rever tutorial
+
+================================================================================
+7C — REFLEXIÓN SRS
+================================================================================
+
+PR 7C-1 [M] Detalle 12 notas + practicar nota
+PR 7C-2 [S] Historial sesiones local
+PR 7C-3 [C] Gráfico evolución 7 días
+PR 7C-4 [S] Pool notas configurable (multi-select)
+
+================================================================================
+7D — AJUSTES Y ACCESIBILIDAD
+================================================================================
+
+PR 7D-1 [M] Reorganizar Cuenta / ruta /settings
+PR 7D-2 [S] inputMode, confirmar respuesta, ocultar labels piano
+PR 7D-3 [S] Tema oscuro Harmonic Precision + pref sistema
+PR 7D-4 [S] Piano grande, reducir animaciones
+
+================================================================================
+7E — CUENTA, LEGAL, AVANZADO
+================================================================================
+
+PR 7E-1 [M] Eliminar cuenta, export JSON, privacidad actualizada
+PR 7E-2 [C] Perfil intensidad SRS
+PR 7E-3 [C] Modo micrófono (spike)
+PR 7E-4 [C] i18n ARB (solo ES activo)
+
+================================================================================
+CRONOGRAMA SUGERIDO
+================================================================================
+
+  S1  7A-1 + 7A-2     Fundación audio + UI
+  S2  7A-3            Sesión + velocidad
+  S3  7B-1 + 7B-4     Home CTA + test audio
+  S4  7C-1            Detalle 12 notas
+  S5  7B-2 + 7B-3     Objetivo sesión + pausa
+  S6  7D-1–7D-3       Settings + tema
+  S7  7C-2/4 + 7A-4   Historial + pool + octavas
+  S8  7E-1 + docs     GDPR + cierre
+
+================================================================================
+DECISIONES CERRADAS
+================================================================================
+
+  - Cluster configurable: Free (pedagogía core)
+  - Override timbre en sesión: bottom sheet (no solo toggle binario)
+  - Detalle por nota: básico Free, histórico/practicar Pro
+  - Sin bottom nav; Home sigue siendo hub
+  - Preferencias accesibles desde Cuenta (+ icono tune en Home en 7D)
+
+================================================================================
+FIN plan_fase7_ux.txt
+================================================================================

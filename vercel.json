@@ -3,5 +3,8 @@
   "framework": null,
   "installCommand": "git clone https://github.com/flutter/flutter.git -b stable --depth 1 flutter && ./flutter/bin/flutter config --enable-web && ./flutter/bin/flutter pub get --directory=TOGESC/togesc",
   "buildCommand": "./flutter/bin/flutter build web --release --no-wasm-dry-run --directory=TOGESC/togesc",
-  "outputDirectory": "TOGESC/togesc/build/web"
+  "outputDirectory": "TOGESC/togesc/build/web",
+  "rewrites": [
+    { "source": "/promo", "destination": "/landing.html" }
+  ]
 }

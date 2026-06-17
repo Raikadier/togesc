@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config/supabase_config.dart';
+import '../models/note_progress_summary.dart';
 import '../models/subscription_status.dart';
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
@@ -113,5 +114,15 @@ final practiceRecommendationsProvider = Provider<Map<String, dynamic>>((ref) {
     data: (srs) => srs.getPracticeRecommendations(),
     loading: () => {},
     error: (_, _) => {},
+  );
+});
+
+/// Resumen SRS por nota (12 clases de altura).
+final noteProgressSummariesProvider = Provider<List<NoteProgressSummary>>((ref) {
+  final srsAsync = ref.watch(srsSystemProvider);
+  return srsAsync.when(
+    data: (srs) => buildNoteProgressSummaries(srs),
+    loading: () => [],
+    error: (_, _) => [],
   );
 });

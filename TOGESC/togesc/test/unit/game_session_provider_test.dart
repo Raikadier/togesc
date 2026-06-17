@@ -2,10 +2,12 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:togesc/constants/game_constants.dart';
 import 'package:togesc/providers/audio_provider.dart';
 import 'package:togesc/providers/game_session_provider.dart';
+import 'package:togesc/providers/practice_focus_provider.dart';
 import 'package:togesc/providers/srs_provider.dart';
 import 'package:togesc/services/audio_generator.dart';
 import 'package:togesc/services/audio_player_service.dart';
@@ -18,6 +20,7 @@ void main() {
   late InMemoryProgressRepository repo;
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues({});
     repo = InMemoryProgressRepository();
     srs = SRSSystem(
       repository: repo,
@@ -54,7 +57,7 @@ void main() {
       expect(state.mode, GameMode.singleNote);
       expect(state.currentNotes, isEmpty);
       expect(state.numNotes, 1);
-      expect(state.useRandomInstrument, true);
+      expect(state.sessionInstrumentOverride, isNull);
       expect(state.lastResult, isNull);
     });
 
@@ -67,15 +70,19 @@ void main() {
       expect(state.state, GameState.idle);
     });
 
-    test('toggleInstrument alterna useRandomInstrument', () {
+    test('setSessionInstrumentOverride guarda override de sesion', () {
       final notifier = container.read(gameSessionProvider.notifier);
-      expect(container.read(gameSessionProvider).useRandomInstrument, true);
+      notifier.setSessionInstrumentOverride('piano');
+      expect(
+        container.read(gameSessionProvider).sessionInstrumentOverride,
+        'piano',
+      );
 
-      notifier.toggleInstrument();
-      expect(container.read(gameSessionProvider).useRandomInstrument, false);
-
-      notifier.toggleInstrument();
-      expect(container.read(gameSessionProvider).useRandomInstrument, true);
+      notifier.setSessionInstrumentOverride(null);
+      expect(
+        container.read(gameSessionProvider).sessionInstrumentOverride,
+        isNull,
+      );
     });
 
     test('startRound selecciona notas y transiciona a waitingForAnswer', () async {
@@ -169,6 +176,15 @@ void main() {
       expect(state.state, GameState.idle);
       expect(state.currentNotes, isEmpty);
       expect(state.mode, GameMode.singleNote);
+    });
+
+    test('startRound con nota enfocada selecciona solo esa nota', () async {
+      container.read(practiceFocusNoteProvider.notifier).state = 'E';
+      final notifier = container.read(gameSessionProvider.notifier);
+      await notifier.startRound();
+
+      final state = container.read(gameSessionProvider);
+      expect(state.currentNotes, ['E']);
     });
 
     test('flujo completo: startRound -> submitAnswer -> playCluster', () async {

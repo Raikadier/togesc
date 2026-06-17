@@ -275,8 +275,10 @@ CRONOGRAMA RESUMIDO
   Fase 4  Supabase + sync             ████████░░  COMPLETADA (Must)
   Fase 5  Monetización                ████████░░  COMPLETADA (código)
   Fase 6  Escala continua             ████████░░  COMPLETADA
+  Fase 7  IA/UX completa              ██░░░░░░░░  EN CURSO (7A S1)
 
 Total hasta lanzamiento público (Fase 3): ~8–12 semanas según dedicación.
+Ver Plan/plan_fase7_ux.txt para desglose Fase 7.
 
 
 ================================================================================
@@ -314,10 +316,9 @@ Python→Flutter. Este plan_fases.txt es la hoja de ruta de PRODUCTO y negocio.
 PRÓXIMO PASO INMEDIATO RECOMENDADO
 ================================================================================
 
-1. Ejecutar .\scripts\validate-production.ps1
-2. Desplegar: supabase-push + deploy-functions + migracion metrics_csat
-3. Configurar SENTRY_DSN y revisar workflow uptime-check en GitHub
-4. Prueba manual sync web + movil; sandbox pagos si aplica
+1. Fase 7A S1: preferencias de sonido (Plan/plan_fase7_ux.txt) — EN CURSO
+2. Ejecutar .\scripts\validate-production.ps1
+3. Prueba manual sync web + movil; sandbox pagos si aplica
 
 ================================================================================
 FIN plan_fases.txt

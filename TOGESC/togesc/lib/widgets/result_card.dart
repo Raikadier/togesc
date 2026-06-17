@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../app/design_tokens.dart';
+
 /// Card que muestra el resultado de una ronda.
 class ResultCard extends StatelessWidget {
   final bool isCorrect;
@@ -22,14 +24,15 @@ class ResultCard extends StatelessWidget {
   }
 
   Color _timeColor() {
-    if (responseTime < 2.0) return Colors.green;
-    if (responseTime < 5.0) return Colors.orange;
-    return Colors.red.shade300;
+    if (responseTime < 2.0) return DesignTokens.correct;
+    if (responseTime < 5.0) return DesignTokens.selection;
+    return DesignTokens.incorrect.withValues(alpha: 0.7);
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = isCorrect ? Colors.green : Colors.red;
+    final theme = Theme.of(context);
+    final color = isCorrect ? DesignTokens.correct : DesignTokens.incorrect;
     final icon = isCorrect ? Icons.check_circle : Icons.cancel;
     final title = isCorrect ? 'EXCELENTE!' : 'INCORRECTO';
     final notesList = correctNotes.toList()..sort();
@@ -49,18 +52,14 @@ class ResultCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               title,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+              style: theme.textTheme.titleLarge?.copyWith(color: color),
             ),
             const SizedBox(height: 8),
             Text(
               isCorrect
                   ? 'Acertaste: ${notesList.join(", ")}'
                   : 'Las notas correctas eran: ${notesList.join(", ")}',
-              style: const TextStyle(fontSize: 16),
+              style: theme.textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -99,11 +98,13 @@ class ResultCard extends StatelessWidget {
                         ...List.generate(5, (i) => Icon(
                           i < consecutive ? Icons.square : Icons.square_outlined,
                           size: 14,
-                          color: i < consecutive ? Colors.deepPurple : Colors.grey,
+                          color: i < consecutive
+                              ? DesignTokens.primaryContainer
+                              : DesignTokens.outline,
                         )),
                         Text(' $consecutive/5', style: const TextStyle(fontSize: 12)),
                       ] else
-                        const Text('Consolidada', style: TextStyle(color: Colors.green)),
+                        const Text('Consolidada', style: TextStyle(color: DesignTokens.correct)),
                     ],
                   ),
                 );

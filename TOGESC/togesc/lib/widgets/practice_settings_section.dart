@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../app/design_tokens.dart';
 import '../constants/note_naming.dart';
 import '../providers/app_preferences_provider.dart';
 import '../services/practice_reminder_service.dart';
+import 'audio_settings_section.dart';
+import 'togesc_ui.dart';
 
 /// Preferencias de practica: solfeo y recordatorios (Fase 6).
 class PracticeSettingsSection extends ConsumerWidget {
@@ -14,18 +17,21 @@ class PracticeSettingsSection extends ConsumerWidget {
     final namingAsync = ref.watch(noteNamingModeProvider);
     final remindersAsync = ref.watch(practiceRemindersEnabledProvider);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Preferencias de practica',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            namingAsync.when(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const AudioSettingsSection(),
+        const SizedBox(height: 16),
+        TogescCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Preferencias de practica',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              namingAsync.when(
               data: (mode) => SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Notacion Do/Re/Mi'),
@@ -72,6 +78,7 @@ class PracticeSettingsSection extends ConsumerWidget {
           ],
         ),
       ),
+    ],
     );
   }
 }

@@ -7,6 +7,7 @@ import '../screens/about_screen.dart';
 import '../screens/account_screen.dart';
 import '../screens/game_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/note_progress_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/paywall_screen.dart';
 import '../screens/privacy_policy_screen.dart';
@@ -22,6 +23,7 @@ abstract final class AppRoutes {
   static const home = '/';
   static const onboarding = '/onboarding';
   static const statistics = '/statistics';
+  static const statisticsNotes = '/statistics/notes';
   static const about = '/about';
   static const privacy = '/privacy';
   static const account = '/account';
@@ -61,6 +63,10 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
       GoRoute(
         path: AppRoutes.statistics,
         builder: (_, _) => const StatisticsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.statisticsNotes,
+        builder: (_, _) => const NoteProgressScreen(),
       ),
       GoRoute(
         path: AppRoutes.about,

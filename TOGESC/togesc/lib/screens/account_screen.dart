@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../config/subscription_config.dart';
 import '../providers/analytics_provider.dart';
@@ -10,8 +11,10 @@ import '../providers/auth_provider.dart';
 import '../providers/srs_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../providers/sync_provider.dart';
+import '../widgets/account_monetization_views.dart';
 import '../widgets/practice_settings_section.dart';
 import '../widgets/sync_diagnostics_card.dart';
+import '../widgets/togesc_ui.dart';
 
 enum _AccountView { signIn, signUp, forgotPassword, updatePassword }
 
@@ -248,228 +251,217 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final cloudSync = ref.watch(cloudSyncAvailableProvider);
     final pendingAsync = ref.watch(syncPendingProvider);
     final hasPro = ref.watch(hasProAccessProvider);
-    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cuenta y sincronizacion'),
-      ),
+    return TogescScaffold(
+      title: 'Cuenta y sincronizacion',
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(DesignTokens.marginMobile),
         children: [
           const PracticeSettingsSection(),
-          const SizedBox(height: 16),
+          const SizedBox(height: DesignTokens.spacingLg),
           if (!available) ...[
-            const Icon(Icons.cloud_off, size: 48),
-            const SizedBox(height: 12),
-            const Text(
-              'Sincronizacion no disponible',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Este despliegue no tiene Supabase configurado. Puedes '
-              'entrenar con normalidad: el progreso se guarda solo en '
-              'tu dispositivo.',
-              style: TextStyle(color: muted),
-            ),
+            const SizedBox(height: DesignTokens.spacingLg),
+            const AccountOfflineView(),
           ] else if (_recoveryMode || _view == _AccountView.updatePassword) ...[
-            const Text(
-              'Nueva contrasena',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _newPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Nueva contrasena',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: _busy ? null : _updatePassword,
-              child: const Text('Guardar contrasena'),
-            ),
-          ] else if (signedIn) ...[
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const CircleAvatar(child: Icon(Icons.person)),
-              title: Text(email),
-              subtitle: Text(
-                cloudSync
-                    ? 'Progreso sincronizado en la nube'
-                    : hasPro
-                        ? 'Progreso vinculado a esta cuenta'
-                        : 'SRS local (sync Pro requiere suscripcion)',
-              ),
-            ),
-            const SizedBox(height: 8),
-            const SyncDiagnosticsCard(),
-            if (!verified) ...[
-              const SizedBox(height: 8),
-              MaterialBanner(
-                content: const Text(
-                  'Verifica tu email para activar la cuenta por completo.',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: _busy ? null : _resendVerification,
-                    child: const Text('Reenviar'),
+            TogescCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const AccountSectionTitle(title: 'Nueva contrasena'),
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  TextField(
+                    controller: _newPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Nueva contrasena',
+                    ),
+                  ),
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  FilledButton(
+                    onPressed: _busy ? null : _updatePassword,
+                    child: const Text('Guardar contrasena'),
                   ),
                 ],
+              ),
+            ),
+          ] else if (signedIn) ...[
+            TogescCard(
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  backgroundColor:
+                      DesignTokens.primaryContainer.withValues(alpha: 0.12),
+                  child: const Icon(
+                    Icons.person_rounded,
+                    color: DesignTokens.primaryContainer,
+                  ),
+                ),
+                title: Text(email),
+                subtitle: Text(
+                  cloudSync
+                      ? 'Progreso sincronizado en la nube'
+                      : hasPro
+                          ? 'Progreso vinculado a esta cuenta'
+                          : 'SRS local (sync Pro requiere suscripcion)',
+                ),
+              ),
+            ),
+            const SizedBox(height: DesignTokens.spacingMd),
+            const SyncDiagnosticsCard(),
+            if (!verified) ...[
+              const SizedBox(height: DesignTokens.spacingMd),
+              AccountInfoBanner(
+                icon: Icons.mark_email_unread_outlined,
+                message:
+                    'Verifica tu email para activar la cuenta por completo.',
+                actionLabel: 'Reenviar',
+                onAction: _busy ? null : _resendVerification,
               ),
             ],
             if (SubscriptionConfig.isActive && !hasPro) ...[
-              const SizedBox(height: 8),
-              MaterialBanner(
-                content: const Text(
-                  'La sincronizacion en la nube es una funcion Pro.',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => context.push(AppRoutes.paywall),
-                    child: const Text('Ver Pro'),
-                  ),
-                ],
+              const SizedBox(height: DesignTokens.spacingMd),
+              AccountInfoBanner(
+                icon: Icons.workspace_premium_outlined,
+                message: 'La sincronizacion en la nube es una funcion Pro.',
+                actionLabel: 'Ver Pro',
+                onAction: () => context.push(AppRoutes.paywall),
               ),
             ],
             pendingAsync.when(
               data: (pending) {
                 if (!pending) return const SizedBox.shrink();
                 return Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: MaterialBanner(
-                    content: const Text(
-                      'Hay cambios locales pendientes de subir.',
-                    ),
-                    leading: const Icon(Icons.cloud_upload_outlined),
-                    actions: [
-                      TextButton(
-                        onPressed: _busy ? null : _syncNow,
-                        child: const Text('Subir ahora'),
-                      ),
-                    ],
+                  padding: const EdgeInsets.only(top: DesignTokens.spacingMd),
+                  child: AccountInfoBanner(
+                    icon: Icons.cloud_upload_outlined,
+                    message: 'Hay cambios locales pendientes de subir.',
+                    actionLabel: 'Subir ahora',
+                    onAction: _busy ? null : _syncNow,
                   ),
                 );
               },
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spacingLg),
             if (cloudSync || !SubscriptionConfig.isActive)
-              FilledButton.icon(
-                onPressed: _busy ? null : _syncNow,
-                icon: const Icon(Icons.sync),
-                label: const Text('Sincronizar ahora'),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _busy ? null : _syncNow,
+                  icon: const Icon(Icons.sync_rounded),
+                  label: const Text('Sincronizar ahora'),
+                ),
               ),
             if (cloudSync || !SubscriptionConfig.isActive)
-              const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: _busy ? null : _signOut,
-              icon: const Icon(Icons.logout),
-              label: const Text('Cerrar sesion'),
+              const SizedBox(height: DesignTokens.spacingSm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _busy ? null : _signOut,
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text('Cerrar sesion'),
+              ),
             ),
           ] else if (_view == _AccountView.forgotPassword) ...[
-            const Text(
-              'Recuperar contrasena',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              autocorrect: false,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
+            TogescCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const AccountSectionTitle(title: 'Recuperar contrasena'),
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    autocorrect: false,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  FilledButton(
+                    onPressed: _busy ? null : _sendPasswordReset,
+                    child: const Text('Enviar enlace'),
+                  ),
+                  const SizedBox(height: DesignTokens.spacingSm),
+                  TextButton(
+                    onPressed: _busy
+                        ? null
+                        : () => setState(() {
+                              _view = _AccountView.signIn;
+                              _message = null;
+                            }),
+                    child: const Text('Volver al inicio de sesion'),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: _busy ? null : _sendPasswordReset,
-              child: const Text('Enviar enlace'),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: _busy
-                  ? null
-                  : () => setState(() {
-                        _view = _AccountView.signIn;
-                        _message = null;
-                      }),
-              child: const Text('Volver al inicio de sesion'),
             ),
           ] else ...[
-            Text(
-              _view == _AccountView.signUp ? 'Crear cuenta' : 'Iniciar sesion',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Opcional. Vincula tu progreso SRS entre dispositivos. '
-              'Puedes seguir entrenando sin cuenta.',
-              style: TextStyle(color: muted),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              autocorrect: false,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
+            TogescCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AccountSectionTitle(
+                    title: _view == _AccountView.signUp
+                        ? 'Crear cuenta'
+                        : 'Iniciar sesion',
+                    subtitle:
+                        'Opcional. Vincula tu progreso SRS entre dispositivos. '
+                        'Puedes seguir entrenando sin cuenta.',
+                  ),
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    autocorrect: false,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                  const SizedBox(height: DesignTokens.spacingMd),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(labelText: 'Contrasena'),
+                  ),
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  FilledButton(
+                    onPressed: _busy ? null : _submitAuth,
+                    child: Text(
+                      _view == _AccountView.signUp ? 'Crear cuenta' : 'Entrar',
+                    ),
+                  ),
+                  const SizedBox(height: DesignTokens.spacingSm),
+                  TextButton(
+                    onPressed: _busy
+                        ? null
+                        : () => setState(() {
+                              _view = _view == _AccountView.signUp
+                                  ? _AccountView.signIn
+                                  : _AccountView.signUp;
+                              _message = null;
+                            }),
+                    child: Text(
+                      _view == _AccountView.signUp
+                          ? 'Ya tengo cuenta — iniciar sesion'
+                          : 'No tengo cuenta — registrarme',
+                    ),
+                  ),
+                  if (_view == _AccountView.signIn)
+                    TextButton(
+                      onPressed: _busy
+                          ? null
+                          : () => setState(() {
+                                _view = _AccountView.forgotPassword;
+                                _message = null;
+                              }),
+                      child: const Text('Olvide mi contrasena'),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Contrasena',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: _busy ? null : _submitAuth,
-              child: Text(
-                _view == _AccountView.signUp ? 'Crear cuenta' : 'Entrar',
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: _busy
-                  ? null
-                  : () => setState(() {
-                        _view = _view == _AccountView.signUp
-                            ? _AccountView.signIn
-                            : _AccountView.signUp;
-                        _message = null;
-                      }),
-              child: Text(
-                _view == _AccountView.signUp
-                    ? 'Ya tengo cuenta — iniciar sesion'
-                    : 'No tengo cuenta — registrarme',
-              ),
-            ),
-            if (_view == _AccountView.signIn)
-              TextButton(
-                onPressed: _busy
-                    ? null
-                    : () => setState(() {
-                          _view = _AccountView.forgotPassword;
-                          _message = null;
-                        }),
-                child: const Text('Olvide mi contrasena'),
-              ),
           ],
           if (_message != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spacingLg),
             Text(
               _message!,
-              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+              style: TextStyle(color: DesignTokens.primaryContainer),
             ),
           ],
         ],

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../models/subscription_status.dart';
 import '../providers/srs_provider.dart';
@@ -11,10 +12,19 @@ import '../providers/subscription_provider.dart';
 import '../services/progress_export_download.dart';
 import '../services/progress_export_service.dart';
 import '../services/subscription_access.dart';
+import '../widgets/account_monetization_views.dart';
+import '../widgets/info_views.dart';
+import '../widgets/togesc_ui.dart';
 
 /// Pantalla de estadisticas del sistema SRS.
 class StatisticsScreen extends ConsumerWidget {
   const StatisticsScreen({super.key});
+
+  Color _accuracyColor(double accuracy) {
+    if (accuracy >= 80) return DesignTokens.correct;
+    if (accuracy >= 50) return DesignTokens.selection;
+    return DesignTokens.incorrect;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,9 +35,9 @@ class StatisticsScreen extends ConsumerWidget {
     );
 
     if (stats.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Estadisticas')),
-        body: const Center(child: CircularProgressIndicator()),
+      return const TogescScaffold(
+        title: 'Estadisticas',
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -39,144 +49,127 @@ class StatisticsScreen extends ConsumerWidget {
     final overdueCount = stats['overdue_count'] as int? ?? 0;
     final hardestNotes = stats['hardest_notes'] as List<dynamic>? ?? [];
     final easiestNotes = stats['easiest_notes'] as List<dynamic>? ?? [];
+    final accuracyColor = _accuracyColor(accuracy);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Estadisticas'),
-      ),
+    return TogescScaffold(
+      title: 'Estadisticas',
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(DesignTokens.marginMobile),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Resumen general
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Resumen General',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _StatTile(
-                      icon: Icons.percent,
-                      label: 'Precision global',
-                      value: '$accuracy%',
-                      color: accuracy >= 80
-                          ? Colors.green
-                          : accuracy >= 50
-                              ? Colors.orange
-                              : Colors.red,
-                    ),
-                    _StatTile(
-                      icon: Icons.visibility,
-                      label: 'Total de intentos',
-                      value: '$totalSeen',
-                      color: Colors.blue,
-                    ),
-                    _StatTile(
-                      icon: Icons.school,
-                      label: 'En aprendizaje',
-                      value: '$learningPhase / $totalNotes',
-                      color: Colors.orange,
-                    ),
-                    _StatTile(
-                      icon: Icons.check_circle,
-                      label: 'Consolidadas',
-                      value: '$graduated / $totalNotes',
-                      color: Colors.green,
-                    ),
-                    if (overdueCount > 0)
-                      _StatTile(
-                        icon: Icons.warning,
-                        label: 'Pendientes de revision',
-                        value: '$overdueCount',
-                        color: Colors.red,
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Progreso visual
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Progreso',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    LinearProgressIndicator(
-                      value: totalNotes > 0 ? graduated / totalNotes : 0,
-                      backgroundColor: Colors.grey.shade200,
-                      minHeight: 12,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$graduated de $totalNotes notas consolidadas',
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            if (!advancedStats)
-              Card(
-                child: ListTile(
-                  leading: const Icon(Icons.lock_outline, color: Colors.amber),
-                  title: const Text('Estadisticas avanzadas (Pro)'),
-                  subtitle: const Text(
-                    'Notas mas dificiles y mas faciles con TOGESC Pro.',
+            TogescCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Resumen General',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(AppRoutes.paywall),
-                ),
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  StatsMetricRow(
+                    icon: Icons.percent_rounded,
+                    label: 'Precision global',
+                    value: '$accuracy%',
+                    color: accuracyColor,
+                  ),
+                  StatsMetricRow(
+                    icon: Icons.visibility_rounded,
+                    label: 'Total de intentos',
+                    value: '$totalSeen',
+                    color: DesignTokens.primaryContainer,
+                  ),
+                  StatsMetricRow(
+                    icon: Icons.school_rounded,
+                    label: 'En aprendizaje',
+                    value: '$learningPhase / $totalNotes',
+                    color: DesignTokens.selection,
+                  ),
+                  StatsMetricRow(
+                    icon: Icons.check_circle_rounded,
+                    label: 'Consolidadas',
+                    value: '$graduated / $totalNotes',
+                    color: DesignTokens.correct,
+                  ),
+                  if (overdueCount > 0)
+                    StatsMetricRow(
+                      icon: Icons.warning_amber_rounded,
+                      label: 'Pendientes de revision',
+                      value: '$overdueCount',
+                      color: DesignTokens.incorrect,
+                    ),
+                ],
               ),
-            if (advancedStats && hardestNotes.isNotEmpty)
-              _NotesSection(
+            ),
+            const SizedBox(height: DesignTokens.spacingMd),
+            TogescCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Progreso', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: DesignTokens.spacingMd),
+                  ClipRRect(
+                    borderRadius: DesignTokens.borderRadiusMd,
+                    child: LinearProgressIndicator(
+                      value: totalNotes > 0 ? graduated / totalNotes : 0,
+                      backgroundColor: DesignTokens.surfaceContainer,
+                      color: DesignTokens.primaryContainer,
+                      minHeight: 8,
+                    ),
+                  ),
+                  const SizedBox(height: DesignTokens.spacingSm),
+                  Text(
+                    '$graduated de $totalNotes notas consolidadas',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: DesignTokens.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: DesignTokens.spacingMd),
+            OutlinedButton.icon(
+              onPressed: () => context.push(AppRoutes.statisticsNotes),
+              icon: const Icon(Icons.grid_view_rounded),
+              label: const Text('Ver progreso por nota (12)'),
+            ),
+            const SizedBox(height: DesignTokens.spacingMd),
+            if (!advancedStats)
+              ProLockedFeatureCard(
+                onTap: () => context.push(AppRoutes.paywall),
+              ),
+            if (advancedStats && hardestNotes.isNotEmpty) ...[
+              const SizedBox(height: DesignTokens.spacingMd),
+              StatsNotesSection(
                 title: 'Notas Mas Dificiles',
                 notes: hardestNotes.cast<String>(),
-                color: Colors.red,
-                icon: Icons.trending_up,
+                color: DesignTokens.incorrect,
+                icon: Icons.trending_up_rounded,
               ),
-            const SizedBox(height: 12),
-            if (advancedStats && easiestNotes.isNotEmpty)
-              _NotesSection(
+            ],
+            if (advancedStats && easiestNotes.isNotEmpty) ...[
+              const SizedBox(height: DesignTokens.spacingMd),
+              StatsNotesSection(
                 title: 'Notas Mas Faciles',
                 notes: easiestNotes.cast<String>(),
-                color: Colors.green,
-                icon: Icons.trending_down,
+                color: DesignTokens.correct,
+                icon: Icons.trending_down_rounded,
               ),
-            const SizedBox(height: 24),
+            ],
+            const SizedBox(height: DesignTokens.spacingLg),
             if (advancedStats)
               OutlinedButton.icon(
                 onPressed: () => _exportProgress(context, ref),
                 icon: const Icon(Icons.download_outlined),
                 label: const Text('Exportar progreso (CSV)'),
               ),
-            if (advancedStats) const SizedBox(height: 12),
-            // Boton reset
+            if (advancedStats) const SizedBox(height: DesignTokens.spacingMd),
             OutlinedButton.icon(
-              onPressed: () => _showResetDialog(context, ref),
-              icon: const Icon(Icons.restart_alt, color: Colors.red),
-              label: const Text(
+              onPressed: () => confirmAndResetProgress(context, ref),
+              icon: Icon(Icons.restart_alt_rounded, color: DesignTokens.error),
+              label: Text(
                 'Reiniciar progreso',
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: DesignTokens.error),
               ),
             ),
           ],
@@ -201,122 +194,5 @@ class StatisticsScreen extends ConsumerWidget {
         const SnackBar(content: Text('Progreso copiado al portapapeles')),
       );
     }
-  }
-
-  void _showResetDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Reiniciar progreso?'),
-        content: const Text(
-          'Se perderan todos los datos de entrenamiento. Esta accion no se puede deshacer.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              ref.read(srsSystemProvider.notifier).resetProgress();
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Progreso reiniciado')),
-              );
-            },
-            child: const Text(
-              'Reiniciar',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
-  const _StatTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
-          Expanded(child: Text(label)),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NotesSection extends StatelessWidget {
-  final String title;
-  final List<String> notes;
-  final Color color;
-  final IconData icon;
-
-  const _NotesSection({
-    required this.title,
-    required this.notes,
-    required this.color,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: notes.map((note) => Chip(
-                label: Text(note, style: TextStyle(color: color)),
-                backgroundColor: color.withValues(alpha: 0.1),
-                side: BorderSide(color: color.withValues(alpha: 0.3)),
-              )).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

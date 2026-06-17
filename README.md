@@ -43,6 +43,8 @@ togesc/
 
 ## Documentación
 
+- **System design:** [Plan/system_design.md](Plan/system_design.md)
+- **IA y vistas GUI:** [Plan/gui_information_architecture.md](Plan/gui_information_architecture.md)
 - **Contexto del proyecto:** [Plan/project_context.txt](Plan/project_context.txt)
 - **Plan de fases:** [Plan/plan_fases.txt](Plan/plan_fases.txt)
 - **Supabase (Fase 4):** [docs/supabase_setup.md](docs/supabase_setup.md)

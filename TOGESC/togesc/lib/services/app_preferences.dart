@@ -1,6 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/note_naming.dart';
+import '../models/audio_preferences.dart';
+import '../models/last_practice_session.dart';
 
 const String onboardingCompleteKey = 'togesc_onboarding_complete';
 const String sessionCountKey = 'togesc_session_count';
@@ -8,6 +10,14 @@ const String csatLastSubmittedKey = 'togesc_csat_last_submitted';
 const String csatLastDismissedKey = 'togesc_csat_last_dismissed';
 const String noteNamingModeKey = 'togesc_note_naming_mode';
 const String practiceRemindersEnabledKey = 'togesc_practice_reminders';
+const String instrumentModeKey = 'togesc_instrument_mode';
+const String fixedInstrumentIdKey = 'togesc_fixed_instrument_id';
+const String masterVolumeKey = 'togesc_master_volume';
+const String clusterEnabledKey = 'togesc_cluster_enabled';
+const String clusterDurationKey = 'togesc_cluster_duration_sec';
+const String lastPracticeModeIdKey = 'togesc_last_practice_mode_id';
+const String lastPracticeKindKey = 'togesc_last_practice_kind';
+const String lastPracticeAtKey = 'togesc_last_practice_at';
 
 /// Preferencias de la aplicacion (onboarding, Fase 6, etc.).
 class AppPreferences {
@@ -65,6 +75,67 @@ class AppPreferences {
 
   Future<void> setPracticeRemindersEnabled(bool value) async {
     await _prefs.setBool(practiceRemindersEnabledKey, value);
+  }
+
+  AudioPreferences get audioPreferences {
+    final modeRaw = _prefs.getString(instrumentModeKey);
+    final mode = modeRaw == InstrumentMode.fixed.name
+        ? InstrumentMode.fixed
+        : InstrumentMode.random;
+
+    final fixedId = _prefs.getString(fixedInstrumentIdKey) ?? 'sine';
+    final volume = _prefs.getDouble(masterVolumeKey) ?? 1.0;
+    final clusterOn = _prefs.getBool(clusterEnabledKey) ?? true;
+    final clusterDur = _prefs.getDouble(clusterDurationKey) ?? 3.0;
+
+    return AudioPreferences(
+      instrumentMode: mode,
+      fixedInstrumentId: fixedId,
+      masterVolume: volume.clamp(0.0, 1.0),
+      clusterEnabled: clusterOn,
+      clusterDurationSec: _normalizeClusterDuration(clusterDur),
+    );
+  }
+
+  Future<void> setAudioPreferences(AudioPreferences value) async {
+    await _prefs.setString(instrumentModeKey, value.instrumentMode.name);
+    await _prefs.setString(fixedInstrumentIdKey, value.fixedInstrumentId);
+    await _prefs.setDouble(masterVolumeKey, value.masterVolume.clamp(0.0, 1.0));
+    await _prefs.setBool(clusterEnabledKey, value.clusterEnabled);
+    await _prefs.setDouble(
+      clusterDurationKey,
+      _normalizeClusterDuration(value.clusterDurationSec),
+    );
+  }
+
+  static double _normalizeClusterDuration(double seconds) {
+    if (seconds <= 2.5) return 2.0;
+    if (seconds <= 4.0) return 3.0;
+    return 5.0;
+  }
+
+  LastPracticeSession? get lastPracticeSession {
+    final modeId = _prefs.getInt(lastPracticeModeIdKey);
+    final atRaw = _prefs.getString(lastPracticeAtKey);
+    if (modeId == null || atRaw == null) return null;
+
+    final kindRaw = _prefs.getString(lastPracticeKindKey) ?? PracticeKind.game.name;
+    final kind = kindRaw == PracticeKind.speed.name
+        ? PracticeKind.speed
+        : PracticeKind.game;
+    final at = DateTime.tryParse(atRaw);
+    if (at == null) return null;
+
+    return LastPracticeSession(modeId: modeId, kind: kind, practicedAt: at);
+  }
+
+  Future<void> setLastPracticeSession(LastPracticeSession session) async {
+    await _prefs.setInt(lastPracticeModeIdKey, session.modeId);
+    await _prefs.setString(lastPracticeKindKey, session.kind.name);
+    await _prefs.setString(
+      lastPracticeAtKey,
+      session.practicedAt.toIso8601String(),
+    );
   }
 
   /// Encuesta CSAT ocasional: tras 10 sesiones y cada 30 dias.

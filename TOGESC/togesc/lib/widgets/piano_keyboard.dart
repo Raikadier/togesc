@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../app/design_tokens.dart';
 import '../constants/note_naming.dart';
 
 /// Teclado de piano interactivo con 7 teclas blancas y 5 negras.
@@ -45,17 +46,23 @@ class PianoKeyboard extends StatelessWidget {
   };
 
   Color _getWhiteKeyColor(String note) {
-    if (correctNotes.contains(note)) return Colors.green.shade200;
-    if (incorrectNotes.contains(note)) return Colors.red.shade200;
-    if (selectedNotes.contains(note)) return Colors.amber.shade200;
-    return Colors.white;
+    if (correctNotes.contains(note)) {
+      return DesignTokens.correct.withValues(alpha: 0.25);
+    }
+    if (incorrectNotes.contains(note)) {
+      return DesignTokens.incorrect.withValues(alpha: 0.25);
+    }
+    if (selectedNotes.contains(note)) {
+      return DesignTokens.selection.withValues(alpha: 0.35);
+    }
+    return DesignTokens.pianoWhite;
   }
 
   Color _getBlackKeyColor(String note) {
-    if (correctNotes.contains(note)) return Colors.green.shade700;
-    if (incorrectNotes.contains(note)) return Colors.red.shade700;
-    if (selectedNotes.contains(note)) return Colors.amber.shade700;
-    return Colors.black87;
+    if (correctNotes.contains(note)) return DesignTokens.correct;
+    if (incorrectNotes.contains(note)) return DesignTokens.incorrect;
+    if (selectedNotes.contains(note)) return const Color(0xFF8A6A00);
+    return DesignTokens.pianoBlack;
   }
 
   Color _getWhiteKeyTextColor(String note) {
@@ -74,6 +81,18 @@ class PianoKeyboard extends StatelessWidget {
       return Colors.black;
     }
     return Colors.white;
+  }
+
+  Color _whiteKeyBorder(String note) {
+    if (selectedNotes.contains(note)) return DesignTokens.selection;
+    if (correctNotes.contains(note)) return DesignTokens.correct;
+    if (incorrectNotes.contains(note)) return DesignTokens.incorrect;
+    return DesignTokens.outlineVariant;
+  }
+
+  double _whiteKeyBorderWidth(String note) {
+    if (selectedNotes.contains(note)) return 2;
+    return 1;
   }
 
   @override
@@ -101,7 +120,10 @@ class PianoKeyboard extends StatelessWidget {
                         height: whiteKeyHeight,
                         decoration: BoxDecoration(
                           color: _getWhiteKeyColor(note),
-                          border: Border.all(color: Colors.grey.shade400),
+                          border: Border.all(
+                            color: _whiteKeyBorder(note),
+                            width: _whiteKeyBorderWidth(note),
+                          ),
                           borderRadius: const BorderRadius.only(
                             bottomLeft: Radius.circular(4),
                             bottomRight: Radius.circular(4),
@@ -138,6 +160,12 @@ class PianoKeyboard extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         color: _getBlackKeyColor(sharpNote),
+                        border: Border.all(
+                          color: selectedNotes.contains(sharpNote)
+                              ? DesignTokens.selection
+                              : Colors.transparent,
+                          width: selectedNotes.contains(sharpNote) ? 2 : 0,
+                        ),
                         borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(4),
                           bottomRight: Radius.circular(4),
