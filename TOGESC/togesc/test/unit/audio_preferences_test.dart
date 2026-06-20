@@ -54,6 +54,23 @@ void main() {
       expect(audio.masterVolume, 1.0);
       expect(audio.clusterEnabled, true);
       expect(audio.clusterDurationSec, 3.0);
+      expect(audio.octaveVariationEnabled, true);
+      expect(audio.toneDurationSec, 1.0);
+    });
+
+    test('persiste octavas y duracion del tono', () async {
+      SharedPreferences.setMockInitialValues({});
+      final store = AppPreferences(await SharedPreferences.getInstance());
+      await store.setAudioPreferences(
+        const AudioPreferences(
+          octaveVariationEnabled: false,
+          toneDurationSec: 0.5,
+        ),
+      );
+
+      final loaded = store.audioPreferences;
+      expect(loaded.octaveVariationEnabled, isFalse);
+      expect(loaded.toneDurationSec, 0.5);
     });
 
     test('persiste y restaura preferencias de audio', () async {

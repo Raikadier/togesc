@@ -118,6 +118,33 @@ class _AudioSettingsBody extends ConsumerWidget {
             },
           ),
         ],
+        const SizedBox(height: 16),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Variacion de octavas'),
+          subtitle: const Text(
+            'Las notas pueden sonar una octava arriba o abajo en cada ronda.',
+          ),
+          value: prefs.octaveVariationEnabled,
+          onChanged: notifier.setOctaveVariationEnabled,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Duracion del tono',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        SegmentedButton<double>(
+          segments: const [
+            ButtonSegment(value: 0.5, label: Text('0,5 s')),
+            ButtonSegment(value: 1.0, label: Text('1 s')),
+            ButtonSegment(value: 1.5, label: Text('1,5 s')),
+          ],
+          selected: {prefs.toneDurationSec},
+          onSelectionChanged: (selection) {
+            notifier.setToneDuration(selection.first);
+          },
+        ),
         const SizedBox(height: DesignTokens.spacingMd),
         const AudioTestButton(),
         const SizedBox(height: DesignTokens.spacingXs),

@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/note_naming.dart';
 import '../models/audio_preferences.dart';
 import '../models/last_practice_session.dart';
+import '../models/practice_session_log.dart';
 import '../models/practice_session_preferences.dart';
 import '../models/ui_preferences.dart';
 
@@ -28,6 +31,10 @@ const String hidePianoLabelsKey = 'togesc_hide_piano_labels';
 const String largePianoKey = 'togesc_large_piano';
 const String reduceAnimationsKey = 'togesc_reduce_animations';
 const String themePreferenceKey = 'togesc_theme_preference';
+const String octaveVariationKey = 'togesc_octave_variation';
+const String toneDurationKey = 'togesc_tone_duration_sec';
+const String practiceNotePoolKey = 'togesc_practice_note_pool';
+const String sessionHistoryKey = 'togesc_session_history';
 
 /// Preferencias de la aplicacion (onboarding, Fase 6, etc.).
 class AppPreferences {
@@ -104,6 +111,10 @@ class AppPreferences {
       masterVolume: volume.clamp(0.0, 1.0),
       clusterEnabled: clusterOn,
       clusterDurationSec: _normalizeClusterDuration(clusterDur),
+      octaveVariationEnabled: _prefs.getBool(octaveVariationKey) ?? true,
+      toneDurationSec: _normalizeToneDuration(
+        _prefs.getDouble(toneDurationKey) ?? 1.0,
+      ),
     );
   }
 
@@ -116,6 +127,17 @@ class AppPreferences {
       clusterDurationKey,
       _normalizeClusterDuration(value.clusterDurationSec),
     );
+    await _prefs.setBool(octaveVariationKey, value.octaveVariationEnabled);
+    await _prefs.setDouble(
+      toneDurationKey,
+      _normalizeToneDuration(value.toneDurationSec),
+    );
+  }
+
+  static double _normalizeToneDuration(double seconds) {
+    if (seconds <= 0.75) return 0.5;
+    if (seconds <= 1.25) return 1.0;
+    return 1.5;
   }
 
   static double _normalizeClusterDuration(double seconds) {
@@ -186,6 +208,54 @@ class AppPreferences {
     await _prefs.setBool(largePianoKey, value.largePiano);
     await _prefs.setBool(reduceAnimationsKey, value.reduceAnimations);
     await _prefs.setString(themePreferenceKey, value.themePreference.name);
+  }
+
+  List<String> get practiceNotePool {
+    final raw = _prefs.getStringList(practiceNotePoolKey);
+    if (raw == null || raw.isEmpty) return List.from(chromaticNotes);
+    final valid = raw.where(chromaticNotes.contains).toList();
+    return valid.isEmpty ? List.from(chromaticNotes) : valid;
+  }
+
+  Future<void> setPracticeNotePool(List<String> notes) async {
+    final valid = notes.where(chromaticNotes.contains).toList();
+    if (valid.isEmpty) return;
+    await _prefs.setStringList(practiceNotePoolKey, valid);
+  }
+
+  List<PracticeSessionLog> get sessionHistory {
+    final raw = _prefs.getString(sessionHistoryKey);
+    if (raw == null || raw.isEmpty) return [];
+
+    try {
+      final decoded = (jsonDecode(raw) as List<dynamic>)
+          .map((e) => PracticeSessionLog.fromJson(
+                Map<String, dynamic>.from(e as Map),
+              ))
+          .toList();
+      return decoded;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<List<PracticeSessionLog>> appendSessionLog(
+    PracticeSessionLog entry,
+  ) async {
+    final current = List<PracticeSessionLog>.from(sessionHistory);
+    current.insert(0, entry);
+    if (current.length > maxSessionHistoryEntries) {
+      current.removeRange(maxSessionHistoryEntries, current.length);
+    }
+    await _prefs.setString(
+      sessionHistoryKey,
+      jsonEncode(current.map((e) => e.toJson()).toList()),
+    );
+    return current;
+  }
+
+  Future<void> clearSessionHistory() async {
+    await _prefs.remove(sessionHistoryKey);
   }
 
   /// Encuesta CSAT ocasional: tras 10 sesiones y cada 30 dias.

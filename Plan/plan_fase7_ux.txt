@@ -14,9 +14,9 @@ METODOLOGÍA
   gui_information_architecture.md si cambia inventario UI.
 
 SUBFASES
-  7A  Sonido y estímulo          [HECHO — S1]
+  7A  Sonido y estímulo          [HECHO — S1+7A-4]
   7B  Sesión y hub               [HECHO — S2+S5]
-  7C  Reflexión SRS              [EN CURSO — 7C-1 hecho]
+  7C  Reflexión SRS              [HECHO — 7C-1/2/4]
   7D  Ajustes y accesibilidad    [HECHO — S6]
   7E  Cuenta, legal, avanzado    [PENDIENTE]
 

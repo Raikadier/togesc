@@ -6,6 +6,8 @@ import '../constants/game_constants.dart';
 import '../constants/note_naming.dart';
 import '../providers/app_preferences_provider.dart';
 import '../providers/audio_provider.dart';
+import '../models/last_practice_session.dart';
+import '../providers/session_history_provider.dart';
 import '../providers/speed_session_provider.dart';
 import '../utils/piano_note_selection.dart';
 import '../widgets/countdown_timer_widget.dart';
@@ -42,6 +44,20 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(speedSessionProvider.notifier).setTargetMode(widget.targetMode);
     });
+  }
+
+  @override
+  void deactivate() {
+    final session = ref.read(speedSessionProvider);
+    if (session.roundsPlayed > 0) {
+      ref.read(sessionHistoryProvider.notifier).record(
+            mode: session.targetMode,
+            kind: PracticeKind.speed,
+            roundsCompleted: session.roundsPlayed,
+            correctRounds: session.correctRounds,
+          );
+    }
+    super.deactivate();
   }
 
   void _toggleNote(String note, int maxNotes) {

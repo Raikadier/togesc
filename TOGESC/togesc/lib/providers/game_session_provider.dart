@@ -10,6 +10,7 @@ import 'audio_provider.dart';
 import 'last_practice_provider.dart';
 import 'practice_focus_provider.dart';
 import 'srs_provider.dart';
+import '../utils/note_pool.dart';
 import 'app_preferences_provider.dart';
 
 /// Estados posibles de la sesion de juego.
@@ -41,6 +42,7 @@ class GameSessionState {
   final String? lastInstrument;
   final RoundResult? lastResult;
   final int roundsCompleted;
+  final int correctRounds;
   final bool isPaused;
   final bool goalReached;
 
@@ -53,6 +55,7 @@ class GameSessionState {
     this.lastInstrument,
     this.lastResult,
     this.roundsCompleted = 0,
+    this.correctRounds = 0,
     this.isPaused = false,
     this.goalReached = false,
   });
@@ -67,6 +70,7 @@ class GameSessionState {
     String? lastInstrument,
     RoundResult? lastResult,
     int? roundsCompleted,
+    int? correctRounds,
     bool? isPaused,
     bool? goalReached,
     bool clearLastResult = false,
@@ -82,6 +86,7 @@ class GameSessionState {
       lastInstrument: lastInstrument ?? this.lastInstrument,
       lastResult: clearLastResult ? null : (lastResult ?? this.lastResult),
       roundsCompleted: roundsCompleted ?? this.roundsCompleted,
+      correctRounds: correctRounds ?? this.correctRounds,
       isPaused: isPaused ?? this.isPaused,
       goalReached: goalReached ?? this.goalReached,
     );
@@ -104,6 +109,7 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
       state: GameState.idle,
       numNotes: fixed ?? randomMinNotes,
       roundsCompleted: 0,
+      correctRounds: 0,
       goalReached: false,
       isPaused: false,
       clearLastResult: true,
@@ -140,12 +146,12 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
 
     final numNotes = _getNumNotes(state.mode);
     final focusNote = ref.read(practiceFocusNoteProvider);
-    List<String>? notePool;
-    if (state.mode == GameMode.sharpsOnly) {
-      notePool = sharpNotes;
-    } else if (focusNote != null && notes.containsKey(focusNote)) {
-      notePool = [focusNote];
-    }
+    final appPrefs = await ref.read(appPreferencesProvider.future);
+    final notePool = resolvePracticeNotePool(
+      mode: state.mode,
+      configuredPool: appPrefs.practiceNotePool,
+      focusNote: focusNote,
+    );
     final selectedNotes = srs.selectNotes(numNotes, notePool: notePool);
 
     state = state.copyWith(
@@ -165,15 +171,18 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
     // Reproducir audio
     final audioService = ref.read(audioPlayerServiceProvider);
     final audioGen = ref.read(audioGeneratorProvider);
-    final (frequencies, _) = audioGen.getNoteFrequencies(selectedNotes);
-
     final audioPrefs = await _readAudioPreferences();
     _applyMasterVolume(audioPrefs);
+    final (frequencies, _) = audioGen.getNoteFrequencies(
+      selectedNotes,
+      varyOctaves: audioPrefs.octaveVariationEnabled,
+    );
     final instrument = audioPrefs.playbackInstrument(
       sessionOverrideKey: state.sessionInstrumentOverride,
     );
     final instUsed = await audioService.playTones(
       frequencies,
+      duration: audioPrefs.toneDurationSec,
       instrument: instrument,
     );
 
@@ -214,6 +223,7 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
     );
 
     final nextRounds = state.roundsCompleted + 1;
+    final nextCorrect = state.correctRounds + (isCorrect ? 1 : 0);
     final appPrefs = await ref.read(appPreferencesProvider.future);
     final goal = appPrefs.practiceSessionPreferences.targetRounds;
     final reachedGoal = goal > 0 && nextRounds >= goal;
@@ -221,6 +231,7 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
     state = state.copyWith(
       state: GameState.showingResult,
       roundsCompleted: nextRounds,
+      correctRounds: nextCorrect,
       isPaused: false,
       goalReached: reachedGoal,
       lastResult: RoundResult(

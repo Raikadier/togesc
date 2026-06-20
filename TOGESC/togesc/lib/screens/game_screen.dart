@@ -11,6 +11,8 @@ import '../providers/game_session_provider.dart';
 import '../providers/practice_focus_provider.dart';
 import '../models/ui_preferences.dart';
 import '../providers/practice_session_preferences_provider.dart';
+import '../models/last_practice_session.dart';
+import '../providers/session_history_provider.dart';
 import '../providers/ui_preferences_provider.dart';
 import '../utils/piano_note_selection.dart';
 import '../widgets/game_session_views.dart';
@@ -72,6 +74,15 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
   @override
   void deactivate() {
+    final session = ref.read(gameSessionProvider);
+    if (session.roundsCompleted > 0) {
+      ref.read(sessionHistoryProvider.notifier).record(
+            mode: session.mode,
+            kind: PracticeKind.game,
+            roundsCompleted: session.roundsCompleted,
+            correctRounds: session.correctRounds,
+          );
+    }
     clearPracticeFocusNote(ref);
     super.deactivate();
   }

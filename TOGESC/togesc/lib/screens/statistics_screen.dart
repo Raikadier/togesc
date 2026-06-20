@@ -14,6 +14,7 @@ import '../services/progress_export_service.dart';
 import '../services/subscription_access.dart';
 import '../widgets/account_monetization_views.dart';
 import '../widgets/info_views.dart';
+import '../widgets/session_history_card.dart';
 import '../widgets/togesc_ui.dart';
 
 /// Pantalla de estadisticas del sistema SRS.
@@ -127,6 +128,8 @@ class StatisticsScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            const SizedBox(height: DesignTokens.spacingMd),
+            const SessionHistoryCard(),
             const SizedBox(height: DesignTokens.spacingMd),
             OutlinedButton.icon(
               onPressed: () => context.push(AppRoutes.statisticsNotes),

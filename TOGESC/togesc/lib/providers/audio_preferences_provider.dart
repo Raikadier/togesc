@@ -45,4 +45,14 @@ class AudioPreferencesNotifier extends AsyncNotifier<AudioPreferences> {
     final current = state.valueOrNull ?? const AudioPreferences();
     await save(current.copyWith(clusterDurationSec: seconds));
   }
+
+  Future<void> setOctaveVariationEnabled(bool enabled) async {
+    final current = state.valueOrNull ?? const AudioPreferences();
+    await save(current.copyWith(octaveVariationEnabled: enabled));
+  }
+
+  Future<void> setToneDuration(double seconds) async {
+    final current = state.valueOrNull ?? const AudioPreferences();
+    await save(current.copyWith(toneDurationSec: seconds));
+  }
 }

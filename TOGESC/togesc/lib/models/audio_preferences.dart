@@ -10,6 +10,8 @@ class AudioPreferences {
   final double masterVolume;
   final bool clusterEnabled;
   final double clusterDurationSec;
+  final bool octaveVariationEnabled;
+  final double toneDurationSec;
 
   const AudioPreferences({
     this.instrumentMode = InstrumentMode.random,
@@ -17,6 +19,8 @@ class AudioPreferences {
     this.masterVolume = 1.0,
     this.clusterEnabled = true,
     this.clusterDurationSec = 3.0,
+    this.octaveVariationEnabled = true,
+    this.toneDurationSec = 1.0,
   });
 
   static const sessionOverrideRandom = '__random__';
@@ -40,6 +44,8 @@ class AudioPreferences {
     double? masterVolume,
     bool? clusterEnabled,
     double? clusterDurationSec,
+    bool? octaveVariationEnabled,
+    double? toneDurationSec,
   }) {
     return AudioPreferences(
       instrumentMode: instrumentMode ?? this.instrumentMode,
@@ -47,6 +53,9 @@ class AudioPreferences {
       masterVolume: masterVolume ?? this.masterVolume,
       clusterEnabled: clusterEnabled ?? this.clusterEnabled,
       clusterDurationSec: clusterDurationSec ?? this.clusterDurationSec,
+      octaveVariationEnabled:
+          octaveVariationEnabled ?? this.octaveVariationEnabled,
+      toneDurationSec: toneDurationSec ?? this.toneDurationSec,
     );
   }
 }

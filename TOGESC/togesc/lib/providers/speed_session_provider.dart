@@ -7,6 +7,8 @@ import '../constants/game_constants.dart';
 import '../constants/notes.dart';
 import '../models/audio_preferences.dart';
 import '../models/last_practice_session.dart';
+import '../utils/note_pool.dart';
+import 'app_preferences_provider.dart';
 import 'audio_preferences_provider.dart';
 import 'last_practice_provider.dart';
 import 'audio_provider.dart';
@@ -26,6 +28,8 @@ class SpeedSessionState {
   final int consecutiveCorrect;
   final List<double> responseTimes;
   final String? sessionInstrumentOverride;
+  final int roundsPlayed;
+  final int correctRounds;
 
   const SpeedSessionState({
     this.state = SpeedState.idle,
@@ -37,6 +41,8 @@ class SpeedSessionState {
     this.consecutiveCorrect = 0,
     this.responseTimes = const [],
     this.sessionInstrumentOverride,
+    this.roundsPlayed = 0,
+    this.correctRounds = 0,
   });
 
   double get averageTime =>
@@ -55,6 +61,8 @@ class SpeedSessionState {
     int? consecutiveCorrect,
     List<double>? responseTimes,
     String? sessionInstrumentOverride,
+    int? roundsPlayed,
+    int? correctRounds,
     bool clearSessionInstrumentOverride = false,
   }) {
     return SpeedSessionState(
@@ -69,6 +77,8 @@ class SpeedSessionState {
       sessionInstrumentOverride: clearSessionInstrumentOverride
           ? null
           : (sessionInstrumentOverride ?? this.sessionInstrumentOverride),
+      roundsPlayed: roundsPlayed ?? this.roundsPlayed,
+      correctRounds: correctRounds ?? this.correctRounds,
     );
   }
 }
@@ -123,7 +133,11 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
     if (srs == null) return;
 
     final numNotes = _getNumNotes(state.targetMode);
-    final notePool = state.targetMode == GameMode.sharpsOnly ? sharpNotes : null;
+    final appPrefs = await ref.read(appPreferencesProvider.future);
+    final notePool = resolvePracticeNotePool(
+      mode: state.targetMode,
+      configuredPool: appPrefs.practiceNotePool,
+    );
     final selectedNotes = srs.selectNotes(numNotes, notePool: notePool);
 
     state = state.copyWith(
@@ -136,13 +150,20 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
     // Reproducir audio
     final audioService = ref.read(audioPlayerServiceProvider);
     final audioGen = ref.read(audioGeneratorProvider);
-    final (frequencies, _) = audioGen.getNoteFrequencies(selectedNotes);
     final audioPrefs = await _readAudioPreferences();
     _applyMasterVolume(audioPrefs);
+    final (frequencies, _) = audioGen.getNoteFrequencies(
+      selectedNotes,
+      varyOctaves: audioPrefs.octaveVariationEnabled,
+    );
     final instrument = audioPrefs.playbackInstrument(
       sessionOverrideKey: state.sessionInstrumentOverride,
     );
-    await audioService.playTones(frequencies, instrument: instrument);
+    await audioService.playTones(
+      frequencies,
+      duration: audioPrefs.toneDurationSec,
+      instrument: instrument,
+    );
 
     // Iniciar countdown
     state = state.copyWith(state: SpeedState.waitingForAnswer);
@@ -162,6 +183,7 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
         state = state.copyWith(
           state: SpeedState.timeout,
           remainingTime: 0,
+          roundsPlayed: state.roundsPlayed + 1,
         );
         return;
       }
@@ -191,11 +213,14 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
         consecutiveCorrect: state.consecutiveCorrect + 1,
         currentTimeLimit: newLimit,
         responseTimes: newTimes,
+        roundsPlayed: state.roundsPlayed + 1,
+        correctRounds: state.correctRounds + 1,
       );
     } else {
       state = state.copyWith(
         state: SpeedState.incorrect,
         responseTimes: newTimes,
+        roundsPlayed: state.roundsPlayed + 1,
       );
     }
   }

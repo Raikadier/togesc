@@ -8,6 +8,7 @@ import '../services/practice_reminder_service.dart';
 import 'audio_settings_section.dart';
 import 'appearance_settings_section.dart';
 import 'gameplay_settings_section.dart';
+import 'note_pool_settings_section.dart';
 import 'session_settings_section.dart';
 import 'togesc_ui.dart';
 
@@ -30,6 +31,8 @@ class PracticeSettingsSection extends ConsumerWidget {
         const AudioSettingsSection(),
         const SizedBox(height: 16),
         const SessionSettingsSection(),
+        const SizedBox(height: 16),
+        const NotePoolSettingsSection(),
         const SizedBox(height: 16),
         TogescCard(
           child: Column(
