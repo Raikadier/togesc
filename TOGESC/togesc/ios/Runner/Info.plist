@@ -66,5 +66,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>TOGESC usa el microfono solo en modo canto experimental para detectar la nota que cantas o tarareas. El audio no se graba ni se sube a internet.</string>
 </dict>
 </plist>

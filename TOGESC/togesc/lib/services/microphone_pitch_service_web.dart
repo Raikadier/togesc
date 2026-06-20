@@ -5,6 +5,7 @@ import 'dart:typed_data' as typed_data;
 import 'package:web/web.dart';
 
 import '../utils/frequency_to_note.dart';
+import '../utils/pitch_estimation.dart';
 
 /// Deteccion experimental de pitch en navegador (Fase 7E-3 spike).
 abstract final class MicrophonePitchService {
@@ -52,11 +53,15 @@ abstract final class MicrophonePitchService {
 
   static void _pollAnalyser(void Function(String message)? onStatus) {
     final analyser = _analyser;
-    if (analyser == null) return;
+    final context = _context;
+    if (analyser == null || context == null) return;
 
     final buffer = typed_data.Float32List(analyser.fftSize);
     analyser.getFloatTimeDomainData(buffer.toJS);
-    final frequency = _estimateFrequency(buffer);
+    final frequency = estimatePitchFrequency(
+      buffer,
+      sampleRate: context.sampleRate,
+    );
     if (frequency == null) return;
 
     final note = frequencyToNote(frequency);
@@ -74,38 +79,6 @@ abstract final class MicrophonePitchService {
       _stableCount = 0;
       onStatus?.call('Nota detectada: $note');
     }
-  }
-
-  static double? _estimateFrequency(typed_data.Float32List samples) {
-    if (samples.length < 64) return null;
-
-    var peak = 0.0;
-    for (var i = 0; i < samples.length; i++) {
-      final abs = samples[i].abs();
-      if (abs > peak) peak = abs;
-    }
-    if (peak < 0.02) return null;
-
-    var bestLag = 0;
-    var bestCorr = 0.0;
-    const minLag = 32;
-    final maxLag = samples.length ~/ 2;
-
-    for (var lag = minLag; lag < maxLag; lag++) {
-      var corr = 0.0;
-      for (var i = 0; i < maxLag; i++) {
-        corr += samples[i] * samples[i + lag];
-      }
-      if (corr > bestCorr) {
-        bestCorr = corr;
-        bestLag = lag;
-      }
-    }
-
-    if (bestLag <= 0 || _context == null) return null;
-    final frequency = _context!.sampleRate / bestLag;
-    if (frequency < 80 || frequency > 1200) return null;
-    return frequency;
   }
 
   static Future<void> stopListening() async {

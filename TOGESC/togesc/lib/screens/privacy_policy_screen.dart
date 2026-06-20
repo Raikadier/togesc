@@ -70,10 +70,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
           const PolicySection(
             title: 'Audio',
             body:
-                'Los ejercicios se sintetizan en tu dispositivo. No se graba '
-                'microfono ni se sube audio a internet, salvo el modo canto '
-                'experimental en web: el microfono se usa solo en tu '
-                'navegador para detectar la nota y no se almacena ni envia.',
+                'Los ejercicios se sintetizan en tu dispositivo. El modo canto '
+                'experimental usa el microfono solo en tu dispositivo para '
+                'detectar la nota; el audio no se almacena ni se envia a '
+                'internet.',
           ),
           const PolicySection(
             title: 'Eliminacion de datos',

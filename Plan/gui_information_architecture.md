@@ -348,7 +348,7 @@ Vistas que un entrenador SRS+audio **debe** tener vs estado:
 | 13 | Encuesta satisfacción ocasional | Sí (Fase 6) | ✅ CSAT dialog |
 | 14 | Preferencias práctica (solfeo, recordatorios) | Sí (Fase 6) | ✅ PracticeSettings |
 | 15 | Recordatorio OS notas vencidas | Sí móvil | ✅ notificación local |
-| 16 | Modo micrófono / tarareo | Roadmap [C] | ✅ GameInputMode.humming + panel web |
+| 16 | Modo micrófono / tarareo | Roadmap [C] | ✅ web + Android/iOS (experimental) |
 | 17 | Selector timbre (7 presets) | Útil pedagógicamente | ✅ Ajustes → Sonido |
 | 18 | Vista detalle por nota (12× SRS) | Útil para power users | ✅ `/statistics/notes` |
 | 19 | Perfil intensidad SRS | Roadmap 7E-2 | ✅ Ajustes → Intensidad SRS |
