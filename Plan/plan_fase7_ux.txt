@@ -18,7 +18,7 @@ SUBFASES
   7B  Sesión y hub               [HECHO — S2+S5]
   7C  Reflexión SRS              [HECHO — 7C-1/2/4]
   7D  Ajustes y accesibilidad    [HECHO — S6]
-  7E  Cuenta, legal, avanzado    [PENDIENTE]
+  7E  Cuenta, legal, avanzado    [HECHO — S8 / 7E-1]
 
 ================================================================================
 7A — SONIDO Y ESTÍMULO

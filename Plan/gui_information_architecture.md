@@ -237,7 +237,8 @@ Solo en **Cuenta** cuando sesión iniciada:
 | Instrucciones Stripe / restaurar | Paywall, Subscription |
 | `Suscripcion activada. ¡Disfruta TOGESC Pro!` | `SubscriptionCheckoutListener` (`?checkout=success`) |
 | `Pago cancelado.` | checkout cancelado |
-| `Descarga CSV iniciada` / portapapeles | Estadísticas export |
+| `Descarga CSV iniciada` / portapapeles | Estadísticas export CSV |
+| `Descarga JSON iniciada` / portapapeles | Cuenta export JSON (7E-1) |
 | `Progreso reiniciado` | Post-diálogo reset |
 | Mensajes sync / auth | Account (texto inline `_message` también) |
 
@@ -380,7 +381,10 @@ Home tap modo Pro → Paywall (?feature=)  OR  ProRouteGuard → replace paywall
 
 ```
 Home → Account → (signIn|signUp) → SyncDiagnosticsCard → Sincronizar ahora
+Home → Account → Tus datos → Exportar JSON | Politica | Eliminar cuenta
 ```
+
+Eliminar cuenta requiere RPC `delete_own_account` en Supabase (migración `20260620000000_delete_own_account.sql`).
 
 ### 8.4 Checkout web
 

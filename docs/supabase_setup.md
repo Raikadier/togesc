@@ -112,3 +112,6 @@ El workflow `deploy-web.yml` las inyecta como `--dart-define` en el build web.
 - RLS en `user_progress`: solo `auth.uid() = user_id`
 - Políticas UPDATE con `WITH CHECK`
 - Solo clave anon/publishable en el cliente Flutter
+- RPC `delete_own_account` (security definer): borra `auth.users` del usuario autenticado; `user_progress` en cascade
+
+Aplicar también `supabase/migrations/20260620000000_delete_own_account.sql` para habilitar eliminación de cuenta desde la app.

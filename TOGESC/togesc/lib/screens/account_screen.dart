@@ -11,6 +11,7 @@ import '../providers/auth_provider.dart';
 import '../providers/srs_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../providers/sync_provider.dart';
+import '../widgets/account_data_section.dart';
 import '../widgets/account_monetization_views.dart';
 import '../widgets/sync_diagnostics_card.dart';
 import '../widgets/togesc_ui.dart';
@@ -465,6 +466,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               ),
             ),
           ],
+          const SizedBox(height: DesignTokens.spacingLg),
+          AccountDataSection(
+            busy: _busy,
+            onBusyChanged: (value) => setState(() => _busy = value),
+            onMessage: (value) => setState(() => _message = value),
+          ),
           if (_message != null) ...[
             const SizedBox(height: DesignTokens.spacingLg),
             Text(

@@ -4,11 +4,11 @@ import '../app/design_tokens.dart';
 import '../widgets/info_views.dart';
 import '../widgets/togesc_ui.dart';
 
-/// Politica de privacidad (fase sin cuentas ni backend).
+/// Politica de privacidad (Fase 7E-1).
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
-  static const _lastUpdated = '14 de junio de 2026';
+  static const _lastUpdated = '20 de junio de 2026';
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +38,11 @@ class PrivacyPolicyScreen extends StatelessWidget {
           const PolicySection(
             title: 'Datos que se guardan',
             body:
-                'Tu progreso de entrenamiento (pesos SRS, estadisticas y '
-                'preferencias como onboarding completado) se almacena solo en '
-                'tu dispositivo mediante almacenamiento local del sistema '
-                '(SharedPreferences en movil/escritorio; almacenamiento del '
-                'navegador en web).',
+                'Tu progreso de entrenamiento (pesos SRS, estadisticas, '
+                'historial local de sesiones y preferencias como onboarding '
+                'completado) se almacena en tu dispositivo mediante '
+                'almacenamiento local del sistema (SharedPreferences en '
+                'movil/escritorio; almacenamiento del navegador en web).',
           ),
           const PolicySection(
             title: 'Cuenta opcional y sincronizacion',
@@ -52,6 +52,14 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'JSON con tu progreso SRS vinculado a tu identificador de '
                 'usuario. No vendemos ni compartimos esos datos con terceros '
                 'con fines comerciales.',
+          ),
+          const PolicySection(
+            title: 'Exportacion de datos',
+            body:
+                'En Cuenta puedes exportar un archivo JSON con tu progreso '
+                'SRS, preferencias e historial local de sesiones. En web se '
+                'descarga el archivo; en movil se copia al portapapeles. '
+                'Sirve para respaldo o portabilidad (GDPR).',
           ),
           const PolicySection(
             title: 'Datos que no recopilamos',
@@ -68,10 +76,12 @@ class PrivacyPolicyScreen extends StatelessWidget {
           const PolicySection(
             title: 'Eliminacion de datos',
             body:
-                'Puedes borrar tu progreso desinstalando la app o limpiando '
-                'los datos del sitio en la configuracion del navegador (web). '
-                'En futuras versiones puede anadirse un boton de restablecer '
-                'progreso en la app.',
+                'Puedes borrar tu progreso local desde Estadisticas '
+                '(Reiniciar progreso) o desinstalando la app. Si tienes '
+                'cuenta, en Cuenta puedes eliminarla: se borra tu usuario '
+                'en Supabase y el progreso sincronizado en la nube. El '
+                'progreso local en el dispositivo se conserva hasta que lo '
+                'reinicies o desinstales la app.',
           ),
           const PolicySection(
             title: 'Cambios futuros',
