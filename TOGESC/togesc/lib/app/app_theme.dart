@@ -159,35 +159,146 @@ abstract final class AppTheme {
 
   static ThemeData get dark {
     final scheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
+      seedColor: DesignTokens.primaryContainer,
       brightness: Brightness.dark,
+    ).copyWith(
+      primary: DesignTokens.darkPrimary,
+      onPrimary: DesignTokens.darkOnPrimary,
+      primaryContainer: DesignTokens.darkPrimaryContainer,
+      onPrimaryContainer: DesignTokens.darkOnPrimaryContainer,
+      secondary: DesignTokens.secondaryContainer,
+      onSecondary: DesignTokens.onSecondaryContainer,
+      secondaryContainer: DesignTokens.secondary,
+      onSecondaryContainer: DesignTokens.onSecondary,
+      tertiary: DesignTokens.onTertiaryContainer,
+      onTertiary: DesignTokens.tertiary,
+      tertiaryContainer: DesignTokens.tertiaryContainer,
+      onTertiaryContainer: DesignTokens.onTertiaryContainer,
+      error: DesignTokens.error,
+      onError: DesignTokens.onError,
+      errorContainer: DesignTokens.onErrorContainer,
+      onErrorContainer: DesignTokens.errorContainer,
+      surface: DesignTokens.darkSurface,
+      onSurface: DesignTokens.darkOnSurface,
+      onSurfaceVariant: DesignTokens.darkOnSurfaceVariant,
+      outline: DesignTokens.darkOutline,
+      outlineVariant: DesignTokens.darkOutlineVariant,
+      surfaceContainerHighest: const Color(0xFF332839),
+      surfaceContainerHigh: const Color(0xFF2E2433),
+      surfaceContainer: DesignTokens.darkSurfaceContainer,
+      surfaceContainerLow: DesignTokens.darkSurfaceContainerLow,
+      surfaceContainerLowest: DesignTokens.darkSurfaceContainerLowest,
     );
+
     final textTheme = _textTheme(Brightness.dark);
 
     return ThemeData(
       colorScheme: scheme,
+      scaffoldBackgroundColor: DesignTokens.darkBackground,
       useMaterial3: true,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         centerTitle: true,
-        backgroundColor: scheme.surface,
-        foregroundColor: scheme.onSurface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: DesignTokens.darkBackground,
+        foregroundColor: DesignTokens.darkOnSurface,
         titleTextStyle: textTheme.titleLarge,
+        iconTheme: const IconThemeData(color: DesignTokens.darkOnSurface),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
+        color: DesignTokens.darkSurfaceContainerLowest,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: DesignTokens.borderRadiusMd,
-          side: BorderSide(color: scheme.outlineVariant),
+          side: const BorderSide(color: DesignTokens.darkOutlineVariant),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: DesignTokens.darkPrimaryContainer,
+          foregroundColor: DesignTokens.darkOnPrimaryContainer,
           minimumSize: const Size(DesignTokens.touchTargetMin, DesignTokens.touchTargetMin),
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spacingLg,
+            vertical: DesignTokens.spacingMd,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: DesignTokens.borderRadiusMd,
           ),
+          textStyle: textTheme.labelLarge,
         ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: DesignTokens.darkPrimary,
+          minimumSize: const Size(DesignTokens.touchTargetMin, DesignTokens.touchTargetMin),
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spacingLg,
+            vertical: DesignTokens.spacingMd,
+          ),
+          side: const BorderSide(color: DesignTokens.darkOutlineVariant),
+          shape: RoundedRectangleBorder(
+            borderRadius: DesignTokens.borderRadiusMd,
+          ),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: DesignTokens.darkSurfaceContainerLowest,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: DesignTokens.spacingLg,
+          vertical: DesignTokens.spacingMd,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: DesignTokens.borderRadiusMd,
+          borderSide: const BorderSide(color: DesignTokens.darkOutlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: DesignTokens.borderRadiusMd,
+          borderSide: const BorderSide(color: DesignTokens.darkOutlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: DesignTokens.borderRadiusMd,
+          borderSide: const BorderSide(
+            color: DesignTokens.darkPrimary,
+            width: 2,
+          ),
+        ),
+        labelStyle: textTheme.bodyMedium?.copyWith(
+          color: DesignTokens.darkOnSurfaceVariant,
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: DesignTokens.darkSurfaceContainerLow,
+        selectedColor: DesignTokens.darkPrimaryContainer.withValues(alpha: 0.35),
+        labelStyle: textTheme.labelLarge,
+        side: const BorderSide(color: DesignTokens.darkOutlineVariant),
+        shape: RoundedRectangleBorder(
+          borderRadius: DesignTokens.borderRadiusMd,
+        ),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: DesignTokens.darkOutlineVariant,
+        thickness: 1,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: DesignTokens.borderRadiusMd,
+        ),
+        elevation: 2,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: DesignTokens.darkSurfaceContainerLowest,
+        shape: RoundedRectangleBorder(
+          borderRadius: DesignTokens.borderRadiusMd,
+          side: const BorderSide(color: DesignTokens.darkOutlineVariant),
+        ),
+        titleTextStyle: textTheme.titleLarge,
+        contentTextStyle: textTheme.bodyMedium,
       ),
     );
   }

@@ -89,6 +89,11 @@ class HomeScreen extends ConsumerWidget {
             onPressed: () => context.push(AppRoutes.paywall),
           ),
         IconButton(
+          icon: const Icon(Icons.tune_rounded),
+          tooltip: 'Ajustes',
+          onPressed: () => context.push(AppRoutes.settings),
+        ),
+        IconButton(
           icon: const Icon(Icons.person_outline_rounded),
           tooltip: 'Cuenta',
           onPressed: () => context.push(AppRoutes.account),

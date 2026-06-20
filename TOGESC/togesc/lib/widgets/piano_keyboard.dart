@@ -26,6 +26,12 @@ class PianoKeyboard extends StatelessWidget {
   /// Etiquetas en letras o solfeo (Do/Re/Mi).
   final NoteNamingMode noteNamingMode;
 
+  /// Teclas mas amplias (accesibilidad).
+  final bool large;
+
+  /// Oculta nombres en las teclas.
+  final bool hideLabels;
+
   const PianoKeyboard({
     super.key,
     this.selectedNotes = const {},
@@ -34,6 +40,8 @@ class PianoKeyboard extends StatelessWidget {
     this.onNoteTapped,
     this.disabled = false,
     this.noteNamingMode = NoteNamingMode.letter,
+    this.large = false,
+    this.hideLabels = false,
   });
 
   static const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -99,7 +107,9 @@ class PianoKeyboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth.clamp(280.0, 500.0);
+        final maxWidth = large ? 640.0 : 500.0;
+        final minWidth = large ? 320.0 : 280.0;
+        final totalWidth = constraints.maxWidth.clamp(minWidth, maxWidth);
         final whiteKeyWidth = totalWidth / 7;
         final whiteKeyHeight = whiteKeyWidth * 3.5;
         final blackKeyWidth = whiteKeyWidth * 0.6;
@@ -131,14 +141,16 @@ class PianoKeyboard extends StatelessWidget {
                         ),
                         alignment: Alignment.bottomCenter,
                         padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          formatNoteLabel(note, noteNamingMode),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: _getWhiteKeyTextColor(note),
-                          ),
-                        ),
+                        child: hideLabels
+                            ? const SizedBox.shrink()
+                            : Text(
+                                formatNoteLabel(note, noteNamingMode),
+                                style: TextStyle(
+                                  fontSize: large ? 16 : 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: _getWhiteKeyTextColor(note),
+                                ),
+                              ),
                       ),
                     ),
                   );
@@ -173,14 +185,16 @@ class PianoKeyboard extends StatelessWidget {
                       ),
                       alignment: Alignment.bottomCenter,
                       padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        formatNoteLabel(sharpNote, noteNamingMode),
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: _getBlackKeyTextColor(sharpNote),
-                        ),
-                      ),
+                      child: hideLabels
+                          ? const SizedBox.shrink()
+                          : Text(
+                              formatNoteLabel(sharpNote, noteNamingMode),
+                              style: TextStyle(
+                                fontSize: large ? 12 : 10,
+                                fontWeight: FontWeight.bold,
+                                color: _getBlackKeyTextColor(sharpNote),
+                              ),
+                            ),
                     ),
                   ),
                 );

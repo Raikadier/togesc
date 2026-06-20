@@ -92,6 +92,154 @@ class GameSessionPhaseLayout extends StatelessWidget {
   }
 }
 
+/// Progreso hacia el objetivo de rondas de la sesion.
+class GameSessionProgressBar extends StatelessWidget {
+  final int roundsCompleted;
+  final int targetRounds;
+
+  const GameSessionProgressBar({
+    super.key,
+    required this.roundsCompleted,
+    required this.targetRounds,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (targetRounds <= 0) return const SizedBox.shrink();
+
+    final progress = (roundsCompleted / targetRounds).clamp(0.0, 1.0);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Ronda $roundsCompleted de $targetRounds',
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: DesignTokens.onSurfaceVariant,
+              ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: DesignTokens.spacingSm),
+        ClipRRect(
+          borderRadius: DesignTokens.borderRadiusMd,
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 6,
+            backgroundColor: DesignTokens.primary.withValues(alpha: 0.12),
+            color: DesignTokens.primaryContainer,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Controles de pausa y saltar nota durante la ronda.
+class GameSessionRoundControls extends StatelessWidget {
+  final bool isPaused;
+  final VoidCallback onPause;
+  final VoidCallback onResume;
+  final VoidCallback onSkip;
+  final bool showPause;
+
+  const GameSessionRoundControls({
+    super.key,
+    required this.isPaused,
+    required this.onPause,
+    required this.onResume,
+    required this.onSkip,
+    this.showPause = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!showPause) {
+      return OutlinedButton.icon(
+        onPressed: onSkip,
+        icon: const Icon(Icons.skip_next_rounded),
+        label: const Text('Saltar nota'),
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: isPaused ? onResume : onPause,
+            icon: Icon(isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded),
+            label: Text(isPaused ? 'Reanudar' : 'Pausar'),
+          ),
+        ),
+        const SizedBox(width: DesignTokens.spacingMd),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: onSkip,
+            icon: const Icon(Icons.skip_next_rounded),
+            label: const Text('Saltar nota'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Overlay cuando la sesion esta pausada.
+class GameSessionPausedOverlay extends StatelessWidget {
+  final VoidCallback onResume;
+
+  const GameSessionPausedOverlay({super.key, required this.onResume});
+
+  @override
+  Widget build(BuildContext context) {
+    return GameSessionPhaseLayout(
+      icon: Icons.pause_circle_outline_rounded,
+      title: 'Sesion pausada',
+      subtitle: 'El tiempo de respuesta esta detenido',
+      footer: FilledButton.icon(
+        onPressed: onResume,
+        icon: const Icon(Icons.play_arrow_rounded),
+        label: const Text('Reanudar'),
+      ),
+    );
+  }
+}
+
+/// Banner al completar el objetivo de rondas.
+class GameSessionGoalCompleteBanner extends StatelessWidget {
+  final int targetRounds;
+
+  const GameSessionGoalCompleteBanner({
+    super.key,
+    required this.targetRounds,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(DesignTokens.spacingMd),
+      decoration: BoxDecoration(
+        color: DesignTokens.correct.withValues(alpha: 0.12),
+        borderRadius: DesignTokens.borderRadiusMd,
+        border: Border.all(color: DesignTokens.correct.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.emoji_events_rounded, color: DesignTokens.correct),
+          const SizedBox(width: DesignTokens.spacingMd),
+          Expanded(
+            child: Text(
+              'Objetivo cumplido: $targetRounds rondas',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: DesignTokens.correct,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Vista idle — preparación antes de escuchar.
 class GameSessionIdleView extends StatelessWidget {
   final VoidCallback onPlay;

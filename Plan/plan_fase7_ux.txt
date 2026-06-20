@@ -15,9 +15,9 @@ METODOLOGÍA
 
 SUBFASES
   7A  Sonido y estímulo          [HECHO — S1]
-  7B  Sesión y hub               [EN CURSO — S2: 7B-1/4/5 hechos]
+  7B  Sesión y hub               [HECHO — S2+S5]
   7C  Reflexión SRS              [EN CURSO — 7C-1 hecho]
-  7D  Ajustes y accesibilidad    [PENDIENTE]
+  7D  Ajustes y accesibilidad    [HECHO — S6]
   7E  Cuenta, legal, avanzado    [PENDIENTE]
 
 ================================================================================

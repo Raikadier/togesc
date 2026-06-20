@@ -13,6 +13,7 @@ import '../screens/paywall_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/speed_game_screen.dart';
 import '../screens/speed_mode_select_screen.dart';
+import '../screens/settings_screen.dart';
 import '../screens/statistics_screen.dart';
 import '../screens/subscription_screen.dart';
 import '../services/app_preferences.dart';
@@ -27,6 +28,7 @@ abstract final class AppRoutes {
   static const about = '/about';
   static const privacy = '/privacy';
   static const account = '/account';
+  static const settings = '/settings';
   static const subscription = '/subscription';
   static const paywall = '/paywall';
   static const speedSelect = '/speed';
@@ -79,6 +81,10 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
       GoRoute(
         path: AppRoutes.account,
         builder: (_, _) => const AccountScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        builder: (_, _) => const SettingsScreen(),
       ),
       GoRoute(
         path: AppRoutes.subscription,

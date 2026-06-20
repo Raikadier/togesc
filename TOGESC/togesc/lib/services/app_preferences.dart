@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/note_naming.dart';
 import '../models/audio_preferences.dart';
 import '../models/last_practice_session.dart';
+import '../models/practice_session_preferences.dart';
+import '../models/ui_preferences.dart';
 
 const String onboardingCompleteKey = 'togesc_onboarding_complete';
 const String sessionCountKey = 'togesc_session_count';
@@ -18,6 +20,14 @@ const String clusterDurationKey = 'togesc_cluster_duration_sec';
 const String lastPracticeModeIdKey = 'togesc_last_practice_mode_id';
 const String lastPracticeKindKey = 'togesc_last_practice_kind';
 const String lastPracticeAtKey = 'togesc_last_practice_at';
+const String sessionRoundGoalKey = 'togesc_session_round_goal';
+const String autoAdvanceAfterResultKey = 'togesc_auto_advance_after_result';
+const String gameInputModeKey = 'togesc_game_input_mode';
+const String confirmBeforeSubmitKey = 'togesc_confirm_before_submit';
+const String hidePianoLabelsKey = 'togesc_hide_piano_labels';
+const String largePianoKey = 'togesc_large_piano';
+const String reduceAnimationsKey = 'togesc_reduce_animations';
+const String themePreferenceKey = 'togesc_theme_preference';
 
 /// Preferencias de la aplicacion (onboarding, Fase 6, etc.).
 class AppPreferences {
@@ -136,6 +146,46 @@ class AppPreferences {
       lastPracticeAtKey,
       session.practicedAt.toIso8601String(),
     );
+  }
+
+  PracticeSessionPreferences get practiceSessionPreferences {
+    final goalRounds = _prefs.getInt(sessionRoundGoalKey);
+    return PracticeSessionPreferences(
+      roundGoal: SessionRoundGoal.fromRounds(goalRounds),
+      autoAdvanceAfterResult:
+          _prefs.getBool(autoAdvanceAfterResultKey) ?? false,
+    );
+  }
+
+  Future<void> setPracticeSessionPreferences(
+    PracticeSessionPreferences value,
+  ) async {
+    await _prefs.setInt(sessionRoundGoalKey, value.roundGoal.rounds);
+    await _prefs.setBool(
+      autoAdvanceAfterResultKey,
+      value.autoAdvanceAfterResult,
+    );
+  }
+
+  UiPreferences get uiPreferences {
+    return UiPreferences(
+      inputMode: GameInputMode.fromId(_prefs.getString(gameInputModeKey)),
+      confirmBeforeSubmit: _prefs.getBool(confirmBeforeSubmitKey) ?? true,
+      hidePianoLabels: _prefs.getBool(hidePianoLabelsKey) ?? false,
+      largePiano: _prefs.getBool(largePianoKey) ?? false,
+      reduceAnimations: _prefs.getBool(reduceAnimationsKey) ?? false,
+      themePreference:
+          AppThemePreference.fromId(_prefs.getString(themePreferenceKey)),
+    );
+  }
+
+  Future<void> setUiPreferences(UiPreferences value) async {
+    await _prefs.setString(gameInputModeKey, value.inputMode.name);
+    await _prefs.setBool(confirmBeforeSubmitKey, value.confirmBeforeSubmit);
+    await _prefs.setBool(hidePianoLabelsKey, value.hidePianoLabels);
+    await _prefs.setBool(largePianoKey, value.largePiano);
+    await _prefs.setBool(reduceAnimationsKey, value.reduceAnimations);
+    await _prefs.setString(themePreferenceKey, value.themePreference.name);
   }
 
   /// Encuesta CSAT ocasional: tras 10 sesiones y cada 30 dias.

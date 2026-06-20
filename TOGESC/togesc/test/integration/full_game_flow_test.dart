@@ -104,10 +104,9 @@ void main() {
 
       // 4. Escribir respuesta via campo de texto y enviar
       await tester.enterText(find.byType(TextField), 'C');
+      await tester.ensureVisible(find.text('Enviar'));
       await tester.tap(find.text('Enviar'));
-      for (var i = 0; i < 10; i++) {
-        await tester.pump(const Duration(milliseconds: 50));
-      }
+      await tester.pumpAndSettle();
 
       // 5. Vista de resultado: aparece boton Siguiente
       expect(find.text('Siguiente'), findsOneWidget);

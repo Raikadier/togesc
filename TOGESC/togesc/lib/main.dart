@@ -7,6 +7,7 @@ import 'app/app_theme.dart';
 import 'config/observability_config.dart';
 import 'config/supabase_config.dart';
 import 'providers/router_provider.dart';
+import 'providers/ui_preferences_provider.dart';
 import 'widgets/app_startup_listener.dart';
 import 'widgets/auth_sync_listener.dart';
 import 'widgets/csat_survey_listener.dart';
@@ -60,14 +61,14 @@ class TogescApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
+    final themeMode = ref.watch(appThemeModeProvider);
 
     return MaterialApp.router(
       title: 'Entrenador de Oido Absoluto',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      // Harmonic Precision esta definido en tema claro; evita M3 generico en dark.
-      themeMode: ThemeMode.light,
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

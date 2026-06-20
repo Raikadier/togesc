@@ -12,7 +12,6 @@ import '../providers/srs_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../providers/sync_provider.dart';
 import '../widgets/account_monetization_views.dart';
-import '../widgets/practice_settings_section.dart';
 import '../widgets/sync_diagnostics_card.dart';
 import '../widgets/togesc_ui.dart';
 
@@ -257,7 +256,16 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       body: ListView(
         padding: const EdgeInsets.all(DesignTokens.marginMobile),
         children: [
-          const PracticeSettingsSection(),
+          TogescCard(
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.tune_rounded),
+              title: const Text('Ajustes de practica'),
+              subtitle: const Text('Sonido, sesion, apariencia y accesibilidad'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(AppRoutes.settings),
+            ),
+          ),
           const SizedBox(height: DesignTokens.spacingLg),
           if (!available) ...[
             const SizedBox(height: DesignTokens.spacingLg),

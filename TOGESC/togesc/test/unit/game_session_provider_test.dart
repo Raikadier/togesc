@@ -59,6 +59,9 @@ void main() {
       expect(state.numNotes, 1);
       expect(state.sessionInstrumentOverride, isNull);
       expect(state.lastResult, isNull);
+      expect(state.roundsCompleted, 0);
+      expect(state.isPaused, isFalse);
+      expect(state.goalReached, isFalse);
     });
 
     test('setMode cambia el modo y vuelve a idle', () {
@@ -141,6 +144,29 @@ void main() {
       expect(state.lastResult!.correctNotes, notes.toSet());
       expect(state.lastResult!.responseTime, 1.5);
       expect(state.lastResult!.srsChanges, isNotEmpty);
+      expect(state.roundsCompleted, 1);
+    });
+
+    test('skipRound vuelve a idle sin actualizar SRS', () async {
+      final notifier = container.read(gameSessionProvider.notifier);
+      await notifier.startRound();
+      notifier.skipRound();
+
+      final state = container.read(gameSessionProvider);
+      expect(state.state, GameState.idle);
+      expect(state.currentNotes, isEmpty);
+      expect(state.roundsCompleted, 0);
+    });
+
+    test('pauseRound y resumeRound alternan isPaused', () async {
+      final notifier = container.read(gameSessionProvider.notifier);
+      await notifier.startRound();
+
+      notifier.pauseRound();
+      expect(container.read(gameSessionProvider).isPaused, isTrue);
+
+      notifier.resumeRound();
+      expect(container.read(gameSessionProvider).isPaused, isFalse);
     });
 
     test('submitAnswer incorrecta muestra resultado incorrecto', () async {

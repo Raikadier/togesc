@@ -10,6 +10,7 @@ import 'audio_provider.dart';
 import 'last_practice_provider.dart';
 import 'practice_focus_provider.dart';
 import 'srs_provider.dart';
+import 'app_preferences_provider.dart';
 
 /// Estados posibles de la sesion de juego.
 enum GameState { idle, listening, waitingForAnswer, showingResult, playingCluster }
@@ -39,6 +40,9 @@ class GameSessionState {
   final String? sessionInstrumentOverride;
   final String? lastInstrument;
   final RoundResult? lastResult;
+  final int roundsCompleted;
+  final bool isPaused;
+  final bool goalReached;
 
   const GameSessionState({
     this.state = GameState.idle,
@@ -48,6 +52,9 @@ class GameSessionState {
     this.sessionInstrumentOverride,
     this.lastInstrument,
     this.lastResult,
+    this.roundsCompleted = 0,
+    this.isPaused = false,
+    this.goalReached = false,
   });
 
   GameSessionState copyWith({
@@ -59,6 +66,10 @@ class GameSessionState {
     bool clearSessionInstrumentOverride = false,
     String? lastInstrument,
     RoundResult? lastResult,
+    int? roundsCompleted,
+    bool? isPaused,
+    bool? goalReached,
+    bool clearLastResult = false,
   }) {
     return GameSessionState(
       state: state ?? this.state,
@@ -69,7 +80,10 @@ class GameSessionState {
           ? null
           : (sessionInstrumentOverride ?? this.sessionInstrumentOverride),
       lastInstrument: lastInstrument ?? this.lastInstrument,
-      lastResult: lastResult ?? this.lastResult,
+      lastResult: clearLastResult ? null : (lastResult ?? this.lastResult),
+      roundsCompleted: roundsCompleted ?? this.roundsCompleted,
+      isPaused: isPaused ?? this.isPaused,
+      goalReached: goalReached ?? this.goalReached,
     );
   }
 }
@@ -89,6 +103,10 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
       mode: mode,
       state: GameState.idle,
       numNotes: fixed ?? randomMinNotes,
+      roundsCompleted: 0,
+      goalReached: false,
+      isPaused: false,
+      clearLastResult: true,
     );
     ref.read(lastPracticeSessionProvider.notifier).record(
           mode: mode,
@@ -135,6 +153,8 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
       currentNotes: selectedNotes,
       numNotes: numNotes,
       lastResult: null,
+      isPaused: false,
+      clearLastResult: true,
     );
 
     await ref.read(analyticsServiceProvider).modeStarted(
@@ -193,14 +213,46 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
       correct: isCorrect,
     );
 
+    final nextRounds = state.roundsCompleted + 1;
+    final appPrefs = await ref.read(appPreferencesProvider.future);
+    final goal = appPrefs.practiceSessionPreferences.targetRounds;
+    final reachedGoal = goal > 0 && nextRounds >= goal;
+
     state = state.copyWith(
       state: GameState.showingResult,
+      roundsCompleted: nextRounds,
+      isPaused: false,
+      goalReached: reachedGoal,
       lastResult: RoundResult(
         isCorrect: isCorrect,
         correctNotes: correctNotesSet,
         responseTime: responseTime,
         srsChanges: changes,
       ),
+    );
+  }
+
+  void pauseRound() {
+    if (state.state != GameState.waitingForAnswer || state.isPaused) return;
+    state = state.copyWith(isPaused: true);
+  }
+
+  void resumeRound() {
+    if (!state.isPaused) return;
+    state = state.copyWith(isPaused: false);
+  }
+
+  /// Salta la ronda actual sin actualizar SRS.
+  void skipRound() {
+    if (state.state != GameState.waitingForAnswer &&
+        state.state != GameState.listening) {
+      return;
+    }
+    state = state.copyWith(
+      state: GameState.idle,
+      currentNotes: const [],
+      isPaused: false,
+      clearLastResult: true,
     );
   }
 

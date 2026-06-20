@@ -11,7 +11,6 @@ import '../models/subscription_status.dart';
 import '../providers/app_preferences_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/practice_focus_provider.dart';
-import '../providers/srs_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../services/subscription_access.dart';
 import '../widgets/srs_progress_indicator.dart';
@@ -154,9 +153,4 @@ void startFocusedNotePractice({
   ref.read(practiceFocusNoteProvider.notifier).state = note;
   ref.read(audioPlayerServiceProvider).captureUserGesture();
   context.push('${AppRoutes.game}/${GameMode.singleNote.id}');
-}
-
-/// Limpia el foco de practica al salir del juego.
-void clearPracticeFocusNote(WidgetRef ref) {
-  ref.read(practiceFocusNoteProvider.notifier).state = null;
 }

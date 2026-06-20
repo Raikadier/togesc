@@ -6,6 +6,9 @@ import '../constants/note_naming.dart';
 import '../providers/app_preferences_provider.dart';
 import '../services/practice_reminder_service.dart';
 import 'audio_settings_section.dart';
+import 'appearance_settings_section.dart';
+import 'gameplay_settings_section.dart';
+import 'session_settings_section.dart';
 import 'togesc_ui.dart';
 
 /// Preferencias de practica: solfeo y recordatorios (Fase 6).
@@ -20,7 +23,13 @@ class PracticeSettingsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const AppearanceSettingsSection(),
+        const SizedBox(height: 16),
+        const GameplaySettingsSection(),
+        const SizedBox(height: 16),
         const AudioSettingsSection(),
+        const SizedBox(height: 16),
+        const SessionSettingsSection(),
         const SizedBox(height: 16),
         TogescCard(
           child: Column(
