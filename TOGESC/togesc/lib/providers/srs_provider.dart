@@ -5,6 +5,7 @@ import '../models/note_progress_summary.dart';
 import '../models/subscription_status.dart';
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
+import 'app_preferences_provider.dart';
 import '../services/hybrid_progress_repository.dart';
 import '../services/progress_repository.dart';
 import '../services/subscription_access.dart';
@@ -73,7 +74,11 @@ class SRSNotifier extends AsyncNotifier<SRSSystem> {
   @override
   Future<SRSSystem> build() async {
     final repo = ref.read(progressRepositoryProvider);
-    final srs = SRSSystem(repository: repo);
+    final appPrefs = await ref.watch(appPreferencesProvider.future);
+    final srs = SRSSystem(
+      repository: repo,
+      intensityProfile: appPrefs.srsIntensityProfile,
+    );
     await srs.loadProgress();
     return srs;
   }

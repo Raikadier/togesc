@@ -1,0 +1,14 @@
+{
+  "@@locale": "es",
+  "appTitle": "Entrenador de Oido Absoluto",
+  "@appTitle": {
+    "description": "Titulo de la aplicacion"
+  },
+  "srsIntensityTitle": "Intensidad SRS",
+  "srsIntensitySubtitle": "Ajusta la frecuencia de repaso entre sesiones.",
+  "microphoneModeTitle": "Modo canto (experimental)",
+  "microphoneModeWebHint": "Canta o tararea la nota. El audio no se sube a internet.",
+  "microphoneModeMobileHint": "Disponible en web. En movil usa piano o texto por ahora.",
+  "microphoneListen": "Escuchar nota",
+  "microphoneStop": "Detener microfono"
+}

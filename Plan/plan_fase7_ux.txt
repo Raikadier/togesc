@@ -18,7 +18,7 @@ SUBFASES
   7B  Sesión y hub               [HECHO — S2+S5]
   7C  Reflexión SRS              [HECHO — 7C-1/2/4]
   7D  Ajustes y accesibilidad    [HECHO — S6]
-  7E  Cuenta, legal, avanzado    [HECHO — S8 / 7E-1]
+  7E  Cuenta, legal, avanzado    [HECHO — S8 + 7E-2/3/4]
 
 ================================================================================
 7A — SONIDO Y ESTÍMULO
@@ -77,10 +77,10 @@ PR 7D-4 [S] Piano grande, reducir animaciones
 7E — CUENTA, LEGAL, AVANZADO
 ================================================================================
 
-PR 7E-1 [M] Eliminar cuenta, export JSON, privacidad actualizada
-PR 7E-2 [C] Perfil intensidad SRS
-PR 7E-3 [C] Modo micrófono (spike)
-PR 7E-4 [C] i18n ARB (solo ES activo)
+PR 7E-1 [M] Eliminar cuenta, export JSON, privacidad actualizada  [HECHO]
+PR 7E-2 [C] Perfil intensidad SRS                               [HECHO]
+PR 7E-3 [C] Modo micrófono (spike)                              [HECHO]
+PR 7E-4 [C] i18n ARB (solo ES activo)                           [HECHO]
 
 ================================================================================
 CRONOGRAMA SUGERIDO

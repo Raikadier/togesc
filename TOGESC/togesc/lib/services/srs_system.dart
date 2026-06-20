@@ -3,6 +3,7 @@ import 'dart:math';
 import '../constants/notes.dart';
 import '../constants/srs_constants.dart';
 import '../models/note_data.dart';
+import '../models/srs_intensity_profile.dart';
 import 'progress_repository.dart';
 
 /// Sistema de Repeticion Espaciada mejorado para entrenamiento de oido absoluto.
@@ -15,6 +16,7 @@ class SRSSystem {
   final ProgressRepository? repository;
   final DateTime Function() _getNow;
   final Random _random;
+  SrsIntensityProfile intensityProfile;
 
   Map<String, NoteData> _noteData = {};
 
@@ -23,6 +25,7 @@ class SRSSystem {
 
   SRSSystem({
     this.repository,
+    this.intensityProfile = SrsIntensityProfile.balanced,
     DateTime Function()? clock,
     Random? random,
   })  : _getNow = clock ?? DateTime.now,
@@ -202,7 +205,8 @@ class SRSSystem {
       }
 
       // Verificar graduacion
-      if (data.isLearning && data.consecutiveCorrect >= learningPhaseThreshold) {
+      if (data.isLearning &&
+          data.consecutiveCorrect >= intensityProfile.learningThreshold) {
         data.isLearning = false;
         data.intervalIndex = 0;
         _scheduleNextReview(note, wasCorrect: true);
@@ -245,14 +249,14 @@ class SRSSystem {
 
     if (data.isLearning) {
       if (data.consecutiveCorrect == 0) {
-        nextDate = now.add(Duration(days: intervalLearning1));
+        nextDate = now.add(Duration(days: _scaleIntervalDays(intervalLearning1)));
       } else if (data.consecutiveCorrect == 1) {
-        nextDate = now.add(Duration(days: intervalLearning2));
+        nextDate = now.add(Duration(days: _scaleIntervalDays(intervalLearning2)));
       } else {
-        final days = data.consecutiveCorrect >= learningPhaseThreshold
+        final days = data.consecutiveCorrect >= intensityProfile.learningThreshold
             ? reviewIntervals[0]
             : 7;
-        nextDate = now.add(Duration(days: days));
+        nextDate = now.add(Duration(days: _scaleIntervalDays(days)));
       }
     } else {
       // Fase de consolidacion
@@ -263,7 +267,7 @@ class SRSSystem {
       final baseInterval = reviewIntervals[
           min(data.intervalIndex, reviewIntervals.length - 1)];
       final days = (baseInterval * data.easeFactor).toInt();
-      nextDate = now.add(Duration(days: days));
+      nextDate = now.add(Duration(days: _scaleIntervalDays(days)));
 
       if (wasCorrect && data.intervalIndex < reviewIntervals.length - 1) {
         data.intervalIndex += 1;
@@ -378,6 +382,11 @@ class SRSSystem {
   }
 
   // --- Helpers ---
+
+  int _scaleIntervalDays(int days) {
+    final scaled = (days * intensityProfile.intervalScale).round();
+    return max(1, scaled);
+  }
 
   DateTime? _parseDateTime(String? isoString) {
     if (isoString == null || isoString.isEmpty) return null;

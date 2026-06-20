@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 enum GameInputMode {
   both('Ambos', 'Piano y campo de texto'),
   pianoOnly('Solo piano', 'Toca las teclas para responder'),
-  textOnly('Solo texto', 'Escribe las notas con el teclado');
+  textOnly('Solo texto', 'Escribe las notas con el teclado'),
+  humming('Canto / tarareo', 'Experimental: responde cantando o tarareando');
 
   const GameInputMode(this.label, this.description);
 

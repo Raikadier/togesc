@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -6,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app/app_theme.dart';
 import 'config/observability_config.dart';
 import 'config/supabase_config.dart';
+import 'l10n/app_localizations.dart';
 import 'providers/router_provider.dart';
 import 'providers/ui_preferences_provider.dart';
 import 'widgets/app_startup_listener.dart';
@@ -64,8 +66,16 @@ class TogescApp extends ConsumerWidget {
     final themeMode = ref.watch(appThemeModeProvider);
 
     return MaterialApp.router(
-      title: 'Entrenador de Oido Absoluto',
+      title: AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
+      locale: const Locale('es'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,

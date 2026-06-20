@@ -7,6 +7,7 @@ import '../models/audio_preferences.dart';
 import '../models/last_practice_session.dart';
 import '../models/practice_session_log.dart';
 import '../models/practice_session_preferences.dart';
+import '../models/srs_intensity_profile.dart';
 import '../models/ui_preferences.dart';
 
 const String onboardingCompleteKey = 'togesc_onboarding_complete';
@@ -35,6 +36,7 @@ const String octaveVariationKey = 'togesc_octave_variation';
 const String toneDurationKey = 'togesc_tone_duration_sec';
 const String practiceNotePoolKey = 'togesc_practice_note_pool';
 const String sessionHistoryKey = 'togesc_session_history';
+const String srsIntensityProfileKey = 'togesc_srs_intensity_profile';
 
 /// Preferencias de la aplicacion (onboarding, Fase 6, etc.).
 class AppPreferences {
@@ -256,6 +258,14 @@ class AppPreferences {
 
   Future<void> clearSessionHistory() async {
     await _prefs.remove(sessionHistoryKey);
+  }
+
+  SrsIntensityProfile get srsIntensityProfile {
+    return SrsIntensityProfile.fromId(_prefs.getString(srsIntensityProfileKey));
+  }
+
+  Future<void> setSrsIntensityProfile(SrsIntensityProfile profile) async {
+    await _prefs.setString(srsIntensityProfileKey, profile.name);
   }
 
   /// Encuesta CSAT ocasional: tras 10 sesiones y cada 30 dias.

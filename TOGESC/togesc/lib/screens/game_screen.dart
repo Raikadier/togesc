@@ -14,8 +14,10 @@ import '../providers/practice_session_preferences_provider.dart';
 import '../models/last_practice_session.dart';
 import '../providers/session_history_provider.dart';
 import '../providers/ui_preferences_provider.dart';
+import '../services/microphone_pitch_service.dart';
 import '../utils/piano_note_selection.dart';
 import '../widgets/game_session_views.dart';
+import '../widgets/microphone_answer_panel.dart';
 import '../widgets/note_input_field.dart';
 import '../widgets/piano_keyboard.dart';
 import '../widgets/result_card.dart';
@@ -74,6 +76,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
   @override
   void deactivate() {
+    MicrophonePitchService.stopListening();
     final session = ref.read(gameSessionProvider);
     if (session.roundsCompleted > 0) {
       ref.read(sessionHistoryProvider.notifier).record(
@@ -314,8 +317,11 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final hint = namingMode == NoteNamingMode.solfege
         ? 'O escribe aqui: Do Re Mi'
         : 'O escribe aqui: C E G';
-    final showPiano = ui.inputMode != GameInputMode.textOnly;
-    final showText = ui.inputMode != GameInputMode.pianoOnly;
+    final showMic = ui.inputMode == GameInputMode.humming;
+    final showPiano =
+        ui.inputMode != GameInputMode.textOnly && !showMic;
+    final showText =
+        ui.inputMode != GameInputMode.pianoOnly && !showMic;
     final showConfirm = ui.confirmBeforeSubmit && showPiano;
 
     return SingleChildScrollView(
@@ -323,6 +329,15 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           GameSessionAnswerHeader(numNotes: required),
+          if (showMic) ...[
+            const SizedBox(height: DesignTokens.spacingSm),
+            MicrophoneAnswerPanel(
+              requiredNotes: required,
+              onNoteDetected: (note) => _toggleNote(note, required),
+              onSubmit: () => _confirmSelection(required),
+            ),
+            const SizedBox(height: DesignTokens.spacingMd),
+          ],
           if (showPiano) ...[
             const SizedBox(height: DesignTokens.spacingSm),
             Text(

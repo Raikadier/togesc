@@ -54,6 +54,7 @@ abstract final class UserDataExportService {
           'auto_advance_after_result': session.autoAdvanceAfterResult,
         },
         'practice_note_pool': prefs.practiceNotePool,
+        'srs_intensity': prefs.srsIntensityProfile.name,
         'last_practice': last == null
             ? null
             : {
