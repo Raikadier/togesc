@@ -250,7 +250,7 @@ Entregables [S]:
   - [x] Dependabot para deps Flutter y GitHub Actions
 
 Entregables [C]:
-  - [ ] Modo canto/tarareo (respuesta por micrófono) — diferido
+  - [x] Modo canto/tarareo (respuesta por microfono) — Fase 7E-3 + movil
   - [x] Solfeo Do/Re/Mi además de C/D/E (preferencia en /account)
   - [x] Notificaciones push "tienes notas vencidas para repasar" (Android/iOS)
   - [x] Export CSV del progreso (Fase 5)
@@ -275,7 +275,7 @@ CRONOGRAMA RESUMIDO
   Fase 4  Supabase + sync             ████████░░  COMPLETADA (Must)
   Fase 5  Monetización                ████████░░  COMPLETADA (código)
   Fase 6  Escala continua             ████████░░  COMPLETADA
-  Fase 7  IA/UX completa              ██░░░░░░░░  EN CURSO (7A S1)
+  Fase 7  IA/UX completa              ████████░░  COMPLETADA (plan_fase7_ux.txt)
 
 Total hasta lanzamiento público (Fase 3): ~8–12 semanas según dedicación.
 Ver Plan/plan_fase7_ux.txt para desglose Fase 7.

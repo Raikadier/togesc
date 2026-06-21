@@ -7,13 +7,16 @@ import 'package:go_router/go_router.dart';
 import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../models/subscription_status.dart';
+import '../providers/session_history_provider.dart';
 import '../providers/srs_provider.dart';
 import '../providers/subscription_provider.dart';
+import '../utils/session_history_stats.dart';
 import '../services/progress_export_download.dart';
 import '../services/progress_export_service.dart';
 import '../services/subscription_access.dart';
 import '../widgets/account_monetization_views.dart';
 import '../widgets/info_views.dart';
+import '../widgets/session_evolution_chart.dart';
 import '../widgets/session_history_card.dart';
 import '../widgets/togesc_ui.dart';
 
@@ -50,6 +53,9 @@ class StatisticsScreen extends ConsumerWidget {
     final overdueCount = stats['overdue_count'] as int? ?? 0;
     final hardestNotes = stats['hardest_notes'] as List<dynamic>? ?? [];
     final easiestNotes = stats['easiest_notes'] as List<dynamic>? ?? [];
+    final history = ref.watch(sessionHistoryProvider).valueOrNull ?? [];
+    final weeklySummaries = buildDailyPracticeSummaries(history);
+    final hasWeeklyActivity = weeklySummaries.any((day) => day.hasActivity);
     final accuracyColor = _accuracyColor(accuracy);
 
     return TogescScaffold(
@@ -129,6 +135,10 @@ class StatisticsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: DesignTokens.spacingMd),
+            if (hasWeeklyActivity) ...[
+              SessionEvolutionChart(summaries: weeklySummaries),
+              const SizedBox(height: DesignTokens.spacingMd),
+            ],
             const SessionHistoryCard(),
             const SizedBox(height: DesignTokens.spacingMd),
             OutlinedButton.icon(

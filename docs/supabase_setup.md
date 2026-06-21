@@ -115,3 +115,12 @@ El workflow `deploy-web.yml` las inyecta como `--dart-define` en el build web.
 - RPC `delete_own_account` (security definer): borra `auth.users` del usuario autenticado; `user_progress` en cascade
 
 Aplicar también `supabase/migrations/20260620000000_delete_own_account.sql` para habilitar eliminación de cuenta desde la app.
+
+Si `supabase db push` falla por historial divergente, ejecuta:
+
+```powershell
+cd "D:\Github repos\togesc"
+.\scripts\repair-supabase-migrations.ps1
+```
+
+Esto alinea las versiones locales con el proyecto remoto (2026-06-21 verificado).

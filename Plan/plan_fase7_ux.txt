@@ -53,7 +53,7 @@ PR 7B-1 [M] Continuar práctica en Home (último modo + CTA)
 PR 7B-2 [S] Objetivo de sesión (5/10/20 rondas)
 PR 7B-3 [S] Pausa, saltar nota, auto-repro tras cluster
 PR 7B-4 [M] Test de audio (onboarding o Cuenta)
-PR 7B-5 [S] Notación en onboarding + rever tutorial
+PR 7B-5 [S] Notación en onboarding + rever tutorial                 [HECHO]
 
 ================================================================================
 7C — REFLEXIÓN SRS
@@ -61,7 +61,7 @@ PR 7B-5 [S] Notación en onboarding + rever tutorial
 
 PR 7C-1 [M] Detalle 12 notas + practicar nota
 PR 7C-2 [S] Historial sesiones local
-PR 7C-3 [C] Gráfico evolución 7 días
+PR 7C-3 [C] Gráfico evolución 7 días                               [HECHO]
 PR 7C-4 [S] Pool notas configurable (multi-select)
 
 ================================================================================

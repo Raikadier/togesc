@@ -352,6 +352,7 @@ Vistas que un entrenador SRS+audio **debe** tener vs estado:
 | 17 | Selector timbre (7 presets) | Útil pedagógicamente | ✅ Ajustes → Sonido |
 | 18 | Vista detalle por nota (12× SRS) | Útil para power users | ✅ `/statistics/notes` |
 | 19 | Perfil intensidad SRS | Roadmap 7E-2 | ✅ Ajustes → Intensidad SRS |
+| 20 | Gráfico evolución 7 días | Roadmap 7C-3 | ✅ Estadísticas (historial local) |
 
 ---
 
