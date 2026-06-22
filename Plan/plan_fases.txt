@@ -145,8 +145,8 @@ Objetivo:
   Usuarios reales pueden instalar/usar la app fuera del entorno de desarrollo.
 
 Entregables [M]:
-  - [ ] Build release Android (AAB) + firma — diferido (sin Android SDK)
-  - [ ] Build release iOS (si aplica) + TestFlight — diferido
+  - [x] Build release Android (AAB) + firma — scripts + docs (key.properties local)
+  - [ ] Build release iOS (si aplica) + TestFlight — requiere Mac/Xcode
   - [x] Web publica: https://togesc.vercel.app (sin dominio propio por ahora)
   - [x] Politica de privacidad en app (/privacy)
 

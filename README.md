@@ -48,6 +48,8 @@ togesc/
 - **Contexto del proyecto:** [Plan/project_context.txt](Plan/project_context.txt)
 - **Plan de fases:** [Plan/plan_fases.txt](Plan/plan_fases.txt)
 - **Supabase (Fase 4):** [docs/supabase_setup.md](docs/supabase_setup.md)
+- **QA manual:** [docs/qa_checklist.md](docs/qa_checklist.md)
+- **Release móvil:** [docs/mobile_release.md](docs/mobile_release.md)
 
 ## Stack
 

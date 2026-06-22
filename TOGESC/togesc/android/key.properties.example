@@ -1,0 +1,7 @@
+# Copia a android/key.properties (no commitear) y rellena tras crear el keystore.
+# Ver docs/mobile_release.md
+
+storePassword=TU_PASSWORD_DEL_KEYSTORE
+keyPassword=TU_PASSWORD_DE_LA_CLAVE
+keyAlias=togesc
+storeFile=../keystores/togesc-release.jks

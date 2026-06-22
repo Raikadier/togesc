@@ -144,7 +144,7 @@ flutter build appbundle --release
 
 Salida: `build/app/outputs/bundle/release/app-release.aab`
 
-Hoy el `applicationId` es `com.example.togesc` (válido para pruebas; cámbialo antes de Play Store).
+El `applicationId` es `com.raikadier.togesc`. Para firma release y subida a Play Store, sigue [mobile_release.md](mobile_release.md).
 
 ---
 
