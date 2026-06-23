@@ -15,6 +15,7 @@ import '../widgets/account_auth_views.dart';
 import '../widgets/account_data_section.dart';
 import '../widgets/account_sync_views.dart';
 import '../widgets/account_monetization_views.dart';
+import '../widgets/info_views.dart';
 
 enum _AccountView { signIn, signUp, forgotPassword, updatePassword }
 
@@ -269,6 +270,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           const SizedBox(height: DesignTokens.spacingLg),
           AccountSettingsShortcutCard(
             onTap: () => context.push(AppRoutes.settings),
+          ),
+          const SizedBox(height: DesignTokens.spacingLg),
+          const InfoSectionHeader(title: 'Informacion'),
+          InfoLinkCard(
+            icon: Icons.info_outline_rounded,
+            title: 'Acerca de TOGESC',
+            subtitle: 'Pedagogia, tutorial y enlaces utiles',
+            onTap: () => context.push(AppRoutes.about),
           ),
           const SizedBox(height: DesignTokens.spacingLg),
           if (!available) ...[

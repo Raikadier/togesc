@@ -4,14 +4,23 @@ import 'package:go_router/go_router.dart';
 
 import '../app/router.dart';
 
-final _routerRefresh = ValueNotifier<int>(0);
+final routerRefreshListenable = ValueNotifier<int>(0);
+
+/// Router con ubicacion inicial segun onboarding (llamar desde main tras leer prefs).
+GoRouter buildAppRouter({required bool onboardingComplete}) {
+  return createAppRouter(
+    refreshListenable: routerRefreshListenable,
+    initialLocation:
+        onboardingComplete ? AppRoutes.home : AppRoutes.onboarding,
+  );
+}
 
 final goRouterProvider = Provider<GoRouter>((ref) {
-  ref.onDispose(_routerRefresh.dispose);
-  return createAppRouter(refreshListenable: _routerRefresh);
+  ref.onDispose(routerRefreshListenable.dispose);
+  return createAppRouter(refreshListenable: routerRefreshListenable);
 });
 
 /// Notifica al router que debe reevaluar redirects (p. ej. tras onboarding).
 void refreshAppRouter() {
-  _routerRefresh.value++;
+  routerRefreshListenable.value++;
 }

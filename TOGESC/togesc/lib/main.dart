@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app_theme.dart';
@@ -10,6 +11,7 @@ import 'config/supabase_config.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/router_provider.dart';
 import 'providers/ui_preferences_provider.dart';
+import 'services/app_preferences.dart';
 import 'widgets/app_startup_listener.dart';
 import 'widgets/auth_sync_listener.dart';
 import 'widgets/csat_survey_listener.dart';
@@ -44,9 +46,17 @@ Future<void> _bootstrap() async {
     );
   }
 
+  final prefs = await SharedPreferences.getInstance();
+  final onboardingComplete =
+      prefs.getBool(onboardingCompleteKey) ?? false;
+  final router = buildAppRouter(onboardingComplete: onboardingComplete);
+
   runApp(
-    const ProviderScope(
-      child: AppStartupListener(
+    ProviderScope(
+      overrides: [
+        goRouterProvider.overrideWithValue(router),
+      ],
+      child: const AppStartupListener(
         child: CsatSurveyListener(
           child: SubscriptionCheckoutListener(
             child: AuthSyncListener(child: TogescApp()),

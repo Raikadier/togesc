@@ -15,24 +15,24 @@ Debe pasar: `flutter analyze`, `flutter test` (285+).
 
 ## 0. Navegacion shell (Stitch)
 
-- [ ] Header **TOGESC** visible en Home, Stats, Pro y Perfil
-- [ ] Bottom nav movil: Practica / Stats / Pro / Perfil cambia de tab sin crash
-- [ ] Juego y velocidad abren **sin** bottom bar (pantalla inmersiva)
+- [x] Header **TOGESC** visible en Home, Stats, Pro y Perfil
+- [x] Bottom nav movil: Practica / Stats / Pro / Perfil cambia de tab sin crash
+- [x] Juego y velocidad abren **sin** bottom bar (pantalla inmersiva)
 - [ ] Desktop (>=600px): enlaces Entrenamiento / Estadisticas / Pro en header
 
 ## 1. Primera apertura y onboarding
 
 - [ ] App nueva muestra **Cómo funciona** (onboarding)
-- [ ] Toggle **Do/Re/Mi** muestra vista previa correcta
-- [ ] **Test de audio** suena en el dispositivo
+- [x] Toggle **Do/Re/Mi** muestra vista previa correcta
+- [x] **Test de audio** suena en el dispositivo
 - [ ] **Entendido, empezar** lleva a Home
 - [ ] Acerca de → **Ver tutorial de nuevo** vuelve al onboarding
 
 ## 2. Práctica core (modo Una nota)
 
-- [ ] Reproducir → escuchar → responder (piano) → resultado → cluster → siguiente ronda
-- [ ] Sin crashes ni pantalla congelada
-- [ ] Progreso SRS persiste tras cerrar y reabrir la app
+- [x] Reproducir → escuchar → responder (piano) → resultado → cluster → siguiente ronda
+- [x] Sin crashes ni pantalla congelada
+- [x] Progreso SRS persiste tras cerrar y reabrir la app
 
 ## 3. Home y engagement
 
@@ -52,14 +52,14 @@ Debe pasar: `flutter analyze`, `flutter test` (285+).
 
 ## 5. Estadisticas Pro dashboard
 
-- [ ] Bento superior: precision, intentos, pendientes + **Repasar ahora**
+- [x] Bento superior: precision, intentos, pendientes + **Repasar ahora**
 - [ ] Radar 12 notas (usuario Pro)
 - [ ] Filas de dificultad muestran latencia si hay datos
 
 ## 6. Modo canto (experimental)
 
 - [ ] Web: permiso micrófono → detecta nota al cantar
-- [ ] Android/iOS: permiso micrófono → detecta nota (entorno silencioso)
+- [x] Android/iOS: permiso micrófono → detecta nota (entorno silencioso)
 - [ ] El audio **no** se sube (verificar sin red si es posible)
 
 ## 5. Estadísticas y reflexión
@@ -86,9 +86,9 @@ Debe pasar: `flutter analyze`, `flutter test` (285+).
 
 ## 8. Regresión web
 
-- [ ] https://togesc.vercel.app carga tras deploy
+- [x] [https://togesc.vercel.app](https://togesc.vercel.app) carga tras deploy
 - [ ] Audio funciona tras un gesto del usuario (política autoplay)
-- [ ] Sin errores en consola del navegador (críticos)
+- [x] Sin errores en consola del navegador (críticos)
 
 ---
 
@@ -97,3 +97,4 @@ Debe pasar: `flutter analyze`, `flutter test` (285+).
 - **0 crashes** en la sesión
 - **0 regresiones** en flujo práctica → SRS
 - Sync y pagos validados al menos una vez en sandbox antes de producción
+

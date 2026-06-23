@@ -104,9 +104,8 @@ class AboutScreen extends ConsumerWidget {
   Future<void> _replayOnboarding(BuildContext context) async {
     final prefs = AppPreferences(await SharedPreferences.getInstance());
     await prefs.setOnboardingComplete(false);
+    if (!context.mounted) return;
+    context.go(AppRoutes.onboarding);
     refreshAppRouter();
-    if (context.mounted) {
-      context.go(AppRoutes.onboarding);
-    }
   }
 }

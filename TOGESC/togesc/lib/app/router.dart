@@ -37,9 +37,12 @@ abstract final class AppRoutes {
   static const speedGame = '/speed/game';
 }
 
-GoRouter createAppRouter({required Listenable refreshListenable}) {
+GoRouter createAppRouter({
+  required Listenable refreshListenable,
+  String initialLocation = AppRoutes.home,
+}) {
   return GoRouter(
-    initialLocation: AppRoutes.home,
+    initialLocation: initialLocation,
     refreshListenable: refreshListenable,
     redirect: (context, state) async {
       final prefs = await SharedPreferences.getInstance();
