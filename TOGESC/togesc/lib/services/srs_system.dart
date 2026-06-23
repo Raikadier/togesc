@@ -157,6 +157,15 @@ class SRSSystem {
       data.timesSeen += 1;
       data.lastSeen = now.toIso8601String();
 
+      if (responseTime > 0) {
+        if (data.timesSeen <= 1) {
+          data.avgResponseTimeSec = responseTime;
+        } else {
+          data.avgResponseTimeSec =
+              data.avgResponseTimeSec * 0.7 + responseTime * 0.3;
+        }
+      }
+
       final oldData = {
         'weight': data.weight,
         'ease_factor': data.easeFactor,

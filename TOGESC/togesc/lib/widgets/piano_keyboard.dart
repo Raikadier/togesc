@@ -3,33 +3,15 @@ import 'package:flutter/material.dart';
 import '../app/design_tokens.dart';
 import '../constants/note_naming.dart';
 
-/// Teclado de piano interactivo con 7 teclas blancas y 5 negras.
-///
-/// Permite seleccionar/deseleccionar notas con tap.
-/// Soporta colores de highlight para feedback visual.
-class PianoKeyboard extends StatelessWidget {
-  /// Notas actualmente seleccionadas por el usuario.
+/// Teclado de piano interactivo (Stitch skeuominimalist).
+class PianoKeyboard extends StatefulWidget {
   final Set<String> selectedNotes;
-
-  /// Notas correctas (para highlight verde despues de responder).
   final Set<String> correctNotes;
-
-  /// Notas incorrectas (para highlight rojo despues de responder).
   final Set<String> incorrectNotes;
-
-  /// Callback cuando el usuario toca una nota.
   final ValueChanged<String>? onNoteTapped;
-
-  /// Si el teclado esta deshabilitado (no acepta taps).
   final bool disabled;
-
-  /// Etiquetas en letras o solfeo (Do/Re/Mi).
   final NoteNamingMode noteNamingMode;
-
-  /// Teclas mas amplias (accesibilidad).
   final bool large;
-
-  /// Oculta nombres en las teclas.
   final bool hideLabels;
 
   const PianoKeyboard({
@@ -53,153 +35,255 @@ class PianoKeyboard extends StatelessWidget {
     'A': 'A#',
   };
 
-  Color _getWhiteKeyColor(String note) {
-    if (correctNotes.contains(note)) {
-      return DesignTokens.correct.withValues(alpha: 0.25);
+  @override
+  State<PianoKeyboard> createState() => _PianoKeyboardState();
+}
+
+class _PianoKeyboardState extends State<PianoKeyboard> {
+  final Set<String> _pressed = {};
+
+  LinearGradient _whiteGradient(String note, bool pressed) {
+    if (widget.correctNotes.contains(note)) {
+      return LinearGradient(
+        colors: [
+          DesignTokens.correct.withValues(alpha: 0.3),
+          DesignTokens.correct.withValues(alpha: 0.2),
+        ],
+      );
     }
-    if (incorrectNotes.contains(note)) {
-      return DesignTokens.incorrect.withValues(alpha: 0.25);
+    if (widget.incorrectNotes.contains(note)) {
+      return LinearGradient(
+        colors: [
+          DesignTokens.incorrect.withValues(alpha: 0.3),
+          DesignTokens.incorrect.withValues(alpha: 0.2),
+        ],
+      );
     }
-    if (selectedNotes.contains(note)) {
-      return DesignTokens.selection.withValues(alpha: 0.35);
+    if (widget.selectedNotes.contains(note)) {
+      return LinearGradient(
+        colors: [
+          DesignTokens.selection.withValues(alpha: 0.4),
+          DesignTokens.selection.withValues(alpha: 0.25),
+        ],
+      );
     }
-    return DesignTokens.pianoWhite;
+    if (pressed) {
+      return const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFF3ECF1), Color(0xFFEEEEEE)],
+      );
+    }
+    return const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Colors.white, Color(0xFFFCFCFC), Color(0xFFF0F0F0)],
+      stops: [0, 0.9, 1],
+    );
   }
 
-  Color _getBlackKeyColor(String note) {
-    if (correctNotes.contains(note)) return DesignTokens.correct;
-    if (incorrectNotes.contains(note)) return DesignTokens.incorrect;
-    if (selectedNotes.contains(note)) return const Color(0xFF8A6A00);
-    return DesignTokens.pianoBlack;
-  }
-
-  Color _getWhiteKeyTextColor(String note) {
-    if (correctNotes.contains(note) ||
-        incorrectNotes.contains(note) ||
-        selectedNotes.contains(note)) {
-      return Colors.black;
+  LinearGradient _blackGradient(String note, bool pressed) {
+    if (widget.correctNotes.contains(note)) {
+      return const LinearGradient(
+        colors: [DesignTokens.correct, Color(0xFF1B5E20)],
+      );
     }
-    return Colors.black87;
-  }
-
-  Color _getBlackKeyTextColor(String note) {
-    if (correctNotes.contains(note) ||
-        incorrectNotes.contains(note) ||
-        selectedNotes.contains(note)) {
-      return Colors.black;
+    if (widget.incorrectNotes.contains(note)) {
+      return const LinearGradient(
+        colors: [DesignTokens.incorrect, Color(0xFF8B0000)],
+      );
     }
-    return Colors.white;
+    if (widget.selectedNotes.contains(note)) {
+      return const LinearGradient(
+        colors: [Color(0xFF8A6A00), Color(0xFF5D4800)],
+      );
+    }
+    if (pressed) {
+      return const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFF4D4351), Color(0xFF333333)],
+      );
+    }
+    return const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Color(0xFF333333), Color(0xFF212121), Colors.black],
+      stops: [0, 0.8, 1],
+    );
   }
 
-  Color _whiteKeyBorder(String note) {
-    if (selectedNotes.contains(note)) return DesignTokens.selection;
-    if (correctNotes.contains(note)) return DesignTokens.correct;
-    if (incorrectNotes.contains(note)) return DesignTokens.incorrect;
-    return DesignTokens.outlineVariant;
+  Color _whiteKeyBorder(String note, ColorScheme scheme) {
+    if (widget.selectedNotes.contains(note)) return DesignTokens.selection;
+    if (widget.correctNotes.contains(note)) return DesignTokens.correct;
+    if (widget.incorrectNotes.contains(note)) return DesignTokens.incorrect;
+    return scheme.outlineVariant;
   }
 
-  double _whiteKeyBorderWidth(String note) {
-    if (selectedNotes.contains(note)) return 2;
-    return 1;
+  double _whiteKeyBorderWidth(String note) =>
+      widget.selectedNotes.contains(note) ? 2 : 1;
+
+  void _tap(String note) {
+    if (widget.disabled) return;
+    setState(() => _pressed.add(note));
+    widget.onNoteTapped?.call(note);
+    Future<void>.delayed(const Duration(milliseconds: 80), () {
+      if (mounted) setState(() => _pressed.remove(note));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxWidth = large ? 640.0 : 500.0;
-        final minWidth = large ? 320.0 : 280.0;
+        final maxWidth = widget.large ? 640.0 : 500.0;
+        final minWidth = widget.large ? 320.0 : 280.0;
         final totalWidth = constraints.maxWidth.clamp(minWidth, maxWidth);
         final whiteKeyWidth = totalWidth / 7;
         final whiteKeyHeight = whiteKeyWidth * 3.5;
         final blackKeyWidth = whiteKeyWidth * 0.6;
-        final blackKeyHeight = whiteKeyHeight * 0.6;
+        final blackKeyHeight = whiteKeyHeight * 0.62;
 
-        return SizedBox(
-          width: totalWidth,
-          height: whiteKeyHeight,
-          child: Stack(
-            children: [
-              // Teclas blancas
-              Row(
-                children: whiteNotes.map((note) {
-                  return Expanded(
+        return Container(
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLow,
+            borderRadius: DesignTokens.borderRadiusXl,
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: scheme.shadow.withValues(alpha: 0.12),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(4),
+          child: SizedBox(
+            width: totalWidth,
+            height: whiteKeyHeight,
+            child: Stack(
+              children: [
+                Row(
+                  children: PianoKeyboard.whiteNotes.map((note) {
+                    final pressed = _pressed.contains(note);
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () => _tap(note),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 50),
+                          transform: pressed
+                              ? (Matrix4.identity()..translateByDouble(0.0, 2.0, 0.0, 1.0))
+                              : Matrix4.identity(),
+                          margin: const EdgeInsets.symmetric(horizontal: 0.5),
+                          decoration: BoxDecoration(
+                            gradient: _whiteGradient(note, pressed),
+                            border: Border.all(
+                              color: _whiteKeyBorder(note, scheme),
+                              width: _whiteKeyBorderWidth(note),
+                            ),
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(
+                                note == 'C' ? 12 : 4,
+                              ),
+                              bottomRight: Radius.circular(
+                                note == 'B' ? 12 : 4,
+                              ),
+                            ),
+                            boxShadow: pressed
+                                ? null
+                                : [
+                                    BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.05),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                          ),
+                          alignment: Alignment.bottomCenter,
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: widget.hideLabels
+                              ? const SizedBox.shrink()
+                              : Text(
+                                  formatNoteLabel(note, widget.noteNamingMode),
+                                  style: TextStyle(
+                                    fontSize: widget.large ? 16 : 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: scheme.outline,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                ...PianoKeyboard.blackNoteMap.entries.map((entry) {
+                  final whiteIndex =
+                      PianoKeyboard.whiteNotes.indexOf(entry.key);
+                  final sharpNote = entry.value;
+                  final pressed = _pressed.contains(sharpNote);
+                  final leftOffset =
+                      (whiteIndex + 1) * whiteKeyWidth - blackKeyWidth / 2;
+
+                  return Positioned(
+                    left: leftOffset,
+                    top: 0,
+                    width: blackKeyWidth,
+                    height: blackKeyHeight,
                     child: GestureDetector(
-                      onTap: disabled ? null : () => onNoteTapped?.call(note),
-                      child: Container(
-                        height: whiteKeyHeight,
+                      onTap: () => _tap(sharpNote),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 50),
+                        transform: pressed
+                            ? (Matrix4.identity()..translateByDouble(0.0, 3.0, 0.0, 1.0))
+                            : Matrix4.identity(),
                         decoration: BoxDecoration(
-                          color: _getWhiteKeyColor(note),
+                          gradient: _blackGradient(sharpNote, pressed),
                           border: Border.all(
-                            color: _whiteKeyBorder(note),
-                            width: _whiteKeyBorderWidth(note),
+                            color: widget.selectedNotes.contains(sharpNote)
+                                ? DesignTokens.selection
+                                : Colors.transparent,
+                            width: widget.selectedNotes.contains(sharpNote)
+                                ? 2
+                                : 0,
                           ),
                           borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(4),
-                            bottomRight: Radius.circular(4),
+                            bottomLeft: Radius.circular(6),
+                            bottomRight: Radius.circular(6),
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
                         alignment: Alignment.bottomCenter,
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: hideLabels
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: widget.hideLabels
                             ? const SizedBox.shrink()
                             : Text(
-                                formatNoteLabel(note, noteNamingMode),
+                                formatNoteLabel(
+                                  sharpNote,
+                                  widget.noteNamingMode,
+                                ),
                                 style: TextStyle(
-                                  fontSize: large ? 16 : 14,
+                                  fontSize: widget.large ? 12 : 10,
                                   fontWeight: FontWeight.bold,
-                                  color: _getWhiteKeyTextColor(note),
+                                  color: Colors.white,
                                 ),
                               ),
                       ),
                     ),
                   );
-                }).toList(),
-              ),
-              // Teclas negras
-              ...blackNoteMap.entries.map((entry) {
-                final whiteIndex = whiteNotes.indexOf(entry.key);
-                final sharpNote = entry.value;
-                final leftOffset = (whiteIndex + 1) * whiteKeyWidth - blackKeyWidth / 2;
-
-                return Positioned(
-                  left: leftOffset,
-                  top: 0,
-                  width: blackKeyWidth,
-                  height: blackKeyHeight,
-                  child: GestureDetector(
-                    onTap: disabled ? null : () => onNoteTapped?.call(sharpNote),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: _getBlackKeyColor(sharpNote),
-                        border: Border.all(
-                          color: selectedNotes.contains(sharpNote)
-                              ? DesignTokens.selection
-                              : Colors.transparent,
-                          width: selectedNotes.contains(sharpNote) ? 2 : 0,
-                        ),
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(4),
-                          bottomRight: Radius.circular(4),
-                        ),
-                      ),
-                      alignment: Alignment.bottomCenter,
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: hideLabels
-                          ? const SizedBox.shrink()
-                          : Text(
-                              formatNoteLabel(sharpNote, noteNamingMode),
-                              style: TextStyle(
-                                fontSize: large ? 12 : 10,
-                                fontWeight: FontWeight.bold,
-                                color: _getBlackKeyTextColor(sharpNote),
-                              ),
-                            ),
-                    ),
-                  ),
-                );
-              }),
-            ],
+                }),
+              ],
+            ),
           ),
         );
       },

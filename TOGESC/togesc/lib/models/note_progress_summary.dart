@@ -12,6 +12,7 @@ class NoteProgressSummary {
   final int timesCorrect;
   final double weight;
   final bool isOverdue;
+  final double avgResponseTimeSec;
 
   const NoteProgressSummary({
     required this.note,
@@ -21,6 +22,7 @@ class NoteProgressSummary {
     required this.timesCorrect,
     required this.weight,
     required this.isOverdue,
+    this.avgResponseTimeSec = 0,
   });
 
   double get accuracyPercent =>
@@ -42,6 +44,7 @@ class NoteProgressSummary {
       timesCorrect: data.timesCorrect,
       weight: data.weight,
       isOverdue: isOverdue,
+      avgResponseTimeSec: data.avgResponseTimeSec,
     );
   }
 }

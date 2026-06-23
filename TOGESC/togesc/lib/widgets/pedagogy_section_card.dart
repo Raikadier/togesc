@@ -21,7 +21,8 @@ class PedagogySectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = accentColor ?? DesignTokens.primaryContainer;
+    final scheme = theme.colorScheme;
+    final color = accentColor ?? scheme.primaryContainer;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: DesignTokens.spacingMd),
@@ -43,7 +44,7 @@ class PedagogySectionCard extends StatelessWidget {
                   Text(
                     body,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: DesignTokens.onSurfaceVariant,
+                      color: scheme.onSurfaceVariant,
                     ),
                   ),
                 ],

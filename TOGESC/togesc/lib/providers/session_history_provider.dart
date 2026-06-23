@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/game_constants.dart';
 import '../models/last_practice_session.dart';
 import '../models/practice_session_log.dart';
+import '../services/engagement_stats_service.dart';
 import 'app_preferences_provider.dart';
 
 final sessionHistoryProvider =
@@ -35,6 +36,8 @@ class SessionHistoryNotifier extends AsyncNotifier<List<PracticeSessionLog>> {
       endedAt: endedAt ?? DateTime.now(),
     );
     final next = await prefs.appendSessionLog(entry);
+    final xp = EngagementStatsService.xpFromSession(correctRounds);
+    await prefs.addXp(xp);
     state = AsyncData(next);
   }
 

@@ -13,6 +13,7 @@ class NoteData {
   String? lastSeen; // ISO format timestamp
   String? nextReview; // ISO format timestamp
   bool isLearning;
+  double avgResponseTimeSec;
 
   NoteData({
     this.weight = defaultNoteWeight,
@@ -24,6 +25,7 @@ class NoteData {
     this.lastSeen,
     this.nextReview,
     this.isLearning = true,
+    this.avgResponseTimeSec = 0,
   });
 
   Map<String, dynamic> toJson() => {
@@ -36,6 +38,7 @@ class NoteData {
         'last_seen': lastSeen,
         'next_review': nextReview,
         'is_learning': isLearning,
+        'avg_response_time_sec': avgResponseTimeSec,
       };
 
   factory NoteData.fromJson(Map<String, dynamic> data) {
@@ -64,6 +67,7 @@ class NoteData {
       lastSeen: _safeString(data['last_seen']),
       nextReview: _safeString(data['next_review']),
       isLearning: data['is_learning'] is bool ? data['is_learning'] as bool : true,
+      avgResponseTimeSec: _safeDouble(data['avg_response_time_sec'], 0, minVal: 0),
     );
   }
 
@@ -122,6 +126,7 @@ class NoteData {
     String? lastSeen,
     String? nextReview,
     bool? isLearning,
+    double? avgResponseTimeSec,
   }) {
     return NoteData(
       weight: weight ?? this.weight,
@@ -133,6 +138,7 @@ class NoteData {
       lastSeen: lastSeen ?? this.lastSeen,
       nextReview: nextReview ?? this.nextReview,
       isLearning: isLearning ?? this.isLearning,
+      avgResponseTimeSec: avgResponseTimeSec ?? this.avgResponseTimeSec,
     );
   }
 }

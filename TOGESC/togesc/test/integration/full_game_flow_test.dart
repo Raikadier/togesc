@@ -77,10 +77,8 @@ void main() {
       expect(find.text('Modos de Juego'), findsOneWidget);
       expect(find.text('Una sola nota'), findsOneWidget);
 
-      await tester.tap(find.text('Una sola nota'));
+      await tester.tap(find.text('Una sola nota').first);
       await tester.pumpAndSettle();
-
-      expect(find.text('Preparate para escuchar'), findsOneWidget);
       expect(find.text('Reproducir'), findsOneWidget);
     });
 
@@ -90,7 +88,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Ir a modo "Una sola nota"
-      await tester.tap(find.text('Una sola nota'));
+      await tester.tap(find.text('Una sola nota').first);
       await tester.pumpAndSettle();
 
       // 2. Tap Reproducir
@@ -104,23 +102,30 @@ void main() {
 
       // 4. Escribir respuesta via campo de texto y enviar
       await tester.enterText(find.byType(TextField), 'C');
-      await tester.ensureVisible(find.text('Enviar'));
-      await tester.tap(find.text('Enviar'));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
 
       // 5. Vista de resultado: aparece boton Siguiente
       expect(find.text('Siguiente'), findsOneWidget);
+
+      // Volver a home para que record() en deactivate termine antes del dispose.
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('boton de estadisticas navega a StatisticsScreen',
         (tester) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Estadisticas'));
+      await tester.tap(find.text('Stats'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Estadisticas'), findsAtLeast(1));
+      expect(find.textContaining('Estadisticas'), findsAtLeast(1));
     });
   });
 }

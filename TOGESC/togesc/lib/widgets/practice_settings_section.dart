@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../app/design_tokens.dart';
 import '../constants/note_naming.dart';
 import '../providers/app_preferences_provider.dart';
 import '../services/practice_reminder_service.dart';

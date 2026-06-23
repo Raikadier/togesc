@@ -10,6 +10,7 @@ abstract final class DesignTokens {
   static const Color onSurfaceVariant = Color(0xFF4D4351);
   static const Color surfaceContainerLow = Color(0xFFF9F1F6);
   static const Color surfaceContainer = Color(0xFFF3ECF1);
+  static const Color surfaceContainerHigh = Color(0xFFEEE6EB);
   static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
   static const Color outline = Color(0xFF7F7383);
   static const Color outlineVariant = Color(0xFFD0C2D3);
@@ -65,6 +66,8 @@ abstract final class DesignTokens {
 
   // --- Forma y espaciado ---
   static const double radiusMd = 12;
+  static const double radiusXl = 16;
+  static const double shellBreakpoint = 600;
   static const double touchTargetMin = 48;
   static const double spacingXs = 4;
   static const double spacingSm = 8;
@@ -74,4 +77,33 @@ abstract final class DesignTokens {
 
   static BorderRadius get borderRadiusMd =>
       BorderRadius.circular(radiusMd);
+
+  static BorderRadius get borderRadiusXl =>
+      BorderRadius.circular(radiusXl);
+
+  // --- Modo velocidad (Stitch speed-gradient) ---
+  static const Color speedAccent = Color(0xFFE64A19);
+  static const Color speedContainer = Color(0xFFFFEBE6);
+
+  static const LinearGradient speedGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFFF5722), Color(0xFFB71C1C)],
+  );
+
+  /// Gradiente Pro (Stitch pro-gradient).
+  static const LinearGradient proGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [primaryContainer, secondary],
+  );
+
+  /// Sombra suave para cards hover (web/desktop).
+  static List<BoxShadow> get cardHoverShadow => [
+        BoxShadow(
+          color: primary.withValues(alpha: 0.08),
+          blurRadius: 20,
+          offset: const Offset(0, 8),
+        ),
+      ];
 }

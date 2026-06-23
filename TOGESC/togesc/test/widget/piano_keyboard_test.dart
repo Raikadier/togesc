@@ -53,9 +53,11 @@ void main() {
       ));
 
       await tester.tap(find.text('C'));
+      await tester.pump(const Duration(milliseconds: 100));
       expect(tappedNote, 'C');
 
       await tester.tap(find.text('G'));
+      await tester.pump(const Duration(milliseconds: 100));
       expect(tappedNote, 'G');
     });
 
@@ -66,6 +68,7 @@ void main() {
       ));
 
       await tester.tap(find.text('C#'));
+      await tester.pump(const Duration(milliseconds: 100));
       expect(tappedNote, 'C#');
     });
 

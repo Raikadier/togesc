@@ -195,7 +195,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
             '${_selectedNotes.length}/$required notas seleccionadas',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: DesignTokens.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
           const SizedBox(height: DesignTokens.spacingLg),
@@ -219,9 +219,9 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
                 return InputChip(
                   label: Text(note),
                   onDeleted: () => _toggleNote(note, required),
-                  deleteIconColor: DesignTokens.primaryContainer,
-                  side: const BorderSide(
-                    color: DesignTokens.primaryContainer,
+                  deleteIconColor: Theme.of(context).colorScheme.primaryContainer,
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     width: 2,
                   ),
                   backgroundColor:

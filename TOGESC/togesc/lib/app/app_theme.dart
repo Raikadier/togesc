@@ -40,13 +40,14 @@ abstract final class AppTheme {
       surfaceContainerLowest: const Color(0xFFFFFFFF),
     );
 
-    final textTheme = _textTheme(Brightness.light);
+    final textTheme = _textTheme(Brightness.light, scheme);
 
     return ThemeData(
       colorScheme: scheme,
       scaffoldBackgroundColor: DesignTokens.background,
       useMaterial3: true,
       textTheme: textTheme,
+      navigationBarTheme: _navigationBarTheme(scheme, textTheme),
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: 0,
@@ -190,13 +191,14 @@ abstract final class AppTheme {
       surfaceContainerLowest: DesignTokens.darkSurfaceContainerLowest,
     );
 
-    final textTheme = _textTheme(Brightness.dark);
+    final textTheme = _textTheme(Brightness.dark, scheme);
 
     return ThemeData(
       colorScheme: scheme,
       scaffoldBackgroundColor: DesignTokens.darkBackground,
       useMaterial3: true,
       textTheme: textTheme,
+      navigationBarTheme: _navigationBarTheme(scheme, textTheme),
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: 0,
@@ -303,7 +305,33 @@ abstract final class AppTheme {
     );
   }
 
-  static TextTheme _textTheme(Brightness brightness) {
+  static NavigationBarThemeData _navigationBarTheme(
+    ColorScheme scheme,
+    TextTheme textTheme,
+  ) {
+    return NavigationBarThemeData(
+      backgroundColor: scheme.surfaceContainerLow,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      height: 80,
+      indicatorColor: scheme.primaryContainer.withValues(alpha: 0.15),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        final selected = states.contains(WidgetState.selected);
+        return textTheme.labelMedium?.copyWith(
+          color: selected ? scheme.primaryContainer : scheme.onSurfaceVariant,
+          fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+        );
+      }),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        final selected = states.contains(WidgetState.selected);
+        return IconThemeData(
+          color: selected ? scheme.primaryContainer : scheme.onSurfaceVariant,
+        );
+      }),
+    );
+  }
+
+  static TextTheme _textTheme(Brightness brightness, ColorScheme scheme) {
     final base = brightness == Brightness.light
         ? ThemeData.light().textTheme
         : ThemeData.dark().textTheme;
@@ -315,38 +343,51 @@ abstract final class AppTheme {
         fontWeight: FontWeight.w700,
         height: 36 / 28,
         letterSpacing: -0.56,
+        color: scheme.onSurface,
       ),
       headlineMedium: hanken.headlineMedium?.copyWith(
         fontSize: 24,
         fontWeight: FontWeight.w600,
         height: 32 / 24,
+        color: scheme.onSurface,
       ),
       titleLarge: hanken.titleLarge?.copyWith(
         fontSize: 20,
         fontWeight: FontWeight.w600,
         height: 28 / 20,
+        color: scheme.onSurface,
+      ),
+      displaySmall: hanken.displaySmall?.copyWith(
+        color: scheme.onSurface,
       ),
       bodyLarge: hanken.bodyLarge?.copyWith(
         fontSize: 18,
         fontWeight: FontWeight.w400,
         height: 26 / 18,
+        color: scheme.onSurface,
       ),
       bodyMedium: hanken.bodyMedium?.copyWith(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         height: 24 / 16,
+        color: scheme.onSurface,
       ),
       labelLarge: hanken.labelLarge?.copyWith(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         height: 20 / 14,
         letterSpacing: 0.1,
+        color: scheme.onSurface,
       ),
       labelMedium: hanken.labelMedium?.copyWith(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         height: 16 / 12,
         letterSpacing: 0.5,
+        color: scheme.onSurfaceVariant,
+      ),
+      labelSmall: hanken.labelSmall?.copyWith(
+        color: scheme.onSurfaceVariant,
       ),
     );
   }

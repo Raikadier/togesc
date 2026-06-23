@@ -14,6 +14,7 @@ class RecommendationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final message = recommendations['message'] as String? ?? '';
     final totalOverdue = recommendations['total_overdue'] as int? ?? 0;
     final learningCount = recommendations['learning_notes_count'] as int? ?? 0;
@@ -28,7 +29,7 @@ class RecommendationCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb, color: DesignTokens.primaryContainer),
+              Icon(Icons.lightbulb, color: scheme.primaryContainer),
               const SizedBox(width: 8),
               Text(
                 'Recomendaciones',
@@ -39,10 +40,10 @@ class RecommendationCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(message, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 12),
-            _buildStatRow('Notas pendientes', '$totalOverdue'),
-            _buildStatRow('En aprendizaje', '$learningCount'),
+            _buildStatRow(context, 'Notas pendientes', '$totalOverdue'),
+            _buildStatRow(context, 'En aprendizaje', '$learningCount'),
             if (daysSince > 0)
-              _buildStatRow('Ultima sesion', 'hace $daysSince dia(s)'),
+              _buildStatRow(context, 'Ultima sesion', 'hace $daysSince dia(s)'),
             if (criticalNotes.isNotEmpty) ...[
               const SizedBox(height: 8),
               const Text(
@@ -71,13 +72,15 @@ class RecommendationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatRow(String label, String value) {
+  Widget _buildStatRow(BuildContext context, String label, String value) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: DesignTokens.onSurfaceVariant)),
+          Text(label, style: TextStyle(color: scheme.onSurfaceVariant)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),

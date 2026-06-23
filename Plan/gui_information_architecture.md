@@ -444,12 +444,13 @@ Paywall → Stripe (externo) → return ?checkout=success → SnackBar Pro
 
 ## 11. Resumen ejecutivo
 
+- **Shell Stitch:** `TogescShell` con header TOGESC + bottom nav (4 tabs) en hub; juego/onboarding fuera del shell.
+- **Engagement:** racha diaria, XP (+10/acierto), mastery por modo, latencia media por nota (`avgResponseTimeSec`).
 - **11 rutas** GoRouter cubren el ámbito funcional completo del producto actual.
 - **12 subvistas de estado** viven dentro de Game + SpeedGame (el grueso de la UX).
 - **5 subvistas** en Account (auth/recovery).
 - **2 diálogos modales**, **3 tipos de MaterialBanner**, **~10 patrones de SnackBar**.
-- **0 dropdowns / bottom sheets** — la IA usa **listas de cards** y **pantallas selector** en su lugar.
-- **Gaps naturales pendientes:** modo micrófono (Fase 6 [C]), detalle SRS por nota, selector explícito de los 7 timbres.
+- Componentes Stitch: `daily_focus_section`, `mode_bento_card`, `note_accuracy_radar_chart`, `stats_bento_grid`, `TogescProButton`.
 
 ---
 

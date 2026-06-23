@@ -13,6 +13,13 @@ Debe pasar: `flutter analyze`, `flutter test` (285+).
 
 ---
 
+## 0. Navegacion shell (Stitch)
+
+- [ ] Header **TOGESC** visible en Home, Stats, Pro y Perfil
+- [ ] Bottom nav movil: Practica / Stats / Pro / Perfil cambia de tab sin crash
+- [ ] Juego y velocidad abren **sin** bottom bar (pantalla inmersiva)
+- [ ] Desktop (>=600px): enlaces Entrenamiento / Estadisticas / Pro en header
+
 ## 1. Primera apertura y onboarding
 
 - [ ] App nueva muestra **Cómo funciona** (onboarding)
@@ -27,7 +34,14 @@ Debe pasar: `flutter analyze`, `flutter test` (285+).
 - [ ] Sin crashes ni pantalla congelada
 - [ ] Progreso SRS persiste tras cerrar y reabrir la app
 
-## 3. Ajustes
+## 3. Home y engagement
+
+- [ ] **Enfoque diario**: notas criticas + racha/XP tras 2+ sesiones
+- [ ] Modos en **grid bento** (no solo lista)
+- [ ] **Practicar ahora** abre modo una nota
+- [ ] Mini grafico semanal si hay historial
+
+## 4. Ajustes
 
 - [ ] Home → icono **tune** → Ajustes
 - [ ] Sonido: timbre, volumen, cluster, octavas, duración del tono
@@ -36,7 +50,13 @@ Debe pasar: `flutter analyze`, `flutter test` (285+).
 - [ ] Modo canto / tarareo en **Juego y accesibilidad**
 - [ ] Tema claro / oscuro / sistema
 
-## 4. Modo canto (experimental)
+## 5. Estadisticas Pro dashboard
+
+- [ ] Bento superior: precision, intentos, pendientes + **Repasar ahora**
+- [ ] Radar 12 notas (usuario Pro)
+- [ ] Filas de dificultad muestran latencia si hay datos
+
+## 6. Modo canto (experimental)
 
 - [ ] Web: permiso micrófono → detecta nota al cantar
 - [ ] Android/iOS: permiso micrófono → detecta nota (entorno silencioso)

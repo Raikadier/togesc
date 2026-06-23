@@ -26,6 +26,7 @@ class CountdownTimerWidget extends StatelessWidget {
         totalTime > 0 ? (remainingTime / totalTime).clamp(0.0, 1.0) : 0.0;
     final color = _getColor();
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Column(
       children: [
@@ -38,7 +39,7 @@ class CountdownTimerWidget extends StatelessWidget {
               CircularProgressIndicator(
                 value: progress,
                 strokeWidth: 6,
-                backgroundColor: DesignTokens.surfaceContainer,
+                backgroundColor: scheme.surfaceContainer,
                 valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
               Text(
@@ -52,7 +53,7 @@ class CountdownTimerWidget extends StatelessWidget {
         Text(
           'Tiempo restante',
           style: theme.textTheme.labelLarge?.copyWith(
-            color: DesignTokens.onSurfaceVariant,
+            color: scheme.onSurfaceVariant,
           ),
         ),
       ],

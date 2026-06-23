@@ -128,6 +128,7 @@ class AudioPlayerService {
         wavBytes,
         mode: LoadMode.memory,
       );
+      // ignore: experimental_member_use
       final finished = source.allInstancesFinished.first;
       await _soloud!.play(source, volume: 1.0);
       await finished;

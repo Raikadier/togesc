@@ -37,6 +37,7 @@ const String toneDurationKey = 'togesc_tone_duration_sec';
 const String practiceNotePoolKey = 'togesc_practice_note_pool';
 const String sessionHistoryKey = 'togesc_session_history';
 const String srsIntensityProfileKey = 'togesc_srs_intensity_profile';
+const String totalXpKey = 'togesc_total_xp';
 
 /// Preferencias de la aplicacion (onboarding, Fase 6, etc.).
 class AppPreferences {
@@ -266,6 +267,19 @@ class AppPreferences {
 
   Future<void> setSrsIntensityProfile(SrsIntensityProfile profile) async {
     await _prefs.setString(srsIntensityProfileKey, profile.name);
+  }
+
+  int get totalXp => _prefs.getInt(totalXpKey) ?? 0;
+
+  Future<int> addXp(int amount) async {
+    if (amount <= 0) return totalXp;
+    final next = totalXp + amount;
+    await _prefs.setInt(totalXpKey, next);
+    return next;
+  }
+
+  Future<void> clearEngagementXp() async {
+    await _prefs.remove(totalXpKey);
   }
 
   /// Encuesta CSAT ocasional: tras 10 sesiones y cada 30 dias.

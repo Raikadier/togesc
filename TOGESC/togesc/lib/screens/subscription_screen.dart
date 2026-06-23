@@ -62,12 +62,20 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   Widget build(BuildContext context) {
     final statusAsync = ref.watch(subscriptionStatusProvider);
     final signedIn = ref.watch(currentUserIdProvider) != null;
+    final scheme = Theme.of(context).colorScheme;
 
-    return TogescScaffold(
-      title: 'Suscripcion',
+    return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(DesignTokens.marginMobile),
         children: [
+          Text(
+            'Suscripcion Pro',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: scheme.primary,
+                ),
+          ),
+          const SizedBox(height: DesignTokens.spacingLg),
           if (!SubscriptionConfig.isActive) ...[
             TogescCard(
               child: Column(
@@ -82,7 +90,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     'Activa MONETIZATION_ENABLED y las claves de tienda en '
                     'produccion para habilitar planes Free/Pro.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: DesignTokens.onSurfaceVariant,
+                          color: scheme.onSurfaceVariant,
                         ),
                   ),
                 ],
@@ -139,7 +147,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
             Text(
               'Inicia sesion para sincronizar tu suscripcion entre dispositivos.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: DesignTokens.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
             ),
           ],

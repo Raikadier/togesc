@@ -55,6 +55,7 @@ abstract final class UserDataExportService {
         },
         'practice_note_pool': prefs.practiceNotePool,
         'srs_intensity': prefs.srsIntensityProfile.name,
+        'total_xp': prefs.totalXp,
         'last_practice': last == null
             ? null
             : {

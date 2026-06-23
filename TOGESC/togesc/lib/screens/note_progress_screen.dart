@@ -39,7 +39,7 @@ class NoteProgressScreen extends ConsumerWidget {
           Text(
             'Estado de cada clase de altura en el sistema SRS.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: DesignTokens.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
           const SizedBox(height: DesignTokens.spacingMd),

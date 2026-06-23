@@ -73,7 +73,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Entrenador de Oido Absoluto'), findsOneWidget);
+      expect(find.text('TOGESC'), findsOneWidget);
       expect(find.text('Modos de Juego'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -94,7 +94,7 @@ void main() {
       for (final modo in modos) {
         await tester.scrollUntilVisible(find.text(modo), 100,
             scrollable: find.byType(Scrollable).first);
-        await tester.tap(find.text(modo));
+        await tester.tap(find.text(modo).first);
         await tester.pumpAndSettle();
         expect(find.text('Reproducir'), findsOneWidget,
             reason: 'Modo $modo deberia mostrar boton Reproducir');
@@ -113,7 +113,7 @@ void main() {
       await tester.scrollUntilVisible(
           find.text('Entrenamiento de velocidad'), 100,
           scrollable: find.byType(Scrollable).first);
-      await tester.tap(find.text('Entrenamiento de velocidad'));
+      await tester.tap(find.text('Entrenamiento de velocidad').first);
       await tester.pumpAndSettle();
 
       expect(find.text('Velocidad - Elige modo'), findsOneWidget);
@@ -121,13 +121,17 @@ void main() {
     });
 
     testWidgets('navegacion a estadisticas', (tester) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Estadisticas'));
+      await tester.tap(find.text('Stats'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Estadisticas'), findsAtLeast(1));
+      expect(find.textContaining('Estadisticas'), findsAtLeast(1));
       expect(tester.takeException(), isNull);
     });
   });

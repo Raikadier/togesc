@@ -11,6 +11,7 @@ import '../providers/analytics_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/account_monetization_views.dart';
+import '../widgets/togesc_shell.dart';
 import '../widgets/togesc_ui.dart';
 
 /// Pantalla de paywall (Fase 5).
@@ -116,17 +117,19 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     final feature = widget.feature;
+    final scheme = Theme.of(context).colorScheme;
 
-    return TogescScaffold(
-      title: 'TOGESC Pro',
-      automaticallyImplyLeading: false,
-      leading: IconButton(
-        icon: const Icon(Icons.close_rounded),
-        onPressed: () => context.pop(),
-      ),
+    return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(DesignTokens.marginMobile),
         children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              icon: const Icon(Icons.close_rounded),
+              onPressed: () => context.pop(),
+            ),
+          ),
           PaywallHero(
             title: feature != null ? 'Desbloquea $feature' : 'Pasa a TOGESC Pro',
             subtitle:
@@ -134,26 +137,29 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 'sincronizacion entre dispositivos.',
           ),
           const SizedBox(height: DesignTokens.spacingLg),
-          const ProFeatureRow(
-            icon: Icons.piano_rounded,
-            text: 'Acordes, aleatorio y modo velocidad',
-          ),
-          const ProFeatureRow(
-            icon: Icons.sync_rounded,
-            text: 'Sincronizacion SRS en la nube',
-          ),
-          const ProFeatureRow(
-            icon: Icons.analytics_rounded,
-            text: 'Estadisticas avanzadas',
+          TogescCard(
+            child: Column(
+              children: const [
+                ProFeatureRow(
+                  icon: Icons.piano_rounded,
+                  text: 'Acordes, aleatorio y modo velocidad',
+                ),
+                ProFeatureRow(
+                  icon: Icons.sync_rounded,
+                  text: 'Sincronizacion SRS en la nube',
+                ),
+                ProFeatureRow(
+                  icon: Icons.analytics_rounded,
+                  text: 'Estadisticas avanzadas',
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: DesignTokens.spacingLg * 2),
           if (SubscriptionConfig.isActive) ...[
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _busy ? null : _purchase,
-                child: Text(kIsWeb ? 'Suscribirme (Stripe)' : 'Suscribirme'),
-              ),
+            TogescProButton(
+              label: kIsWeb ? 'Suscribirme (Stripe)' : 'Suscribirme',
+              onPressed: _busy ? null : _purchase,
             ),
             const SizedBox(height: DesignTokens.spacingSm),
             SizedBox(
@@ -178,7 +184,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               'disponibles.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: DesignTokens.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
             ),
             const SizedBox(height: DesignTokens.spacingLg),

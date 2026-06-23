@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../app/design_tokens.dart';
 import '../services/note_parser.dart';
 
-/// Campo de texto alternativo para ingresar notas.
-///
-/// Parsea la entrada del usuario y devuelve las notas normalizadas.
+/// Campo de texto estilo command-bar (Stitch).
 class NoteInputField extends StatefulWidget {
   final ValueChanged<List<String>> onSubmitted;
   final bool enabled;
@@ -14,7 +13,7 @@ class NoteInputField extends StatefulWidget {
     super.key,
     required this.onSubmitted,
     this.enabled = true,
-    this.hintText = 'Escribe notas: C E G / C, E, G / C-E-G',
+    this.hintText = 'Escribe notas (C, Do, Mi...)',
   });
 
   @override
@@ -23,6 +22,7 @@ class NoteInputField extends StatefulWidget {
 
 class _NoteInputFieldState extends State<NoteInputField> {
   final _controller = TextEditingController();
+  final _focusNode = FocusNode();
 
   void _submit() {
     final text = _controller.text.trim();
@@ -38,35 +38,70 @@ class _NoteInputFieldState extends State<NoteInputField> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _controller,
-            enabled: widget.enabled,
-            decoration: InputDecoration(
-              hintText: widget.hintText,
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: DesignTokens.borderRadiusXl,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _controller,
+        focusNode: _focusNode,
+        enabled: widget.enabled,
+        decoration: InputDecoration(
+          hintText: widget.hintText,
+          filled: true,
+          fillColor: scheme.surfaceContainerLowest,
+          prefixIcon: const Icon(Icons.keyboard_rounded),
+          suffixIcon: Padding(
+            padding: const EdgeInsets.only(right: DesignTokens.spacingMd),
+            child: Text(
+              'INPUT',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: scheme.outline,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                  ),
             ),
-            textCapitalization: TextCapitalization.characters,
-            onSubmitted: (_) => _submit(),
+          ),
+          suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+          border: OutlineInputBorder(
+            borderRadius: DesignTokens.borderRadiusXl,
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: DesignTokens.borderRadiusXl,
+            borderSide: BorderSide(color: scheme.outlineVariant),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: DesignTokens.borderRadiusXl,
+            borderSide: BorderSide(
+              color: scheme.primary,
+              width: 2,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spacingMd,
+            vertical: DesignTokens.spacingMd,
           ),
         ),
-        const SizedBox(width: 8),
-        ElevatedButton(
-          onPressed: widget.enabled ? _submit : null,
-          child: const Text('Enviar'),
-        ),
-      ],
+        textCapitalization: TextCapitalization.characters,
+        onSubmitted: (_) => _submit(),
+        onEditingComplete: _submit,
+      ),
     );
   }
 }

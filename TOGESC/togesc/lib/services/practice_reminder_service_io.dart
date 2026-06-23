@@ -49,40 +49,48 @@ class PracticeReminderService {
     required int overdueCount,
   }) async {
     if (!isSupported) return;
-    await _ensureInitialized();
+    try {
+      await _ensureInitialized();
 
-    if (!enabled || overdueCount <= 0) {
-      await cancel();
-      return;
+      if (!enabled || overdueCount <= 0) {
+        await cancel();
+        return;
+      }
+
+      const androidDetails = AndroidNotificationDetails(
+        _channelId,
+        'Repaso TOGESC',
+        channelDescription: 'Recordatorios cuando tienes notas vencidas',
+        importance: Importance.defaultImportance,
+        priority: Priority.defaultPriority,
+      );
+      const iosDetails = DarwinNotificationDetails();
+      const details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await _plugin.periodicallyShow(
+        _notificationId,
+        'Tienes notas para repasar',
+        'Hay $overdueCount nota${overdueCount == 1 ? '' : 's'} vencida${overdueCount == 1 ? '' : 's'}. '
+            'Abre TOGESC para practicar.',
+        RepeatInterval.daily,
+        details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    } catch (_) {
+      // Ignorar fallos de plugin en release (p. ej. R8/Gson).
     }
-
-    const androidDetails = AndroidNotificationDetails(
-      _channelId,
-      'Repaso TOGESC',
-      channelDescription: 'Recordatorios cuando tienes notas vencidas',
-      importance: Importance.defaultImportance,
-      priority: Priority.defaultPriority,
-    );
-    const iosDetails = DarwinNotificationDetails();
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _plugin.periodicallyShow(
-      _notificationId,
-      'Tienes notas para repasar',
-      'Hay $overdueCount nota${overdueCount == 1 ? '' : 's'} vencida${overdueCount == 1 ? '' : 's'}. '
-          'Abre TOGESC para practicar.',
-      RepeatInterval.daily,
-      details,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-    );
   }
 
   Future<void> cancel() async {
     if (!isSupported) return;
-    await _ensureInitialized();
-    await _plugin.cancel(_notificationId);
+    try {
+      await _ensureInitialized();
+      await _plugin.cancel(_notificationId);
+    } catch (_) {
+      // Ignorar fallos al limpiar cache de notificaciones programadas.
+    }
   }
 }

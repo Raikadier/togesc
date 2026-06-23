@@ -70,9 +70,9 @@ class _DayBar extends StatelessWidget {
   final DayPracticeSummary summary;
   final int maxRounds;
 
-  Color _barColor(double accuracy) {
+  Color _barColor(double accuracy, ColorScheme scheme) {
     if (!summary.hasActivity) {
-      return DesignTokens.onSurfaceVariant.withValues(alpha: 0.15);
+      return scheme.onSurfaceVariant.withValues(alpha: 0.15);
     }
     if (accuracy >= 80) return DesignTokens.correct;
     if (accuracy >= 50) return DesignTokens.selection;
@@ -82,6 +82,7 @@ class _DayBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final barHeightFactor = maxRounds <= 0 || !summary.hasActivity
         ? 0.08
         : (summary.rounds / maxRounds).clamp(0.12, 1.0);
@@ -94,7 +95,7 @@ class _DayBar extends StatelessWidget {
           Text(
             '${accuracy.round()}%',
             style: theme.textTheme.labelSmall?.copyWith(
-              color: _barColor(accuracy),
+              color: _barColor(accuracy, scheme),
               fontWeight: FontWeight.w600,
             ),
           )
@@ -109,7 +110,7 @@ class _DayBar extends StatelessWidget {
               widthFactor: 1,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: _barColor(accuracy),
+                  color: _barColor(accuracy, scheme),
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),

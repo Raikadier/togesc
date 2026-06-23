@@ -83,8 +83,13 @@ class TogescCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cardColor = color ??
+        theme.cardTheme.color ??
+        theme.colorScheme.surfaceContainerLowest;
+
     final card = Card(
-      color: color,
+      color: cardColor,
       child: Padding(
         padding: padding,
         child: child,
@@ -119,6 +124,7 @@ class TogescChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return FilterChip(
       label: Text(label),
@@ -127,14 +133,10 @@ class TogescChip extends StatelessWidget {
       onSelected: onTap == null ? null : (_) => onTap!(),
       showCheckmark: false,
       labelStyle: theme.textTheme.labelLarge?.copyWith(
-        color: selected
-            ? DesignTokens.primaryContainer
-            : DesignTokens.onSurface,
+        color: selected ? scheme.primaryContainer : scheme.onSurface,
       ),
       side: BorderSide(
-        color: selected
-            ? DesignTokens.primaryContainer
-            : DesignTokens.outlineVariant,
+        color: selected ? scheme.primaryContainer : scheme.outlineVariant,
         width: selected ? 2 : 1,
       ),
     );
@@ -157,6 +159,7 @@ class TogescSpeedMetricsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.labelLarge;
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
       width: double.infinity,
@@ -165,9 +168,9 @@ class TogescSpeedMetricsBar extends StatelessWidget {
         vertical: DesignTokens.spacingSm,
       ),
       decoration: BoxDecoration(
-        color: DesignTokens.surfaceContainerLow,
-        border: const Border(
-          bottom: BorderSide(color: DesignTokens.outlineVariant),
+        color: scheme.surfaceContainerLow,
+        border: Border(
+          bottom: BorderSide(color: scheme.outlineVariant),
         ),
       ),
       child: Row(
@@ -205,18 +208,20 @@ class _Metric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
-          style: style?.copyWith(color: DesignTokens.onSurfaceVariant),
+          style: style?.copyWith(color: scheme.onSurfaceVariant),
         ),
         Text(
           value,
           style: style?.copyWith(
             fontWeight: FontWeight.w600,
-            color: DesignTokens.primaryContainer,
+            color: scheme.primaryContainer,
           ),
         ),
       ],

@@ -31,6 +31,7 @@ class ContinuePracticeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return TogescCard(
       padding: const EdgeInsets.all(DesignTokens.spacingMd),
@@ -41,7 +42,7 @@ class ContinuePracticeCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.play_circle_outline_rounded,
-                color: DesignTokens.primaryContainer,
+                color: scheme.primaryContainer,
                 size: 28,
               ),
               const SizedBox(width: 8),
@@ -119,22 +120,24 @@ class _ProBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: DesignTokens.spacingSm,
         vertical: 2,
       ),
       decoration: BoxDecoration(
-        color: DesignTokens.secondaryContainer.withValues(alpha: 0.35),
+        color: scheme.secondaryContainer.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(DesignTokens.spacingSm),
         border: Border.all(
-          color: DesignTokens.secondary.withValues(alpha: 0.35),
+          color: scheme.secondary.withValues(alpha: 0.35),
         ),
       ),
       child: Text(
         'PRO',
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: DesignTokens.onSecondaryContainer,
+              color: scheme.onSecondaryContainer,
               fontWeight: FontWeight.w700,
             ),
       ),

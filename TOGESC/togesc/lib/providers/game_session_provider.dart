@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/game_constants.dart';
-import '../constants/notes.dart';
 import '../models/audio_preferences.dart';
 import '../models/last_practice_session.dart';
 import 'analytics_provider.dart';

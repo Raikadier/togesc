@@ -14,21 +14,17 @@ import '../utils/session_history_stats.dart';
 import '../services/progress_export_download.dart';
 import '../services/progress_export_service.dart';
 import '../services/subscription_access.dart';
-import '../widgets/account_monetization_views.dart';
 import '../widgets/info_views.dart';
+import '../widgets/note_accuracy_radar_chart.dart';
 import '../widgets/session_evolution_chart.dart';
 import '../widgets/session_history_card.dart';
+import '../widgets/stats_bento_grid.dart';
+import '../widgets/stats_free_dashboard.dart';
 import '../widgets/togesc_ui.dart';
 
-/// Pantalla de estadisticas del sistema SRS.
+/// Pantalla de estadisticas del sistema SRS (dashboard Stitch).
 class StatisticsScreen extends ConsumerWidget {
   const StatisticsScreen({super.key});
-
-  Color _accuracyColor(double accuracy) {
-    if (accuracy >= 80) return DesignTokens.correct;
-    if (accuracy >= 50) return DesignTokens.selection;
-    return DesignTokens.incorrect;
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,10 +33,10 @@ class StatisticsScreen extends ConsumerWidget {
     final advancedStats = SubscriptionAccess.canViewAdvancedStats(
       status ?? const SubscriptionStatus.free(),
     );
+    final summaries = ref.watch(noteProgressSummariesProvider);
 
     if (stats.isEmpty) {
-      return const TogescScaffold(
-        title: 'Estadisticas',
+      return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -51,94 +47,89 @@ class StatisticsScreen extends ConsumerWidget {
     final graduated = stats['graduated'] as int? ?? 0;
     final totalNotes = stats['total_notes'] as int? ?? 12;
     final overdueCount = stats['overdue_count'] as int? ?? 0;
-    final hardestNotes = stats['hardest_notes'] as List<dynamic>? ?? [];
-    final easiestNotes = stats['easiest_notes'] as List<dynamic>? ?? [];
     final history = ref.watch(sessionHistoryProvider).valueOrNull ?? [];
     final weeklySummaries = buildDailyPracticeSummaries(history);
     final hasWeeklyActivity = weeklySummaries.any((day) => day.hasActivity);
-    final accuracyColor = _accuracyColor(accuracy);
 
-    return TogescScaffold(
-      title: 'Estadisticas',
+    final sortedByAccuracy = List.of(summaries)
+      ..sort((a, b) => a.accuracyPercent.compareTo(b.accuracyPercent));
+    final hardest = sortedByAccuracy.take(3).toList();
+    final easiest = sortedByAccuracy.reversed.take(3).toList();
+    final scheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(DesignTokens.marginMobile),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            StatsDashboardHeader(isPro: advancedStats),
+            const SizedBox(height: DesignTokens.spacingLg),
+            StatsBentoHeader(
+              accuracy: accuracy,
+              totalSeen: totalSeen,
+              overdueCount: overdueCount,
+              onReviewNow: () => startReviewPractice(context, ref),
+            ),
+            const SizedBox(height: DesignTokens.spacingLg),
             TogescCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Resumen General',
+                    'Estado del dominio',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  const SizedBox(height: DesignTokens.spacingLg),
-                  StatsMetricRow(
-                    icon: Icons.percent_rounded,
-                    label: 'Precision global',
-                    value: '$accuracy%',
-                    color: accuracyColor,
-                  ),
-                  StatsMetricRow(
-                    icon: Icons.visibility_rounded,
-                    label: 'Total de intentos',
-                    value: '$totalSeen',
-                    color: DesignTokens.primaryContainer,
-                  ),
-                  StatsMetricRow(
-                    icon: Icons.school_rounded,
-                    label: 'En aprendizaje',
-                    value: '$learningPhase / $totalNotes',
-                    color: DesignTokens.selection,
-                  ),
-                  StatsMetricRow(
-                    icon: Icons.check_circle_rounded,
-                    label: 'Consolidadas',
-                    value: '$graduated / $totalNotes',
-                    color: DesignTokens.correct,
-                  ),
-                  if (overdueCount > 0)
-                    StatsMetricRow(
-                      icon: Icons.warning_amber_rounded,
-                      label: 'Pendientes de revision',
-                      value: '$overdueCount',
-                      color: DesignTokens.incorrect,
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: DesignTokens.spacingMd),
-            TogescCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Progreso', style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: DesignTokens.spacingMd),
-                  ClipRRect(
-                    borderRadius: DesignTokens.borderRadiusMd,
-                    child: LinearProgressIndicator(
-                      value: totalNotes > 0 ? graduated / totalNotes : 0,
-                      backgroundColor: DesignTokens.surfaceContainer,
-                      color: DesignTokens.primaryContainer,
-                      minHeight: 8,
-                    ),
-                  ),
-                  const SizedBox(height: DesignTokens.spacingSm),
-                  Text(
-                    '$graduated de $totalNotes notas consolidadas',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: DesignTokens.onSurfaceVariant,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _DomainStatBox(
+                          label: 'En aprendizaje',
+                          value: '$learningPhase/$totalNotes',
+                          color: scheme.secondary,
                         ),
+                      ),
+                      const SizedBox(width: DesignTokens.spacingMd),
+                      Expanded(
+                        child: _DomainStatBox(
+                          label: 'Dominadas',
+                          value: '$graduated/$totalNotes',
+                          color: DesignTokens.correct,
+                        ),
+                      ),
+                    ],
                   ),
+                  if (advancedStats) ...[
+                    const SizedBox(height: DesignTokens.spacingLg),
+                    NoteAccuracyRadarChart(summaries: summaries),
+                    Text(
+                      'Distribucion de precision por nota',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: scheme.outline,
+                            fontStyle: FontStyle.italic,
+                          ),
+                    ),
+                  ],
                 ],
               ),
             ),
-            const SizedBox(height: DesignTokens.spacingMd),
-            if (hasWeeklyActivity) ...[
-              SessionEvolutionChart(summaries: weeklySummaries),
+            if (!advancedStats) ...[
+              const SizedBox(height: DesignTokens.spacingLg),
+              StatsFreeAdvancedLockSection(
+                onUnlock: () => context.push(AppRoutes.paywall),
+              ),
               const SizedBox(height: DesignTokens.spacingMd),
+              StatsFreeProUpsellCard(
+                onTap: () => context.push(AppRoutes.paywall),
+              ),
             ],
+            if (hasWeeklyActivity) ...[
+              const SizedBox(height: DesignTokens.spacingMd),
+              SessionEvolutionChart(summaries: weeklySummaries),
+            ],
+            const SizedBox(height: DesignTokens.spacingMd),
             const SessionHistoryCard(),
             const SizedBox(height: DesignTokens.spacingMd),
             OutlinedButton.icon(
@@ -146,27 +137,36 @@ class StatisticsScreen extends ConsumerWidget {
               icon: const Icon(Icons.grid_view_rounded),
               label: const Text('Ver progreso por nota (12)'),
             ),
-            const SizedBox(height: DesignTokens.spacingMd),
-            if (!advancedStats)
-              ProLockedFeatureCard(
-                onTap: () => context.push(AppRoutes.paywall),
-              ),
-            if (advancedStats && hardestNotes.isNotEmpty) ...[
+            if (advancedStats && hardest.isNotEmpty) ...[
               const SizedBox(height: DesignTokens.spacingMd),
-              StatsNotesSection(
-                title: 'Notas Mas Dificiles',
-                notes: hardestNotes.cast<String>(),
-                color: DesignTokens.incorrect,
-                icon: Icons.trending_up_rounded,
+              TogescCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Dificultad alta',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    ...hardest.map(
+                      (s) => StatsNoteRow(summary: s, highlightError: true),
+                    ),
+                  ],
+                ),
               ),
             ],
-            if (advancedStats && easiestNotes.isNotEmpty) ...[
+            if (advancedStats && easiest.isNotEmpty) ...[
               const SizedBox(height: DesignTokens.spacingMd),
-              StatsNotesSection(
-                title: 'Notas Mas Faciles',
-                notes: easiestNotes.cast<String>(),
-                color: DesignTokens.correct,
-                icon: Icons.trending_down_rounded,
+              TogescCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Mayor dominio',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    ...easiest.map((s) => StatsNoteRow(summary: s)),
+                  ],
+                ),
               ),
             ],
             const SizedBox(height: DesignTokens.spacingLg),
@@ -207,5 +207,50 @@ class StatisticsScreen extends ConsumerWidget {
         const SnackBar(content: Text('Progreso copiado al portapapeles')),
       );
     }
+  }
+}
+
+class _DomainStatBox extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _DomainStatBox({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(DesignTokens.spacingMd),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: DesignTokens.borderRadiusMd,
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: scheme.outline,
+                ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ],
+      ),
+    );
   }
 }

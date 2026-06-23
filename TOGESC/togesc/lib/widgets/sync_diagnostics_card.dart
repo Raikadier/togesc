@@ -20,21 +20,21 @@ class _SyncStatusVisual {
   final Color background;
 }
 
-_SyncStatusVisual _visualFor(SyncDiagnostics d) {
+_SyncStatusVisual _visualFor(SyncDiagnostics d, ColorScheme scheme) {
   if (!d.cloudSyncEnabled) {
-    return const _SyncStatusVisual(
+    return _SyncStatusVisual(
       label: 'Sync Pro',
       icon: Icons.lock_outline_rounded,
-      color: DesignTokens.onSurfaceVariant,
-      background: DesignTokens.surfaceContainer,
+      color: scheme.onSurfaceVariant,
+      background: scheme.surfaceContainer,
     );
   }
   if (!d.hasSession) {
-    return const _SyncStatusVisual(
+    return _SyncStatusVisual(
       label: 'Sin sesion',
       icon: Icons.person_off_outlined,
-      color: DesignTokens.onSurfaceVariant,
-      background: DesignTokens.surfaceContainer,
+      color: scheme.onSurfaceVariant,
+      background: scheme.surfaceContainer,
     );
   }
   if (!d.remoteReachable) {
@@ -46,19 +46,19 @@ _SyncStatusVisual _visualFor(SyncDiagnostics d) {
     );
   }
   if (d.pendingUpload) {
-    return const _SyncStatusVisual(
+    return _SyncStatusVisual(
       label: 'Pendiente',
       icon: Icons.cloud_upload_rounded,
       color: DesignTokens.selection,
-      background: DesignTokens.surfaceContainerLow,
+      background: scheme.surfaceContainerLow,
     );
   }
   if (d.isInSync) {
-    return const _SyncStatusVisual(
+    return _SyncStatusVisual(
       label: 'Sincronizado',
       icon: Icons.cloud_done_rounded,
       color: DesignTokens.correct,
-      background: DesignTokens.surfaceContainerLow,
+      background: scheme.surfaceContainerLow,
     );
   }
   return const _SyncStatusVisual(
@@ -77,6 +77,7 @@ class SyncDiagnosticsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final diagnosticsAsync = ref.watch(syncDiagnosticsProvider);
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return diagnosticsAsync.when(
       loading: () => const TogescCard(
@@ -93,7 +94,7 @@ class SyncDiagnosticsCard extends ConsumerWidget {
       ),
       error: (_, _) => const SizedBox.shrink(),
       data: (SyncDiagnostics d) {
-        final visual = _visualFor(d);
+        final visual = _visualFor(d, scheme);
 
         return TogescCard(
           child: Column(
@@ -123,7 +124,7 @@ class SyncDiagnosticsCard extends ConsumerWidget {
                         Text(
                           d.statusLabel,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: DesignTokens.onSurfaceVariant,
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -138,7 +139,7 @@ class SyncDiagnosticsCard extends ConsumerWidget {
               ),
               if (d.localSession != null || d.remoteSession != null) ...[
                 const SizedBox(height: DesignTokens.spacingMd),
-                const Divider(height: 1, color: DesignTokens.outlineVariant),
+                Divider(height: 1, color: scheme.outlineVariant),
                 const SizedBox(height: DesignTokens.spacingMd),
                 if (d.localSession != null)
                   _SessionRow(
@@ -167,7 +168,7 @@ class SyncDiagnosticsCard extends ConsumerWidget {
                       child: Text(
                         'Hay cambios locales esperando subida.',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: DesignTokens.onSurfaceVariant,
+                          color: scheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -227,19 +228,20 @@ class _SessionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: DesignTokens.spacingSm),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: DesignTokens.primaryContainer),
+          Icon(icon, size: 18, color: scheme.primaryContainer),
           const SizedBox(width: DesignTokens.spacingSm),
           Expanded(
             child: Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: DesignTokens.onSurfaceVariant,
+                color: scheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -249,7 +251,7 @@ class _SessionRow extends StatelessWidget {
               textAlign: TextAlign.end,
               style: theme.textTheme.labelLarge?.copyWith(
                 fontFamily: 'monospace',
-                color: DesignTokens.onSurface,
+                color: scheme.onSurface,
               ),
             ),
           ),

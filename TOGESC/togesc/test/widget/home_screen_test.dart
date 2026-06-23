@@ -39,11 +39,12 @@ void main() {
   }
 
   group('HomeScreen', () {
-    testWidgets('muestra titulo', (tester) async {
+    testWidgets('muestra enfoque diario o modos', (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
       expect(find.text('Entrenador de Oido Absoluto'), findsOneWidget);
+      expect(find.text('Modos de Juego'), findsOneWidget);
     });
 
     testWidgets('muestra 6 opciones de modo de juego', (tester) async {
@@ -58,19 +59,23 @@ void main() {
       expect(find.text('Entrenamiento de velocidad'), findsOneWidget);
     });
 
-    testWidgets('muestra boton de estadisticas en appbar', (tester) async {
+    testWidgets('muestra navegacion shell stats', (tester) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.byTooltip('Estadisticas'), findsOneWidget);
-      expect(find.byTooltip('Acerca de'), findsOneWidget);
+      expect(find.text('TOGESC'), findsOneWidget);
+      expect(find.text('Stats'), findsOneWidget);
     });
 
-    testWidgets('muestra panel de recomendaciones', (tester) async {
+    testWidgets('muestra enfoque diario cuando hay recomendaciones', (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Recomendaciones'), findsOneWidget);
+      expect(find.text('Enfoque diario'), findsOneWidget);
     });
 
     testWidgets('muestra continuar practica tras guardar ultimo modo',

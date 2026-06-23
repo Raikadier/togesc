@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../constants/game_constants.dart';
+import '../widgets/speed_mode_select_views.dart';
 import '../widgets/speed_session_views.dart';
 import '../widgets/togesc_ui.dart';
 
@@ -41,8 +42,6 @@ class SpeedModeSelectScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return TogescScaffold(
       title: 'Velocidad - Elige modo',
       body: SingleChildScrollView(
@@ -50,17 +49,7 @@ class SpeedModeSelectScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Que modo quieres practicar?',
-              style: theme.textTheme.titleLarge,
-            ),
-            const SizedBox(height: DesignTokens.spacingSm),
-            Text(
-              'El tiempo limite disminuira con cada respuesta correcta.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: DesignTokens.onSurfaceVariant,
-              ),
-            ),
+            const SpeedModeSelectHero(),
             const SizedBox(height: DesignTokens.spacingLg),
             for (final (mode, icon, subtitle) in _modes)
               SpeedModeOptionCard(

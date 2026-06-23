@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import 'togesc_premium_dialog.dart';
 
-/// Encuesta CSAT ocasional (Fase 6): valoracion 1-5 estrellas.
+/// Encuesta CSAT ocasional (Stitch premium).
 class CsatSurveyDialog extends StatefulWidget {
   const CsatSurveyDialog({super.key});
 
@@ -22,57 +23,56 @@ class _CsatSurveyDialogState extends State<CsatSurveyDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
 
-    return AlertDialog(
-      title: const Text('Como va tu experiencia?'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Tu opinion nos ayuda a mejorar TOGESC. Califica del 1 al 5.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: DesignTokens.onSurfaceVariant,
+    return TogescPremiumDialog(
+      icon: Icons.star_rounded,
+      accentColor: DesignTokens.selection,
+      title: 'Como va tu experiencia?',
+      subtitle: 'Tu opinion nos ayuda a mejorar TOGESC. Califica del 1 al 5.',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(5, (index) {
+              final star = index + 1;
+              final selected = star <= _rating;
+              return IconButton(
+                tooltip: '$star estrella${star > 1 ? 's' : ''}',
+                onPressed: () => setState(() => _rating = star),
+                icon: Icon(
+                  selected ? Icons.star_rounded : Icons.star_outline_rounded,
+                  color: selected
+                      ? DesignTokens.selection
+                      : scheme.outlineVariant,
+                  size: 36,
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: DesignTokens.spacingSm),
+          TextField(
+            controller: _commentController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: 'Comentario (opcional)',
+              alignLabelWithHint: true,
+              filled: true,
+              fillColor: scheme.surfaceContainerLow,
+              border: OutlineInputBorder(
+                borderRadius: DesignTokens.borderRadiusXl,
               ),
             ),
-            const SizedBox(height: DesignTokens.spacingLg),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (index) {
-                final star = index + 1;
-                final selected = star <= _rating;
-                return IconButton(
-                  tooltip: '$star estrella${star > 1 ? 's' : ''}',
-                  onPressed: () => setState(() => _rating = star),
-                  icon: Icon(
-                    selected ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: selected
-                        ? DesignTokens.selection
-                        : DesignTokens.outlineVariant,
-                    size: 32,
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(height: DesignTokens.spacingSm),
-            TextField(
-              controller: _commentController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Comentario (opcional)',
-                alignLabelWithHint: true,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(null),
           child: const Text('Ahora no'),
         ),
+        const SizedBox(height: DesignTokens.spacingSm),
         FilledButton(
           onPressed: _rating == 0
               ? null
@@ -82,6 +82,12 @@ class _CsatSurveyDialogState extends State<CsatSurveyDialog> {
                       comment: _commentController.text.trim(),
                     ),
                   ),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
+            shape: RoundedRectangleBorder(
+              borderRadius: DesignTokens.borderRadiusXl,
+            ),
+          ),
           child: const Text('Enviar'),
         ),
       ],

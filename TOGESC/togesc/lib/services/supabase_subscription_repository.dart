@@ -35,11 +35,9 @@ class SupabaseSubscriptionRepository {
       'plan': status.plan,
       'status': status.status,
       'source': status.source,
-      if (externalId != null) 'external_id': externalId,
-      if (status.trialEndsAt != null)
-        'trial_ends_at': status.trialEndsAt!.toIso8601String(),
-      if (status.expiresAt != null)
-        'expires_at': status.expiresAt!.toIso8601String(),
+      'external_id': ?externalId,
+      'trial_ends_at': ?status.trialEndsAt?.toIso8601String(),
+      'expires_at': ?status.expiresAt?.toIso8601String(),
     });
   }
 }

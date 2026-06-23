@@ -66,7 +66,7 @@ class TogescApp extends ConsumerWidget {
     final themeMode = ref.watch(appThemeModeProvider);
 
     return MaterialApp.router(
-      title: AppLocalizations.of(context).appTitle,
+      title: 'TOGESC',
       debugShowCheckedModeBanner: false,
       locale: const Locale('es'),
       supportedLocales: AppLocalizations.supportedLocales,

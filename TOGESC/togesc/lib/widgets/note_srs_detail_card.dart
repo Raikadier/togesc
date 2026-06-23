@@ -7,12 +7,9 @@ import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../constants/note_naming.dart';
 import '../models/note_progress_summary.dart';
-import '../models/subscription_status.dart';
 import '../providers/app_preferences_provider.dart';
 import '../providers/audio_provider.dart';
 import '../providers/practice_focus_provider.dart';
-import '../providers/subscription_provider.dart';
-import '../services/subscription_access.dart';
 import '../widgets/srs_progress_indicator.dart';
 import '../widgets/togesc_ui.dart';
 
@@ -32,6 +29,7 @@ class NoteSrsDetailCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final naming = ref.watch(noteNamingModeProvider).valueOrNull ??
         NoteNamingMode.letter;
     final label = formatNoteLabel(summary.note, naming);
@@ -80,7 +78,7 @@ class NoteSrsDetailCard extends ConsumerWidget {
           Text(
             summary.statusLabel,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: DesignTokens.onSurfaceVariant,
+              color: scheme.onSurfaceVariant,
             ),
           ),
           if (showAdvanced) ...[
@@ -128,6 +126,8 @@ class _MetricRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
@@ -135,7 +135,7 @@ class _MetricRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(color: DesignTokens.onSurfaceVariant),
+            style: TextStyle(color: scheme.onSurfaceVariant),
           ),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],

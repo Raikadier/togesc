@@ -30,7 +30,11 @@ class _CsatSurveyListenerState extends ConsumerState<CsatSurveyListener> {
   }
 
   Future<void> _afterStartup() async {
-    await _syncPracticeReminder();
+    try {
+      await _syncPracticeReminder();
+    } catch (_) {
+      // No bloquear arranque si falla el plugin de notificaciones en release.
+    }
     if (!mounted || _csatChecked) return;
     _csatChecked = true;
 

@@ -21,12 +21,17 @@ void main() {
     );
   }
 
+  Future<void> submitField(WidgetTester tester) async {
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+  }
+
   group('NoteInputField', () {
-    testWidgets('tiene campo de texto y boton Enviar', (tester) async {
+    testWidgets('tiene campo de texto command-bar', (tester) async {
       await tester.pumpWidget(buildApp(onSubmitted: (_) {}));
 
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('Enviar'), findsOneWidget);
+      expect(find.text('INPUT'), findsOneWidget);
     });
 
     testWidgets('parsea notas separadas por espacios', (tester) async {
@@ -34,8 +39,7 @@ void main() {
       await tester.pumpWidget(buildApp(onSubmitted: (notes) => result = notes));
 
       await tester.enterText(find.byType(TextField), 'C E G');
-      await tester.tap(find.text('Enviar'));
-      await tester.pump();
+      await submitField(tester);
 
       expect(result, ['C', 'E', 'G']);
     });
@@ -45,8 +49,7 @@ void main() {
       await tester.pumpWidget(buildApp(onSubmitted: (notes) => result = notes));
 
       await tester.enterText(find.byType(TextField), 'c d e');
-      await tester.tap(find.text('Enviar'));
-      await tester.pump();
+      await submitField(tester);
 
       expect(result, ['C', 'D', 'E']);
     });
@@ -56,8 +59,7 @@ void main() {
       await tester.pumpWidget(buildApp(onSubmitted: (notes) => result = notes));
 
       await tester.enterText(find.byType(TextField), 'Db Eb');
-      await tester.tap(find.text('Enviar'));
-      await tester.pump();
+      await submitField(tester);
 
       expect(result, ['C#', 'D#']);
     });
@@ -66,8 +68,7 @@ void main() {
       List<String>? result;
       await tester.pumpWidget(buildApp(onSubmitted: (notes) => result = notes));
 
-      await tester.tap(find.text('Enviar'));
-      await tester.pump();
+      await submitField(tester);
 
       expect(result, isNull);
     });
@@ -76,21 +77,20 @@ void main() {
       await tester.pumpWidget(buildApp(onSubmitted: (_) {}));
 
       await tester.enterText(find.byType(TextField), 'C E G');
-      await tester.tap(find.text('Enviar'));
-      await tester.pump();
+      await submitField(tester);
 
       final textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.controller?.text, '');
     });
 
-    testWidgets('boton deshabilitado cuando enabled=false', (tester) async {
+    testWidgets('campo deshabilitado cuando enabled=false', (tester) async {
       await tester.pumpWidget(buildApp(
         onSubmitted: (_) {},
         enabled: false,
       ));
 
-      final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
-      expect(button.onPressed, isNull);
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.enabled, isFalse);
     });
   });
 }

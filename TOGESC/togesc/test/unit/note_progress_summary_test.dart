@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:togesc/constants/notes.dart';
-import 'package:togesc/models/note_data.dart';
 import 'package:togesc/models/note_progress_summary.dart';
 import 'package:togesc/services/progress_repository.dart';
 import 'package:togesc/services/srs_system.dart';

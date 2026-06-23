@@ -18,6 +18,7 @@ import '../screens/statistics_screen.dart';
 import '../screens/subscription_screen.dart';
 import '../services/app_preferences.dart';
 import '../widgets/pro_route_guard.dart';
+import '../widgets/togesc_shell.dart';
 
 /// Rutas de la aplicacion.
 abstract final class AppRoutes {
@@ -55,20 +56,8 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
     },
     routes: [
       GoRoute(
-        path: AppRoutes.home,
-        builder: (_, _) => const HomeScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.onboarding,
         builder: (_, _) => const OnboardingScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.statistics,
-        builder: (_, _) => const StatisticsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.statisticsNotes,
-        builder: (_, _) => const NoteProgressScreen(),
       ),
       GoRoute(
         path: AppRoutes.about,
@@ -79,23 +68,8 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
         builder: (_, _) => const PrivacyPolicyScreen(),
       ),
       GoRoute(
-        path: AppRoutes.account,
-        builder: (_, _) => const AccountScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.settings,
         builder: (_, _) => const SettingsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.subscription,
-        builder: (_, _) => const SubscriptionScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.paywall,
-        builder: (context, state) {
-          final feature = state.uri.queryParameters['feature'];
-          return PaywallScreen(feature: feature);
-        },
       ),
       GoRoute(
         path: AppRoutes.speedSelect,
@@ -131,6 +105,40 @@ GoRouter createAppRouter({required Listenable refreshListenable}) {
             child: SpeedGameScreen(targetMode: mode),
           );
         },
+      ),
+      ShellRoute(
+        builder: (_, _, child) => TogescShell(child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (_, _) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.statistics,
+            builder: (_, _) => const StatisticsScreen(),
+            routes: [
+              GoRoute(
+                path: 'notes',
+                builder: (_, _) => const NoteProgressScreen(),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: AppRoutes.account,
+            builder: (_, _) => const AccountScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.subscription,
+            builder: (_, _) => const SubscriptionScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.paywall,
+            builder: (context, state) {
+              final feature = state.uri.queryParameters['feature'];
+              return PaywallScreen(feature: feature);
+            },
+          ),
+        ],
       ),
     ],
   );

@@ -28,23 +28,28 @@ class SrsIntensitySettingsSection extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
-            ...SrsIntensityProfile.values.map((profile) {
-              return RadioListTile<SrsIntensityProfile>(
-                contentPadding: EdgeInsets.zero,
-                title: Text(profile.label),
-                subtitle: Text(profile.description),
-                value: profile,
-                groupValue: selected,
-                onChanged: (value) {
-                  if (value == null) return;
-                  ref.read(srsIntensityProfileProvider.notifier).setProfile(value);
-                },
-              );
-            }),
+            RadioGroup<SrsIntensityProfile>(
+              groupValue: selected,
+              onChanged: (value) {
+                if (value == null) return;
+                ref.read(srsIntensityProfileProvider.notifier).setProfile(value);
+              },
+              child: Column(
+                children: [
+                  for (final profile in SrsIntensityProfile.values)
+                    RadioListTile<SrsIntensityProfile>(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(profile.label),
+                      subtitle: Text(profile.description),
+                      value: profile,
+                    ),
+                ],
+              ),
+            ),
           ],
         ),
         loading: () => const LinearProgressIndicator(),
-        error: (_, __) => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
       ),
     );
   }

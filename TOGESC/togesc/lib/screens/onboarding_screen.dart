@@ -104,6 +104,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             width: double.infinity,
             child: FilledButton(
               onPressed: () => _complete(context),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: DesignTokens.borderRadiusXl,
+                ),
+              ),
               child: const Text('Entendido, empezar'),
             ),
           ),

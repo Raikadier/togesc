@@ -17,19 +17,23 @@ class HomeSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: DesignTokens.spacingMd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: theme.textTheme.titleLarge),
+          Text(
+            title,
+            style: theme.textTheme.titleLarge?.copyWith(color: scheme.onSurface),
+          ),
           if (subtitle != null) ...[
             const SizedBox(height: DesignTokens.spacingXs),
             Text(
               subtitle!,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: DesignTokens.onSurfaceVariant,
+                color: scheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -61,6 +65,7 @@ class HomeModeOptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: DesignTokens.spacingSm),
@@ -70,8 +75,8 @@ class HomeModeOptionCard extends StatelessWidget {
         child: ListTile(
           leading: CircleAvatar(
             backgroundColor:
-                DesignTokens.primaryContainer.withValues(alpha: 0.12),
-            child: Icon(icon, color: DesignTokens.primaryContainer),
+                scheme.primaryContainer.withValues(alpha: 0.12),
+            child: Icon(icon, color: scheme.primaryContainer),
           ),
           title: Row(
             children: [
@@ -87,7 +92,7 @@ class HomeModeOptionCard extends StatelessWidget {
           subtitle: Text(subtitle),
           trailing: Icon(
             locked ? Icons.lock_outline_rounded : Icons.chevron_right_rounded,
-            color: DesignTokens.onSurfaceVariant,
+            color: scheme.onSurfaceVariant,
           ),
         ),
       ),
@@ -100,22 +105,24 @@ class _ProBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: DesignTokens.spacingSm,
         vertical: 2,
       ),
       decoration: BoxDecoration(
-        color: DesignTokens.secondaryContainer.withValues(alpha: 0.35),
+        color: scheme.secondaryContainer.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(DesignTokens.spacingSm),
         border: Border.all(
-          color: DesignTokens.secondary.withValues(alpha: 0.35),
+          color: scheme.secondary.withValues(alpha: 0.35),
         ),
       ),
       child: Text(
         'PRO',
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: DesignTokens.onSecondaryContainer,
+              color: scheme.onSecondaryContainer,
               fontWeight: FontWeight.w700,
             ),
       ),
@@ -130,24 +137,44 @@ class OnboardingWelcomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spacingMd,
+            vertical: DesignTokens.spacingXs,
+          ),
+          decoration: BoxDecoration(
+            gradient: DesignTokens.proGradient,
+            borderRadius: DesignTokens.borderRadiusXl,
+          ),
+          child: Text(
+            'TOGESC',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: DesignTokens.onPrimary,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        const SizedBox(height: DesignTokens.spacingLg),
+        Container(
           width: 72,
           height: 72,
           decoration: BoxDecoration(
-            color: DesignTokens.primaryContainer.withValues(alpha: 0.12),
+            color: scheme.primaryContainer.withValues(alpha: 0.12),
             shape: BoxShape.circle,
             border: Border.all(
-              color: DesignTokens.primaryContainer.withValues(alpha: 0.25),
+              color: scheme.primaryContainer.withValues(alpha: 0.25),
             ),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.hearing_rounded,
             size: 36,
-            color: DesignTokens.primaryContainer,
+            color: scheme.primaryContainer,
           ),
         ),
         const SizedBox(height: DesignTokens.spacingLg),
@@ -160,7 +187,7 @@ class OnboardingWelcomeHeader extends StatelessWidget {
           'Esta app usa estrategias pedagogicas comprobadas. '
           'Tres ideas clave antes de empezar:',
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: DesignTokens.onSurfaceVariant,
+            color: scheme.onSurfaceVariant,
           ),
         ),
       ],

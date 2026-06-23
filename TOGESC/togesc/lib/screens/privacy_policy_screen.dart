@@ -4,7 +4,7 @@ import '../app/design_tokens.dart';
 import '../widgets/info_views.dart';
 import '../widgets/togesc_ui.dart';
 
-/// Politica de privacidad (Fase 7E-1).
+/// Politica de privacidad (Stitch privacy_premium).
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
@@ -12,21 +12,14 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return TogescScaffold(
       title: 'Politica de privacidad',
       body: ListView(
         padding: const EdgeInsets.all(DesignTokens.marginMobile),
-        children: [
-          Text(
-            'Ultima actualizacion: $_lastUpdated',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: DesignTokens.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: DesignTokens.spacingLg),
-          const PolicySection(
+        children: const [
+          PrivacyHeroHeader(lastUpdated: _lastUpdated),
+          SizedBox(height: DesignTokens.spacingLg),
+          PolicySection(
             title: 'Resumen',
             body:
                 'TOGESC guarda tu progreso de entrenamiento en tu dispositivo. '
@@ -35,7 +28,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'cifrada en tránsito con tu email y contrasena; solo tu '
                 'usuario puede leer esos datos.',
           ),
-          const PolicySection(
+          PolicySection(
             title: 'Datos que se guardan',
             body:
                 'Tu progreso de entrenamiento (pesos SRS, estadisticas, '
@@ -44,7 +37,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'almacenamiento local del sistema (SharedPreferences en '
                 'movil/escritorio; almacenamiento del navegador en web).',
           ),
-          const PolicySection(
+          PolicySection(
             title: 'Cuenta opcional y sincronizacion',
             body:
                 'Puedes entrenar sin registrarte. Si creas una cuenta, '
@@ -53,7 +46,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'usuario. No vendemos ni compartimos esos datos con terceros '
                 'con fines comerciales.',
           ),
-          const PolicySection(
+          PolicySection(
             title: 'Exportacion de datos',
             body:
                 'En Cuenta puedes exportar un archivo JSON con tu progreso '
@@ -61,13 +54,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'descarga el archivo; en movil se copia al portapapeles. '
                 'Sirve para respaldo o portabilidad (GDPR).',
           ),
-          const PolicySection(
+          PolicySection(
             title: 'Datos que no recopilamos',
             body:
                 'No grabamos microfono ni subimos audio. No usamos servicios '
                 'de analitica ni publicidad de terceros.',
           ),
-          const PolicySection(
+          PolicySection(
             title: 'Audio',
             body:
                 'Los ejercicios se sintetizan en tu dispositivo. El modo canto '
@@ -75,7 +68,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'detectar la nota; el audio no se almacena ni se envia a '
                 'internet.',
           ),
-          const PolicySection(
+          PolicySection(
             title: 'Eliminacion de datos',
             body:
                 'Puedes borrar tu progreso local desde Estadisticas '
@@ -85,13 +78,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'progreso local en el dispositivo se conserva hasta que lo '
                 'reinicies o desinstales la app.',
           ),
-          const PolicySection(
+          PolicySection(
             title: 'Cambios futuros',
             body:
                 'Si se anaden analitica, pagos u otros servicios, esta politica '
                 'se actualizara antes del lanzamiento.',
           ),
-          const PolicySection(
+          PolicySection(
             title: 'Contacto',
             body:
                 'Proyecto open source en GitHub (Raikadier/togesc). Para '

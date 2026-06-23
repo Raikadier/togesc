@@ -1,6 +1,5 @@
 import '../constants/game_constants.dart';
 import '../constants/notes.dart';
-import '../models/practice_session_log.dart';
 
 /// Resuelve el pool de notas para SRS segun modo, foco y preferencia del usuario.
 List<String>? resolvePracticeNotePool({

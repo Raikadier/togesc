@@ -6,7 +6,7 @@ import '../models/audio_preferences.dart';
 import '../providers/audio_preferences_provider.dart';
 import 'session_instrument_sheet.dart';
 
-/// Layout centrado para fases idle, listening y cluster.
+/// Layout centrado para fases idle, listening y cluster (Stitch premium).
 class GameSessionPhaseLayout extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -14,6 +14,9 @@ class GameSessionPhaseLayout extends StatelessWidget {
   final Widget? footer;
   final bool showProgress;
   final Color? accentColor;
+  final String? badge;
+  final LinearGradient? iconGradient;
+  final bool pulsingIcon;
 
   const GameSessionPhaseLayout({
     super.key,
@@ -23,12 +26,25 @@ class GameSessionPhaseLayout extends StatelessWidget {
     this.footer,
     this.showProgress = false,
     this.accentColor,
+    this.badge,
+    this.iconGradient,
+    this.pulsingIcon = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = accentColor ?? DesignTokens.primaryContainer;
+    final scheme = theme.colorScheme;
+    final color = accentColor ?? scheme.primaryContainer;
+    final gradient = iconGradient ??
+        LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.18),
+            color.withValues(alpha: 0.06),
+          ],
+        );
 
     return Center(
       child: Padding(
@@ -38,34 +54,89 @@ class GameSessionPhaseLayout extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: color.withValues(alpha: 0.25),
+            if (badge != null) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DesignTokens.spacingMd,
+                  vertical: DesignTokens.spacingXs,
+                ),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: color.withValues(alpha: 0.2)),
+                ),
+                child: Text(
+                  badge!,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
-              child: Icon(
-                icon,
-                size: 48,
-                color: color,
+              const SizedBox(height: DesignTokens.spacingLg),
+            ],
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (pulsingIcon) ...[
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: color.withValues(alpha: 0.15),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: color.withValues(alpha: 0.06),
+                      ),
+                    ),
+                  ],
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      gradient: gradient,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: color.withValues(alpha: 0.25)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withValues(alpha: 0.15),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(icon, size: 44, color: color),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: DesignTokens.spacingLg),
             Text(
               title,
-              style: theme.textTheme.titleLarge,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
               textAlign: TextAlign.center,
             ),
             if (subtitle != null) ...[
               const SizedBox(height: DesignTokens.spacingSm),
               Text(
                 subtitle!,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: DesignTokens.onSurfaceVariant,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: scheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -73,8 +144,8 @@ class GameSessionPhaseLayout extends StatelessWidget {
             if (showProgress) ...[
               const SizedBox(height: DesignTokens.spacingLg),
               SizedBox(
-                width: 32,
-                height: 32,
+                width: 36,
+                height: 36,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
                   color: color,
@@ -108,13 +179,14 @@ class GameSessionProgressBar extends StatelessWidget {
     if (targetRounds <= 0) return const SizedBox.shrink();
 
     final progress = (roundsCompleted / targetRounds).clamp(0.0, 1.0);
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           'Ronda $roundsCompleted de $targetRounds',
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: DesignTokens.onSurfaceVariant,
+                color: scheme.onSurfaceVariant,
               ),
           textAlign: TextAlign.center,
         ),
@@ -124,8 +196,8 @@ class GameSessionProgressBar extends StatelessWidget {
           child: LinearProgressIndicator(
             value: progress,
             minHeight: 6,
-            backgroundColor: DesignTokens.primary.withValues(alpha: 0.12),
-            color: DesignTokens.primaryContainer,
+            backgroundColor: scheme.primary.withValues(alpha: 0.12),
+            color: scheme.primaryContainer,
           ),
         ),
       ],
@@ -249,10 +321,18 @@ class GameSessionIdleView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GameSessionPhaseLayout(
+      badge: 'ENTRENAMIENTO DE OIDO',
       icon: Icons.headphones_rounded,
       title: 'Preparate para escuchar',
+      subtitle: 'Pulsa reproducir cuando estes listo',
       footer: FilledButton.icon(
         onPressed: onPlay,
+        style: FilledButton.styleFrom(
+          minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
+          shape: RoundedRectangleBorder(
+            borderRadius: DesignTokens.borderRadiusXl,
+          ),
+        ),
         icon: const Icon(Icons.play_arrow_rounded),
         label: const Text('Reproducir'),
       ),
@@ -269,10 +349,12 @@ class GameSessionListeningView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GameSessionPhaseLayout(
+      badge: 'ESCUCHANDO',
       icon: Icons.graphic_eq_rounded,
-      title: 'Escucha atentamente... ($numNotes nota(s))',
-      subtitle: 'Concentrate en cada altura',
+      title: 'Escucha atentamente',
+      subtitle: '$numNotes nota(s) — concentrate en cada altura',
       showProgress: true,
+      pulsingIcon: true,
     );
   }
 }
@@ -283,16 +365,56 @@ class GameSessionClusterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const GameSessionPhaseLayout(
+    return GameSessionPhaseLayout(
+      badge: 'LIMPIEZA TONAL',
       icon: Icons.waves_rounded,
+      accentColor: DesignTokens.tertiary,
       title: 'Limpiando el oido...',
-      subtitle: 'Transicion tonal breve',
+      subtitle: 'Transicion tonal breve para romper el anclaje',
       showProgress: true,
+      pulsingIcon: true,
     );
   }
 }
 
-/// Encabezado de la fase de respuesta.
+/// Etiqueta de seccion en vista de resultado (Stitch).
+class GameSessionResultSectionLabel extends StatelessWidget {
+  final String label;
+
+  const GameSessionResultSectionLabel({super.key, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: DesignTokens.spacingMd),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 20,
+            decoration: BoxDecoration(
+              color: scheme.primary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: DesignTokens.spacingSm),
+          Text(
+            label.toUpperCase(),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: scheme.outline,
+                  letterSpacing: 1,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Encabezado de la fase de respuesta (Stitch).
 class GameSessionAnswerHeader extends StatelessWidget {
   final int numNotes;
 
@@ -300,10 +422,138 @@ class GameSessionAnswerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'Que nota(s) escuchaste? ($numNotes)',
-      style: Theme.of(context).textTheme.titleLarge,
-      textAlign: TextAlign.center,
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spacingMd,
+            vertical: DesignTokens.spacingSm,
+          ),
+          decoration: BoxDecoration(
+            color: scheme.secondaryContainer.withValues(alpha: 0.45),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.hearing_rounded,
+                size: 18,
+                color: scheme.onSecondaryContainer,
+              ),
+              const SizedBox(width: DesignTokens.spacingSm),
+              Text(
+                'ENTRENAMIENTO DE OIDO',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: scheme.onSecondaryContainer,
+                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: DesignTokens.spacingMd),
+        Text(
+          numNotes == 1
+              ? 'Que nota escuchaste?'
+              : 'Que nota(s) escuchaste?',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+}
+
+/// Chips de seleccion encima del piano.
+class GameSelectionChips extends StatelessWidget {
+  final Set<String> selectedNotes;
+  final ValueChanged<String>? onRemove;
+
+  const GameSelectionChips({
+    super.key,
+    required this.selectedNotes,
+    this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    if (selectedNotes.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: DesignTokens.spacingLg,
+          vertical: DesignTokens.spacingSm,
+        ),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: scheme.outlineVariant.withValues(alpha: 0.35),
+          ),
+        ),
+        child: Text(
+          'Esperando respuesta...',
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+              ),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: DesignTokens.spacingSm,
+      runSpacing: DesignTokens.spacingSm,
+      alignment: WrapAlignment.center,
+      children: selectedNotes.map((note) {
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spacingLg,
+            vertical: DesignTokens.spacingSm,
+          ),
+          decoration: BoxDecoration(
+            color: scheme.primaryContainer,
+            borderRadius: BorderRadius.circular(999),
+            boxShadow: [
+              BoxShadow(
+                color: scheme.primary.withValues(alpha: 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                note,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: scheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              if (onRemove != null) ...[
+                const SizedBox(width: DesignTokens.spacingXs),
+                InkWell(
+                  onTap: () => onRemove!(note),
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 18,
+                    color: scheme.onPrimaryContainer,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }

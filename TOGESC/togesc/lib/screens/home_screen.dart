@@ -8,14 +8,17 @@ import '../constants/game_constants.dart';
 import '../constants/subscription_constants.dart';
 import '../models/subscription_status.dart';
 import '../providers/audio_provider.dart';
+import '../providers/engagement_stats_provider.dart';
 import '../providers/last_practice_provider.dart';
-import '../providers/srs_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../services/subscription_access.dart';
 import '../widgets/continue_practice_card.dart';
+import '../widgets/daily_focus_section.dart';
 import '../widgets/home_hub_views.dart';
-import '../widgets/recommendation_card.dart';
-import '../widgets/togesc_ui.dart';
+import '../widgets/mode_bento_card.dart';
+import '../widgets/session_evolution_chart.dart';
+import '../providers/session_history_provider.dart';
+import '../utils/session_history_stats.dart';
 
 /// Pantalla principal con menu de modos de juego y recomendaciones.
 class HomeScreen extends ConsumerWidget {
@@ -61,11 +64,13 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recommendations = ref.watch(practiceRecommendationsProvider);
     final lastPractice = ref.watch(lastPracticeSessionProvider).valueOrNull;
-    final hasPro = ref.watch(hasProAccessProvider);
     final status = ref.watch(subscriptionStatusProvider).valueOrNull;
     final effectiveStatus = status ?? const SubscriptionStatus.free();
+    final engagement = ref.watch(engagementStatsProvider);
+    final history = ref.watch(sessionHistoryProvider).valueOrNull ?? [];
+    final weeklySummaries = buildDailyPracticeSummaries(history);
+    final hasWeeklyActivity = weeklySummaries.any((d) => d.hasActivity);
 
     void openGame(String route, GameMode mode) {
       if (!SubscriptionAccess.canPlayMode(effectiveStatus, mode)) {
@@ -79,41 +84,59 @@ class HomeScreen extends ConsumerWidget {
       context.push(route);
     }
 
-    return TogescScaffold(
-      title: 'Entrenador de Oido Absoluto',
-      actions: [
-        if (!hasPro)
-          IconButton(
-            icon: const Icon(Icons.workspace_premium_outlined),
-            tooltip: 'TOGESC Pro',
-            onPressed: () => context.push(AppRoutes.paywall),
-          ),
-        IconButton(
-          icon: const Icon(Icons.tune_rounded),
-          tooltip: 'Ajustes',
-          onPressed: () => context.push(AppRoutes.settings),
+    final bentoModes = [
+      for (final (mode, icon, title, subtitle, isPro) in _modes)
+        (
+          mode: mode,
+          icon: icon,
+          title: title,
+          subtitle: subtitle,
+          isPro: isPro,
+          locked:
+              isPro && !SubscriptionAccess.canPlayMode(effectiveStatus, mode),
+          mastery: engagement.masteryFor(mode),
+          onTap: () => openGame('${AppRoutes.game}/${mode.id}', mode),
         ),
-        IconButton(
-          icon: const Icon(Icons.person_outline_rounded),
-          tooltip: 'Cuenta',
-          onPressed: () => context.push(AppRoutes.account),
+      (
+        mode: GameMode.speedTraining,
+        icon: Icons.speed_rounded,
+        title: 'Entrenamiento de velocidad',
+        subtitle: 'Responde antes de que se agote el tiempo',
+        isPro: true,
+        locked: !SubscriptionAccess.canPlayMode(
+          effectiveStatus,
+          GameMode.speedTraining,
         ),
-        IconButton(
-          icon: const Icon(Icons.info_outline_rounded),
-          tooltip: 'Acerca de',
-          onPressed: () => context.push(AppRoutes.about),
-        ),
-        IconButton(
-          icon: const Icon(Icons.bar_chart_rounded),
-          tooltip: 'Estadisticas',
-          onPressed: () => context.push(AppRoutes.statistics),
-        ),
-      ],
+        mastery: engagement.masteryFor(GameMode.speedTraining),
+        onTap: () {
+          ref.read(audioPlayerServiceProvider).captureUserGesture();
+          if (!SubscriptionAccess.canPlayMode(
+            effectiveStatus,
+            GameMode.speedTraining,
+          )) {
+            context.push(
+              '${AppRoutes.paywall}?feature=${Uri.encodeComponent('Entrenamiento de velocidad')}',
+            );
+            return;
+          }
+          context.push(AppRoutes.speedSelect);
+        },
+      ),
+    ];
+
+    return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(DesignTokens.marginMobile),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(
+              'Entrenador de Oido Absoluto',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: DesignTokens.spacingLg),
             if (lastPractice != null && lastPractice.mode != null) ...[
               ContinuePracticeCard(
                 session: lastPractice,
@@ -130,51 +153,17 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: DesignTokens.spacingLg),
             ],
-            if (recommendations.isNotEmpty) ...[
-              const HomeSectionHeader(
-                title: 'Enfoque diario',
-                subtitle: 'Recomendaciones segun tu progreso SRS',
-              ),
-              RecommendationCard(recommendations: recommendations),
-              const SizedBox(height: DesignTokens.spacingLg),
-            ],
-            const HomeSectionHeader(title: 'Modos de Juego'),
-            for (final (mode, icon, title, subtitle, isPro) in _modes)
-              HomeModeOptionCard(
-                title: title,
-                subtitle: subtitle,
-                icon: icon,
-                isPro: isPro,
-                locked: isPro &&
-                    !SubscriptionAccess.canPlayMode(effectiveStatus, mode),
-                onTap: () => openGame(
-                  '${AppRoutes.game}/${mode.id}',
-                  mode,
-                ),
-              ),
-            HomeModeOptionCard(
-              title: 'Entrenamiento de velocidad',
-              subtitle: 'Responde antes de que se agote el tiempo',
-              icon: Icons.speed_rounded,
-              isPro: true,
-              locked: !SubscriptionAccess.canPlayMode(
-                effectiveStatus,
-                GameMode.speedTraining,
-              ),
-              onTap: () {
-                ref.read(audioPlayerServiceProvider).captureUserGesture();
-                if (!SubscriptionAccess.canPlayMode(
-                  effectiveStatus,
-                  GameMode.speedTraining,
-                )) {
-                  context.push(
-                    '${AppRoutes.paywall}?feature=${Uri.encodeComponent('Entrenamiento de velocidad')}',
-                  );
-                  return;
-                }
-                context.push(AppRoutes.speedSelect);
-              },
+            const DailyFocusSection(),
+            const SizedBox(height: DesignTokens.spacingLg),
+            const HomeSectionHeader(
+              title: 'Modos de Juego',
+              subtitle: 'Selecciona un ejercicio para comenzar tu entrenamiento.',
             ),
+            ModeBentoGrid(modes: bentoModes),
+            if (hasWeeklyActivity) ...[
+              const SizedBox(height: DesignTokens.spacingLg),
+              SessionEvolutionChart(summaries: weeklySummaries),
+            ],
           ],
         ),
       ),

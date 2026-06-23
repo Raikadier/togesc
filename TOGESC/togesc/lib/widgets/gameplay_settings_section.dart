@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../app/design_tokens.dart';
 import '../models/ui_preferences.dart';
 import '../providers/ui_preferences_provider.dart';
 import 'togesc_ui.dart';
@@ -29,19 +28,24 @@ class GameplaySettingsSection extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 8),
-            ...GameInputMode.values.map((mode) {
-              return RadioListTile<GameInputMode>(
-                contentPadding: EdgeInsets.zero,
-                title: Text(mode.label),
-                subtitle: Text(mode.description),
-                value: mode,
-                groupValue: prefs.inputMode,
-                onChanged: (value) {
-                  if (value == null) return;
-                  ref.read(uiPreferencesProvider.notifier).setInputMode(value);
-                },
-              );
-            }),
+            RadioGroup<GameInputMode>(
+              groupValue: prefs.inputMode,
+              onChanged: (value) {
+                if (value == null) return;
+                ref.read(uiPreferencesProvider.notifier).setInputMode(value);
+              },
+              child: Column(
+                children: [
+                  for (final mode in GameInputMode.values)
+                    RadioListTile<GameInputMode>(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(mode.label),
+                      subtitle: Text(mode.description),
+                      value: mode,
+                    ),
+                ],
+              ),
+            ),
             const Divider(),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
@@ -92,7 +96,7 @@ class GameplaySettingsSection extends ConsumerWidget {
           ],
         ),
         loading: () => const LinearProgressIndicator(),
-        error: (_, __) => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
       ),
     );
   }

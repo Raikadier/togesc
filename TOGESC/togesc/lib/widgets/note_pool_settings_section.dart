@@ -65,7 +65,7 @@ class NotePoolSettingsSection extends ConsumerWidget {
           ],
         ),
         loading: () => const LinearProgressIndicator(),
-        error: (_, __) => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
       ),
     );
   }

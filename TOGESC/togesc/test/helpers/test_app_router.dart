@@ -8,17 +8,13 @@ import 'package:togesc/screens/home_screen.dart';
 import 'package:togesc/screens/speed_mode_select_screen.dart';
 import 'package:togesc/screens/statistics_screen.dart';
 import 'package:togesc/services/app_preferences.dart';
+import 'package:togesc/widgets/togesc_shell.dart';
 
 /// Router minimo para widget/e2e tests (sin redirect de onboarding).
 GoRouter buildTestRouter() {
   return GoRouter(
     initialLocation: AppRoutes.home,
     routes: [
-      GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
-      GoRoute(
-        path: AppRoutes.statistics,
-        builder: (_, _) => const StatisticsScreen(),
-      ),
       GoRoute(
         path: AppRoutes.speedSelect,
         builder: (_, _) => const SpeedModeSelectScreen(),
@@ -32,6 +28,16 @@ GoRouter buildTestRouter() {
           return GameScreen(mode: mode);
         },
       ),
+      ShellRoute(
+        builder: (_, _, child) => TogescShell(child: child),
+        routes: [
+          GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
+          GoRoute(
+            path: AppRoutes.statistics,
+            builder: (_, _) => const StatisticsScreen(),
+          ),
+        ],
+      ),
     ],
   );
 }
@@ -39,7 +45,6 @@ GoRouter buildTestRouter() {
 /// Marca onboarding como completado en tests.
 void markOnboardingCompleteForTests() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  // ignore: invalid_use_of_visible_for_testing_member
   SharedPreferences.setMockInitialValues({
     onboardingCompleteKey: true,
   });

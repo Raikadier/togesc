@@ -20,7 +20,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('TOGESC Pro'), findsOneWidget);
+    expect(find.text('Pasa a TOGESC Pro'), findsOneWidget);
     expect(find.textContaining('Acordes'), findsOneWidget);
   });
 }
