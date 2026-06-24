@@ -1,19 +1,7 @@
 import '../models/note_data.dart';
+import '../utils/session_timestamp.dart';
 import 'progress_repository.dart';
 import 'sync_pending_store.dart';
-
-DateTime? _parseSession(String? iso) {
-  if (iso == null || iso.isEmpty) return null;
-  return DateTime.tryParse(iso);
-}
-
-bool _isRemoteNewer(String? localIso, String? remoteIso) {
-  final local = _parseSession(localIso);
-  final remote = _parseSession(remoteIso);
-  if (remote == null) return false;
-  if (local == null) return true;
-  return remote.isAfter(local);
-}
 
 /// Local primero; sincroniza con remoto cuando hay sesion autenticada.
 class HybridProgressRepository implements ProgressRepository {
@@ -54,7 +42,7 @@ class HybridProgressRepository implements ProgressRepository {
       return remoteData;
     }
 
-    if (_isRemoteNewer(localSession, remoteSession)) {
+    if (SessionTimestamp.isRemoteNewer(localSession, remoteSession)) {
       await _local.save(remoteData, lastSession: remoteSession);
       await _syncPending.clear();
       return remoteData;
@@ -70,7 +58,7 @@ class HybridProgressRepository implements ProgressRepository {
     if (remote == null) return localSession;
 
     final remoteSession = await remote.loadLastSessionIso();
-    if (_isRemoteNewer(localSession, remoteSession)) {
+    if (SessionTimestamp.isRemoteNewer(localSession, remoteSession)) {
       return remoteSession;
     }
     return localSession;
@@ -144,7 +132,7 @@ class HybridProgressRepository implements ProgressRepository {
     }
 
     final remoteSession = await remote.loadLastSessionIso();
-    if (_isRemoteNewer(localSession, remoteSession)) {
+    if (SessionTimestamp.isRemoteNewer(localSession, remoteSession)) {
       await _local.save(remoteData, lastSession: remoteSession);
       await _syncPending.clear();
     } else {

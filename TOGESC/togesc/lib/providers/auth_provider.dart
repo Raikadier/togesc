@@ -12,33 +12,40 @@ final supabaseClientProvider = Provider<SupabaseClient?>((ref) {
   return Supabase.instance.client;
 });
 
-/// ID del usuario autenticado, o null si no hay sesion.
-final currentUserIdProvider = Provider<String?>((ref) {
-  final client = ref.watch(supabaseClientProvider);
-  return client?.auth.currentUser?.id;
-});
-
-/// Email del usuario autenticado.
-final currentUserEmailProvider = Provider<String?>((ref) {
-  final client = ref.watch(supabaseClientProvider);
-  return client?.auth.currentUser?.email;
-});
-
-/// Si el email del usuario esta verificado.
-final emailVerifiedProvider = Provider<bool>((ref) {
-  final client = ref.watch(supabaseClientProvider);
-  final user = client?.auth.currentUser;
-  if (user == null) return false;
-  return user.emailConfirmedAt != null;
-});
-
-/// Cambios de sesion (login, logout, refresh).
+/// Cambios de sesion (login, logout, refresh). Los providers de usuario
+/// escuchan este stream para refrescar la UI sin recargar la pagina.
 final authStateChangesProvider = StreamProvider<AuthState>((ref) {
   final client = ref.watch(supabaseClientProvider);
   if (client == null) {
     return Stream.value(const AuthState(AuthChangeEvent.initialSession, null));
   }
   return client.auth.onAuthStateChange;
+});
+
+User? _sessionUser(Ref ref) {
+  final authAsync = ref.watch(authStateChangesProvider);
+  return authAsync.when(
+    data: (state) => state.session?.user,
+    loading: () => ref.watch(supabaseClientProvider)?.auth.currentUser,
+    error: (e, _) => ref.watch(supabaseClientProvider)?.auth.currentUser,
+  );
+}
+
+/// ID del usuario autenticado, o null si no hay sesion.
+final currentUserIdProvider = Provider<String?>((ref) {
+  return _sessionUser(ref)?.id;
+});
+
+/// Email del usuario autenticado.
+final currentUserEmailProvider = Provider<String?>((ref) {
+  return _sessionUser(ref)?.email;
+});
+
+/// Si el email del usuario esta verificado.
+final emailVerifiedProvider = Provider<bool>((ref) {
+  final user = _sessionUser(ref);
+  if (user == null) return false;
+  return user.emailConfirmedAt != null;
 });
 
 final supabaseAvailableProvider = Provider<bool>((ref) {

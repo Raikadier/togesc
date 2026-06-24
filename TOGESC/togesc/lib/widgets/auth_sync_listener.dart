@@ -34,6 +34,8 @@ class _AuthSyncListenerState extends ConsumerState<AuthSyncListener>
 
   Future<void> _refreshCloudState() async {
     await ref.read(syncNowProvider)();
+    ref.invalidate(syncDiagnosticsProvider);
+    ref.invalidate(syncPendingProvider);
     ref.invalidate(srsSystemProvider);
     if (SubscriptionConfig.isActive) {
       await ref.read(subscriptionStatusProvider.notifier).refresh();
@@ -51,6 +53,12 @@ class _AuthSyncListenerState extends ConsumerState<AuthSyncListener>
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<AuthState>>(authStateChangesProvider, (prev, next) {
       next.whenData((state) {
+        if (state.event == AuthChangeEvent.signedOut) {
+          ref.invalidate(progressRepositoryProvider);
+          ref.invalidate(syncDiagnosticsProvider);
+          ref.invalidate(syncPendingProvider);
+          return;
+        }
         if (state.session == null) return;
         if (state.event == AuthChangeEvent.signedIn ||
             state.event == AuthChangeEvent.initialSession ||

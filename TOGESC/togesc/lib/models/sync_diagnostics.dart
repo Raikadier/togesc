@@ -1,3 +1,5 @@
+import '../utils/session_timestamp.dart';
+
 /// Estado de sincronizacion local vs nube.
 class SyncDiagnostics {
   const SyncDiagnostics({
@@ -16,11 +18,14 @@ class SyncDiagnostics {
   final bool pendingUpload;
   final bool remoteReachable;
 
+  static bool sessionsMatch(String? a, String? b) =>
+      SessionTimestamp.match(a, b);
+
   bool get isInSync {
     if (!cloudSyncEnabled || !hasSession) return true;
     if (pendingUpload) return false;
     if (localSession == null && remoteSession == null) return true;
-    return localSession == remoteSession;
+    return sessionsMatch(localSession, remoteSession);
   }
 
   String get statusLabel {
@@ -33,7 +38,7 @@ class SyncDiagnostics {
     if (isInSync) return 'Local y nube alineados.';
     if (localSession != null &&
         remoteSession != null &&
-        localSession != remoteSession) {
+        !sessionsMatch(localSession, remoteSession)) {
       return 'Local y nube difieren; pulsa Sincronizar.';
     }
     return 'Listo para sincronizar.';

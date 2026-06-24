@@ -80,6 +80,21 @@ void main() {
       expect((await local.load())!['C']!.weight, 9.0);
     });
 
+    test('load mantiene local si marcas son el mismo instante distinto formato',
+        () async {
+      await local.save(
+        {'C': NoteData(weight: 1.0)},
+        lastSession: '2026-06-23T15:08:11.868',
+      );
+      await remoteInner!.save(
+        {'C': NoteData(weight: 9.0)},
+        lastSession: '2026-06-23T15:08:11.868+00:00',
+      );
+
+      final loaded = await hybrid.load();
+      expect(loaded!['C']!.weight, 1.0);
+    });
+
     test('mergeOnSignIn sube local si remoto vacio', () async {
       await local.save({'E': NoteData(weight: 4.0)});
       await hybrid.mergeOnSignIn();

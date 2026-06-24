@@ -64,7 +64,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
     try {
       if (_view == _AccountView.signUp) {
-        await client.auth.signUp(email: email, password: password);
+        await client.auth.signUp(
+          email: email,
+          password: password,
+          emailRedirectTo: Uri.base.origin,
+        );
         setState(() {
           _message =
               'Cuenta creada. Revisa tu email para verificar la cuenta.';
@@ -75,6 +79,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
       if (client.auth.currentUser != null) {
         await ref.read(progressSyncOnSignInProvider)();
+        ref.invalidate(subscriptionStatusProvider);
+        ref.invalidate(syncDiagnosticsProvider);
+        ref.invalidate(syncPendingProvider);
         if (mounted) {
           setState(() {
             _message = _view == _AccountView.signUp
@@ -191,6 +198,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
     try {
       await client.auth.signOut();
+      ref.invalidate(progressRepositoryProvider);
+      ref.invalidate(syncDiagnosticsProvider);
+      ref.invalidate(syncPendingProvider);
+      ref.invalidate(subscriptionStatusProvider);
       if (mounted) {
         setState(() => _message = 'Sesion cerrada. Tu progreso local se conserva.');
       }
@@ -210,7 +221,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     });
 
     try {
-      final diagnostics = await ref.read(syncNowProvider)();
+      await ref.read(syncNowProvider)();
+      final diagnostics = await ref.refresh(syncDiagnosticsProvider.future);
       ref.invalidate(srsSystemProvider);
       await ref.read(analyticsServiceProvider).syncCompleted(
             inSync: diagnostics.isInSync,

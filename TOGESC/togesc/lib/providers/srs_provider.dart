@@ -14,6 +14,9 @@ import '../services/srs_system.dart';
 
 /// Provider para el repositorio de progreso (local + sync opcional Supabase).
 final progressRepositoryProvider = Provider<ProgressRepository>((ref) {
+  ref.watch(currentUserIdProvider);
+  ref.watch(subscriptionStatusProvider);
+
   final local = SharedPreferencesProgressRepository();
 
   if (!SupabaseConfig.isConfigured) return local;
@@ -41,6 +44,7 @@ final progressSyncOnSignInProvider = Provider<Future<void> Function()>((ref) {
     if (repo is HybridProgressRepository) {
       await repo.mergeOnSignIn();
       await repo.flushPendingSync();
+      ref.invalidate(progressRepositoryProvider);
       ref.invalidate(srsSystemProvider);
       ref.invalidate(syncPendingProvider);
     }
@@ -59,7 +63,8 @@ final progressFlushPendingProvider = Provider<Future<bool> Function()>((ref) {
 });
 
 final syncPendingProvider = FutureProvider<bool>((ref) async {
-  final repo = ref.read(progressRepositoryProvider);
+  ref.watch(currentUserIdProvider);
+  final repo = ref.watch(progressRepositoryProvider);
   if (repo is HybridProgressRepository) {
     return repo.hasPendingSync;
   }

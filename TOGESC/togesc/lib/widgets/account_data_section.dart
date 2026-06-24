@@ -10,6 +10,8 @@ import '../app/router.dart';
 import '../providers/app_preferences_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/srs_provider.dart';
+import '../providers/subscription_provider.dart';
+import '../providers/sync_provider.dart';
 import '../services/account_service.dart';
 import '../services/progress_export_download.dart';
 import '../services/user_data_export_service.dart';
@@ -95,6 +97,10 @@ class AccountDataSection extends ConsumerWidget {
 
     try {
       await AccountService.deleteOwnAccount(client);
+      ref.invalidate(progressRepositoryProvider);
+      ref.invalidate(syncDiagnosticsProvider);
+      ref.invalidate(syncPendingProvider);
+      ref.invalidate(subscriptionStatusProvider);
       if (context.mounted) {
         onMessage('Cuenta eliminada. Tu progreso local se conserva.');
       }
