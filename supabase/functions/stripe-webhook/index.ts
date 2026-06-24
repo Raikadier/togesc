@@ -1,5 +1,10 @@
 import Stripe from "npm:stripe@17";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import {
+  isStaleSubscriptionUpdate,
+  isWebhookDuplicate,
+  markWebhookProcessed,
+} from "../_shared/webhook_idempotency.ts";
 
 const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY");
 const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
@@ -31,17 +36,42 @@ function mapStripeStatus(status: string): { plan: string; status: string } {
   }
 }
 
+async function loadExistingSubscription(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+) {
+  const { data, error } = await supabase
+    .from("user_subscriptions")
+    .select("expires_at, status, plan")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("subscription lookup error", error.message);
+    throw error;
+  }
+
+  return data;
+}
+
 async function upsertSubscription(
   supabase: ReturnType<typeof createClient>,
   userId: string,
   payload: Record<string, unknown>,
+  expiresAt: string | null,
 ) {
+  const existing = await loadExistingSubscription(supabase, userId);
+  if (isStaleSubscriptionUpdate(existing, expiresAt)) {
+    console.log(`Skipping stale subscription update for ${userId}`);
+    return;
+  }
+
   const { error } = await supabase.from("user_subscriptions").upsert({
     user_id: userId,
     ...payload,
   });
   if (error) {
-    console.error("upsert error", error);
+    console.error("upsert error", error.message);
     throw error;
   }
 }
@@ -70,6 +100,10 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error("Webhook signature verification failed", err);
     return jsonResponse({ error: "Invalid signature" }, 400);
+  }
+
+  if (await isWebhookDuplicate(supabase, event.id)) {
+    return jsonResponse({ received: true, duplicate: true });
   }
 
   try {
@@ -112,7 +146,7 @@ Deno.serve(async (req) => {
           stripe_subscription_id: subscriptionId ?? null,
           trial_ends_at: trialEndsAt,
           expires_at: expiresAt,
-        });
+        }, expiresAt);
         break;
       }
 
@@ -128,19 +162,21 @@ Deno.serve(async (req) => {
           ? new Date(sub.current_period_end * 1000).toISOString()
           : null;
 
+        const payload = {
+          plan: mapped.plan,
+          status: mapped.status,
+          source: "stripe",
+          external_id: sub.id,
+          stripe_customer_id: typeof sub.customer === "string"
+            ? sub.customer
+            : sub.customer?.id ?? null,
+          stripe_subscription_id: sub.id,
+          trial_ends_at: trialEndsAt,
+          expires_at: expiresAt,
+        };
+
         if (userId) {
-          await upsertSubscription(supabase, userId, {
-            plan: mapped.plan,
-            status: mapped.status,
-            source: "stripe",
-            external_id: sub.id,
-            stripe_customer_id: typeof sub.customer === "string"
-              ? sub.customer
-              : sub.customer?.id ?? null,
-            stripe_subscription_id: sub.id,
-            trial_ends_at: trialEndsAt,
-            expires_at: expiresAt,
-          });
+          await upsertSubscription(supabase, userId, payload, expiresAt);
           break;
         }
 
@@ -155,16 +191,7 @@ Deno.serve(async (req) => {
             .maybeSingle();
 
           if (row?.user_id) {
-            await upsertSubscription(supabase, row.user_id, {
-              plan: mapped.plan,
-              status: mapped.status,
-              source: "stripe",
-              external_id: sub.id,
-              stripe_customer_id: customerId,
-              stripe_subscription_id: sub.id,
-              trial_ends_at: trialEndsAt,
-              expires_at: expiresAt,
-            });
+            await upsertSubscription(supabase, row.user_id, payload, expiresAt);
           }
         }
         break;
@@ -174,6 +201,7 @@ Deno.serve(async (req) => {
         console.log(`Unhandled event type: ${event.type}`);
     }
 
+    await markWebhookProcessed(supabase, event.id, "stripe");
     return jsonResponse({ received: true });
   } catch (err) {
     console.error("Webhook handler error", err);

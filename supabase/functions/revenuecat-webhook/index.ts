@@ -1,4 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import {
+  isStaleSubscriptionUpdate,
+  isWebhookDuplicate,
+  markWebhookProcessed,
+} from "../_shared/webhook_idempotency.ts";
 
 const webhookSecret = Deno.env.get("REVENUECAT_WEBHOOK_SECRET");
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -12,6 +17,7 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
 }
 
 type RcEvent = {
+  id?: string;
   type?: string;
   app_user_id?: string;
   product_id?: string;
@@ -41,7 +47,15 @@ Deno.serve(async (req) => {
     return jsonResponse({ received: true, skipped: "no app_user_id" });
   }
 
+  const eventId = event.id ??
+    `rc:${event.type ?? "unknown"}:${userId}:${event.expiration_at_ms ?? 0}`;
+
   const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+  if (await isWebhookDuplicate(supabase, eventId)) {
+    return jsonResponse({ received: true, duplicate: true });
+  }
+
   const eventType = event.type ?? "";
 
   const activeEvents = new Set([
@@ -82,6 +96,22 @@ Deno.serve(async (req) => {
     }
   }
 
+  const { data: existing, error: lookupError } = await supabase
+    .from("user_subscriptions")
+    .select("expires_at, status, plan")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (lookupError) {
+    console.error("RevenueCat lookup error", lookupError.message);
+    return jsonResponse({ error: "Lookup failed" }, 500);
+  }
+
+  if (isStaleSubscriptionUpdate(existing, expiresAt)) {
+    await markWebhookProcessed(supabase, eventId, "revenuecat");
+    return jsonResponse({ received: true, skipped: "stale" });
+  }
+
   const { error } = await supabase.from("user_subscriptions").upsert({
     user_id: userId,
     plan,
@@ -93,9 +123,10 @@ Deno.serve(async (req) => {
   });
 
   if (error) {
-    console.error("RevenueCat upsert error", error);
+    console.error("RevenueCat upsert error", error.message);
     return jsonResponse({ error: "Upsert failed" }, 500);
   }
 
+  await markWebhookProcessed(supabase, eventId, "revenuecat");
   return jsonResponse({ received: true });
 });
