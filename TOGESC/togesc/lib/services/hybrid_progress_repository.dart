@@ -1,5 +1,5 @@
 import '../models/note_data.dart';
-import '../utils/session_timestamp.dart';
+import '../utils/progress_merge.dart';
 import 'progress_repository.dart';
 import 'sync_pending_store.dart';
 
@@ -25,6 +25,20 @@ class HybridProgressRepository implements ProgressRepository {
   /// Hay cambios locales pendientes de subir a la nube.
   Future<bool> get hasPendingSync => _syncPending.isPending;
 
+  Future<void> _persistMerged({
+    required Map<String, NoteData> merged,
+    required String? mergedSession,
+    required ProgressRepository remote,
+  }) async {
+    await _local.save(merged, lastSession: mergedSession);
+    try {
+      await remote.save(merged, lastSession: mergedSession);
+      await _syncPending.clear();
+    } catch (_) {
+      await _syncPending.markPending();
+    }
+  }
+
   @override
   Future<Map<String, NoteData>?> load() async {
     final localData = await _local.load();
@@ -42,13 +56,15 @@ class HybridProgressRepository implements ProgressRepository {
       return remoteData;
     }
 
-    if (SessionTimestamp.isRemoteNewer(localSession, remoteSession)) {
-      await _local.save(remoteData, lastSession: remoteSession);
-      await _syncPending.clear();
-      return remoteData;
-    }
-
-    return localData;
+    final merged = ProgressMerge.mergeMaps(localData, remoteData);
+    final mergedSession =
+        ProgressMerge.pickNewerSession(localSession, remoteSession);
+    await _persistMerged(
+      merged: merged,
+      mergedSession: mergedSession,
+      remote: remote,
+    );
+    return merged;
   }
 
   @override
@@ -58,10 +74,7 @@ class HybridProgressRepository implements ProgressRepository {
     if (remote == null) return localSession;
 
     final remoteSession = await remote.loadLastSessionIso();
-    if (SessionTimestamp.isRemoteNewer(localSession, remoteSession)) {
-      return remoteSession;
-    }
-    return localSession;
+    return ProgressMerge.pickNewerSession(localSession, remoteSession);
   }
 
   @override
@@ -94,16 +107,28 @@ class HybridProgressRepository implements ProgressRepository {
     }
 
     try {
-      final session = await _local.loadLastSessionIso();
-      await remote.save(localData, lastSession: session);
-      await _syncPending.clear();
+      final localSession = await _local.loadLastSessionIso();
+      final remoteData = await remote.load();
+      final remoteSession = await remote.loadLastSessionIso();
+
+      final merged = remoteData != null
+          ? ProgressMerge.mergeMaps(localData, remoteData)
+          : localData;
+      final mergedSession =
+          ProgressMerge.pickNewerSession(localSession, remoteSession);
+
+      await _persistMerged(
+        merged: merged,
+        mergedSession: mergedSession,
+        remote: remote,
+      );
       return true;
     } catch (_) {
       return false;
     }
   }
 
-  /// Tras iniciar sesion: sube progreso local si la nube esta vacia o es mas antigua.
+  /// Tras iniciar sesion: fusiona progreso local y remoto por nota.
   Future<void> mergeOnSignIn() async {
     final remote = await _remote();
     if (remote == null) return;
@@ -132,16 +157,13 @@ class HybridProgressRepository implements ProgressRepository {
     }
 
     final remoteSession = await remote.loadLastSessionIso();
-    if (SessionTimestamp.isRemoteNewer(localSession, remoteSession)) {
-      await _local.save(remoteData, lastSession: remoteSession);
-      await _syncPending.clear();
-    } else {
-      try {
-        await remote.save(localData, lastSession: localSession);
-        await _syncPending.clear();
-      } catch (_) {
-        await _syncPending.markPending();
-      }
-    }
+    final merged = ProgressMerge.mergeMaps(localData, remoteData);
+    final mergedSession =
+        ProgressMerge.pickNewerSession(localSession, remoteSession);
+    await _persistMerged(
+      merged: merged,
+      mergedSession: mergedSession,
+      remote: remote,
+    );
   }
 }

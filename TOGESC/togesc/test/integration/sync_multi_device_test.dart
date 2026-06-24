@@ -59,20 +59,26 @@ void main() {
       expect(onB!['C']!.weight, 8.0);
     });
 
-    test('conflicto: gana sesion mas reciente', () async {
+    test('conflicto en misma nota: gana lastSeen mas reciente', () async {
       await cloud.save(
-        {'D': NoteData(weight: 2.0)},
+        {
+          'D': NoteData(weight: 2.0, lastSeen: '2026-06-17T08:00:00.000'),
+        },
         lastSession: '2026-06-17T08:00:00.000',
       );
       await deviceA.save(
-        {'D': NoteData(weight: 9.0)},
+        {
+          'D': NoteData(weight: 9.0, lastSeen: '2026-06-17T12:00:00.000'),
+        },
         lastSession: '2026-06-17T12:00:00.000',
       );
 
       await coordinatorFor(deviceA).syncNow();
 
       await deviceB.save(
-        {'D': NoteData(weight: 1.0)},
+        {
+          'D': NoteData(weight: 1.0, lastSeen: '2026-06-17T09:00:00.000'),
+        },
         lastSession: '2026-06-17T09:00:00.000',
       );
 
@@ -80,6 +86,38 @@ void main() {
 
       final remote = await cloud.load();
       expect(remote!['D']!.weight, 9.0);
+    });
+
+    test('A y B avanzan notas distintas y ambos conservan el progreso', () async {
+      await deviceA.save(
+        {
+          'C': NoteData(weight: 8.0, lastSeen: '2026-06-20T10:00:00.000'),
+          'D': NoteData(weight: 7.0, lastSeen: '2026-06-20T11:00:00.000'),
+        },
+        lastSession: '2026-06-20T11:00:00.000',
+      );
+      await coordinatorFor(deviceA).syncNow();
+
+      await deviceB.save(
+        {
+          'F': NoteData(weight: 5.0, lastSeen: '2026-06-21T10:00:00.000'),
+          'G': NoteData(weight: 4.0, lastSeen: '2026-06-21T11:00:00.000'),
+        },
+        lastSession: '2026-06-21T11:00:00.000',
+      );
+      await coordinatorFor(deviceB).syncNow();
+
+      await coordinatorFor(deviceA).syncNow();
+
+      final onA = await deviceA.load();
+      final onB = await deviceB.load();
+      final onCloud = await cloud.load();
+
+      for (final map in [onA!, onB!, onCloud!]) {
+        expect(map.keys, containsAll(['C', 'D', 'F', 'G']));
+        expect(map['C']!.weight, 8.0);
+        expect(map['G']!.weight, 4.0);
+      }
     });
   });
 }

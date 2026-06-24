@@ -65,13 +65,13 @@ void main() {
       expect(await pendingStore.isPending, isFalse);
     });
 
-    test('load prefiere remoto si last_session es mas reciente', () async {
+    test('load fusiona por nota si lastSeen remoto es mas reciente', () async {
       await local.save(
-        {'C': NoteData(weight: 1.0)},
+        {'C': NoteData(weight: 1.0, lastSeen: '2026-01-01T10:00:00.000')},
         lastSession: '2026-01-01T10:00:00.000',
       );
       await remoteInner!.save(
-        {'C': NoteData(weight: 9.0)},
+        {'C': NoteData(weight: 9.0, lastSeen: '2026-06-01T10:00:00.000')},
         lastSession: '2026-06-01T10:00:00.000',
       );
 
@@ -80,14 +80,47 @@ void main() {
       expect((await local.load())!['C']!.weight, 9.0);
     });
 
-    test('load mantiene local si marcas son el mismo instante distinto formato',
+    test('load fusiona notas distintas de local y remoto', () async {
+      await local.save(
+        {
+          'C': NoteData(weight: 8.0, lastSeen: '2026-06-20T10:00:00.000'),
+          'D': NoteData(weight: 7.0, lastSeen: '2026-06-20T11:00:00.000'),
+        },
+        lastSession: '2026-06-20T11:00:00.000',
+      );
+      await remoteInner!.save(
+        {
+          'F': NoteData(weight: 5.0, lastSeen: '2026-06-21T10:00:00.000'),
+          'G': NoteData(weight: 4.0, lastSeen: '2026-06-21T11:00:00.000'),
+        },
+        lastSession: '2026-06-21T11:00:00.000',
+      );
+
+      final loaded = await hybrid.load();
+      expect(loaded!.keys, containsAll(['C', 'D', 'F', 'G']));
+      expect((await remoteInner!.load())!.keys, containsAll(['C', 'D', 'F', 'G']));
+    });
+
+    test('load mantiene local si marcas de sesion coinciden y nota local gana',
         () async {
       await local.save(
-        {'C': NoteData(weight: 1.0)},
+        {
+          'C': NoteData(
+            weight: 1.0,
+            lastSeen: '2026-06-23T15:08:11.868',
+            timesSeen: 3,
+          ),
+        },
         lastSession: '2026-06-23T15:08:11.868',
       );
       await remoteInner!.save(
-        {'C': NoteData(weight: 9.0)},
+        {
+          'C': NoteData(
+            weight: 9.0,
+            lastSeen: '2026-06-23T15:08:11.868+00:00',
+            timesSeen: 1,
+          ),
+        },
         lastSession: '2026-06-23T15:08:11.868+00:00',
       );
 
