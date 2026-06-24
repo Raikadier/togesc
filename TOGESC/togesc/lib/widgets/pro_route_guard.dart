@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../constants/subscription_constants.dart';
+import '../models/subscription_status.dart';
 import '../providers/subscription_provider.dart';
 import '../services/subscription_access.dart';
 
@@ -27,24 +28,30 @@ class ProRouteGuard extends ConsumerWidget {
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, _) => child,
-      data: (status) {
-        if (SubscriptionConstants.isModeFree(mode) ||
-            SubscriptionAccess.hasProAccess(status)) {
-          return child;
-        }
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!context.mounted) return;
-          context.replace(
-            '${AppRoutes.paywall}?feature=${Uri.encodeComponent(SubscriptionConstants.modeProLabel(mode))}',
-          );
-        });
-
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        );
+      error: (error, stackTrace) {
+        final cached = ref.read(subscriptionStatusProvider.notifier).lastKnown ??
+            const SubscriptionStatus.free();
+        return _guardWithStatus(context, cached);
       },
+      data: (status) => _guardWithStatus(context, status),
+    );
+  }
+
+  Widget _guardWithStatus(BuildContext context, SubscriptionStatus status) {
+    if (SubscriptionConstants.isModeFree(mode) ||
+        SubscriptionAccess.hasProAccess(status)) {
+      return child;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      context.replace(
+        '${AppRoutes.paywall}?feature=${Uri.encodeComponent(SubscriptionConstants.modeProLabel(mode))}',
+      );
+    });
+
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }
