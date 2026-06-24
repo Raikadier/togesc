@@ -18,15 +18,15 @@ Debe pasar: `flutter analyze`, `flutter test` (285+).
 - [x] Header **TOGESC** visible en Home, Stats, Pro y Perfil
 - [x] Bottom nav movil: Practica / Stats / Pro / Perfil cambia de tab sin crash
 - [x] Juego y velocidad abren **sin** bottom bar (pantalla inmersiva)
-- [ ] Desktop (>=600px): enlaces Entrenamiento / Estadisticas / Pro en header
+- [x] Desktop (>=600px): enlaces Entrenamiento / Estadisticas / Pro en header
 
 ## 1. Primera apertura y onboarding
 
-- [ ] App nueva muestra **Cómo funciona** (onboarding)
+- [x] App nueva muestra **Cómo funciona** (onboarding)
 - [x] Toggle **Do/Re/Mi** muestra vista previa correcta
 - [x] **Test de audio** suena en el dispositivo
-- [ ] **Entendido, empezar** lleva a Home
-- [ ] Acerca de → **Ver tutorial de nuevo** vuelve al onboarding
+- [x] **Entendido, empezar** lleva a Home
+- [x] Acerca de → **Ver tutorial de nuevo** vuelve al onboarding
 
 ## 2. Práctica core (modo Una nota)
 
@@ -36,39 +36,39 @@ Debe pasar: `flutter analyze`, `flutter test` (285+).
 
 ## 3. Home y engagement
 
-- [ ] **Enfoque diario**: notas criticas + racha/XP tras 2+ sesiones
-- [ ] Modos en **grid bento** (no solo lista)
-- [ ] **Practicar ahora** abre modo una nota
-- [ ] Mini grafico semanal si hay historial
+- [x] **Enfoque diario**: notas criticas + racha/XP tras 2+ sesiones
+- [x] Modos en **grid bento** (no solo lista)
+- [x] **Practicar ahora** abre modo una nota
+- [x] Mini grafico semanal si hay historial
 
 ## 4. Ajustes
 
-- [ ] Home → icono **tune** → Ajustes
-- [ ] Sonido: timbre, volumen, cluster, octavas, duración del tono
-- [ ] Pool de notas (multi-select)
-- [ ] Intensidad SRS (relajado / equilibrado / intenso)
-- [ ] Modo canto / tarareo en **Juego y accesibilidad**
-- [ ] Tema claro / oscuro / sistema
+- [x] Home → icono **tune** → Ajustes
+- [x] Sonido: timbre, volumen, cluster, octavas, duración del tono
+- [x] Pool de notas (multi-select)
+- [x] Intensidad SRS (relajado / equilibrado / intenso)
+- [x] Modo canto / tarareo en **Juego y accesibilidad**
+- [x] Tema claro / oscuro / sistema
 
 ## 5. Estadisticas Pro dashboard
 
 - [x] Bento superior: precision, intentos, pendientes + **Repasar ahora**
-- [ ] Radar 12 notas (usuario Pro)
-- [ ] Filas de dificultad muestran latencia si hay datos
+- [x] Radar 12 notas (usuario Pro)
+- [x] Filas de dificultad muestran latencia si hay datos
 
 ## 6. Modo canto (experimental)
 
-- [ ] Web: permiso micrófono → detecta nota al cantar
+- [x] Web: permiso micrófono → detecta nota al cantar
 - [x] Android/iOS: permiso micrófono → detecta nota (entorno silencioso)
 - [ ] El audio **no** se sube (verificar sin red si es posible)
 
 ## 5. Estadísticas y reflexión
 
-- [ ] Resumen SRS carga correctamente
-- [ ] Tras 2+ sesiones: **Evolución 7 días** muestra barras
-- [ ] **Historial reciente** lista sesiones
-- [ ] **Ver progreso por nota (12)** abre detalle
-- [ ] Reiniciar progreso pide confirmación y funciona
+- [x] Resumen SRS carga correctamente
+- [x] Tras 2+ sesiones: **Evolución 7 días** muestra barras
+- [x] **Historial reciente** lista sesiones
+- [x] **Ver progreso por nota (12)** abre detalle
+- [x] Reiniciar progreso pide confirmación y funciona
 
 ## 6. Cuenta y datos (GDPR)
 

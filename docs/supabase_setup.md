@@ -38,8 +38,14 @@ npx skills add supabase/agent-skills
 1. [Dashboard → togesc](https://supabase.com/dashboard/project/puetlvcsrntwweuxinee)
 2. **Authentication → Providers → Email** → habilitado
 3. **Authentication → URL Configuration**
-   - Site URL: `https://togesc.vercel.app`
-   - Redirect URLs: `https://togesc.vercel.app/**`, `http://localhost:*`
+   - **Site URL:** `https://togesc.vercel.app` (no dejar `http://localhost:3000`)
+   - **Redirect URLs:** `https://togesc.vercel.app/**`, `http://localhost:*`
+
+> **Importante:** `supabase/config.toml` (`site_url`) solo aplica al stack **local** (`supabase start`). El proyecto remoto usa la **Site URL del dashboard**. Si sigue en `localhost:3000`, los emails de confirmación redirigen ahí aunque te registres desde Vercel.
+
+La app pasa `emailRedirectTo: Uri.base.origin` en signup y reset de contraseña, así el enlace de confirmación vuelve al mismo origen (Vercel o localhost) donde abriste la app.
+
+Tras confirmar el email, el navegador llega a `/?code=...`; Supabase Flutter (PKCE) intercambia el código al iniciar.
 
 ---
 
