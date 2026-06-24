@@ -6,6 +6,8 @@ on:
 jobs:
   build-aab:
     runs-on: ubuntu-latest
+    env:
+      HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     defaults:
       run:
         working-directory: TOGESC/togesc
@@ -27,7 +29,7 @@ jobs:
         run: flutter pub get
 
       - name: Decode keystore
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: ${{ env.HAS_KEYSTORE == 'true' }}
         run: |
           mkdir -p android/keystores
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/keystores/togesc-release.jks
