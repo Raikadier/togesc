@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:togesc/widgets/piano_keyboard.dart';
@@ -86,6 +87,22 @@ void main() {
     testWidgets('se renderiza correctamente', (tester) async {
       await tester.pumpWidget(buildApp());
       expect(find.byType(PianoKeyboard), findsOneWidget);
+    });
+
+    testWidgets('teclas blancas exponen Semantics con nombre de nota', (tester) async {
+      await tester.pumpWidget(buildApp());
+
+      final semantics = tester.getSemantics(find.bySemanticsLabel('C'));
+      expect(semantics.label, 'C');
+      expect(semantics.hasFlag(SemanticsFlag.isButton), isTrue);
+    });
+
+    testWidgets('nota correcta muestra icono y hint en Semantics', (tester) async {
+      await tester.pumpWidget(buildApp(correctNotes: {'D'}));
+
+      expect(find.byIcon(Icons.check_circle), findsWidgets);
+      final semantics = tester.getSemantics(find.bySemanticsLabel('D'));
+      expect(semantics.hint, 'correcta');
     });
   });
 }
