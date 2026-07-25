@@ -27,8 +27,8 @@ final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
 /// Estado de suscripcion del usuario (Supabase + tiendas).
 final subscriptionStatusProvider =
     AsyncNotifierProvider<SubscriptionNotifier, SubscriptionStatus>(
-  SubscriptionNotifier.new,
-);
+      SubscriptionNotifier.new,
+    );
 
 class SubscriptionNotifier extends AsyncNotifier<SubscriptionStatus> {
   SubscriptionStatus? lastKnown;
@@ -62,24 +62,20 @@ class SubscriptionNotifier extends AsyncNotifier<SubscriptionStatus> {
       await _cacheStatus(status);
       state = AsyncData(status);
     } catch (error, stackTrace) {
-      if (lastKnown != null) {
-        state = AsyncData(lastKnown!);
-      } else {
-        state = AsyncError(error, stackTrace);
-      }
+      state = AsyncError(error, stackTrace);
     }
   }
 
   Future<bool> purchasePro() async {
-    final result =
-        await ref.read(subscriptionServiceProvider).purchasePro();
+    final result = await ref.read(subscriptionServiceProvider).purchasePro();
     await refresh();
     return result?.isPro ?? false;
   }
 
   Future<bool> restorePurchases() async {
-    final result =
-        await ref.read(subscriptionServiceProvider).restorePurchases();
+    final result = await ref
+        .read(subscriptionServiceProvider)
+        .restorePurchases();
     await refresh();
     return result?.isPro ?? false;
   }
@@ -91,7 +87,9 @@ class SubscriptionNotifier extends AsyncNotifier<SubscriptionStatus> {
 
   Future<void> openStripeCheckout() async {
     final email = ref.read(currentUserEmailProvider);
-    await ref.read(subscriptionServiceProvider).openStripeCheckout(email: email);
+    await ref
+        .read(subscriptionServiceProvider)
+        .openStripeCheckout(email: email);
   }
 
   Future<void> openStripePortal() async {

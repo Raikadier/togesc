@@ -10,8 +10,8 @@ class SupabaseProgressRepository implements ProgressRepository {
   SupabaseProgressRepository({
     required SupabaseClient client,
     required String userId,
-  })  : _client = client,
-        _userId = userId;
+  }) : _client = client,
+       _userId = userId;
 
   final SupabaseClient _client;
   final String _userId;
@@ -59,15 +59,20 @@ class SupabaseProgressRepository implements ProgressRepository {
   }
 
   @override
-  Future<void> save(Map<String, NoteData> noteData, {String? lastSession}) async {
+  Future<void> save(
+    Map<String, NoteData> noteData, {
+    String? lastSession,
+  }) async {
     try {
       final session = lastSession ?? DateTime.now().toIso8601String();
       final payload = encodeProgressPayload(noteData, lastSession: session);
-      await _client.from(userProgressTable).upsert({
-        'user_id': _userId,
-        'progress': payload,
-        'last_session': session,
-      });
+      await _client.rpc(
+        'merge_user_progress',
+        params: {
+          'incoming_progress': payload,
+          'incoming_last_session': session,
+        },
+      );
     } catch (e) {
       // Propaga el error para que el hibrido marque sync pendiente.
       throw StateError('Error al guardar progreso remoto: $e');

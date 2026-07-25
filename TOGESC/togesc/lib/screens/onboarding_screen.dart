@@ -28,89 +28,109 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final wide =
+        MediaQuery.sizeOf(context).width >= DesignTokens.shellBreakpoint;
+    final margin = wide
+        ? DesignTokens.marginDesktop
+        : DesignTokens.marginMobile;
+
     return TogescScaffold(
       title: 'Como funciona',
       automaticallyImplyLeading: false,
       body: ListView(
-        padding: const EdgeInsets.all(DesignTokens.marginMobile),
+        padding: EdgeInsets.all(margin),
         children: [
-          const OnboardingWelcomeHeader(),
-          const SizedBox(height: DesignTokens.spacingLg),
-          const PedagogySectionCard(
-            icon: Icons.psychology_rounded,
-            accentColor: DesignTokens.primaryContainer,
-            title: 'Repeticion espaciada (SRS)',
-            body:
-                'El sistema repite mas las notas que te cuestan y espacia las que '
-                'ya dominas. Asi consolidas memoria a largo plazo, no memorizacion '
-                'de un dia.',
-          ),
-          const PedagogySectionCard(
-            icon: Icons.tune_rounded,
-            accentColor: DesignTokens.secondary,
-            title: 'Variacion de octavas y timbres',
-            body:
-                'Las notas suenan en distintas octavas y con distintos colores '
-                'timbrales para que aprendas la clase de altura (Do, Re, Mi...) '
-                'y no una frecuencia fija en Hz.',
-          ),
-          const PedagogySectionCard(
-            icon: Icons.blur_on_rounded,
-            accentColor: DesignTokens.tertiary,
-            title: 'Limpieza tonal',
-            body:
-                'Tras cada ejercicio oiras un sonido caotico breve que rompe el '
-                'anclaje al tono anterior. Asi entrenas identificacion absoluta, '
-                'no memoria relativa entre ejercicios.',
-          ),
-          const SizedBox(height: DesignTokens.spacingMd),
-          TogescCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Notacion Do/Re/Mi'),
-                  subtitle: const Text(
-                    'Puedes cambiarlo despues en Ajustes.',
-                  ),
-                  value: _useSolfege,
-                  onChanged: (value) => setState(() => _useSolfege = value),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Vista previa',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _useSolfege
-                      ? const ['Do', 'Re', 'Mi', 'Fa', 'Sol']
-                          .map((note) => Chip(label: Text(note)))
-                          .toList()
-                      : const ['C', 'D', 'E', 'F', 'G']
-                          .map((note) => Chip(label: Text(note)))
-                          .toList(),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: DesignTokens.spacingMd),
-          const AudioTestButton(outlined: false),
-          const SizedBox(height: DesignTokens.spacingLg),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => _complete(context),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: DesignTokens.borderRadiusXl,
-                ),
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: DesignTokens.contentMaxWidth,
               ),
-              child: const Text('Entendido, empezar'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const OnboardingWelcomeHeader(),
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  PedagogySectionCard(
+                    icon: Icons.psychology_rounded,
+                    accentColor: scheme.primaryContainer,
+                    title: 'Repeticion espaciada (SRS)',
+                    body:
+                        'El sistema repite mas las notas que te cuestan y espacia las que '
+                        'ya dominas. Asi consolidas memoria a largo plazo, no memorizacion '
+                        'de un dia.',
+                  ),
+                  PedagogySectionCard(
+                    icon: Icons.tune_rounded,
+                    accentColor: scheme.secondary,
+                    title: 'Variacion de octavas y timbres',
+                    body:
+                        'Las notas suenan en distintas octavas y con distintos colores '
+                        'timbrales para que aprendas la clase de altura (Do, Re, Mi...) '
+                        'y no una frecuencia fija en Hz.',
+                  ),
+                  PedagogySectionCard(
+                    icon: Icons.blur_on_rounded,
+                    accentColor: scheme.tertiary,
+                    title: 'Limpieza tonal',
+                    body:
+                        'Tras cada ejercicio oiras un sonido caotico breve que rompe el '
+                        'anclaje al tono anterior. Asi entrenas identificacion absoluta, '
+                        'no memoria relativa entre ejercicios.',
+                  ),
+                  const SizedBox(height: DesignTokens.spacingMd),
+                  TogescCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Notacion Do/Re/Mi'),
+                          subtitle: const Text(
+                            'Puedes cambiarlo despues en Ajustes.',
+                          ),
+                          value: _useSolfege,
+                          onChanged: (value) =>
+                              setState(() => _useSolfege = value),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Vista previa',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _useSolfege
+                              ? const ['Do', 'Re', 'Mi', 'Fa', 'Sol']
+                                    .map((note) => Chip(label: Text(note)))
+                                    .toList()
+                              : const ['C', 'D', 'E', 'F', 'G']
+                                    .map((note) => Chip(label: Text(note)))
+                                    .toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: DesignTokens.spacingMd),
+                  const AudioTestButton(outlined: false),
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => _complete(context),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: DesignTokens.borderRadiusXl,
+                        ),
+                      ),
+                      child: const Text('Entendido, empezar'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -132,4 +152,3 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 }
-

@@ -14,8 +14,7 @@ class TogescShell extends ConsumerWidget {
 
   static int _selectedIndex(String location, bool hasPro) {
     if (location.startsWith(AppRoutes.statistics)) return 1;
-    if (location == AppRoutes.paywall ||
-        location == AppRoutes.subscription) {
+    if (location == AppRoutes.paywall || location == AppRoutes.subscription) {
       return 2;
     }
     if (location == AppRoutes.account) return 3;
@@ -40,7 +39,8 @@ class TogescShell extends ConsumerWidget {
     final location = GoRouterState.of(context).matchedLocation;
     final hasPro = ref.watch(hasProAccessProvider);
     final selected = _selectedIndex(location, hasPro);
-    final wide = MediaQuery.sizeOf(context).width >= DesignTokens.shellBreakpoint;
+    final wide =
+        MediaQuery.sizeOf(context).width >= DesignTokens.shellBreakpoint;
 
     return Scaffold(
       appBar: _TogescShellHeader(
@@ -55,8 +55,7 @@ class TogescShell extends ConsumerWidget {
           : NavigationBar(
               selectedIndex: selected,
               surfaceTintColor: Colors.transparent,
-              onDestinationSelected: (i) =>
-                  _onTabSelected(context, i, hasPro),
+              onDestinationSelected: (i) => _onTabSelected(context, i, hasPro),
               destinations: const [
                 NavigationDestination(
                   icon: Icon(Icons.music_note_outlined),
@@ -66,7 +65,7 @@ class TogescShell extends ConsumerWidget {
                 NavigationDestination(
                   icon: Icon(Icons.leaderboard_outlined),
                   selectedIcon: Icon(Icons.leaderboard_rounded),
-                  label: 'Stats',
+                  label: 'Estadisticas',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.workspace_premium_outlined),
@@ -84,7 +83,8 @@ class TogescShell extends ConsumerWidget {
   }
 }
 
-class _TogescShellHeader extends StatelessWidget implements PreferredSizeWidget {
+class _TogescShellHeader extends StatelessWidget
+    implements PreferredSizeWidget {
   final int selectedIndex;
   final bool hasPro;
   final bool wide;
@@ -112,10 +112,10 @@ class _TogescShellHeader extends StatelessWidget implements PreferredSizeWidget 
       title: Text(
         'TOGESC',
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: scheme.primary,
-              letterSpacing: -0.5,
-            ),
+          fontWeight: FontWeight.w700,
+          color: scheme.primary,
+          letterSpacing: -0.5,
+        ),
       ),
       actions: [
         if (wide) ...[
@@ -144,12 +144,8 @@ class _TogescShellHeader extends StatelessWidget implements PreferredSizeWidget 
         IconButton(
           icon: CircleAvatar(
             radius: 16,
-            backgroundColor: DesignTokens.primaryContainer.withValues(alpha: 0.15),
-            child: const Icon(
-              Icons.person_rounded,
-              size: 18,
-              color: DesignTokens.primary,
-            ),
+            backgroundColor: scheme.primaryContainer.withValues(alpha: 0.15),
+            child: Icon(Icons.person_rounded, size: 18, color: scheme.primary),
           ),
           tooltip: 'Cuenta',
           onPressed: () => onNavTap(3),
@@ -174,17 +170,16 @@ class _DesktopNavLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final color =
-        selected ? scheme.primary : scheme.onSurfaceVariant;
+    final color = selected ? scheme.primary : scheme.onSurfaceVariant;
 
     return TextButton(
       onPressed: onTap,
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: color,
-              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            ),
+          color: color,
+          fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+        ),
       ),
     );
   }
@@ -195,11 +190,7 @@ class TogescProButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
 
-  const TogescProButton({
-    super.key,
-    required this.label,
-    this.onPressed,
-  });
+  const TogescProButton({super.key, required this.label, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +205,9 @@ class TogescProButton extends StatelessWidget {
             borderRadius: DesignTokens.borderRadiusXl,
           ),
           child: Container(
-            constraints: const BoxConstraints(minHeight: DesignTokens.touchTargetMin),
+            constraints: const BoxConstraints(
+              minHeight: DesignTokens.touchTargetMin,
+            ),
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(
               horizontal: DesignTokens.spacingLg,
@@ -223,9 +216,9 @@ class TogescProButton extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: DesignTokens.onPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: DesignTokens.onPrimary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),

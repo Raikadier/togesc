@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../models/audio_preferences.dart';
 import '../providers/audio_preferences_provider.dart';
 import 'session_instrument_sheet.dart';
@@ -36,6 +37,8 @@ class GameSessionPhaseLayout extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final color = accentColor ?? scheme.primaryContainer;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final usePulse = pulsingIcon && !reduceMotion;
     final gradient = iconGradient ??
         LinearGradient(
           begin: Alignment.topLeft,
@@ -82,7 +85,7 @@ class GameSessionPhaseLayout extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (pulsingIcon) ...[
+                  if (usePulse) ...[
                     Container(
                       width: 120,
                       height: 120,
@@ -110,13 +113,15 @@ class GameSessionPhaseLayout extends StatelessWidget {
                       gradient: gradient,
                       shape: BoxShape.circle,
                       border: Border.all(color: color.withValues(alpha: 0.25)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: color.withValues(alpha: 0.15),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      boxShadow: reduceMotion
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: color.withValues(alpha: 0.15),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                     ),
                     child: Icon(icon, size: 44, color: color),
                   ),
@@ -141,7 +146,7 @@ class GameSessionPhaseLayout extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ],
-            if (showProgress) ...[
+            if (showProgress && !reduceMotion) ...[
               const SizedBox(height: DesignTokens.spacingLg),
               SizedBox(
                 width: 36,
@@ -286,23 +291,24 @@ class GameSessionGoalCompleteBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final correct = TogescColors.of(context).correct;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(DesignTokens.spacingMd),
       decoration: BoxDecoration(
-        color: DesignTokens.correct.withValues(alpha: 0.12),
+        color: correct.withValues(alpha: 0.12),
         borderRadius: DesignTokens.borderRadiusMd,
-        border: Border.all(color: DesignTokens.correct.withValues(alpha: 0.35)),
+        border: Border.all(color: correct.withValues(alpha: 0.35)),
       ),
       child: Row(
         children: [
-          Icon(Icons.emoji_events_rounded, color: DesignTokens.correct),
+          Icon(Icons.emoji_events_rounded, color: correct),
           const SizedBox(width: DesignTokens.spacingMd),
           Expanded(
             child: Text(
               'Objetivo cumplido: $targetRounds rondas',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: DesignTokens.correct,
+                    color: correct,
                   ),
             ),
           ),
@@ -365,10 +371,11 @@ class GameSessionClusterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return GameSessionPhaseLayout(
       badge: 'LIMPIEZA TONAL',
       icon: Icons.waves_rounded,
-      accentColor: DesignTokens.tertiary,
+      accentColor: scheme.tertiary,
       title: 'Limpiando el oido...',
       subtitle: 'Transicion tonal breve para romper el anclaje',
       showProgress: true,

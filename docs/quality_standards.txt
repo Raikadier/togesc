@@ -1,0 +1,1954 @@
+================================================================================
+REFERENCIAS DE CALIDAD — TOGESC / Entrenador de Oído Absoluto
+Versión: 1.0
+Fecha: 2026-06-23
+Alcance: UI/UX, Frontend, Backend, Arquitectura de Información,
+         Arquitectura de Software y System Design
+================================================================================
+
+PROPÓSITO
+--------------------------------------------------------------------------------
+Este documento recopila los estándares, marcos y referencias profesionales de
+la industria que aplican al producto TOGESC. Está pensado como guía interna
+para toma de decisiones de diseño, implementación y auditoría de calidad.
+
+No sustituye la investigación original de cada estándar; las referencias
+señalan la fuente oficial o el cuerpo de conocimiento reconocido.
+
+================================================================================
+1. UI/UX — ESTÁNDARES Y MARCOS DE REFERENCIA
+================================================================================
+
+1.1 EXPERIENCIA DE USUARIO (UX)
+--------------------------------------------------------------------------------
+- ISO 9241-210
+  Definición oficial de experiencia de uso orientada a productos interactivos.
+  Cubre: ciclo de vida, actividades contextuales, medición de experiencia.
+
+- Nielsen Norman Group (NN/g) — Heurísticas de Usabilidad (10 reglas)
+  1. Visibilidad del estado del sistema.
+  2. Match entre sistema y mundo real.
+  3. Control y libertad (deshacer, cancelar).
+  4. Consistencia y estándares.
+  5. Prevención de errores > mensajes de error.
+  6. Reconocer antes que recordar.
+  7. Flexibilidad y eficiencia de uso.
+  8. Estética y diseño minimalista.
+  9. Ayudar a diagnosticar errores.
+  10. Ayuda y documentación.
+
+- Google HEART
+  Métricas de experiencia:
+  - Happiness (satisfacción)
+  - Engagement (frecuencia/intensidad)
+  - Adoption (nuevos usuarios)
+  - Retention (usuarios que vuelven)
+  - Task Success (completitud de flujo)
+
+- Jobs To Be Done (JTBD)
+  Marco para entender el propósito funcional/emocional del usuario.
+  Pregunta clave: "¿Qué tarea contrata al producto para hacerla?"
+
+- Leyes y principios cognitivos (aplicados a UI/UX)
+  - Fitts’ Law: targets grandes y cercanos reducen tiempo y error.
+  - Hick’s Law: menos opciones simultáneas = decisiones más rápidas.
+  - Ley de Jakobson: usuarios trasladan hábitos de otras apps.
+  - Affordance: los controles deben sugerir su uso.
+  - Feedback inmediato: < 100 ms percibido como instantáneo.
+  - Gestalt: proximidad, semejanza, cierre, continuidad, figura-fondo.
+
+1.2 INTERFAZ VISUAL (UI)
+--------------------------------------------------------------------------------
+- Material Design 3 (Google)
+  Sistema oficial. Aplica a TOGESC como design system base.
+  Cubre: tokens, color semántico, tipografía, elevación, shapes, motion,
+  componentes adaptativos, roles semánticos (primary, surface, error).
+
+- Human Interface Guidelines (Apple)
+  iOS/macOS. Tonos, navegación, controles nativos, accesibilidad Apple.
+
+- Carbon Design System (IBM)
+  Enfoque enterprise, accesibilidad por defecto, patrones complejos.
+
+- Fluent Design (Microsoft)
+  Profundidad, movimiento, material, luz, escala; útil para Windows/Desktop.
+
+1.3 ACCESIBILIDAD (transversal)
+--------------------------------------------------------------------------------
+- WCAG 2.1 / 2.2
+  Niveles A / AA / AAA. Criterios: contraste, foco visible, navegación
+  por teclado, texto alternativo, audio transcrito, consistencia.
+
+- WAI-ARIA Authoring Practices
+  Patrones semánticos para widgets complejos (piano, diálogos, temporizadores).
+
+- ISO 9241-210 (nuevamente)
+  Usabilidad aplicada a accesibilidad y contexto de uso.
+
+- EN 301 549
+  Requisitos europeos para productos digitales públicos.
+
+- Section 508
+  Estándar de accesibilidad en EE.UU. para productos gubernamentales.
+
+1.4 ARQUITECTURA DE INFORMACIÓN (IA)
+--------------------------------------------------------------------------------
+- Principios Louis Rosenfeld / Peter Morville
+  - Organización: jerárquica, secuencial, matricial, orientada a tareas.
+  - Etiquetado: verbos de acción vs sustantivos, consistencia interna.
+  - Navegación: global, local, contextual.
+  - Búsqueda como complemento.
+
+- Card Sorting (presencial o remoto)
+  Técnica para validar taxonomías y labels con usuarios reales.
+
+- Task Analysis / User Flows
+  Descomposición de objetivos en pasos; identificación de friction points.
+
+1.5 SISTEMAS DE DISEÑO (Design Systems)
+--------------------------------------------------------------------------------
+- Design Tokens Community Group (W3C)
+  Especificación para tokens intercambiables (color, typography, spacing)
+  entre Figma, CSS, Android, iOS.
+
+- Atomic Design (Brad Frost)
+  Jerarquía: átomos → moléculas → organismos → templates → páginas.
+
+- Pattern Libraries
+  Catalogs de soluciones recurrentes con reglas de uso explícitas.
+
+================================================================================
+2. FRONTEND — ESTÁNDARES PROFESIONALES
+================================================================================
+
+2.1 CALIDAD DE CÓDIGO
+--------------------------------------------------------------------------------
+- Código limpio (Clean Code, Robert C. Martin)
+  Funciones pequeñas, nombres significativos,单一 responsabilidad, DRY.
+
+- Principios SOLID
+  - Single Responsibility
+  - Open/Closed
+  - Liskov Substitution
+  - Interface Segregation
+  - Dependency Inversion
+  Aplicables a providers, servicios y repositorios en Flutter.
+
+- Conventional Commits
+  Tipos: feat, fix, docs, style, refactor, test, chore.
+  Facilita changelog automático y versionado semántico.
+
+- lint / format
+  Flutter: `flutter analyze`, `dart format`.
+  FrontendJS: ESLint, Prettier.
+
+2.2 ARQUITECTURA DE FRONTEND
+--------------------------------------------------------------------------------
+- Separación de responsabilidades por capas
+  UI (screens/widgets) → Providers/State → Services → Models/Constants.
+  TOGESC: Riverpod como state management aislado de UI.
+
+- Inmutabilidad
+  Modelos y estado preferiblemente inmutables; actualizaciones vía copias.
+
+- Manejo de estado
+  - Server State (datos remotos): cache, invalidación, optimistic UI.
+  - Client State (UI local): formularios, selecciones, paginación.
+  - URL State: navegación y filtros ruteables.
+  TOGESC usa Riverpod para client state + GoRouter para URL state.
+
+- Programación reactiva / streams
+  Flutter: Streams, StreamBuilder, ChangeNotifier/Riverpod notifiers.
+  Útil para temporizadores (modo velocidad), progreso de audio, sync.
+
+2.3 COMPONENTES Y DESIGN SYSTEM EN CÓDIGO
+--------------------------------------------------------------------------------
+- Component Driven Development
+  Construir UI de abajo hacia arriba: átomos → moléculas → organismos.
+
+- Props/API explícita de widgets
+  Parámetros requeridos vs opcionales; defaults documentados.
+
+- Variantes y estados
+  Cada componente define: default, hover, focus, disabled, loading, error,
+  empty, success.
+
+- Handoff semántico
+  Nombres consistentes entre diseño y código.
+  Ejemplo TOGESC: `game_session_premium_idle` ↔ `GameScreen(state: idle)`.
+
+2.4 ACCESIBILIDAD EN FRONTEND
+--------------------------------------------------------------------------------
+- Semantics en Flutter
+  Labels, hints, roles para piano, botones, inputs.
+
+- Orden de foco lógico
+  Tab order coherente en formularios (Account, respuestas texto).
+
+- Contraste de color
+  WCAG AA mínimo (4.5:1 texto normal, 3:1 texto grande).
+  Tokens Harmonic Precision: verificar contraste en `#6A1B9A` vs blanco.
+
+- Soporte de texto grande / zoom
+  Layout fluido (MobileFirst → Tablet → Desktop) sin overflow.
+
+- Reducción de movimiento
+  Respectar `MediaQuery.textScaler` y `AccessibilitySettings.reduceMotion`.
+
+2.5 RENDIMIENTO Y MÉTRICAS
+--------------------------------------------------------------------------------
+- Web (si aplica)
+  - Core Web Vitals: LCP < 2.5 s, FID < 100 ms, CLS < 0.1.
+  - Lighthouse ≥ 90 en performance, accessibility, best practices.
+
+- Móvil
+  - Tiempo de compilación / hot reload razonable.
+  - Sin jank en animaciones (60 fps).
+  - Memoria: evitar fugas en streams y listeners.
+  - Audio bufferizado sin delay perceptible (< 2 s objetivo en TOGESC).
+
+- Estrategias
+  - Lazy loading / paginación en listas largas (estadísticas, historial).
+  - Constantes y modelos puros sin dependencia de Flutter (testeables).
+  - Evitar rebuilds innecesarios (Riverpod selectors, const widgets).
+
+2.6 TESTING EN FRONTEND
+--------------------------------------------------------------------------------
+- Pirámide de testing (adaptada)
+  - Unitarias: lógica pura (SRS, parser, repositorio mockeado).
+  - Widget: componentes y estados visuales.
+  - Integración: flujos con providers y mocks de dependencias externas.
+  - E2E/Smoke: app arranca, navega, ejecuta flujo crítico.
+
+- Cobertura mínima sugerida
+  - Lógica crítica (SRS, parser): ≥ 80%.
+  - Providers y servicios: ≥ 70%.
+  - Widgets core (piano, tarjetas): ≥ 60%.
+
+- TDD en lógica de dominio
+  Red → Green → Refactor en SRS y parser (recomendado en `project_context`).
+
+- Herramientas
+  Flutter: flutter_test, mocktail, integration_test, Patrol/Drive (E2E).
+
+================================================================================
+3. BACKEND — ESTÁNDARES PROFESIONALES
+================================================================================
+
+3.1 PRINCIPIOS GENERALES
+--------------------------------------------------------------------------------
+- API First
+  Contrato primero (OpenAPI/Swagger, tipo `freezed` en Dart para el cliente).
+
+- Offline First (cuando aplique)
+  TOGESC: local primero, syncAfter; cola offline → push al reconectar.
+
+- Event Driven Architecture (opcional)
+  Eventos (`analytics_events`, `subscription_updated`) desacoplados.
+
+3.2 DATOS Y PERSISTENCIA
+--------------------------------------------------------------------------------
+- Modelado
+  - Entidades bien normalizadas (formas normales hasta 3FN según escala).
+  - JSONB para estructuras semiestructuradas (progreso SRS flexible).
+  - Timestamps siempre en UTC.
+
+- Migraciones versionadas
+  Supabase: archivos SQL numerados `YYYYMMDDHHMMSS_description.sql`.
+  Inmutables; nunca editar migraciones aplicadas.
+
+- Backups
+  Automatizados; verificación periódica de restauración.
+
+3.3 SEGURIDAD
+--------------------------------------------------------------------------------
+- Autenticación
+  OAuth2 / OIDC (Supabase Auth). Tokens cortos + refresh tokens.
+  Nunca service_role en cliente.
+
+- Autorización
+  RLS (Supabase) o middleware a nivel API. Prinicipio: deny by default.
+
+- Datos sensibles
+  Cifrado en tránsito (TLS 1.2+) y en reposo según proveedor.
+  No loguear secrets ni PII completo.
+
+- Sanitización
+  Validar en servidor incluso si el cliente ya valida.
+
+3.4 OBSERVABILIDAD
+--------------------------------------------------------------------------------
+- Three pillars
+  - Logs estructurados (JSON).
+  - Métricas (latencia P95, errores 4xx/5xx, throughput).
+  - Trazas distribuidas (OpenTelemetry) cuando hay múltiples servicios.
+
+- Alertas
+  Umbrales y canales; no saturar; separar incidencias de ruido.
+
+- Crash reporting
+  Sentry con release tracking y contexto de usuario (si privacy lo permite).
+
+================================================================================
+4. ARQUITECTURA DE SOFTWARE — ESTÁNDARES
+================================================================================
+
+4.1 ESTILOS Y PATRONES
+--------------------------------------------------------------------------------
+- Arquitectura Limpia / Hexagonal / Onion
+  Separación de dominio de detalles técnicos.
+  Capas: UI → Application/Services → Domain → Infrastructure.
+
+- Patrones de comportamiento
+  - Strategy: selección de instrumento/estrategia SRS.
+  - State: máquinas de estado para sesiones (idle/listening/answer/...).
+  - Observer: notificaciones de cambios (Riverpod, ChangeNotifier).
+
+- Patrones estructurales
+  - Repository: abstracción de persistencia local vs remota.
+  - Adapter: `AudioPlayerService` envuelve `flutter_soloud`.
+  - Facade: servicios que coordinan subsistemas (SRS + audio + persistencia).
+
+- Principios
+  - SOLID (ver Frontend).
+  - YAGNI: no implementar features anticipadamente.
+  - KISS: diseño mínimo que pase tests.
+  - Boy Scout Rule: dejar el código mejor de lo que lo encontraste.
+
+4.2 DISEÑO ORIENTADO A DOMINIO (DDD) — APLICABLE
+--------------------------------------------------------------------------------
+- Capa de dominio
+  Entidades (`NoteData`, `InstrumentPreset`), Value Objects, Aggregates.
+  Lógica SRS como método de `SRSSystem` sobre entidades, no en UI.
+
+- Servicios de dominio
+  Algoritmos sin side effects (síntesis de audio, cálculo de próximas fechas).
+
+- Puertos y adaptadores
+  Interfaces para repositorios; implementaciones local/Supabase intercambiables.
+
+- Eventos de dominio
+  `NoteReviewed`, `SessionCompleted` para analytics/sync.
+
+4.3 CALIDAD Y MÉTRICAS DE CÓDIGO
+--------------------------------------------------------------------------------
+- Código
+  - Complejidad ciclomática baja.
+  - Funciones < 20 líneas donde sea razonable (regla del proyecto).
+  - Sin código muerto ni imports no usados.
+
+- Deuda técnica
+  - Registro explícito.
+  - Presupuesto de deuda: ≤ 5 % del backlog (definido en Fase 6).
+  - Revisión trimestral.
+
+- Dependencias
+  - Actualizadas regularmente (Dependabot en TOGESC).
+  - Licencias compatibles con el proyecto.
+  - Eliminación de dependencias no usadas.
+
+================================================================================
+5. SYSTEM DESIGN — ESTÁNDARES DE REFERENCIA
+================================================================================
+
+5.1 ARQUITECTURA DE SISTEMA
+--------------------------------------------------------------------------------
+- Diagramas C4
+  - Context: usuarios, sistemas externos (Supabase, Vercel, Stores).
+  - Container: apps (Flutter web, Android, iOS, Windows), BaaS (Supabase).
+  - Component: providers, servicios, repositorios.
+  - Code: clases y contratos principales.
+
+- Diagramas de secuencia
+  Flujo de ronda, sincronización offline, checkout Stripe/RevenueCat.
+
+- Decisiones Arquitectónicas (ADR)
+  Documentar opciones consideradas, decisión tomada y rationale.
+  TOGESC: ADR-001 a ADR-006 en `project_context.txt`.
+
+5.2 ESCALABILIDAD Y RENDIMIENTO
+--------------------------------------------------------------------------------
+- Escalabilidad
+  - Vertical: optimizar cliente (local-first como en TOGESC).
+  - Horizontal: Supabase escala Postgres + edge functions sin cambios cliente.
+
+- Caché
+  - Local: SharedPreferences/JSON.
+  - Remoto: cache de entitlements Pro (`user_subscriptions`).
+
+- CDN y hosting
+  Vercel para web estática; assets estáticos bajo CDN.
+
+5.3 CONFIABILIDAD Y RESILIENCIA
+--------------------------------------------------------------------------------
+- Retry策略
+  Backoff exponencial en sync y llamadas a Supabase.
+  TOGESC: cola offline-first que no bloquea juego.
+
+- Circuit Breaker
+  Si un servicio falla repetidamente, dejar de intentar temporalmente.
+
+- Idempotencia
+  Claves derequest idempotentes en webhooks (Stripe, RevenueCat).
+  No procesar el mismo evento dos veces.
+
+5.4 BACKEND COMO SERVICIO (BaaS) — TOGESC SUPABASE
+--------------------------------------------------------------------------------
+- Postgres + RLS
+  Seguridad a nivel fila por usuario (`auth.uid() = user_id`).
+
+- Edge Functions
+  Webhooks minimalistas (Stripe, RevenueCat) con validación de firma.
+
+- Esquema versionado
+  Migraciones SQL numeradas, revertibles.
+
+- Storage (si aplica futuramente)
+  RLS, URLs firmadas, límite de tamaño.
+
+5.5 MONITOREO Y OPERACIÓN
+--------------------------------------------------------------------------------
+- SLI/SLO/SLA
+  - Disponibilidad: objetivo ≥ 99.9% para endpoint crítico (`/`).
+  - Latencia P95: objetivo según producto.
+  - Tasa de error: < 0.1% en crash reporting (Sentry).
+
+- Dashboards
+  Métricas agregadas (`metrics_daily`, `metrics_csat_daily`).
+  Scripts automatizados (`metrics-report.ps1`).
+
+- Alertas y páginas
+  Uptime checks (GitHub Actions hourly).
+  Alertas Sentry por regla (nuevo release, aumento crashes).
+
+- Backups
+  Automáticos (Supabase semanal en TOGESC).
+  Prueba de restauración periódica.
+
+================================================================================
+6. APLICACIÓN PRÁCTICA A TOGESC
+================================================================================
+
+6.1 ESTADO ACTUAL SEGÚN DOCUMENTACIÓN
+--------------------------------------------------------------------------------
+- UI/UX: IA documentada, design system (Harmonic Precision) definido,
+  30 artboards diseñados en Stitch, flujos por estado detallados.
+
+- Frontend: Flutter 3.11+, Riverpod, GoRouter, flutter_soloud, shared_preferences.
+  Tests previstos en pirámide. Sin evidencia de CI operativa en esta lectura
+  (workflows referenciados en docs pero no auditados en este documento).
+
+- Backend: Supabase como BaaS. Modo offline-first robusto. Monetización
+  preparada (Stripe/RevenueCat) pero pendiente de activación manual.
+
+- Arquitectura: Capas UI/Providers/Services/Models/Repository.
+  ADRs documentados. Sin backend propio Python (eliminado en Fase 0).
+
+- System Design: Documentado en `system_design.md` con diagramas Mermaid,
+  rutas, tablas Supabase, edge functions, observabilidad.
+
+6.2 GAPS DE CALIDAD DETECTADOS
+--------------------------------------------------------------------------------
+- UX:
+  - No hay evidencia de pruebas de usabilidad con usuarios reales.
+  - Accesibilidad declarada como objetivo, pero sin auditoría publicada.
+
+- Frontend:
+  - Lighthouse ≥ 90 en accesibilidad diferido (documentado en Fase 2).
+  - Sin handoff automatizado Figma → Flutter (tokens manuales).
+
+- Backend:
+  - Sync manual pendiente de validación en producción (web + móvil).
+  - Sandbox pagos pendiente (código listo, no operativo).
+
+- Arquitectura:
+  - Deuda técnica registrada pero sin métricas en tooling automatizado.
+
+- System Design:
+  - Diagramas C4 con herramientas de modelado no presentes en repo.
+
+6.3 RECOMENDACIONES PRIORITARIAS
+--------------------------------------------------------------------------------
+1. Accesibilidad:
+   - Ejecutar Lighthouse + auditoría manual WCAG AA.
+   - Añadir Semantics en piano, diálogos y formularios.
+
+2. Métricas UX:
+   - Implementar eventos HEART básicos (ya definidos en `analytics_events`).
+   - Publicar métricas D7.
+
+3. Frontend:
+   - Mapear tokens Harmonic Precision a `app_theme.dart` + Google Fonts.
+   - Establecer core-web-vitals presupuesto en deploy.
+
+4. Backend/System Design:
+   - Validar sync multi-dispositivo en sandbox antes de lanzar stores.
+   - Automatizar prueba de restauración de backup Supabase.
+
+5. Proceso:
+   - Incorporar Definition of Ready (DoR) y Definition of Done (DoD) ya
+     definidas en `plan_fases.txt` como checklist de PR.
+
+================================================================================
+9. ICONOS MULTIPLATAFORMA — ESTÁNDARES Y APLICACIÓN A TOGESC
+================================================================================
+
+8.1 ESTANDARIZACIÓN POR PLATAFORMA
+--------------------------------------------------------------------------------
+Cada sistema operativo define su propio estándar de iconografía. En un producto
+multiplataforma lo profesional no es reusar el mismo PNG en todos lados, sino
+adaptar el diseño manteniendo identidad coherente.
+
+Android
+- Estándar: Material Design Icons
+- Formato moderno: Adaptive Icon (API 26+)
+  - Capa foreground (transparente, recortada por máscara del sistema).
+  - Capa background (sólida o textura simple).
+  - Máscara sistema: círculo, squircl o rounded square.
+- Tamaño base: 108×108 dp; safe zone ≈ 66×66 dp.
+- Legacy/tienda: 512×512.
+- Formato: XML vectorial + PNG; herramientas: Android Asset Studio.
+
+iOS / macOS
+- Estándar: Human Interface Guidelines (Apple).
+- App Icon por tamaños (1024×1024 App Store y variantes para devices).
+- No replicar elementos nativos del sistema; sin texto en tamaños pequeños
+  (≤ 29 pt); transparencia real, sin bordes redondeados artificiales.
+- macOS usa además SF Symbols como base cuando aplica.
+
+Web (PWA)
+- Favicon ≥ 48×48; recomendado 192×192 + 512×512.
+- Apple touch icon: 180×180.
+- Soporte mask-icon Safari para variante monocroma.
+
+Windows
+- Estándar: Fluent Design.
+- Formatos: .ico multi-resolución o PNG por asset.
+- Tamaños clave: 44×44, 150×150, 310×310, 310×150.
+- Debe legible sobre tiles de color.
+
+8.2 ESTÁNDARES VISUALES Y SEMÁNTICOS
+--------------------------------------------------------------------------------
+- Identidad coherente, tratamiento adaptado por plataforma.
+- Contraste logo/fondo ≥ 4.5:1 para accesibilidad (WCAG AA).
+- Accesibilidad: label semántico por plataforma
+  - Android: contentDescription
+  - iOS: accessibilityLabel
+  - Flutter: Semantics(label: ..., button: true)
+- Evitar significado transmitido solo por color (considerar daltonismo).
+
+8.3 FLUJO PROFESIONAL DE DISEÑO Y PRODUCCIÓN
+--------------------------------------------------------------------------------
+1. Brief de marca: paleta, tipografía asociada, mood, restricciones.
+2. Exploración: 3–5 variantes en gris para validar legibilidad sin color.
+3. Rejilla de seguridad: definir safe zone (p.ej. 66% central Android).
+4. Exportación automatizada: SVG fuente; pipeline a PNG por plataforma.
+5. Integración en build: flutter_launcher_icons y/o scripts nativos.
+6. Validación: device real, accesibilidad (contraste/label), smoke test.
+
+8.4 ICONOGRAFÍA DE INTERFAZ (dentro de la app)
+--------------------------------------------------------------------------------
+- Sistemas recomendados:
+  - Material Symbols (Google)
+  - SF Symbols (Apple)
+  - Fluent Icons (Microsoft)
+- Tamaño baseline 24×24 dp/pt; hit area mínima 48×48.
+- Stroke weight típico 2 dp (1.5 dp en layouts densos).
+- Naming semántico consistente entre diseño y código.
+
+8.5 CASO TOGESC
+--------------------------------------------------------------------------------
+Configuración actual en pubspec.yaml:
+- Fuente única: assets/app_icon.png
+- Android adaptive con misma imagen en foreground y background.
+- Web, Windows, macOS, iOS desde mismo PNG.
+- Background color web: #4E0078
+
+Observaciones:
+- PNG único es aceptable en MVP, pero limita sharpness en altas resoluciones
+  y no adapta tratamiento visual por plataforma.
+- Android adaptive debería separar foreground (logo transparente) y
+  background (sólido), para mejor recorte por máscara del sistema.
+- iOS/macOS requieren variantes de máscara para App Store.
+
+Recomendaciones:
+1. Fuente mejor en SVG o PNG ≥ 1024×1024.
+2. Separar:
+   - assets/icon_foreground.png (transparente, solo logo)
+   - assets/icon_background.png (sólido #4E0078)
+3. Incluir variante iOS/macOS con máscara Apple.
+4. Verificar adaptive Android safe zone.
+5. Definir accessibility label del icono (ej: "TOGESC",
+   "Entrenador de Oído Absoluto").
+6. Generar splash coherente por plataforma.
+
+8.6 CHECKLIST RÁPIDO
+--------------------------------------------------------------------------------
+- [ ] Icono fuente ≥ 1024×1024
+- [ ] Safe zone verificada (Android)
+- [ ] Contraste fondo/logo ≥ 4.5:1 (WCAG AA)
+- [ ] Label semántico definido
+- [ ] Adaptive icon Android con foreground/background separados
+- [ ] Variantes iOS/macOS cumplen HIG
+- [ ] Favicon + PWA manifest configurados
+- [ ] Windows/macOS assets en formatos nativos
+- [ ] Accesibilidad test: tamaño, contraste, label
+- [ ] CI/CD genera assets automáticamente desde fuente
+
+================================================================================
+9.5 ANIMACIONES Y MOTION — ESTÁNDARES Y APLICACIÓN A TOGESC
+================================================================================
+
+9.5.1 PRINCIPIOS RECTORES
+--------------------------------------------------------------------------------
+- Todo movimiento debe tener propósito (feedback, continuidad espacial,
+  cambio de contexto, resultado).
+- En productos educativos, la animación refuerza el ciclo
+  escuchar → responder → feedback → limpieza; no distrae de la tarea
+  auditiva.
+- Performance budget: 60 fps objetivo.
+- Duración típica:
+  - Microfeedback (press, selección): 80–150 ms
+  - Transiciones pantalla: 200–300 ms
+  - Feedback resultado (correcto/incorrecto): 300–500 ms
+  - Progreso largo (cluster, countdown): 400–1000 ms
+- Easing:
+  - ease-out para entrada
+  - ease-in para salida
+  - linear solo para progreso/audio
+  - evitar rebote exagerado (no educativo)
+
+9.5.2 ESTÁNDARES POR PLATAFORMA
+--------------------------------------------------------------------------------
+Material Design 3 (Android / Web)
+- Duration short/medium/long, easing emphasized.
+- Fade through para cambios de contenido (estados de GameScreen).
+- Container transform para saltos a pantalla completa (paywall).
+- No animar elementos que no requieran reintento, confirmación o cambio
+  de contexto.
+
+Human Interface Guidelines (Apple iOS/macOS)
+- Springs para gestos (swipe, pull).
+- Curvas por defecto ~0.3 s.
+- Respetar Reduce Motion: desactivar animaciones no esenciales.
+- Sin exageración física (rebotes caricaturescos) en apps educativas.
+
+Fluent Design (Windows)
+- Connected animations entre páginas (similar a shared axis M3).
+- Reveal highlight para feedback de foco en teclado de piano.
+- Acrylic sutil (no abusar; Harmonic Precision prefiere tonal layers).
+
+9.5.3 ACCESIBILIDAD Y ANIMACIONES
+--------------------------------------------------------------------------------
+- WCAG 2.1/2.2 2.2.1: si la animación es barrera, debe poderse saltar.
+- WCAG 2.3.1: no más de 3 flashes/segundo (revisar cluster de limpieza).
+- Prefers-reduced-motion:
+  - CSS: @media (prefers-reduced-motion: reduce)
+  - Flutter: MediaQuery + accesibilidad; reemplazar por crossfade.
+- Focus visible nunca debe ocultarse durante animaciones.
+
+9.5.4 PATRONES PROFESIONALES POR TIPO DE ANIMACIÓN
+--------------------------------------------------------------------------------
+Feedback táctil
+- Ripple/splash en botones; scale 0.95–0.98 en teclas piano.
+- Duración 80–120 ms.
+
+Transiciones navegación
+- Shared axis vertical: Home ↔ Game.
+- Fade through entre estados de GameScreen (idle/listening/answer/…).
+- No transiciones diagonales ni combinaciones raras.
+
+Feedback resultado
+- Correcto: highlight verde teclas + card; fade + scale icono.
+- Incorrecto: highlight rojo teclas incorrectas + card.
+- Duración 300–500 ms.
+- Shake sutil (5–10 px, ~100 ms) solo en resultado general.
+
+Progreso y carga
+- ProgressIndicator linear para cluster: tiempo real, no easing.
+- CountdownTimerWidget: barra decreciendo precisa.
+- SRS progress indicator: cambios de bloque con fade.
+
+Microinteracciones específicas TOGESC
+- Selección nota piano: highlight amber inmediato.
+- Remover nota chip: fade out 150 ms.
+- Confirmar respuesta: botón habilitado con transición 200 ms.
+- Cambio timbre AppBar: icono con rotación 180° (opcional).
+
+9.5.5 PERFORMANCE Y BUENAS PRÁCTICAS
+--------------------------------------------------------------------------------
+- Animar solo propiedades GPU-friendly:
+  - transform (scale, translate, rotate): siempre
+  - opacity: aceptable
+  - width/height/top/left: evitar en animación continua
+- No animar texto; animar contenedores.
+- Usar RepaintBoundary en widgets pesados: piano_keyboard, result_card.
+- Riverpod + const constructors para evitar rebuilds innecesarios.
+- audio_soloud buffer debe generarse fuera del hilo UI (ya aislado en
+  servicios).
+- Verificar cluster de 3 s no bloquea frames (buffer crear una sola vez).
+
+9.5.6 DESIGN TOKENS DE MOTION (RECOMENDADOS)
+--------------------------------------------------------------------------------
+- Sin motion tokens en Harmonic Precision actualmente.
+- Propuesta mínima:
+  - duration: short 120 ms, medium 250 ms, long 400 ms
+  - easing: standard/emphasized/decelerate/accelerate por curva
+  - spring: stiffness/damping
+
+9.5.7 ESTADO DOCUMENTADO EN TOGESC Y RECOMENDACIONES
+--------------------------------------------------------------------------------
+- 7 estados en Game + 7 en Speed: transiciones Fade through.
+- Cluster ~3 s con indicador de progreso; evaluar skip.
+- Countdown velocidad: tiempo real, linear.
+- Feedback piano: inmediato, sin easing.
+
+Recomendaciones:
+1. Centralizar duraciones y easings en app_theme.dart.
+2. Añadir RepaintBoundary en piano y result card.
+3. Verificar cluster en hilo separado.
+4. Implementar Reduced Motion.
+5. Smoke test 60 fps device real con audio activo.
+
+9.5.8 CHECKLIST RÁPIDO
+--------------------------------------------------------------------------------
+- [ ] Duración de animaciones documentada (short/medium/long)
+- [ ] Easing curves unificadas
+- [ ] Reduced Motion implementado
+- [ ] Foco visible durante animación
+- [ ] 60 fps en device real
+- [ ] Sin animaciones que bloqueen UI en ronda crítica
+- [ ] Transiciones coherentes entre estados de juego
+- [ ] Progreso cluster/countdown usa linear
+
+================================================================================
+10. ARQUITECTURA DE BACKEND — ESTÁNDARES Y APLICACIÓN A TOGESC
+================================================================================
+
+10.1 ENFOQUE
+--------------------------------------------------------------------------------
+La arquitectura de backend define cómo se estructuran servicios, datos,
+comunicaciones y reglas de negocio en el servidor. En productos como TOGESC,
+el backend no es el núcleo pedagógico (vive en el cliente), pero es crítico
+para:
+- Persistencia compartida y sync
+- Autenticación y autorización
+- Pagos y entitlements
+- Observabilidad
+
+Los estándares buscan mantener el backend acoplado débilmente al cliente,
+escalable sin reescritura y auditable.
+
+10.2 ESTILOS ARQUITECTÓNICOS
+--------------------------------------------------------------------------------
+
+Monolito modular
+- Un solo despliegue con módulos internos bien separados (auth, billing,
+  analytics, progress).
+- Estándar actual para equipos chicos-medianos sin deuda temprana.
+- TOGESC aplica BaaS monolítico (Supabase = auth + postgres + functions).
+
+Microservicios
+- Solo cuando hay dominios con ciclos de vida distintos o equipos separados.
+- Overhead operativo alto; no recomendado en Fase 0–3.
+- TOGESC no necesita microservicios hoy.
+
+Serverless / BaaS
+- Supabase, Firebase, Vercel Functions, Cloudflare Workers.
+- Ventaja: foco en features, no en ops.
+- Riesgo: vendor lock-in y límites de plataforma.
+- Estándar industria: para MVPs y productos indie/small-team, BaaS es
+  elección mayoritaria.
+
+Event-Driven
+- Útil para desacoplar sincronización, analytics, pagos.
+- TOGESC: eventos de dominio (NoteReviewed, SessionCompleted) alimentan
+  analytics y sync sin acoplamiento directo.
+
+10.3 PRINCIPIOS Y PATRONES
+--------------------------------------------------------------------------------
+
+SOLID en backend
+- Single Responsibility: cada tabla/colección/modelo representa un concepto.
+- Open/Closed: agregar payment providers sin cambiar core SRS.
+- Liskov: contratos de interfaces cumplidos por cualquier repo.
+- Interface Segregation: clientes ligeros (ej. wallet service) no cargan
+  toda la API.
+- Dependency Inversion: depende de interfaces, no de implementaciones
+  concretas de DB.
+
+Repository / Data Mapper
+- Abstraer persistencia. TOGESC: `ProgressRepository` interface con
+  implementaciones local y Supabase intercambiables.
+
+Unit of Work / Transaction script
+- Agrupar operaciones relacionadas (guardar progreso + actualizar last_seen)
+  en una transacción cuando hay BD relacional.
+- Supabase: usar `runTransaction` o RPC cuando aplica.
+
+CQRS (Command Query Responsibility Segregation)
+- Separar escrituras (commands) de lecturas (queries) en escala.
+- Para TOGESC es opcional (datos de progreso por usuario son pequeños), pero
+  útil cuando `analytics_events` crezca.
+
+Idempotencia
+- Webhooks y endpoints deben tolerar repeticiones.
+- TOGESC: Stripe y RevenueCat usan event id para no duplicar entitlements.
+
+Rate limiting y circuit breaker
+- Límites en endpoints expuestos (API propia si llega a haber).
+- Reintentos con backoff exponencial en sync; si Supabase cae, seguir en
+  local sin bloquear juego.
+
+10.4 APIs Y CONTRATOS
+--------------------------------------------------------------------------------
+
+API First
+- Contrato primero (OpenAPI, GraphQL SDL).
+- Ventaja: clientes generados, docs vivas, versionado explícito.
+
+REST
+- Estándar más común. Recursos claros, cacheable, sin estado.
+- TOGESC futuramente podría exponer endpoints REST si surge API propia,
+  pero no es necesario con Supabase como BaaS.
+
+GraphQL
+- Flexibilidad para clientes que necesitan datos específicos (stats complejas).
+- Overhead de servidor y caching más complejo.
+
+gRPC / tRPC
+- Tipado fuerte,性能 alto, streaming bidireccional.
+- Aplicable si hay clientes nativos + web pesada; no prioritario en TOGESC.
+
+Webhooks / callbacks
+- Stripe y RevenueCat envían eventos a Supabase Edge Functions.
+- Validación de firma obligatoria; no confiar en payload sin verificar.
+- Respuesta rápida (200) + procesamiento asincrónico.
+
+WebSockets / Realtime
+- Supabase Realtime para sync push cuando aplica.
+- Patrón: cliente se suscribe a cambios de su row `user_progress`.
+
+10.5 BASES DE DATOS
+--------------------------------------------------------------------------------
+
+Elección
+- Postgres: elección estándar para datos estructurados o semiestructurados.
+  JSONB en `user_progress` es correcto para SRS flexible.
+- Supabase agrega RLS, lo que simplifica authz masivamente.
+
+Modelado
+- Hasta 3FN típicamente; JSONB para campos dinámicos.
+- Nunca almacenar secrets en columnas sin cifrado.
+- Timestamps en UTC; conversión a local solo en presentación.
+
+Migraciones
+- Archivos inmutables numerados.
+- Jamás editar migraciones aplicadas en producción.
+- Reversibles cuando sea posible.
+
+Indexing
+- Índices por `user_id` (siempre filtrado por auth.uid()).
+- Índices en columnas de consulta frecuente: `last_session`, `updated_at`.
+
+Backups
+- Automáticos + prueba periódica de restauración.
+- Supabase ofrece backups nativos; verificar retención.
+
+10.6 SEGURIDAD EN BACKEND
+--------------------------------------------------------------------------------
+
+Autenticación
+- OAuth2 / OIDC.
+- Tokens cortos + refresh tokens seguros (HttpOnly cookies en web).
+- PKCE en mobile/web (Supabase lo usa).
+
+Autorización
+- Deny-by-default.
+- RLS por usuario en Supabase.
+- Si hay API propia: middleware deRoles/Permisos.
+
+Cifrado
+- TLS 1.2+ obligatorio en tránsito.
+- Cifrado en reposo: depende de proveedor (Supabase lo provee).
+- Nunca loguear secrets, tokens completos ni PII sensible.
+
+Validación
+- Validar en servidor siempre, incluso si el cliente valida.
+- Esquemas JSON: JSON Schema o validación manual en Edge Functions.
+
+Rate limiting
+- En endpoints públicos (webhooks, API propia) para evitar abuso.
+
+Auditoría
+- Tablas de auditoría para cambios sensibles (suscripciones, eliminación
+  de cuenta).
+- Sentry + logs estructurados en Edge Functions.
+
+10.7 OBSERVABILIDAD
+--------------------------------------------------------------------------------
+
+Tres pilares
+- Logs estructurados (JSON) con correlation id.
+- Métricas: latencia P95, tasa de error, throughput.
+- Trazas distribuidas cuando hay múltiples servicios (OpenTelemetry).
+
+Alertas
+- Umbrales claros; canales separados por severidad.
+- No alertar ruido (ej.: fallos intermitentes de red sin contexto).
+
+SLI/SLO
+- Disponibilidad objetivo ≥ 99.9% para endpoints críticos.
+- Latencia P95 < 500 ms para lectura de progreso.
+- Tasa de error < 0.1% en webhooks de pago.
+
+Dashboards
+- métricas_daily, metrics_csat_daily en Supabase.
+- Uptime checks automatizados (TOGESC ya los tiene).
+
+10.8 ESCALABILIDAD
+--------------------------------------------------------------------------------
+
+Escalado vertical
+- Ajustar plan Supabase (connection pooling, limites).
+- Adecuado hasta escala mediana.
+
+Escalado horizontal
+- Read replicas en Postgres para lecturas pesadas.
+- Supabase abstrae parte, pero requiere upgrade de plan.
+
+Caché
+- Redis (managed) para sesiones y rate limits.
+- Client-side cache + stale-while-revalidate en lecturas de progreso.
+
+Colas
+- Para trabajo asincrónico (emails, reportes, webhooks con retry).
+- Ej.: Supabase + Cloudflare Queues, o funciones event-triggered.
+
+10.9 APPLICACIÓN A TOGESC
+--------------------------------------------------------------------------------
+
+Estado actual documentado:
+- BaaS monolítico (Supabase Auth + Postgres + Edge Functions).
+- Esquema: user_progress, user_subscriptions, analytics_events.
+- RLS por usuario implementada.
+- Edge Functions para Stripe y RevenueCat webhooks.
+- Observabilidad parcial (Sentry, uptime).
+
+Gaps:
+- Falta validación de firma explícita documentada en webhooks.
+- No hay estrategia de rate limiting (depende 100% en RLS + Supabase).
+- No hay API propia (correcto para Fase 0–6; reconsiderar si escala).
+- No hay CDN ni caché adicional (Vercel maneja web estática).
+
+Recomendaciones:
+1. Asegurar validación de firma en webhooks antes de procesar eventos.
+2. Definir tiempo de retención de analytics_events (costo de almacenamiento).
+3. Preparar plan de escape de Supabase (export migraciones SQL estandar)
+   solo si el crecimiento lo justifica.
+4. Considerar índices adicionales en `user_progress (user_id, last_session)`.
+
+10.10 CHECKLIST RÁPIDO
+--------------------------------------------------------------------------------
+- [ ] Estilo arquitectónico documentado (ADR)
+- [ ] APIs versionadas y con contrato explícito
+- [ ] Migraciones inmutables y numeradas
+- [ ] RLS / authz verificada en todas las tablas
+- [ ] Webhooks con validación de firma
+- [ ] Backups automáticos + prueba de restauración
+- [ ] SLI/SLO definidos y monitoreados
+- [ ] Cifrado en tránsito y reposo confirmado
+- [ ] Rate limiting / protección anti-abuso definida
+- [ ] Runbooks para incidentes comunes (sync caída, webhook duplicado)
+
+================================================================================
+11. ARQUITECTURA DE FRONTEND — ESTÁNDARES Y APLICACIÓN A TOGESC
+================================================================================
+
+11.1 ENFOQUE
+--------------------------------------------------------------------------------
+La arquitectura de frontend define cómo se estructuran vistas, estado,
+navegación y capas de presentación para que la app sea testeable, mantenible
+y evolutiva. No es solo “organizar carpetas”: es definir dependencias,
+responsabilidades y contratos entre módulos.
+
+En TOGESC, la arquitectura frontend convive con lógica pedagógica y audio en
+el mismo proceso, pero mantiene separación por capas para no acoplar UI con
+reglas de negocio.
+
+11.1.1 Objetivos específicos para apps educativas / musicales
+- Respuesta táctil inmediata (< 100 ms).
+- Estado complejo (SRS, selección de notas, modos) predecible.
+- Navegación clara sin perder contexto de práctica.
+- Accesibilidad por defecto (lectores, foco, reduced motion).
+- Multiplataforma desde un solo codebase.
+
+--------------------------------------------------------------------------------
+11.2 PRINCIPIOS DE ARQUITECTURA FRONTEND
+--------------------------------------------------------------------------------
+
+Separación de responsabilidades
+- UI no contiene lógica de negocio.
+- Estado no hace síntesis de audio ni persistencia directa.
+- Servicios no construyen widgets.
+- Flutter ideal para esta separación gracias al árbol de widgets
+  declarativo y la inyección de dependencias.
+
+Inversión de dependencias / Clean Frontend
+- UI depende de abstracciones (providers, repositorios interfaces).
+- Permite reemplazar implementaciones sin tocar vistas.
+- TOGESC ejemplifica: ProgressRepository local y Supabase comparten
+  misma interfaz.
+
+Composición sobre herencia
+- Widgets pequeños y combinables.
+- Herencia solo para tematización o variantes de diseño.
+- Evitar widgets “comodín” que hacen demasiado.
+
+Single source of truth
+- Estado en un solo lugar (Riverpod providers).
+- Sin estado duplicado entre widgets hermanos.
+- Navegación como source of truth (GoRouter).
+
+Imutabilidad donde sea posible
+- Modelos de dominio inmutables (NoteData, GameMode).
+- CopyWith para actualizaciones parciales.
+- Facilita testing y detección de cambios.
+
+--------------------------------------------------------------------------------
+11.3 CAPAS DE FRONTEND EN TOGESC
+--------------------------------------------------------------------------------
+
+Presentación (UI)
+- screens/: vistas completas (Home, Game, Statistics).
+- widgets/: componentes reutilizables (piano, result card, modes).
+- app_theme.dart: tokens visuales + tema claro/oscuro.
+- Shell/Scaffold: TogescShell define estructura compartida.
+
+Navegación
+- GoRouter como router declarativo.
+- AppRoutes: constantes tipadas.
+- ProRouteGuard: protección de features Pro.
+- redirects limpios (onboarding complete).
+
+Estado / Orquestación
+-Providers Riverpod: exponen estado y manejan acciones.
+- Ej.: gameSessionProvider, appThemeModeProvider, subscriptionProvider.
+- No contienen lógica pedagógica; delegan en servicios.
+
+Servicios de aplicación
+- services/: orquestan caso de uso (sesión de juego, audio, sync).
+- SRSSystem: motor pedagógico.
+- AudioGenerator / AudioPlayerService: capa de audio.
+- AppPreferences: persistencia local.
+- No exponen widgets ni dependen de Flutter directamente.
+
+Dominio
+- models/: entidades puras (NoteData, GameMode, SubscriptionStatus).
+- constants/: reglas fijas (frecuencias, modos, config).
+- Sin dependencias de Flutter/Supabase/UI.
+
+Infraestructura (cliente)
+- services/repositories: progreso híbrido local+remoto.
+- Supabase, SharedPreferences: implementaciones concretas.
+- Observabilidad, listeners de auth/subscription/checkout.
+
+Dependencias entre capas (permitido)
+Presentación → Navegación → Estado → Servicios → Dominio
+Infraestructura implementa interfaces definidas en capas internas.
+
+--------------------------------------------------------------------------------
+11.4 PATRONES DE FRONTEND
+--------------------------------------------------------------------------------
+
+State Containers / ViewModels
+- Un provider por feature/screen.
+- Lógica de presentación en provider, no en widget build().
+- Widget como función del estado.
+
+Consumer / Selector
+- ref.watch para estado reactivo.
+- ref.read para eventos únicos.
+- select() o buildWhen para reducir rebuilds.
+
+Command–Query Separation en UI
+- Eventos (submitAnswer, toggleNote) mutan estado.
+- Queries (currentAnswer, isCorrect) solo leen estado.
+- Facilita traceo y debugging.
+
+Route Guards y Redirects
+- ProRouteGuard para rutas protegidas.
+- Redirect basado en onboarding / suscripción.
+- No navegar como side-effect oculto en build().
+
+Offline-first / Degraded Mode
+- UI refleja estado local aunque backend no esté disponible.
+- Indicadores claros: banner “Offline”, “Sincronizando…”, error con retry.
+- No bloquear práctica por sync fallida.
+
+Feature Flags / acceso remoto
+- Suscripción habilita/deshabilita features (Speed, Statistics Pro).
+- Estado derivado: puede jugar? puede ver estadísticas?
+
+Error Boundaries y fallbacks
+- Provider fallbacks iniciales (estados vacíos válidos).
+- Registros de error (Sentry) en callbacks asincrónicos.
+- UI de error amigable + acción de recuperación.
+
+Testing Strategy
+- Widget tests para presentación.
+- Provider tests para estado.
+- Integration tests para flujos de usuario.
+- Golden tests opcionales para regresión visual.
+
+-------------------------------------------------------------------------------
+11.5 ESTRUCTURA DE CARPETAS Y CONVENCIONES
+--------------------------------------------------------------------------------
+
+Principios
+- features/ si el proyecto escala; por capas si prefiere simplicidad.
+- TOGESC usa estructura por capas (constants, models, services, providers,
+  screens, widgets); válida para su tamaño.
+
+Naming
+- Archivos en snake_case.
+- Clases en PascalCase.
+- Providers en *_provider.dart.
+- Pantallas en *_screen.dart.
+- Servicios en *_service.dart o *_system.dart.
+- Widgets en *_widget.dart o *_button.dart, *_card.dart.
+
+Imports y barrel files
+- Barriles controlados en carpetas clave (widgets/, services/).
+- Evitar imports circulares; regla: capa externa → interna.
+- const constructors en widgets para optimizar rebuilds.
+
+--------------------------------------------------------------------------------
+11.6 ACCESIBILIDAD EN FRONTEND
+--------------------------------------------------------------------------------
+
+Semantics
+- Semantics(label: ..., button: true) en controles custom (piano, chips).
+- Exclusiones solo cuando el contenido es decorativo real.
+- Focusable / focus order coherente.
+
+Contraste y tipografía
+- WCAG AA mínimo;目标 AA+ en productos educativos.
+- Material 3: comprobar contraste de tokens.
+- Tamaño mínimo de texto 12 sp; títulos jerárquicos.
+
+Navegación por teclado / asistivas
+- Tab order lógico en web.
+- Escape cierra diálogos.
+- VoiceOver / TalkBack labels en iconos AppBar.
+
+Reduced Motion / adaptive UI
+- Detectar accesibilidad y simplificar animaciones.
+- Tamaño de fuente: respetar textScaleFactor sin overflow.
+
+--------------------------------------------------------------------------------
+11.7 PERFORMANCE EN FRONTEND
+--------------------------------------------------------------------------------
+
+Rendimiento percibido
+- Estado inicial rápido; splash mínimo.
+- Contenido skeleton en cargas, nunca spinner eterno en datos locales.
+
+ rebuilds controlados
+- const en widgets estáticos.
+- select() o familias cuando un provider expone muchos valores.
+- Consumer + RepaintBoundary en widgets pesados.
+
+Carga de assets
+- Cacheo local; no descargar assets inmutables cada vez.
+- Lazy loading en listas largas (estadísticas, historial).
+
+Memory pressure
+- Liberar buffers de audio al salir de pantalla.
+- Dispose de controladores de animación y stream subscriptions.
+- Riverpod ref.dispose cuando corresponde.
+
+Platform channels / isolate
+- Operaciones costosas (síntesis, procesamiento de audio) en isolate.
+- Platform invoke solo para features nativas no cubiertas por plugins.
+
+--------------------------------------------------------------------------------
+11.8 ESTANDARES DE ESCRITURA DE CODIGO EN FRONTEND
+--------------------------------------------------------------------------------
+- Aplican las reglas generales del proyecto (ver Sección 12).
+- En Flutter, adicionalmente:
+  - widgets pequenos y con const constructors.
+  - build() sin logica; solo render y eventos.
+  - Providers para estado y services para orquestacion.
+  - Sin dependencia de plataforma hardcodeada en build().
+
+================================================================================
+12. STACK Y NORMATIVA TECNOLOGICA — APPS MULTIPLATAFORMA EDUCATIVAS
+================================================================================
+
+12.1 ENFOQUE
+--------------------------------------------------------------------------------
+Un stack no se elige por “lo que esta de moda”, sino por restricciones del
+producto:
+- Latencia de audio
+- Estado local complejo (SRS)
+- Ejecucion en movil + web + escritorio desde un mismo codebase
+- Modelo freemium con pagos y sync opcional
+- Cumplimiento y accesibilidad
+
+Para TOGESC, el stack actual es una respuesta razonable a esas restricciones.
+A continuacion se documenta la industria y se compara con lo adoptado.
+
+--------------------------------------------------------------------------------
+12.2 FRONTEND / CLIENTE
+--------------------------------------------------------------------------------
+
+12.2.1 Opciones de multiplataforma
+| Opcion | Madurez | Uso tipico | Comentario para TOGESC |
+|--------|---------|------------|-------------------------|
+| Flutter | Alta | Fintech, musicas, e-commerce, educacion | Elegido. Buen soporte de audio, widgets custom y desktop/web. |
+| React Native + Expo | Alta | Social, e-commerce, contenidos | Alternativa valida; ecosistema JS mas grande pero performance de audio mas trabajosa. |
+| Native (Swift/Kotlin) | Maxima | Apps intensivas en GPU/audio | Descarta unificacion web/desktop sin equipo mayor. |
+
+Estandar industria: cuando el nucleo es UI + audio sintetizado + SRS, Flutter
+es una eleccion frecuente hoy dia.
+
+12.2.2 State management
+- Profesional: arquitectura primero, herramienta despues.
+- Criterios:
+  - Capacidad de separar UI de reglas.
+  - Testeabilidad (inyeccion de dependencias, mocks).
+  - Codigo generado o no; tolerancia a refactors.
+- Opciones comunes:
+  - Riverpod / Provider
+  - Bloc/Cubit
+  - Redux Toolkit
+  - Zustand (JS)
+- TOGESC usa **Riverpod**, que es una opcion solida, con comunidades grandes y
+  soporte de testing.
+
+12.2.3 Audio en apps educativas / musicales
+Requisito diferencial: baja latencia, sintesis en cliente, reproduccion
+precisa, manejo de buffers.
+
+Opciones:
+- flutter_soloud: motor multiplataforma, buffers PCM, synth + playback.
+  Riesgo: API menos estable que alternativas maduras, pero valido.
+- just_audio: playback estable multiplataforma, sintesis requiere capa extra.
+- Tone.js / Web Audio API (web nativo): muy usado en ed-tech web, pero no
+  sirve directo en movil/desktop sin unificacion.
+- SuperCollider / Csound: para synths muy complejos; overkill aqui.
+
+Estandar: sintesis y playback deben vivir en capas separadas (como TOGESC
+hace con `audio_generator.dart` y `audio_player_service.dart`).
+
+12.2.4 UI y componentes
+- Sistemas: Material 3, HIG iOS, Fluent Windows.
+- Component Driven Development (Storybook, Widgetbook en Flutter).
+- Accesibilidad por defecto: Semantics en controles custom (piano, sliders).
+
+12.2.5 Navegacion
+- Declarativa basada en rutas (GoRouter, principios tipo “URL is source of
+  truth”).
+- Guards/redirects limpios (como `ProRouteGuard` en TOGESC).
+- Estados de navegacion testeables.
+
+12.2.6 Testing
+- Piramide: unit > widget > integration > e2e.
+- coverage como metrica, no como fin.
+- CI robusto (GitHub Actions, GitLab CI, Codemagic).
+
+12.2.7 Internacionalizacion
+- flutter_localizations + l10n.yaml.
+- placeholders consistentes.
+
+--------------------------------------------------------------------------------
+12.3 BACKEND / BAAS
+--------------------------------------------------------------------------------
+
+12.3.1 Opciones de backend para este perfil
+| Opcion | Madurez | Modelo | Comentario |
+|--------|---------|---------|------------|
+| Supabase | Alta | BaaS Postgres + Auth + Edge | Elegido en TOGESC. Cubre sync, RLS, backups, webhooks. |
+| Firebase | Alta | BaaS NoSQL + Auth + Functions | Alternativa comparable; diferencias en modelo datos y vendor lock-in. |
+| Custom API (Node/Python/Go) | Alta | Autogestion | Solo si Supabase/Firebase no cubre casos complejos. |
+| AWS/GCP/Azure ampliado | Alta | IaaS/PaaS | Overkill hasta escala real. |
+
+Estandar industria: para productos offline-first con auth y sync opcional,
+Supabase o Firebase son soluciones mayoritarias en startups y equipos chicos.
+
+12.3.2 Datos
+- Postgres como motor principal cuando hay datos relacionales o JSONB
+  estructurado (progress SRS).
+- Migraciones versionadas e inmutables.
+- RLS como capa de seguridad primaria en BaaS.
+
+12.3.3 Pagos
+- Movil: RevenueCat o StoreKit/Play Billing nativo.
+- Web: Stripe Checkout + Customer Portal.
+- Entitlements centralizados (Supabase/DB propia).
+- Idempotencia en webhooks.
+
+12.3.4 Observabilidad y analytics
+- Crash reporting: Sentry (adoptado por TOGESC).
+- Product analytics: PostHog, Firebase Analytics, Mixpanel.
+- Uptime: GitHub Actions, cron health checks, PagerDuty si escala.
+
+--------------------------------------------------------------------------------
+12.4 INFRAESTRUCTURA Y DEPLOY
+--------------------------------------------------------------------------------
+
+12.4.1 Web
+- Hosting: Vercel, Cloudflare Pages, Firebase Hosting.
+- Build estatico Flutter web como asset deployable.
+- Proteccion de secrets via CI Secrets (no en repo).
+
+12.4.2 Movil / escritorio
+- CI: Codemagic, GitHub Actions, Bitrise.
+- Stores: Play Console + App Store Connect + TestFlight.
+- Keystores y signing en vaults (no en repo).
+
+12.4.3 Monorepo / estructura
+- Opcional para proyectos grandes (Nx, Turborepo).
+- TOGESC no lo requiere hoy por su scope.
+
+--------------------------------------------------------------------------------
+12.5 SEGURIDAD Y CUMPLIMIENTO
+--------------------------------------------------------------------------------
+
+- Transporte: TLS 1.2+ obligatorio.
+- Auth: OAuth2/OIDC, PKCE en web y movil.
+- No usar service_role en cliente.
+- RLS + validacion server-side siempre.
+- Permisos minimos en movil (mic, notificaciones) justificados en UX.
+- Politica de privacidad accesible (TOGESC ya la incluye).
+
+--------------------------------------------------------------------------------
+12.6 APLICACION A TOGESC — ESTADO Y BREchas
+--------------------------------------------------------------------------------
+
+Estado actual documentado:
+- Cliente Flutter + Riverpod + GoRouter.
+- Audio flutter_soloud con sintesis propia.
+- Persistencia local + Supabase hibrida.
+- Pagos preparados (Stripe/RevenueCat), no activos.
+- Observabilidad: Sentry + metricas + uptime.
+
+Gaps:
+- Stack musical: flutter_soloud es valido, pero conviene definir fallback
+  y path de migracion documentado.
+- Handoff diseno->codigo: tokens no automatizados.
+- CI/CD: workflows referenciados; falta evidencia de ejecucion continua.
+
+Recomendaciones:
+1. Definir fallbacks de audio por plataforma.
+2. Documentar version minima soportada de SO.
+3. Profesionalizar CI (lint + test + build + deploy en un pipeline).
+
+--------------------------------------------------------------------------------
+12.7 CHECKLIST RAPIDO
+--------------------------------------------------------------------------------
+- [ ] Stack documentado por capa (frontend/backend/infra)
+- [ ] Decisiones tecnicas con rationale (ADRs)
+- [ ] Versiones fijadas de dependencias (lockfile)
+- [ ] Dependabot / renovado periodicamente
+- [ ] CI verde en cada rama feature
+- [ ] Deploy web automatizado
+- [ ] Fallbacks y degraded modes definidos
+- [ ] Observabilidad operativa activa (Sentry/uptime)
+- [ ] Accesibilidad integrada en pipeline (Lighthouse/CI)
+
+================================================================================
+13. STANDARDS DE ESCRITURA DE CODIGO
+================================================================================
+
+[contenido existente de 12.x se mantiene igual aqui]
+
+================================================================================
+14. OTROS ESTANDARES RELEVANTES — TESTING, SEGURIDAD, RELEASES, DATOS,
+     ACCESIBILIDAD, i18n, METRICAS, CUMPLIMIENTO Y DEUDA TECNICA
+================================================================================
+
+[contenido existente de 13.x se mantiene igual aqui]
+
+================================================================================
+15. REFERENCES
+================================================================================
+
+[lista existente de referencias]
+
+================================================================================
+16. GLOSARIO DE SIGLAS Y TERMINOLOGÍA
+================================================================================
+
+[glosario existente]
+
+10.2.2 State management
+- Profesional: arquitectura primero, herramienta después.
+- Criterios:
+  - Capacidad de separar UI de reglas.
+  - Testeabilidad (inyección de dependencias, mocks).
+  - Código generado o no; tolerancia a refactors.
+- Opciones comunes:
+  - Riverpod / Provider
+  - Bloc/Cubit
+  - Redux Toolkit
+  - Zustand (JS)
+- TOGESC usa **Riverpod**, que es una opción sólida, con comunidades grandes y
+  soporte de testing.
+
+10.2.3 Audio en apps educativas / musicales
+Requisito diferencial: baja latencia, síntesis en cliente, reproducción
+precisa, manejo de buffers.
+
+Opciones:
+- flutter_soloud: motor multiplataforma, buffers PCM, synth + playback.
+  Riesgo: API menos estable que alternativas maduras, pero válido.
+- just_audio: playback estable multiplataforma, síntesis requiere capa extra.
+- Tone.js / Web Audio API (web nativo): muy usado en ed-tech web, pero no
+  sirve directo en móvil/desktop sin unificación.
+- SuperCollider / Csound: para synths muy complejos; overkill aquí.
+
+Estándar: síntesis y playback deben vivir en capas separadas (como TOGESC
+hace con `audio_generator.dart` y `audio_player_service.dart`).
+
+10.2.4 UI y componentes
+- Sistemas: Material 3, HIG iOS, Fluent Windows.
+- Component Driven Development (Storybook, Widgetbook en Flutter).
+- Accesibilidad por defecto: Semantics en controles custom (piano, sliders).
+
+10.2.5 Navegación
+- Declarativa basada en rutas (GoRouter, principios tipo “URL is source of
+  truth”).
+- Guards/redirects limpios (como `ProRouteGuard` en TOGESC).
+- Estados de navegación testeables.
+
+10.2.6 Testing
+- Pirámide: unit > widget > integration > e2e.
+- coverage como métrica, no como fin.
+- CI robusto (GitHub Actions, GitLab CI, Codemagic).
+
+10.2.7 Internacionalización
+- flutter_localizations + l10n.yaml.
+- placeholders consistentes.
+
+--------------------------------------------------------------------------------
+10.3 BACKEND / BAAS
+--------------------------------------------------------------------------------
+
+10.3.1 Opciones de backend para este perfil
+| Opción | Madurez | Modelo | Comentario |
+|--------|---------|---------|------------|
+| Supabase | Alta | BaaS Postgres + Auth + Edge | ✅ Elegido en TOGESC. Cubre sync, RLS, backups, webhooks. |
+| Firebase | Alta | BaaS NoSQL + Auth + Functions | Alternativa comparable; diferencias en modelo datos y vendor lock-in. |
+| Custom API (Node/Python/Go) | Alta | Autogestión | Solo si Supabase/Firebase no cubre casos complejos. |
+| AWS/GCP/Azure ampliado | Alta | IaaS/PaaS | Overkill hasta escala real. |
+
+Estándar industria: para productos offline-first con auth y sync opcional,
+Supabase o Firebase son soluciones mayoritarias en startups y equipos chicos.
+
+10.3.2 Datos
+- Postgres como motor principal cuando hay datos relacionales o JSONB
+  estructurado (progress SRS).
+- Migraciones versionadas e inmutables.
+- RLS como capa de seguridad primaria en BaaS.
+
+10.3.3 Pagos
+- Móvil: RevenueCat o StoreKit/Play Billing nativo.
+- Web: Stripe Checkout + Customer Portal.
+- Entitlements centralizados (Supabase/DB propia).
+- Idempotencia en webhooks.
+
+10.3.4 Observabilidad y analytics
+- Crash reporting: Sentry (adoptado por TOGESC).
+- Product analytics: PostHog, Firebase Analytics, Mixpanel.
+- Uptime: GitHub Actions, cron health checks, PagerDuty si escala.
+
+--------------------------------------------------------------------------------
+10.4 INFRAESTRUCTURA Y DEPLOY
+--------------------------------------------------------------------------------
+
+10.4.1 Web
+- Hosting: Vercel, Cloudflare Pages, Firebase Hosting.
+- Build estático Flutter web como asset deployable.
+- Protección de secrets via CI Secrets (no en repo).
+
+10.4.2 Móvil / escritorio
+- CI: Codemagic, GitHub Actions, Bitrise.
+- Stores: Play Console + App Store Connect + TestFlight.
+- Keystores y signing en vaults (no en repo).
+
+10.4.3 Monorepo / estructura
+- Opcional para proyectos grandes (Nx, Turborepo).
+- TOGESC no lo requiere hoy por su scope.
+
+--------------------------------------------------------------------------------
+10.5 SEGURIDAD Y CUMPLIMIENTO
+--------------------------------------------------------------------------------
+
+- Transporte: TLS 1.2+ obligatorio.
+- Auth: OAuth2/OIDC, PKCE en web y móvil.
+- No usar service_role en cliente.
+- RLS + validación server-side siempre.
+- Permisos mínimos en móvil (mic, notificaciones) justificados en UX.
+- Política de privacidad accesible (TOGESC ya la incluye).
+
+--------------------------------------------------------------------------------
+10.6 APLICACIÓN A TOGESC — ESTADO Y BREchas
+--------------------------------------------------------------------------------
+
+Estado actual:
+- Cliente Flutter + Riverpod + GoRouter.
+- Audio flutter_soloud con síntesis propia.
+- Persistencia local + Supabase híbrida.
+- Pagos preparados (Stripe/RevenueCat), no activos.
+- Observabilidad: Sentry + métricas + uptime.
+
+Gaps:
+- Stack musical: flutter_soloud es válido, pero conviene definir fallback
+  y path de migración documentado.
+- Handoff diseño→código: tokens no automatizados.
+- CI/CD: workflows referenciados; falta evidencia de ejecución continua.
+
+Recomendaciones:
+1. Definir fallbacks de audio por plataforma.
+2. Documentar versión mínima soportada de SO.
+3. Profesionalizar CI (lint + test + build + deploy en un pipeline).
+
+--------------------------------------------------------------------------------
+10.7 CHECKLIST RÁPIDO
+--------------------------------------------------------------------------------
+- [ ] Stack documentado por capa (frontend/backend/infra)
+- [ ] Decisiones técnicas con rationale (ADRs)
+- [ ] Versiones fijadas de dependencias (lockfile)
+- [ ] Dependabot / renovado periódicamente
+- [ ] CI verde en cada rama feature
+- [ ] Deploy web automatizado
+- [ ] Fallbacks y degraded modes definidos
+- [ ] Observabilidad operativa activa (Sentry/uptime)
+- [ ] Accesibilidad integrada en pipeline (Lighthouse/CI)
+
+================================================================================
+12. ESTÁNDARES DE ESCRITURA DE CÓDIGO
+================================================================================
+
+12.1 ALCANCE Y PRINCIPIOS
+--------------------------------------------------------------------------------
+Los estándares de código definen cómo se escribe, formatea, organiza y
+documenta el código fuente para maximizar legibilidad, mantenibilidad y
+previsibilidad entre miembros del equipo.
+
+Principios transversales:
+- Código autoexplicativo antes que comentarios.
+- Formato y naming uniformes en todo el proyecto.
+- Convenciones por lenguaje, no por preferencia individual.
+- Automatización total: linters, formatters, hooks, CI.
+
+--------------------------------------------------------------------------------
+12.2 DIMENSIONES DE LOS ESTÁNDARES
+--------------------------------------------------------------------------------
+
+Nomenclatura
+- Nombres describen intención, no implementación.
+- Consistencia por tipo de artefacto (clases, archivos, variables).
+
+Formato / estilo
+- Indentación, espacios, comas, llaves, comentarios.
+- Definidos una vez y automatizados; no sujetos a debate en review.
+
+Estructura y organización
+- Responsabilidad única por archivo.
+- Dependencias ordenadas y sin ciclos.
+
+Comentarios y documentación
+- Comentarios sobre el “por qué”, no el “qué”.
+- Docstrings públicas en APIs y lógica no trivial.
+
+Principios estructurales
+- DRY, KISS, YAGNI, SOLID.
+- Funciones pequeñas y con un solo nivel de abstracción.
+
+Prácticas de calidad
+- TDD o tests unitarios como red de seguridad.
+- Linting obligatorio en IDE y en CI.
+- Code review con checklist.
+
+--------------------------------------------------------------------------------
+12.3 ESTÁNDARES POR LENGUAJE Y HERRAMIENTA
+--------------------------------------------------------------------------------
+
+Dart / Flutter
+- Effective Dart + flutter_lints (Google).
+- analysis_options.yaml versionado y estricto.
+- Formatter: dart format (automático en save o pre-commit).
+- Imports ordenados (dart → package → relativo).
+- naming:
+  - Clases: PascalCase
+  - Archivos: snake_case.dart
+  - Variables / funciones: lowerCamelCase
+  - Constantes: lowerCamelCase o SCREAMING_SNAKE_CASE
+
+Python (legacy)
+- PEP 8 + PEP 257.
+- Formatter: black; linter: ruff/flake8.
+- Módulos snake_case, clases PascalCase, constantes UPPER_SNAKE_CASE.
+
+TS/JS (si existieran clientes web separados)
+- Airbnb Style Guide o Google JS Style.
+- ESLint + Prettier.
+- 2 espacios o tabs, quotes unificadas.
+
+YAML / Config
+- Indentación 2 espacios.
+- Comillas para strings con caracteres especiales.
+- Orden alfabético donde aplique.
+
+--------------------------------------------------------------------------------
+12.4 COMENTARIOS Y DOCUMENTACIÓN
+--------------------------------------------------------------------------------
+
+Documentación pública obligatoria
+- Clases públicas con contrato relevante.
+- Métodos públicos con lógica no trivial.
+- Constantes con significado de negocio explicado.
+
+Cuándo comentar
+- Decisiones no obvias (rationale de una rama if).
+- Casos límite documentados en comentario.
+- Referencias a ADRs o docs relacionados.
+
+Cuándo no comentar
+- Si el comentario describe lo mismo que el código.
+- Para código muerto: borrarlo (git lo guarda).
+
+--------------------------------------------------------------------------------
+12.5 PRÁCTICAS DE CALIDAD EN EL FLUJO DE TRABAJO
+--------------------------------------------------------------------------------
+
+Commits
+- Convencional: feat / fix / docs / refactor / test / chore / perf / ci.
+- Mensaje en presente y con cuerpo cuando haga falta.
+- Cada commit debe compilar y pasar lint.
+
+Branches
+- main / develop.
+- feature/, fix/, chore/ según tipo.
+- PR pequeño y con descripción + checklist.
+
+Revisión de código
+- Code review obligatoria.
+- Revisar: arquitectura, tests, seguridad, performance, legibilidad.
+- Aprobar solo si pasa CI (lint + tests).
+
+CI/CD
+- Bloquear merge si lint / analyzer / tests rojos.
+- Publicar métricas de calidad (coverage, análisis).
+
+--------------------------------------------------------------------------------
+12.6 APLICACIÓN A TOGESC
+--------------------------------------------------------------------------------
+
+Estado observado
+- Flutter default lints aplicados.
+- Nomenclatura mayormente consistente.
+- Falta analysis_options.yaml estricto documentado.
+
+Gaps
+- Convenciones de estilo sin documento propio.
+- Sin pre-commit hooks (dart format + flutter analyze).
+- Sin generación de dartdoc en pipeline.
+
+Recomendaciones
+1. Definir analysis_options.yaml con reglas estrictas.
+2. Agregar pre-commit con format + analyze.
+3. Documentar convenciones en CONTRIBUTING.md.
+4. Exigir docstrings públicas en código nuevo.
+5. Medir y publicar coverage en cada PR.
+
+--------------------------------------------------------------------------------
+12.7 CHECKLIST RÁPIDO
+--------------------------------------------------------------------------------
+- [ ] analysis_options.yaml estricto y versionado
+- [ ] dart format automático en IDE o pre-commit
+- [ ] flutter analyze en CI obligatorio
+- [ ] Nomenclatura uniforme por tipo de artefacto
+- [ ] Imports sin ciclos y ordenados
+- [ ] Docstrings públicas en clases y métodos principales
+- [ ] Sin código comentado en ramas estables
+- [ ] Funciones pequeñas y simples (sin lógica anidada profunda)
+- [ ] Constantes semánticas (sin magic numbers/strings)
+- [ ] Commits convencionales
+
+================================================================================
+13. OTROS ESTÁNDARES RELEVANTES — TESTING, SEGURIDAD, RELEASES, DATOS,
+     ACCESIBILIDAD, i18n, MÉTRICAS, CUMPLIMIENTO Y DEUDA TÉCNICA
+================================================================================
+
+13.1 ENFOQUE
+--------------------------------------------------------------------------------
+Además de arquitectura, UI/UX y estilo de código, existe un conjunto de
+estándares transversales que definen la calidad operativa del producto. Se
+documentan aquí para que TOGESC tenga una referencia completa.
+
+--------------------------------------------------------------------------------
+13.2 TESTING Y CALIDAD DE SOFTWARE
+--------------------------------------------------------------------------------
+
+Estrategia
+- Pirámide de tests: unit > widget > integration > e2e.
+- TDD o al menos tests unitarios para toda lógica crítica (SRS, parser,
+  calculadora SRS, repositorios).
+- Cobertura como métrica, no como fin objetivo absoluto.
+- Calidad sobre cantidad: 80% en lógica crítica, 60% global razonable.
+
+Tipos
+- Unitarios: SRSSystem, NoteParser, AudioGenerator puro.
+- Widget: piano keyboard, result card, mode selector.
+- Integration: flujos completos onboarding → práctica → sync.
+- E2E: recorridos críticos (crear cuenta, jugar modo intervalo, pagar,
+  recuperar contraseña).
+- Regresión visual: golden tests en componentes clave.
+
+Herramientas Flutter
+- flutter_test + mocktail/mockito.
+- Patrol / integration_test para e2e.
+- Widgetbook para aislamiento de componentes.
+
+Estándares
+- Cada PR debe incluir tests o justificar por qué no.
+- CI ejecuta todos los tests en cada push; fallo bloquea merge.
+- Tests deterministas: evitar dependencias de tiempo real sin mock.
+
+--------------------------------------------------------------------------------
+13.3 SEGURIDAD
+--------------------------------------------------------------------------------
+
+Principios generales
+- Seguridad por diseño, no por afterthought.
+- Defensa en profundidad: cliente, transporte, servidor, datos.
+- Mínimo privilegio en permisos y accesos.
+
+En cliente
+- No almacenar secrets en shared preferences sin cifrado ligero.
+- Validar entradas antes de enviar a backend (no solo en servidor).
+- WebViews solo con contenido confiable; evitar javascript remoto
+  sin sandbox.
+- Tokens en secure storage (Flutter SecureStorage en móvil).
+
+En backend / BaaS
+- TLS 1.2+ obligatorio.
+- RLS en Supabase + validación server-side.
+- Webhooks con validación de firma (Stripe, RevenueCat).
+- No usar claves service_role en cliente.
+- Rate limiting y protección anti-abuso.
+
+OWASP
+- OWASP Top 10 Mobile y Web como referencia.
+- OWASP ASVS para pruebas de seguridad estructuradas.
+
+--------------------------------------------------------------------------------
+13.4 RELEASES, DEPLOY Y OPERACIONES
+--------------------------------------------------------------------------------
+
+Versionado
+- SemVer estricto en numerado: MAJOR.MINOR.PATCH.
+- Fases: alpha / beta / stable.
+- Changelog por release.
+
+Movilidad / stores
+- Android: AAB firmado, keystore en vault, versionCode autoincremental.
+- iOS: TestFlight antes de App Store, certificates en vault.
+- Permisos mínimos declarados en AndroidManifest / Info.plist.
+
+Web
+- Deploy automatizado desde main a producción (Vercel, Cloudflare).
+- Headers de seguridad: CSP, X-Frame-Options, HSTS.
+- SPA Flutter: manejo de rutas no encontradas y deep links.
+
+Rollback y monitoreo
+- Capacidad de rollback rápido (CI/CD, hosting).
+- Uptime checks en endpoints críticos.
+- Alertas con contexto (qué falló, quién afecta, cómo recuperar).
+
+--------------------------------------------------------------------------------
+13.5 DATOS, PRIVACIDAD Y CUMPLIMIENTO
+--------------------------------------------------------------------------------
+
+Modelo de datos
+- Esquemas documentados (ya hay ADRs y diagramas).
+- Table comments en BD; campos sensables explícitos.
+- JSONB con schema documentado si se usa para datos flexibles.
+
+Privacidad
+- Política de privacidad accesible y actualizada (TOGESC ya la incluye).
+- Datos mínimos: solo lo necesario para la funcionalidad.
+- Derechos de usuario: exportar, borrar cuenta, opt-out analytics.
+- Consentimiento explícito para analytics y notificaciones.
+
+Retención
+- Política de retención declarada por tipo de dato:
+  - Progreso: mientras exista la cuenta o hasta borrado.
+  - Analytics: período definido (90, 180, 365 días) por costo y utilidad.
+  - Logs: retention alineada con observabilidad.
+- Eliminación segura (no solo soft delete; verificar purge).
+
+Regulaciones
+- GDPR si hay usuarios en UE (derechos ARCO).
+- COPPA si el público incluye menores (revisar con abogado).
+- Cualquier régimen local aplicable al público objetivo.
+
+--------------------------------------------------------------------------------
+13.6 ACCESIBILIDAD COMO PROCESO
+--------------------------------------------------------------------------------
+
+Más allá de checklist, la accesibilidad es un proceso continuo:
+- Incluir criterios de accesibilidad en cada diseño nuevo (Harmonic
+  Precision).
+- Lighthouse en CI: objetivo ≥ 90 en accesibilidad.
+- Pruebas manuales periódicas: VoiceOver, TalkBack, teclado físico,
+  lector de pantalla.
+- Reduced Motion, alto contraste, guías de tamaño.
+- Revisar contraste en tokens de color semilla y estados.
+
+--------------------------------------------------------------------------------
+13.7 INTERNACIONALIZACIÓN (i18n) Y LOCALIZACIÓN (l10n)
+--------------------------------------------------------------------------------
+
+- l10n automatizada con flutter_localizations + ARB.
+- Placeholders consistentes y contextuales (no hardcodear strings).
+- Traducciones gestionadas por profesionales o hablantes nativos.
+- Pseudolocalización en desarrollo para detectar hardcodings.
+- Pluralización, géneros y formatos de fecha/hora correctos.
+- RTL readiness si se planea crecer a mercados árabes/hebreos.
+
+--------------------------------------------------------------------------------
+13.8 MÉTRICAS DE CALIDAD Y PRODUCTO
+--------------------------------------------------------------------------------
+
+Calidad
+- Tiempo para restaurar servicio (MTTR).
+- Tasa de fallos en producción (crashes por sesión).
+- Cobertura de tests y cobertura de mutación en lógica crítica.
+
+Producto
+- HEART: Happiness, Engagement, Adoption, Retention, Task Success.
+- Time To First Success: primera ronda completada.
+- CSAT: encuesta post-sesión (ya implementada en Fase 6).
+- Funnel: onboarding → primera sesión → repetición D1/D7.
+
+--------------------------------------------------------------------------------
+13.9 DOCUMENTACIÓN TÉCNICA Y DEL PRODUCTO
+--------------------------------------------------------------------------------
+
+- ADRs para decisiones importantes.
+- README.md por módulo complejo.
+- Guías de contribución (CONTRIBUTING.md) con pasos concretos.
+- Runbooks para incidentes frecuentes (sync fuera, pago no acreditado,
+  crash reproducible).
+- Arquitectura viva: diagramas actualizados y revisados periódicamente.
+
+--------------------------------------------------------------------------------
+13.10 DEUDA TÉCNICA Y MANTENIBILIDAD
+--------------------------------------------------------------------------------
+
+- Deuda documentada explícitamente (no solo “tenemos deuda”).
+- Ventana de pago en cada sprint o release.
+- Priorización por impacto en usuario/negocio, no solo por comodidad.
+- Actualización periódica de dependencias (Dependabot, renovate).
+- Evitar hackeos permanentes; marcar con TODO + ticket.
+
+--------------------------------------------------------------------------------
+13.11 CHECKLIST RÁPIDO
+--------------------------------------------------------------------------------
+- [ ] Tests por capa con cobertura mínima definida
+- [ ] CI bloquea merge si tests o lint fallan
+- [ ] Permisos y secrets gestionados fuera del repo
+- [ ] Versionado SemVer aplicado
+- [ ] Política de privacidad y retención documentada
+- [ ] Accesibilidad auditada periódicamente
+- [ ] i18n completo sin strings hardcodeadas
+- [ ] Métricas de calidad y producto recolectadas
+- [ ] ADRs actualizados para decisiones nuevas
+- [ ] Deuda técnica registrada en backlog con prioridad
+
+================================================================================
+14. REFERENCES — UI/UX, FRONTEND, BACKEND, SYSTEM DESIGN, ICONOS, MOTION,
+     STACK TECNOLÓGICO, ESTÁNDARES DE CÓDIGO, CALIDAD Y CUMPLIMIENTO
+================================================================================
+
+- ISO 9241-210 — Ergonomics of human-system interaction — Usability.
+- ISO/IEC 25010 — Systems and software quality requirements and evaluation.
+- Nielsen Norman Group — Heurísticas de usabilidad.
+- Google HEART — Métricas de experiencia.
+- Google Material Design 3 — design system oficial Material.
+- Apple Human Interface Guidelines.
+- IBM Carbon Design System.
+- Microsoft Fluent Design System.
+- WCAG 2.2 — Web Content Accessibility Guidelines.
+- WAI-ARIA Authoring Practices 1.2 — W3C.
+- EN 301 549 — Accessibility requirements for ICT products and services.
+- Section 508 — U.S. government accessibility standard.
+- Design Tokens Community Group (W3C) — Especificación de tokens.
+- Atomic Design (Brad Frost).
+- OpenAPI Specification — API First.
+- OWASP ASVS (donde aplique seguridad de frontend/móvil).
+- Core Web Vitals — Google Developers.
+- Apple HIG — App Icons.
+- Android Developers — Adaptive icons.
+- Microsoft Fluent — Icones.
+- Supabase Docs — Postgres + RLS + Edge Functions.
+- Flutter Docs — architecture, platform integration.
+- RevenueCat Docs — subscriptions mobile.
+- Stripe Docs — checkout + webhooks.
+- Sentry Docs — Flutter SDK.
+- OWASP Mobile Top 10 — mobile security.
+- SemVer — versionado semántico.
+- GDPR / privacidad — normativa aplicable por región.
+- ISO/IEC 25010 — calidad de producto software.
+- RFC 3339 / ISO 8601 — formato de fechas y timestamps.
+
+================================================================================
+13. GLOSARIO DE SIGLAS Y TERMINOLOGÍA
+================================================================================
+
+ADR      Architectural Decision Record
+BaaS     Backend as a Service
+CLS      Cumulative Layout Shift
+DDD      Domain-Driven Design
+DoD      Definition of Done
+DoR      Definition of Ready
+E2E      End-to-End
+FID      First Input Delay
+HEART    Happiness / Engagement / Adoption / Retention / Task Success
+IA       Information Architecture
+IxD      Interaction Design
+JTBD     Jobs To Be Done
+LCP      Largest Contentful Paint
+RLS      Row Level Security (Supabase)
+SLO      Service Level Objective
+SLI      Service Level Indicator
+SRS      Spaced Repetition System (repetición espaciada)
+TDD      Test-Driven Development
+UI       User Interface
+UX       User Experience
+WCAG     Web Content Accessibility Guidelines
+YAGNI    You Aren't Gonna Need It
+YAML     (no aplica directamente, pero se menciona en contexto de config)
+
+================================================================================
+FIN DE DOCUMENTO
+================================================================================
+Generado a partir de la revisión de:
+- Plan/project_context.txt
+- Plan/system_design.md
+- Plan/gui_information_architecture.md
+- Plan/plan_fases.txt
+- Plan/stitch_harmonic_precision_DESIGN.md
+- docs/supabase_setup.md
+- docs/qa_checklist.md
+- debug_analysis.md
+- pubspec.yaml
+- README.md
+
+Fecha de revisión: 2026-06-23
+Versión del documento: 1.0...

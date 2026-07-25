@@ -2,43 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'design_tokens.dart';
+import 'togesc_colors.dart';
 
 /// Tema visual TOGESC — Harmonic Precision (Material 3 + Hanken Grotesk).
 abstract final class AppTheme {
   static const Color seedColor = DesignTokens.primaryContainer;
 
   static ThemeData get light {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: DesignTokens.primaryContainer,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: DesignTokens.primary,
-      onPrimary: DesignTokens.onPrimary,
-      primaryContainer: DesignTokens.primaryContainer,
-      onPrimaryContainer: DesignTokens.onPrimaryContainer,
-      secondary: DesignTokens.secondary,
-      onSecondary: DesignTokens.onSecondary,
-      secondaryContainer: DesignTokens.secondaryContainer,
-      onSecondaryContainer: DesignTokens.onSecondaryContainer,
-      tertiary: DesignTokens.tertiary,
-      onTertiary: DesignTokens.onTertiary,
-      tertiaryContainer: DesignTokens.tertiaryContainer,
-      onTertiaryContainer: DesignTokens.onTertiaryContainer,
-      error: DesignTokens.error,
-      onError: DesignTokens.onError,
-      errorContainer: DesignTokens.errorContainer,
-      onErrorContainer: DesignTokens.onErrorContainer,
-      surface: DesignTokens.surface,
-      onSurface: DesignTokens.onSurface,
-      onSurfaceVariant: DesignTokens.onSurfaceVariant,
-      outline: DesignTokens.outline,
-      outlineVariant: DesignTokens.outlineVariant,
-      surfaceContainerHighest: const Color(0xFFE8E0E5),
-      surfaceContainerHigh: const Color(0xFFEEE6EB),
-      surfaceContainer: DesignTokens.surfaceContainer,
-      surfaceContainerLow: DesignTokens.surfaceContainerLow,
-      surfaceContainerLowest: const Color(0xFFFFFFFF),
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: DesignTokens.primaryContainer,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: DesignTokens.primary,
+          onPrimary: DesignTokens.onPrimary,
+          primaryContainer: DesignTokens.primaryContainer,
+          onPrimaryContainer: DesignTokens.onPrimaryContainer,
+          secondary: DesignTokens.secondary,
+          onSecondary: DesignTokens.onSecondary,
+          secondaryContainer: DesignTokens.secondaryContainer,
+          onSecondaryContainer: DesignTokens.onSecondaryContainer,
+          tertiary: DesignTokens.tertiary,
+          onTertiary: DesignTokens.onTertiary,
+          tertiaryContainer: DesignTokens.tertiaryContainer,
+          onTertiaryContainer: DesignTokens.onTertiaryContainer,
+          error: DesignTokens.error,
+          onError: DesignTokens.onError,
+          errorContainer: DesignTokens.errorContainer,
+          onErrorContainer: DesignTokens.onErrorContainer,
+          surface: DesignTokens.surface,
+          onSurface: DesignTokens.onSurface,
+          onSurfaceVariant: DesignTokens.onSurfaceVariant,
+          outline: DesignTokens.outline,
+          outlineVariant: DesignTokens.outlineVariant,
+          surfaceContainerHighest: const Color(0xFFE8E0E5),
+          surfaceContainerHigh: const Color(0xFFEEE6EB),
+          surfaceContainer: DesignTokens.surfaceContainer,
+          surfaceContainerLow: DesignTokens.surfaceContainerLow,
+          surfaceContainerLowest: const Color(0xFFFFFFFF),
+        );
 
     final textTheme = _textTheme(Brightness.light, scheme);
 
@@ -47,6 +49,7 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: DesignTokens.background,
       useMaterial3: true,
       textTheme: textTheme,
+      extensions: const [TogescColors.light],
       navigationBarTheme: _navigationBarTheme(scheme, textTheme),
       appBarTheme: AppBarTheme(
         centerTitle: true,
@@ -70,7 +73,10 @@ abstract final class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: DesignTokens.primaryContainer,
           foregroundColor: DesignTokens.onPrimary,
-          minimumSize: const Size(DesignTokens.touchTargetMin, DesignTokens.touchTargetMin),
+          minimumSize: const Size(
+            DesignTokens.touchTargetMin,
+            DesignTokens.touchTargetMin,
+          ),
           padding: const EdgeInsets.symmetric(
             horizontal: DesignTokens.spacingLg,
             vertical: DesignTokens.spacingMd,
@@ -84,7 +90,10 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: DesignTokens.primaryContainer,
-          minimumSize: const Size(DesignTokens.touchTargetMin, DesignTokens.touchTargetMin),
+          minimumSize: const Size(
+            DesignTokens.touchTargetMin,
+            DesignTokens.touchTargetMin,
+          ),
           padding: const EdgeInsets.symmetric(
             horizontal: DesignTokens.spacingLg,
             vertical: DesignTokens.spacingMd,
@@ -159,37 +168,38 @@ abstract final class AppTheme {
   }
 
   static ThemeData get dark {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: DesignTokens.primaryContainer,
-      brightness: Brightness.dark,
-    ).copyWith(
-      primary: DesignTokens.darkPrimary,
-      onPrimary: DesignTokens.darkOnPrimary,
-      primaryContainer: DesignTokens.darkPrimaryContainer,
-      onPrimaryContainer: DesignTokens.darkOnPrimaryContainer,
-      secondary: DesignTokens.secondaryContainer,
-      onSecondary: DesignTokens.onSecondaryContainer,
-      secondaryContainer: DesignTokens.secondary,
-      onSecondaryContainer: DesignTokens.onSecondary,
-      tertiary: DesignTokens.onTertiaryContainer,
-      onTertiary: DesignTokens.tertiary,
-      tertiaryContainer: DesignTokens.tertiaryContainer,
-      onTertiaryContainer: DesignTokens.onTertiaryContainer,
-      error: DesignTokens.error,
-      onError: DesignTokens.onError,
-      errorContainer: DesignTokens.onErrorContainer,
-      onErrorContainer: DesignTokens.errorContainer,
-      surface: DesignTokens.darkSurface,
-      onSurface: DesignTokens.darkOnSurface,
-      onSurfaceVariant: DesignTokens.darkOnSurfaceVariant,
-      outline: DesignTokens.darkOutline,
-      outlineVariant: DesignTokens.darkOutlineVariant,
-      surfaceContainerHighest: const Color(0xFF332839),
-      surfaceContainerHigh: const Color(0xFF2E2433),
-      surfaceContainer: DesignTokens.darkSurfaceContainer,
-      surfaceContainerLow: DesignTokens.darkSurfaceContainerLow,
-      surfaceContainerLowest: DesignTokens.darkSurfaceContainerLowest,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: DesignTokens.primaryContainer,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: DesignTokens.darkPrimary,
+          onPrimary: DesignTokens.darkOnPrimary,
+          primaryContainer: DesignTokens.darkPrimaryContainer,
+          onPrimaryContainer: DesignTokens.darkOnPrimaryContainer,
+          secondary: DesignTokens.secondaryContainer,
+          onSecondary: DesignTokens.onSecondaryContainer,
+          secondaryContainer: DesignTokens.secondary,
+          onSecondaryContainer: DesignTokens.onSecondary,
+          tertiary: DesignTokens.onTertiaryContainer,
+          onTertiary: DesignTokens.tertiary,
+          tertiaryContainer: DesignTokens.tertiaryContainer,
+          onTertiaryContainer: DesignTokens.onTertiaryContainer,
+          error: DesignTokens.error,
+          onError: DesignTokens.onError,
+          errorContainer: DesignTokens.onErrorContainer,
+          onErrorContainer: DesignTokens.errorContainer,
+          surface: DesignTokens.darkSurface,
+          onSurface: DesignTokens.darkOnSurface,
+          onSurfaceVariant: DesignTokens.darkOnSurfaceVariant,
+          outline: DesignTokens.darkOutline,
+          outlineVariant: DesignTokens.darkOutlineVariant,
+          surfaceContainerHighest: const Color(0xFF332839),
+          surfaceContainerHigh: const Color(0xFF2E2433),
+          surfaceContainer: DesignTokens.darkSurfaceContainer,
+          surfaceContainerLow: DesignTokens.darkSurfaceContainerLow,
+          surfaceContainerLowest: DesignTokens.darkSurfaceContainerLowest,
+        );
 
     final textTheme = _textTheme(Brightness.dark, scheme);
 
@@ -198,6 +208,7 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: DesignTokens.darkBackground,
       useMaterial3: true,
       textTheme: textTheme,
+      extensions: const [TogescColors.dark],
       navigationBarTheme: _navigationBarTheme(scheme, textTheme),
       appBarTheme: AppBarTheme(
         centerTitle: true,
@@ -221,7 +232,10 @@ abstract final class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: DesignTokens.darkPrimaryContainer,
           foregroundColor: DesignTokens.darkOnPrimaryContainer,
-          minimumSize: const Size(DesignTokens.touchTargetMin, DesignTokens.touchTargetMin),
+          minimumSize: const Size(
+            DesignTokens.touchTargetMin,
+            DesignTokens.touchTargetMin,
+          ),
           padding: const EdgeInsets.symmetric(
             horizontal: DesignTokens.spacingLg,
             vertical: DesignTokens.spacingMd,
@@ -235,7 +249,10 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: DesignTokens.darkPrimary,
-          minimumSize: const Size(DesignTokens.touchTargetMin, DesignTokens.touchTargetMin),
+          minimumSize: const Size(
+            DesignTokens.touchTargetMin,
+            DesignTokens.touchTargetMin,
+          ),
           padding: const EdgeInsets.symmetric(
             horizontal: DesignTokens.spacingLg,
             vertical: DesignTokens.spacingMd,
@@ -275,7 +292,9 @@ abstract final class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: DesignTokens.darkSurfaceContainerLow,
-        selectedColor: DesignTokens.darkPrimaryContainer.withValues(alpha: 0.35),
+        selectedColor: DesignTokens.darkPrimaryContainer.withValues(
+          alpha: 0.35,
+        ),
         labelStyle: textTheme.labelLarge,
         side: const BorderSide(color: DesignTokens.darkOutlineVariant),
         shape: RoundedRectangleBorder(
@@ -357,9 +376,7 @@ abstract final class AppTheme {
         height: 28 / 20,
         color: scheme.onSurface,
       ),
-      displaySmall: hanken.displaySmall?.copyWith(
-        color: scheme.onSurface,
-      ),
+      displaySmall: hanken.displaySmall?.copyWith(color: scheme.onSurface),
       bodyLarge: hanken.bodyLarge?.copyWith(
         fontSize: 18,
         fontWeight: FontWeight.w400,
@@ -386,9 +403,7 @@ abstract final class AppTheme {
         letterSpacing: 0.5,
         color: scheme.onSurfaceVariant,
       ),
-      labelSmall: hanken.labelSmall?.copyWith(
-        color: scheme.onSurfaceVariant,
-      ),
+      labelSmall: hanken.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../constants/note_naming.dart';
@@ -30,8 +31,15 @@ class NoteSrsDetailCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final naming = ref.watch(noteNamingModeProvider).valueOrNull ??
-        NoteNamingMode.letter;
+    final naming =
+        ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
+    final learningThreshold =
+        ref
+            .watch(appPreferencesProvider)
+            .valueOrNull
+            ?.srsIntensityProfile
+            .learningThreshold ??
+        5;
     final label = formatNoteLabel(summary.note, naming);
 
     return TogescCard(
@@ -49,22 +57,27 @@ class NoteSrsDetailCard extends ConsumerWidget {
                 ),
               ),
               if (summary.isOverdue)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: DesignTokens.spacingSm,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: DesignTokens.errorContainer,
-                    borderRadius: DesignTokens.borderRadiusMd,
-                  ),
-                  child: Text(
-                    'Pendiente',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: DesignTokens.incorrect,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                Builder(
+                  builder: (context) {
+                    final colors = TogescColors.of(context);
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: DesignTokens.spacingSm,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.incorrectContainer,
+                        borderRadius: DesignTokens.borderRadiusMd,
+                      ),
+                      child: Text(
+                        'Pendiente',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colors.onIncorrectContainer,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  },
                 ),
             ],
           ),
@@ -73,6 +86,7 @@ class NoteSrsDetailCard extends ConsumerWidget {
             note: label,
             consecutiveCorrect: summary.consecutiveCorrect,
             isLearning: summary.isLearning,
+            learningThreshold: learningThreshold,
           ),
           const SizedBox(height: DesignTokens.spacingXs),
           Text(
@@ -133,10 +147,7 @@ class _MetricRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(color: scheme.onSurfaceVariant),
-          ),
+          Text(label, style: TextStyle(color: scheme.onSurfaceVariant)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),

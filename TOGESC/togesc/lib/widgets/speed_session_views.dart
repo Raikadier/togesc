@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../constants/game_constants.dart';
 import 'game_session_views.dart';
 
@@ -12,10 +13,11 @@ class SpeedSessionIdleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final speed = TogescColors.of(context).speedAccent;
     return GameSessionPhaseLayout(
       badge: 'MODO VELOCIDAD',
       icon: Icons.speed_rounded,
-      accentColor: DesignTokens.speedAccent,
+      accentColor: speed,
       iconGradient: DesignTokens.speedGradient,
       title: 'Listo para el desafio',
       subtitle: 'Tiempo inicial: ${speedInitialTime.toStringAsFixed(0)}s',
@@ -23,7 +25,7 @@ class SpeedSessionIdleView extends StatelessWidget {
         onPressed: onStart,
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
-          backgroundColor: DesignTokens.speedAccent,
+          backgroundColor: speed,
           shape: RoundedRectangleBorder(
             borderRadius: DesignTokens.borderRadiusXl,
           ),
@@ -46,7 +48,7 @@ class SpeedSessionListeningView extends StatelessWidget {
     return GameSessionPhaseLayout(
       badge: 'RÁFAGA ACTIVA',
       icon: Icons.graphic_eq_rounded,
-      accentColor: DesignTokens.speedAccent,
+      accentColor: TogescColors.of(context).speedAccent,
       title: 'Escucha...',
       subtitle: '$numNotes nota(s) — responde al terminar el audio',
       showProgress: true,
@@ -135,7 +137,10 @@ class SpeedSessionSummaryCard extends StatelessWidget {
             label: 'Promedio',
             value: '${averageTime.toStringAsFixed(2)}s',
           ),
-          _StatRow(label: 'Mejor tiempo', value: '${bestTime.toStringAsFixed(2)}s'),
+          _StatRow(
+            label: 'Mejor tiempo',
+            value: '${bestTime.toStringAsFixed(2)}s',
+          ),
           _StatRow(
             label: 'Tiempo limite',
             value: '${timeLimit.toStringAsFixed(1)}s',
@@ -232,6 +237,7 @@ class SpeedModeOptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final speed = TogescColors.of(context);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: DesignTokens.spacingMd),
@@ -256,12 +262,10 @@ class SpeedModeOptionCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: DesignTokens.speedContainer.withValues(
-                      alpha: scheme.brightness == Brightness.dark ? 0.25 : 1,
-                    ),
+                    color: speed.speedContainer,
                     borderRadius: DesignTokens.borderRadiusMd,
                   ),
-                  child: Icon(icon, color: DesignTokens.speedAccent),
+                  child: Icon(icon, color: speed.speedAccent),
                 ),
                 const SizedBox(height: DesignTokens.spacingMd),
                 Text(
@@ -286,13 +290,13 @@ class SpeedModeOptionCard extends StatelessWidget {
                     Text(
                       'Empieza ahora',
                       style: theme.textTheme.labelLarge?.copyWith(
-                        color: DesignTokens.speedAccent,
+                        color: speed.speedAccent,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       Icons.chevron_right_rounded,
-                      color: DesignTokens.speedAccent,
+                      color: speed.speedAccent,
                       size: 20,
                     ),
                   ],
@@ -314,6 +318,7 @@ class SpeedSessionAnswerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final speed = TogescColors.of(context);
     return Column(
       children: [
         Container(
@@ -322,28 +327,24 @@ class SpeedSessionAnswerHeader extends StatelessWidget {
             vertical: DesignTokens.spacingXs,
           ),
           decoration: BoxDecoration(
-            color: DesignTokens.speedContainer,
+            color: speed.speedContainer,
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
-              color: DesignTokens.speedAccent.withValues(alpha: 0.15),
+              color: speed.speedAccent.withValues(alpha: 0.15),
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.bolt_rounded,
-                size: 16,
-                color: DesignTokens.speedAccent,
-              ),
+              Icon(Icons.bolt_rounded, size: 16, color: speed.speedAccent),
               const SizedBox(width: DesignTokens.spacingXs),
               Text(
                 'MODO VELOCIDAD',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: DesignTokens.speedAccent,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
+                  color: speed.speedAccent,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
               ),
             ],
           ),
@@ -353,9 +354,9 @@ class SpeedSessionAnswerHeader extends StatelessWidget {
           numNotes == 1
               ? 'Que nota escuchaste?'
               : 'Que nota(s) escuchaste? ($numNotes)',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
           textAlign: TextAlign.center,
         ),
       ],

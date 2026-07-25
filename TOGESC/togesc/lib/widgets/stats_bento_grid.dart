@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../app/design_tokens.dart';
 import '../app/router.dart';
+import '../app/togesc_colors.dart';
 import '../constants/game_constants.dart';
 import '../models/note_progress_summary.dart';
 import '../providers/practice_focus_provider.dart';
@@ -24,8 +25,9 @@ class StatsNoteRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final acc = summary.accuracyPercent;
-    final color =
-        highlightError ? DesignTokens.incorrect : scheme.primary;
+    final color = highlightError
+        ? TogescColors.of(context).incorrect
+        : scheme.primary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: DesignTokens.spacingSm),

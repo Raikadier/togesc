@@ -1,55 +1,80 @@
 import 'package:flutter/material.dart';
 
+import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
+
 /// Indicador visual del progreso SRS de una nota.
 ///
-/// Muestra 5 bloques para fase de aprendizaje o badge "Consolidada".
+/// Muestra el umbral del perfil activo o el badge "Consolidada".
 class SrsProgressIndicator extends StatelessWidget {
   final String note;
   final int consecutiveCorrect;
   final bool isLearning;
+  final int learningThreshold;
 
   const SrsProgressIndicator({
     super.key,
     required this.note,
     required this.consecutiveCorrect,
     required this.isLearning,
+    this.learningThreshold = 5,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final colors = TogescColors.of(context);
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           note,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: scheme.onSurface,
+          ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: DesignTokens.spacingSm),
         if (isLearning) ...[
-          ...List.generate(5, (i) {
+          ...List.generate(learningThreshold, (i) {
             final filled = i < consecutiveCorrect;
             return Container(
               width: 16,
               height: 16,
               margin: const EdgeInsets.symmetric(horizontal: 1),
               decoration: BoxDecoration(
-                color: filled ? Colors.deepPurple : Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+                color: filled
+                    ? scheme.primaryContainer
+                    : scheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(DesignTokens.spacingXs / 2),
               ),
             );
           }),
-          const SizedBox(width: 4),
-          Text('$consecutiveCorrect/5', style: const TextStyle(fontSize: 12)),
+          const SizedBox(width: DesignTokens.spacingXs),
+          Text(
+            '$consecutiveCorrect/$learningThreshold',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
         ] else
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.green.shade100,
-              borderRadius: BorderRadius.circular(8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: DesignTokens.spacingSm,
+              vertical: 2,
             ),
-            child: const Text(
+            decoration: BoxDecoration(
+              color: colors.correctContainer,
+              borderRadius: DesignTokens.borderRadiusMd,
+            ),
+            child: Text(
               'Consolidada',
-              style: TextStyle(color: Colors.green, fontSize: 12),
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: colors.onCorrectContainer,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
       ],

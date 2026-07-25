@@ -14,8 +14,7 @@ import 'package:togesc/services/progress_repository.dart';
 import 'package:togesc/services/srs_system.dart';
 
 /// Notifier falso para SRS.
-class _FakeSRSNotifier extends AsyncNotifier<SRSSystem>
-    implements SRSNotifier {
+class _FakeSRSNotifier extends AsyncNotifier<SRSSystem> implements SRSNotifier {
   final SRSSystem _srs;
   _FakeSRSNotifier(this._srs);
 
@@ -108,15 +107,18 @@ void main() {
       expect(container.read(speedSessionProvider).targetMode, GameMode.chord);
     });
 
-    test('startRound selecciona notas y transiciona a waitingForAnswer', () async {
-      final notifier = container.read(speedSessionProvider.notifier);
-      await notifier.startRound();
+    test(
+      'startRound selecciona notas y transiciona a waitingForAnswer',
+      () async {
+        final notifier = container.read(speedSessionProvider.notifier);
+        await notifier.startRound();
 
-      final state = container.read(speedSessionProvider);
-      expect(state.state, SpeedState.waitingForAnswer);
-      expect(state.currentNotes, isNotEmpty);
-      expect(state.currentNotes.length, 1); // singleNote
-    });
+        final state = container.read(speedSessionProvider);
+        expect(state.state, SpeedState.waitingForAnswer);
+        expect(state.currentNotes, isNotEmpty);
+        expect(state.currentNotes.length, 1); // singleNote
+      },
+    );
 
     test('startRound en modo interval selecciona 2 notas', () async {
       final notifier = container.read(speedSessionProvider.notifier);
@@ -134,21 +136,24 @@ void main() {
       expect(container.read(speedSessionProvider).currentNotes.length, 3);
     });
 
-    test('submitAnswer correcta incrementa consecutiveCorrect y reduce timeLimit', () async {
-      final notifier = container.read(speedSessionProvider.notifier);
-      await notifier.startRound();
+    test(
+      'submitAnswer correcta incrementa consecutiveCorrect y reduce timeLimit',
+      () async {
+        final notifier = container.read(speedSessionProvider.notifier);
+        await notifier.startRound();
 
-      final notes = container.read(speedSessionProvider).currentNotes;
-      notifier.submitAnswer(notes, 2.0);
+        final notes = container.read(speedSessionProvider).currentNotes;
+        notifier.submitAnswer(notes, 2.0);
 
-      final state = container.read(speedSessionProvider);
-      expect(state.state, SpeedState.correct);
-      expect(state.consecutiveCorrect, 1);
-      expect(state.currentTimeLimit, speedInitialTime - speedCorrectDecrease);
-      expect(state.responseTimes, [2.0]);
-    });
+        final state = container.read(speedSessionProvider);
+        expect(state.state, SpeedState.correct);
+        expect(state.consecutiveCorrect, 1);
+        expect(state.currentTimeLimit, speedInitialTime - speedCorrectDecrease);
+        expect(state.responseTimes, [2.0]);
+      },
+    );
 
-    test('submitAnswer incorrecta no cambia consecutiveCorrect ni timeLimit', () async {
+    test('respuesta incorrecta aumenta el limite adaptativo', () async {
       final notifier = container.read(speedSessionProvider.notifier);
       await notifier.startRound();
 
@@ -157,28 +162,35 @@ void main() {
       final state = container.read(speedSessionProvider);
       expect(state.state, SpeedState.incorrect);
       expect(state.consecutiveCorrect, 0);
-      expect(state.currentTimeLimit, speedInitialTime); // sin cambio
+      expect(state.currentTimeLimit, speedInitialTime + speedWrongIncrease);
       expect(state.responseTimes, [3.0]);
     });
 
-    test('multiples respuestas correctas reducen timeLimit progresivamente', () async {
-      final notifier = container.read(speedSessionProvider.notifier);
+    test(
+      'multiples respuestas correctas reducen timeLimit progresivamente',
+      () async {
+        final notifier = container.read(speedSessionProvider.notifier);
 
-      // Ronda 1
-      await notifier.startRound();
-      var notes = container.read(speedSessionProvider).currentNotes;
-      notifier.submitAnswer(notes, 1.0);
-      expect(container.read(speedSessionProvider).currentTimeLimit,
-          speedInitialTime - speedCorrectDecrease);
+        // Ronda 1
+        await notifier.startRound();
+        var notes = container.read(speedSessionProvider).currentNotes;
+        notifier.submitAnswer(notes, 1.0);
+        expect(
+          container.read(speedSessionProvider).currentTimeLimit,
+          speedInitialTime - speedCorrectDecrease,
+        );
 
-      // Ronda 2
-      await notifier.startRound();
-      notes = container.read(speedSessionProvider).currentNotes;
-      notifier.submitAnswer(notes, 1.0);
-      expect(container.read(speedSessionProvider).currentTimeLimit,
-          speedInitialTime - 2 * speedCorrectDecrease);
-      expect(container.read(speedSessionProvider).consecutiveCorrect, 2);
-    });
+        // Ronda 2
+        await notifier.startRound();
+        notes = container.read(speedSessionProvider).currentNotes;
+        notifier.submitAnswer(notes, 1.0);
+        expect(
+          container.read(speedSessionProvider).currentTimeLimit,
+          speedInitialTime - 2 * speedCorrectDecrease,
+        );
+        expect(container.read(speedSessionProvider).consecutiveCorrect, 2);
+      },
+    );
 
     test('timeLimit no baja por debajo de speedMinTime', () async {
       final notifier = container.read(speedSessionProvider.notifier);
@@ -190,8 +202,10 @@ void main() {
         notifier.submitAnswer(notes, 0.5);
       }
 
-      expect(container.read(speedSessionProvider).currentTimeLimit,
-          greaterThanOrEqualTo(speedMinTime));
+      expect(
+        container.read(speedSessionProvider).currentTimeLimit,
+        greaterThanOrEqualTo(speedMinTime),
+      );
     });
 
     test('retry reinicia el estado', () async {

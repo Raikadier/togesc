@@ -19,10 +19,7 @@ class _FailingSubscriptionNotifier extends SubscriptionNotifier {
 class _ProSubscriptionNotifier extends SubscriptionNotifier {
   @override
   Future<SubscriptionStatus> build() async {
-    lastKnown = const SubscriptionStatus(
-      plan: 'pro',
-      status: 'active',
-    );
+    lastKnown = const SubscriptionStatus(plan: 'pro', status: 'active');
     return lastKnown!;
   }
 }
@@ -37,45 +34,44 @@ void main() {
       routes: [
         GoRoute(
           path: '/',
-          builder: (_, __) => ProRouteGuard(
+          builder: (_, _) => ProRouteGuard(
             mode: mode,
             child: const Scaffold(body: Text('pro-content')),
           ),
         ),
         GoRoute(
           path: AppRoutes.paywall,
-          builder: (_, __) => const Scaffold(body: Text('paywall')),
+          builder: (_, _) => const Scaffold(body: Text('paywall')),
         ),
       ],
     );
 
     return ProviderScope(
-      overrides: [
-        subscriptionStatusProvider.overrideWith(() => notifier),
-      ],
+      overrides: [subscriptionStatusProvider.overrideWith(() => notifier)],
       child: MaterialApp.router(routerConfig: router),
     );
   }
 
-  testWidgets('error sin cache redirige a paywall en modo Pro', (tester) async {
-    await tester.pumpWidget(
-      buildGuard(
-        notifier: _FailingSubscriptionNotifier(),
-        mode: GameMode.chord,
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'error sin cache redirige a paywall en modo Pro',
+    (tester) async {
+      await tester.pumpWidget(
+        buildGuard(
+          notifier: _FailingSubscriptionNotifier(),
+          mode: GameMode.chord,
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('pro-content'), findsNothing);
-    expect(find.text('paywall'), findsOneWidget);
-  }, skip: !SubscriptionConfig.isActive);
+      expect(find.text('pro-content'), findsNothing);
+      expect(find.text('paywall'), findsOneWidget);
+    },
+    skip: !SubscriptionConfig.isActive,
+  );
 
-  testWidgets('error con cache Pro permite acceso', (tester) async {
+  testWidgets('entitlement Pro confirmado permite acceso', (tester) async {
     await tester.pumpWidget(
-      buildGuard(
-        notifier: _ProSubscriptionNotifier(),
-        mode: GameMode.chord,
-      ),
+      buildGuard(notifier: _ProSubscriptionNotifier(), mode: GameMode.chord),
     );
     await tester.pump();
 

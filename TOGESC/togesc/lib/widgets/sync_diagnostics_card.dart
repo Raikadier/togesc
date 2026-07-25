@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../models/sync_diagnostics.dart';
 import '../providers/sync_provider.dart';
 import 'togesc_ui.dart';
@@ -20,7 +21,11 @@ class _SyncStatusVisual {
   final Color background;
 }
 
-_SyncStatusVisual _visualFor(SyncDiagnostics d, ColorScheme scheme) {
+_SyncStatusVisual _visualFor(
+  SyncDiagnostics d,
+  ColorScheme scheme,
+  TogescColors colors,
+) {
   if (!d.cloudSyncEnabled) {
     return _SyncStatusVisual(
       label: 'Sync Pro',
@@ -38,18 +43,18 @@ _SyncStatusVisual _visualFor(SyncDiagnostics d, ColorScheme scheme) {
     );
   }
   if (!d.remoteReachable) {
-    return const _SyncStatusVisual(
+    return _SyncStatusVisual(
       label: 'Sin conexion',
       icon: Icons.cloud_off_rounded,
-      color: DesignTokens.error,
-      background: DesignTokens.errorContainer,
+      color: scheme.error,
+      background: colors.incorrectContainer,
     );
   }
   if (d.pendingUpload) {
     return _SyncStatusVisual(
       label: 'Pendiente',
       icon: Icons.cloud_upload_rounded,
-      color: DesignTokens.selection,
+      color: colors.selection,
       background: scheme.surfaceContainerLow,
     );
   }
@@ -57,15 +62,15 @@ _SyncStatusVisual _visualFor(SyncDiagnostics d, ColorScheme scheme) {
     return _SyncStatusVisual(
       label: 'Sincronizado',
       icon: Icons.cloud_done_rounded,
-      color: DesignTokens.correct,
+      color: colors.correct,
       background: scheme.surfaceContainerLow,
     );
   }
-  return const _SyncStatusVisual(
+  return _SyncStatusVisual(
     label: 'Desalineado',
     icon: Icons.cloud_sync_rounded,
-    color: DesignTokens.incorrect,
-    background: DesignTokens.errorContainer,
+    color: colors.incorrect,
+    background: colors.incorrectContainer,
   );
 }
 
@@ -78,6 +83,7 @@ class SyncDiagnosticsCard extends ConsumerWidget {
     final diagnosticsAsync = ref.watch(syncDiagnosticsProvider);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = TogescColors.of(context);
 
     return diagnosticsAsync.when(
       loading: () => const TogescCard(
@@ -94,7 +100,7 @@ class SyncDiagnosticsCard extends ConsumerWidget {
       ),
       error: (_, _) => const SizedBox.shrink(),
       data: (SyncDiagnostics d) {
-        final visual = _visualFor(d, scheme);
+        final visual = _visualFor(d, scheme, colors);
 
         return TogescCard(
           child: Column(
@@ -161,7 +167,7 @@ class SyncDiagnosticsCard extends ConsumerWidget {
                     Icon(
                       Icons.sync_rounded,
                       size: 18,
-                      color: DesignTokens.selection,
+                      color: colors.selection,
                     ),
                     const SizedBox(width: DesignTokens.spacingSm),
                     Expanded(

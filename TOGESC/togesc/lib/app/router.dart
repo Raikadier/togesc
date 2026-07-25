@@ -62,10 +62,7 @@ GoRouter createAppRouter({
         path: AppRoutes.onboarding,
         builder: (_, _) => const OnboardingScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.about,
-        builder: (_, _) => const AboutScreen(),
-      ),
+      GoRoute(path: AppRoutes.about, builder: (_, _) => const AboutScreen()),
       GoRoute(
         path: AppRoutes.privacy,
         builder: (_, _) => const PrivacyPolicyScreen(),
@@ -84,7 +81,8 @@ GoRouter createAppRouter({
       GoRoute(
         path: '${AppRoutes.game}/:modeId',
         builder: (context, state) {
-          final modeId = int.parse(state.pathParameters['modeId']!);
+          final modeId = int.tryParse(state.pathParameters['modeId'] ?? '');
+          if (modeId == null) return const HomeScreen();
           final mode = GameMode.fromId(modeId);
           if (mode == null || mode == GameMode.exit) {
             return const HomeScreen();
@@ -98,7 +96,8 @@ GoRouter createAppRouter({
       GoRoute(
         path: '${AppRoutes.speedGame}/:modeId',
         builder: (context, state) {
-          final modeId = int.parse(state.pathParameters['modeId']!);
+          final modeId = int.tryParse(state.pathParameters['modeId'] ?? '');
+          if (modeId == null) return const SpeedModeSelectScreen();
           final mode = GameMode.fromId(modeId);
           if (mode == null) {
             return const SpeedModeSelectScreen();
@@ -112,10 +111,7 @@ GoRouter createAppRouter({
       ShellRoute(
         builder: (_, _, child) => TogescShell(child: child),
         routes: [
-          GoRoute(
-            path: AppRoutes.home,
-            builder: (_, _) => const HomeScreen(),
-          ),
+          GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
           GoRoute(
             path: AppRoutes.statistics,
             builder: (_, _) => const StatisticsScreen(),

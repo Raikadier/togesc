@@ -68,18 +68,18 @@ abstract final class DesignTokens {
   static const double radiusMd = 12;
   static const double radiusXl = 16;
   static const double shellBreakpoint = 600;
+  static const double contentMaxWidth = 1200;
   static const double touchTargetMin = 48;
   static const double spacingXs = 4;
   static const double spacingSm = 8;
   static const double spacingMd = 12;
   static const double spacingLg = 16;
   static const double marginMobile = 16;
+  static const double marginDesktop = 24;
 
-  static BorderRadius get borderRadiusMd =>
-      BorderRadius.circular(radiusMd);
+  static BorderRadius get borderRadiusMd => BorderRadius.circular(radiusMd);
 
-  static BorderRadius get borderRadiusXl =>
-      BorderRadius.circular(radiusXl);
+  static BorderRadius get borderRadiusXl => BorderRadius.circular(radiusXl);
 
   // --- Modo velocidad (Stitch speed-gradient) ---
   static const Color speedAccent = Color(0xFFE64A19);
@@ -100,10 +100,10 @@ abstract final class DesignTokens {
 
   /// Sombra suave para cards hover (web/desktop).
   static List<BoxShadow> get cardHoverShadow => [
-        BoxShadow(
-          color: primary.withValues(alpha: 0.08),
-          blurRadius: 20,
-          offset: const Offset(0, 8),
-        ),
-      ];
+    BoxShadow(
+      color: primary.withValues(alpha: 0.08),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+    ),
+  ];
 }

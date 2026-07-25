@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import 'togesc_ui.dart';
 
 /// Panel de recomendaciones de practica basado en el estado SRS.
 class RecommendationCard extends StatelessWidget {
   final Map<String, dynamic> recommendations;
 
-  const RecommendationCard({
-    super.key,
-    required this.recommendations,
-  });
+  const RecommendationCard({super.key, required this.recommendations});
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final colors = TogescColors.of(context);
     final message = recommendations['message'] as String? ?? '';
     final totalOverdue = recommendations['total_overdue'] as int? ?? 0;
     final learningCount = recommendations['learning_notes_count'] as int? ?? 0;
@@ -30,58 +30,70 @@ class RecommendationCard extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.lightbulb, color: scheme.primaryContainer),
-              const SizedBox(width: 8),
-              Text(
-                'Recomendaciones',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              const SizedBox(width: DesignTokens.spacingSm),
+              Text('Recomendaciones', style: theme.textTheme.titleLarge),
             ],
           ),
-            const SizedBox(height: 8),
-            Text(message, style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 12),
-            _buildStatRow(context, 'Notas pendientes', '$totalOverdue'),
-            _buildStatRow(context, 'En aprendizaje', '$learningCount'),
-            if (daysSince > 0)
-              _buildStatRow(context, 'Ultima sesion', 'hace $daysSince dia(s)'),
-            if (criticalNotes.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              const Text(
-                'Notas criticas:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: DesignTokens.incorrect,
-                ),
+          const SizedBox(height: DesignTokens.spacingSm),
+          Text(message, style: theme.textTheme.bodyMedium),
+          const SizedBox(height: DesignTokens.spacingMd),
+          _buildStatRow(context, 'Notas pendientes', '$totalOverdue'),
+          _buildStatRow(context, 'En aprendizaje', '$learningCount'),
+          if (daysSince > 0)
+            _buildStatRow(context, 'Ultima sesion', 'hace $daysSince dia(s)'),
+          if (criticalNotes.isNotEmpty) ...[
+            const SizedBox(height: DesignTokens.spacingSm),
+            Text(
+              'Notas criticas:',
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: colors.incorrect,
               ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                children: criticalNotes.take(5).map((item) {
-                  // item is a Record (String, int) but comes as dynamic
-                  final note = item is (String, int) ? item.$1 : '$item';
-                  return Chip(
-                    label: Text(note),
-                    backgroundColor: DesignTokens.errorContainer,
-                    side: const BorderSide(color: DesignTokens.incorrect),
-                  );
-                }).toList(),
-              ),
-            ],
+            ),
+            const SizedBox(height: DesignTokens.spacingXs),
+            Wrap(
+              spacing: DesignTokens.spacingSm,
+              children: criticalNotes.take(5).map((item) {
+                final note = item is (String, int) ? item.$1 : '$item';
+                return Chip(
+                  label: Text(
+                    note,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: colors.onIncorrectContainer,
+                    ),
+                  ),
+                  backgroundColor: colors.incorrectContainer,
+                  side: BorderSide(color: colors.incorrect),
+                );
+              }).toList(),
+            ),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildStatRow(BuildContext context, String label, String value) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: scheme.onSurfaceVariant)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );

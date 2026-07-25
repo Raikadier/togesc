@@ -18,7 +18,10 @@ class _ThrowingRemoteRepository implements ProgressRepository {
   Future<String?> loadLastSessionIso() => _inner.loadLastSessionIso();
 
   @override
-  Future<void> save(Map<String, NoteData> noteData, {String? lastSession}) async {
+  Future<void> save(
+    Map<String, NoteData> noteData, {
+    String? lastSession,
+  }) async {
     if (failNext) throw StateError('offline');
     await _inner.save(noteData, lastSession: lastSession);
   }
@@ -65,15 +68,28 @@ void main() {
       expect(await pendingStore.isPending, isFalse);
     });
 
+    test('save conserva notas creadas por otro dispositivo', () async {
+      await remoteInner!.save({
+        'C': NoteData(weight: 8.0, lastSeen: '2026-07-24T10:00:00.000Z'),
+      });
+
+      await hybrid.save({
+        'D': NoteData(weight: 5.0, lastSeen: '2026-07-24T11:00:00.000Z'),
+      });
+
+      final savedLocal = await local.load();
+      final savedRemote = await remoteInner!.load();
+      expect(savedLocal!.keys, containsAll(['C', 'D']));
+      expect(savedRemote!.keys, containsAll(['C', 'D']));
+    });
+
     test('load fusiona por nota si lastSeen remoto es mas reciente', () async {
-      await local.save(
-        {'C': NoteData(weight: 1.0, lastSeen: '2026-01-01T10:00:00.000')},
-        lastSession: '2026-01-01T10:00:00.000',
-      );
-      await remoteInner!.save(
-        {'C': NoteData(weight: 9.0, lastSeen: '2026-06-01T10:00:00.000')},
-        lastSession: '2026-06-01T10:00:00.000',
-      );
+      await local.save({
+        'C': NoteData(weight: 1.0, lastSeen: '2026-01-01T10:00:00.000'),
+      }, lastSession: '2026-01-01T10:00:00.000');
+      await remoteInner!.save({
+        'C': NoteData(weight: 9.0, lastSeen: '2026-06-01T10:00:00.000'),
+      }, lastSession: '2026-06-01T10:00:00.000');
 
       final loaded = await hybrid.load();
       expect(loaded!['C']!.weight, 9.0);
@@ -81,52 +97,45 @@ void main() {
     });
 
     test('load fusiona notas distintas de local y remoto', () async {
-      await local.save(
-        {
-          'C': NoteData(weight: 8.0, lastSeen: '2026-06-20T10:00:00.000'),
-          'D': NoteData(weight: 7.0, lastSeen: '2026-06-20T11:00:00.000'),
-        },
-        lastSession: '2026-06-20T11:00:00.000',
-      );
-      await remoteInner!.save(
-        {
-          'F': NoteData(weight: 5.0, lastSeen: '2026-06-21T10:00:00.000'),
-          'G': NoteData(weight: 4.0, lastSeen: '2026-06-21T11:00:00.000'),
-        },
-        lastSession: '2026-06-21T11:00:00.000',
-      );
+      await local.save({
+        'C': NoteData(weight: 8.0, lastSeen: '2026-06-20T10:00:00.000'),
+        'D': NoteData(weight: 7.0, lastSeen: '2026-06-20T11:00:00.000'),
+      }, lastSession: '2026-06-20T11:00:00.000');
+      await remoteInner!.save({
+        'F': NoteData(weight: 5.0, lastSeen: '2026-06-21T10:00:00.000'),
+        'G': NoteData(weight: 4.0, lastSeen: '2026-06-21T11:00:00.000'),
+      }, lastSession: '2026-06-21T11:00:00.000');
 
       final loaded = await hybrid.load();
       expect(loaded!.keys, containsAll(['C', 'D', 'F', 'G']));
-      expect((await remoteInner!.load())!.keys, containsAll(['C', 'D', 'F', 'G']));
+      expect(
+        (await remoteInner!.load())!.keys,
+        containsAll(['C', 'D', 'F', 'G']),
+      );
     });
 
-    test('load mantiene local si marcas de sesion coinciden y nota local gana',
-        () async {
-      await local.save(
-        {
+    test(
+      'load mantiene local si marcas de sesion coinciden y nota local gana',
+      () async {
+        await local.save({
           'C': NoteData(
             weight: 1.0,
             lastSeen: '2026-06-23T15:08:11.868',
             timesSeen: 3,
           ),
-        },
-        lastSession: '2026-06-23T15:08:11.868',
-      );
-      await remoteInner!.save(
-        {
+        }, lastSession: '2026-06-23T15:08:11.868');
+        await remoteInner!.save({
           'C': NoteData(
             weight: 9.0,
             lastSeen: '2026-06-23T15:08:11.868+00:00',
             timesSeen: 1,
           ),
-        },
-        lastSession: '2026-06-23T15:08:11.868+00:00',
-      );
+        }, lastSession: '2026-06-23T15:08:11.868+00:00');
 
-      final loaded = await hybrid.load();
-      expect(loaded!['C']!.weight, 1.0);
-    });
+        final loaded = await hybrid.load();
+        expect(loaded!['C']!.weight, 1.0);
+      },
+    );
 
     test('mergeOnSignIn sube local si remoto vacio', () async {
       await local.save({'E': NoteData(weight: 4.0)});
@@ -154,4 +163,3 @@ void main() {
     });
   });
 }
-

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../models/sync_diagnostics.dart';
 import '../providers/sync_provider.dart';
 import 'togesc_ui.dart';
@@ -29,6 +30,7 @@ class AccountProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = TogescColors.of(context);
 
     return Container(
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
@@ -97,14 +99,14 @@ class AccountProfileHeader extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: (isSynced
-                                ? DesignTokens.correct
-                                : DesignTokens.selection)
+                                ? colors.correct
+                                : colors.selection)
                             .withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(
                           color: (isSynced
-                                  ? DesignTokens.correct
-                                  : DesignTokens.selection)
+                                  ? colors.correct
+                                  : colors.selection)
                               .withValues(alpha: 0.25),
                         ),
                       ),
@@ -117,16 +119,16 @@ class AccountProfileHeader extends StatelessWidget {
                                 : Icons.cloud_sync_rounded,
                             size: 16,
                             color: isSynced
-                                ? DesignTokens.correct
-                                : DesignTokens.selection,
+                                ? colors.correct
+                                : colors.selection,
                           ),
                           const SizedBox(width: DesignTokens.spacingXs),
                           Text(
                             isSynced ? 'SINCRONIZADO' : 'PENDIENTE',
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: isSynced
-                                  ? DesignTokens.correct
-                                  : DesignTokens.selection,
+                                  ? colors.correct
+                                  : colors.selection,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.3,
                             ),
@@ -225,6 +227,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
     final diagnosticsAsync = ref.watch(syncDiagnosticsProvider);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = TogescColors.of(context);
 
     return diagnosticsAsync.when(
       loading: () => const TogescCard(
@@ -275,8 +278,8 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
                     height: 48,
                     decoration: BoxDecoration(
                       color: (globalOk
-                              ? DesignTokens.correct
-                              : DesignTokens.selection)
+                              ? colors.correct
+                              : colors.selection)
                           .withValues(alpha: 0.12),
                       borderRadius: DesignTokens.borderRadiusMd,
                     ),
@@ -285,8 +288,8 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
                           ? Icons.check_circle_rounded
                           : Icons.warning_amber_rounded,
                       color: globalOk
-                          ? DesignTokens.correct
-                          : DesignTokens.selection,
+                          ? colors.correct
+                          : colors.selection,
                     ),
                   ),
                   const SizedBox(width: DesignTokens.spacingMd),

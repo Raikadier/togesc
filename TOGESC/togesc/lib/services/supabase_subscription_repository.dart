@@ -4,13 +4,13 @@ import '../models/subscription_status.dart';
 
 const String userSubscriptionsTable = 'user_subscriptions';
 
-/// Lee y escribe el cache de suscripcion en Supabase (RLS).
+/// Lee entitlements server-owned desde Supabase.
 class SupabaseSubscriptionRepository {
   SupabaseSubscriptionRepository({
     required SupabaseClient client,
     required String userId,
-  })  : _client = client,
-        _userId = userId;
+  }) : _client = client,
+       _userId = userId;
 
   final SupabaseClient _client;
   final String _userId;
@@ -29,15 +29,12 @@ class SupabaseSubscriptionRepository {
     }
   }
 
-  Future<void> upsert(SubscriptionStatus status, {String? externalId}) async {
-    await _client.from(userSubscriptionsTable).upsert({
-      'user_id': _userId,
-      'plan': status.plan,
-      'status': status.status,
-      'source': status.source,
-      'external_id': ?externalId,
-      'trial_ends_at': ?status.trialEndsAt?.toIso8601String(),
-      'expires_at': ?status.expiresAt?.toIso8601String(),
-    });
+  /// El servidor fija duracion y elegibilidad; nunca acepta un plan del cliente.
+  Future<SubscriptionStatus> startTrial() async {
+    final row = await _client.rpc('start_subscription_trial');
+    if (row is! Map<String, dynamic>) {
+      throw StateError('Respuesta de trial no valida');
+    }
+    return SubscriptionStatus.fromJson(row);
   }
 }

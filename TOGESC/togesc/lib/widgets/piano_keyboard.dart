@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../constants/note_naming.dart';
 
 /// Teclado de piano interactivo (Stitch skeuominimalist).
@@ -43,60 +44,72 @@ class PianoKeyboard extends StatefulWidget {
 class _PianoKeyboardState extends State<PianoKeyboard> {
   final Set<String> _pressed = {};
 
-  LinearGradient _whiteGradient(String note, bool pressed) {
+  LinearGradient _whiteGradient(
+    String note,
+    bool pressed,
+    ColorScheme scheme,
+    TogescColors colors,
+  ) {
     if (widget.correctNotes.contains(note)) {
       return LinearGradient(
         colors: [
-          DesignTokens.correct.withValues(alpha: 0.3),
-          DesignTokens.correct.withValues(alpha: 0.2),
+          colors.correct.withValues(alpha: 0.3),
+          colors.correct.withValues(alpha: 0.2),
         ],
       );
     }
     if (widget.incorrectNotes.contains(note)) {
       return LinearGradient(
         colors: [
-          DesignTokens.incorrect.withValues(alpha: 0.3),
-          DesignTokens.incorrect.withValues(alpha: 0.2),
+          colors.incorrect.withValues(alpha: 0.3),
+          colors.incorrect.withValues(alpha: 0.2),
         ],
       );
     }
     if (widget.selectedNotes.contains(note)) {
       return LinearGradient(
         colors: [
-          DesignTokens.selection.withValues(alpha: 0.4),
-          DesignTokens.selection.withValues(alpha: 0.25),
+          colors.selection.withValues(alpha: 0.4),
+          colors.selection.withValues(alpha: 0.25),
         ],
       );
     }
     if (pressed) {
-      return const LinearGradient(
+      return LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xFFF3ECF1), Color(0xFFEEEEEE)],
+        colors: [scheme.surfaceContainer, scheme.surfaceContainerHighest],
       );
     }
-    return const LinearGradient(
+    return LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Colors.white, Color(0xFFFCFCFC), Color(0xFFF0F0F0)],
-      stops: [0, 0.9, 1],
+      colors: [
+        DesignTokens.pianoWhite,
+        scheme.surfaceContainerLowest,
+        scheme.surfaceContainerHigh,
+      ],
+      stops: const [0, 0.9, 1],
     );
   }
 
-  LinearGradient _blackGradient(String note, bool pressed) {
+  LinearGradient _blackGradient(
+    String note,
+    bool pressed,
+    TogescColors colors,
+  ) {
     if (widget.correctNotes.contains(note)) {
-      return const LinearGradient(
-        colors: [DesignTokens.correct, Color(0xFF1B5E20)],
-      );
+      return LinearGradient(colors: [colors.correct, colors.correctDeep]);
     }
     if (widget.incorrectNotes.contains(note)) {
-      return const LinearGradient(
-        colors: [DesignTokens.incorrect, Color(0xFF8B0000)],
-      );
+      return LinearGradient(colors: [colors.incorrect, colors.incorrectDeep]);
     }
     if (widget.selectedNotes.contains(note)) {
-      return const LinearGradient(
-        colors: [Color(0xFF8A6A00), Color(0xFF5D4800)],
+      return LinearGradient(
+        colors: [
+          colors.selectionDeep,
+          colors.selectionDeep.withValues(alpha: 0.85),
+        ],
       );
     }
     if (pressed) {
@@ -109,15 +122,15 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     return const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFF333333), Color(0xFF212121), Colors.black],
+      colors: [Color(0xFF333333), DesignTokens.pianoBlack, Colors.black],
       stops: [0, 0.8, 1],
     );
   }
 
-  Color _whiteKeyBorder(String note, ColorScheme scheme) {
-    if (widget.selectedNotes.contains(note)) return DesignTokens.selection;
-    if (widget.correctNotes.contains(note)) return DesignTokens.correct;
-    if (widget.incorrectNotes.contains(note)) return DesignTokens.incorrect;
+  Color _whiteKeyBorder(String note, ColorScheme scheme, TogescColors colors) {
+    if (widget.selectedNotes.contains(note)) return colors.selection;
+    if (widget.correctNotes.contains(note)) return colors.correct;
+    if (widget.incorrectNotes.contains(note)) return colors.incorrect;
     return scheme.outlineVariant;
   }
 
@@ -134,12 +147,16 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     return null;
   }
 
-  Widget? _statusBadge(String note, {required bool onDarkKey}) {
+  Widget? _statusBadge(
+    String note, {
+    required bool onDarkKey,
+    required TogescColors colors,
+  }) {
     if (widget.correctNotes.contains(note)) {
       return Icon(
         Icons.check_circle,
         size: widget.large ? 18 : 14,
-        color: onDarkKey ? Colors.white : DesignTokens.correct,
+        color: onDarkKey ? Colors.white : colors.correct,
         semanticLabel: 'correcta',
       );
     }
@@ -147,7 +164,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
       return Icon(
         Icons.cancel,
         size: widget.large ? 18 : 14,
-        color: onDarkKey ? Colors.white : DesignTokens.incorrect,
+        color: onDarkKey ? Colors.white : colors.incorrect,
         semanticLabel: 'incorrecta',
       );
     }
@@ -158,12 +175,20 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     if (widget.disabled) return;
     setState(() => _pressed.add(note));
     widget.onNoteTapped?.call(note);
-    Future<void>.delayed(const Duration(milliseconds: 80), () {
-      if (mounted) setState(() => _pressed.remove(note));
-    });
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    Future<void>.delayed(
+      reduceMotion ? Duration.zero : const Duration(milliseconds: 80),
+      () {
+        if (mounted) setState(() => _pressed.remove(note));
+      },
+    );
   }
 
-  KeyEventResult _handleKeyActivation(String note, FocusNode node, KeyEvent event) {
+  KeyEventResult _handleKeyActivation(
+    String note,
+    FocusNode node,
+    KeyEvent event,
+  ) {
     if (widget.disabled) return KeyEventResult.ignored;
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
     if (event.logicalKey == LogicalKeyboardKey.enter ||
@@ -178,7 +203,9 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     required String note,
     required Widget visual,
     required bool onDarkKey,
+    required TogescColors colors,
   }) {
+    final badge = _statusBadge(note, onDarkKey: onDarkKey, colors: colors);
     return Semantics(
       button: true,
       enabled: !widget.disabled,
@@ -192,18 +219,15 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
           color: Colors.transparent,
           child: InkWell(
             onTap: widget.disabled ? null : () => _tap(note),
-            focusColor: DesignTokens.selection.withValues(alpha: 0.2),
-            hoverColor: DesignTokens.selection.withValues(alpha: 0.1),
-            splashColor: DesignTokens.selection.withValues(alpha: 0.15),
+            focusColor: colors.selection.withValues(alpha: 0.2),
+            hoverColor: colors.selection.withValues(alpha: 0.1),
+            splashColor: colors.selection.withValues(alpha: 0.15),
             child: Stack(
               alignment: Alignment.topCenter,
               children: [
                 visual,
-                if (_statusBadge(note, onDarkKey: onDarkKey) != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: _statusBadge(note, onDarkKey: onDarkKey),
-                  ),
+                if (badge != null)
+                  Padding(padding: const EdgeInsets.only(top: 4), child: badge),
               ],
             ),
           ),
@@ -215,12 +239,17 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final colors = TogescColors.of(context);
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final animDuration = reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 50);
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = widget.large ? 640.0 : 500.0;
         // 7 teclas x 48dp minimo (WCAG 2.5.8).
-        final minWidth = widget.large ? 336.0 : 336.0;
+        const minWidth = 336.0;
         final totalWidth = constraints.maxWidth.clamp(minWidth, maxWidth);
         final whiteKeyWidth = totalWidth / 7;
         final whiteKeyHeight = whiteKeyWidth * 3.5;
@@ -259,18 +288,23 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                         child: _accessibleKey(
                           note: note,
                           onDarkKey: false,
+                          colors: colors,
                           visual: AnimatedContainer(
-                            duration: const Duration(milliseconds: 50),
+                            duration: animDuration,
                             transform: pressed
                                 ? (Matrix4.identity()
-                                  ..translateByDouble(0.0, 2.0, 0.0, 1.0))
+                                    ..translateByDouble(0.0, 2.0, 0.0, 1.0))
                                 : Matrix4.identity(),
-                            margin:
-                                const EdgeInsets.symmetric(horizontal: 0.5),
+                            margin: const EdgeInsets.symmetric(horizontal: 0.5),
                             decoration: BoxDecoration(
-                              gradient: _whiteGradient(note, pressed),
+                              gradient: _whiteGradient(
+                                note,
+                                pressed,
+                                scheme,
+                                colors,
+                              ),
                               border: Border.all(
-                                color: _whiteKeyBorder(note, scheme),
+                                color: _whiteKeyBorder(note, scheme, colors),
                                 width: _whiteKeyBorderWidth(note),
                               ),
                               borderRadius: BorderRadius.only(
@@ -285,8 +319,9 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                                   ? null
                                   : [
                                       BoxShadow(
-                                        color: Colors.black
-                                            .withValues(alpha: 0.05),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.05,
+                                        ),
                                         blurRadius: 4,
                                         offset: const Offset(0, 2),
                                       ),
@@ -315,12 +350,13 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                     }).toList(),
                   ),
                   ...PianoKeyboard.blackNoteMap.entries.map((entry) {
-                    final whiteIndex =
-                        PianoKeyboard.whiteNotes.indexOf(entry.key);
+                    final whiteIndex = PianoKeyboard.whiteNotes.indexOf(
+                      entry.key,
+                    );
                     final sharpNote = entry.value;
                     final pressed = _pressed.contains(sharpNote);
-                    final leftOffset = (whiteIndex + 1) * whiteKeyWidth -
-                        blackHitWidth / 2;
+                    final leftOffset =
+                        (whiteIndex + 1) * whiteKeyWidth - blackHitWidth / 2;
 
                     return Positioned(
                       left: leftOffset,
@@ -330,25 +366,27 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                       child: _accessibleKey(
                         note: sharpNote,
                         onDarkKey: true,
+                        colors: colors,
                         visual: Align(
                           child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 50),
+                            duration: animDuration,
                             width: blackKeyWidth,
                             height: blackKeyHeight,
                             transform: pressed
                                 ? (Matrix4.identity()
-                                  ..translateByDouble(0.0, 3.0, 0.0, 1.0))
+                                    ..translateByDouble(0.0, 3.0, 0.0, 1.0))
                                 : Matrix4.identity(),
                             decoration: BoxDecoration(
-                              gradient:
-                                  _blackGradient(sharpNote, pressed),
+                              gradient: _blackGradient(
+                                sharpNote,
+                                pressed,
+                                colors,
+                              ),
                               border: Border.all(
-                                color: widget.selectedNotes
-                                        .contains(sharpNote)
-                                    ? DesignTokens.selection
+                                color: widget.selectedNotes.contains(sharpNote)
+                                    ? colors.selection
                                     : Colors.transparent,
-                                width: widget.selectedNotes
-                                        .contains(sharpNote)
+                                width: widget.selectedNotes.contains(sharpNote)
                                     ? 2
                                     : 0,
                               ),
@@ -358,8 +396,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color:
-                                      Colors.black.withValues(alpha: 0.3),
+                                  color: Colors.black.withValues(alpha: 0.3),
                                   blurRadius: 6,
                                   offset: const Offset(0, 3),
                                 ),

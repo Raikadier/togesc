@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 
 /// Widget de countdown circular para el modo velocidad.
 class CountdownTimerWidget extends StatelessWidget {
@@ -13,20 +14,21 @@ class CountdownTimerWidget extends StatelessWidget {
     required this.totalTime,
   });
 
-  Color _getColor() {
+  Color _getColor(TogescColors colors) {
     final ratio = totalTime > 0 ? remainingTime / totalTime : 0;
-    if (ratio > 0.5) return DesignTokens.correct;
-    if (ratio > 0.25) return DesignTokens.selection;
-    return DesignTokens.incorrect;
+    if (ratio > 0.5) return colors.correct;
+    if (ratio > 0.25) return colors.selection;
+    return colors.incorrect;
   }
 
   @override
   Widget build(BuildContext context) {
-    final progress =
-        totalTime > 0 ? (remainingTime / totalTime).clamp(0.0, 1.0) : 0.0;
-    final color = _getColor();
+    final progress = totalTime > 0
+        ? (remainingTime / totalTime).clamp(0.0, 1.0)
+        : 0.0;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final color = _getColor(TogescColors.of(context));
 
     return Column(
       children: [

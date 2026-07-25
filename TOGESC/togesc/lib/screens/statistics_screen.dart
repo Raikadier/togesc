@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../app/design_tokens.dart';
 import '../app/router.dart';
+import '../app/togesc_colors.dart';
 import '../models/subscription_status.dart';
 import '../providers/session_history_provider.dart';
 import '../providers/srs_provider.dart';
@@ -28,6 +29,29 @@ class StatisticsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final srsState = ref.watch(srsSystemProvider);
+    if (srsState.isLoading && !srsState.hasValue) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (srsState.hasError && !srsState.hasValue) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('No se pudo cargar tu progreso.'),
+              const SizedBox(height: DesignTokens.spacingMd),
+              FilledButton.icon(
+                onPressed: () => ref.invalidate(srsSystemProvider),
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final stats = ref.watch(srsStatisticsProvider);
     final status = ref.watch(subscriptionStatusProvider).valueOrNull;
     final advancedStats = SubscriptionAccess.canViewAdvancedStats(
@@ -37,7 +61,7 @@ class StatisticsScreen extends ConsumerWidget {
 
     if (stats.isEmpty) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: Text('Aún no hay estadísticas disponibles.')),
       );
     }
 
@@ -56,10 +80,10 @@ class StatisticsScreen extends ConsumerWidget {
     final hardest = sortedByAccuracy.take(3).toList();
     final easiest = sortedByAccuracy.reversed.take(3).toList();
     final scheme = Theme.of(context).colorScheme;
+    final colors = TogescColors.of(context);
 
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(DesignTokens.marginMobile),
+      body: TogescPageBody(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -95,7 +119,7 @@ class StatisticsScreen extends ConsumerWidget {
                         child: _DomainStatBox(
                           label: 'Dominadas',
                           value: '$graduated/$totalNotes',
-                          color: DesignTokens.correct,
+                          color: colors.correct,
                         ),
                       ),
                     ],
@@ -107,9 +131,9 @@ class StatisticsScreen extends ConsumerWidget {
                       'Distribucion de precision por nota',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: scheme.outline,
-                            fontStyle: FontStyle.italic,
-                          ),
+                        color: scheme.outline,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ],
                 ],
@@ -198,9 +222,9 @@ class StatisticsScreen extends ConsumerWidget {
     final csv = ProgressExportService.buildCsv(srs);
     if (kIsWeb) {
       downloadCsvWeb(csv);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Descarga CSV iniciada')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Descarga CSV iniciada')));
     } else {
       Clipboard.setData(ClipboardData(text: csv));
       ScaffoldMessenger.of(context).showSnackBar(
@@ -238,16 +262,16 @@ class _DomainStatBox extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: scheme.outline,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: scheme.outline),
           ),
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w700,
-                ),
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),

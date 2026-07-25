@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../utils/session_history_stats.dart';
 import 'togesc_ui.dart';
 
 /// Grafico de barras de precision diaria (Fase 7C-3).
 class SessionEvolutionChart extends StatelessWidget {
-  const SessionEvolutionChart({
-    super.key,
-    required this.summaries,
-  });
+  const SessionEvolutionChart({super.key, required this.summaries});
 
   final List<DayPracticeSummary> summaries;
 
@@ -26,10 +24,7 @@ class SessionEvolutionChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Evolucion 7 dias',
-            style: theme.textTheme.titleLarge,
-          ),
+          Text('Evolucion 7 dias', style: theme.textTheme.titleLarge),
           const SizedBox(height: 4),
           Text(
             'Precision diaria y rondas practicadas (historial local).',
@@ -46,10 +41,7 @@ class SessionEvolutionChart extends StatelessWidget {
                 return Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: _DayBar(
-                      summary: day,
-                      maxRounds: maxRounds,
-                    ),
+                    child: _DayBar(summary: day, maxRounds: maxRounds),
                   ),
                 );
               }).toList(),
@@ -62,27 +54,25 @@ class SessionEvolutionChart extends StatelessWidget {
 }
 
 class _DayBar extends StatelessWidget {
-  const _DayBar({
-    required this.summary,
-    required this.maxRounds,
-  });
+  const _DayBar({required this.summary, required this.maxRounds});
 
   final DayPracticeSummary summary;
   final int maxRounds;
 
-  Color _barColor(double accuracy, ColorScheme scheme) {
+  Color _barColor(double accuracy, ColorScheme scheme, TogescColors colors) {
     if (!summary.hasActivity) {
       return scheme.onSurfaceVariant.withValues(alpha: 0.15);
     }
-    if (accuracy >= 80) return DesignTokens.correct;
-    if (accuracy >= 50) return DesignTokens.selection;
-    return DesignTokens.incorrect;
+    if (accuracy >= 80) return colors.correct;
+    if (accuracy >= 50) return colors.selection;
+    return colors.incorrect;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = TogescColors.of(context);
     final barHeightFactor = maxRounds <= 0 || !summary.hasActivity
         ? 0.08
         : (summary.rounds / maxRounds).clamp(0.12, 1.0);
@@ -95,7 +85,7 @@ class _DayBar extends StatelessWidget {
           Text(
             '${accuracy.round()}%',
             style: theme.textTheme.labelSmall?.copyWith(
-              color: _barColor(accuracy, scheme),
+              color: _barColor(accuracy, scheme, colors),
               fontWeight: FontWeight.w600,
             ),
           )
@@ -110,7 +100,7 @@ class _DayBar extends StatelessWidget {
               widthFactor: 1,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: _barColor(accuracy, scheme),
+                  color: _barColor(accuracy, scheme, colors),
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),

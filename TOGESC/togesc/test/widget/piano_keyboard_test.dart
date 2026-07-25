@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:togesc/app/app_theme.dart';
 import 'package:togesc/widgets/piano_keyboard.dart';
 
 void main() {
@@ -13,6 +13,7 @@ void main() {
     bool disabled = false,
   }) {
     return MaterialApp(
+      theme: AppTheme.light,
       home: Scaffold(
         body: Center(
           child: SizedBox(
@@ -49,9 +50,9 @@ void main() {
 
     testWidgets('tap en tecla blanca invoca callback con nota', (tester) async {
       String? tappedNote;
-      await tester.pumpWidget(buildApp(
-        onNoteTapped: (note) => tappedNote = note,
-      ));
+      await tester.pumpWidget(
+        buildApp(onNoteTapped: (note) => tappedNote = note),
+      );
 
       await tester.tap(find.text('C'));
       await tester.pump(const Duration(milliseconds: 100));
@@ -62,11 +63,13 @@ void main() {
       expect(tappedNote, 'G');
     });
 
-    testWidgets('tap en tecla negra invoca callback con nota sostenida', (tester) async {
+    testWidgets('tap en tecla negra invoca callback con nota sostenida', (
+      tester,
+    ) async {
       String? tappedNote;
-      await tester.pumpWidget(buildApp(
-        onNoteTapped: (note) => tappedNote = note,
-      ));
+      await tester.pumpWidget(
+        buildApp(onNoteTapped: (note) => tappedNote = note),
+      );
 
       await tester.tap(find.text('C#'));
       await tester.pump(const Duration(milliseconds: 100));
@@ -75,10 +78,9 @@ void main() {
 
     testWidgets('disabled=true no invoca callback', (tester) async {
       String? tappedNote;
-      await tester.pumpWidget(buildApp(
-        onNoteTapped: (note) => tappedNote = note,
-        disabled: true,
-      ));
+      await tester.pumpWidget(
+        buildApp(onNoteTapped: (note) => tappedNote = note, disabled: true),
+      );
 
       await tester.tap(find.text('C'));
       expect(tappedNote, isNull);
@@ -89,15 +91,19 @@ void main() {
       expect(find.byType(PianoKeyboard), findsOneWidget);
     });
 
-    testWidgets('teclas blancas exponen Semantics con nombre de nota', (tester) async {
+    testWidgets('teclas blancas exponen Semantics con nombre de nota', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildApp());
 
       final semantics = tester.getSemantics(find.bySemanticsLabel('C'));
       expect(semantics.label, 'C');
-      expect(semantics.hasFlag(SemanticsFlag.isButton), isTrue);
+      expect(semantics.flagsCollection.isButton, isTrue);
     });
 
-    testWidgets('nota correcta muestra icono y hint en Semantics', (tester) async {
+    testWidgets('nota correcta muestra icono y hint en Semantics', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildApp(correctNotes: {'D'}));
 
       expect(find.byIcon(Icons.check_circle), findsWidgets);

@@ -9,9 +9,9 @@ class HybridProgressRepository implements ProgressRepository {
     required ProgressRepository local,
     required Future<ProgressRepository?> Function() remoteFactory,
     SyncPendingStore? syncPendingStore,
-  })  : _local = local,
-        _remoteFactory = remoteFactory,
-        _syncPending = syncPendingStore ?? SyncPendingStore();
+  }) : _local = local,
+       _remoteFactory = remoteFactory,
+       _syncPending = syncPendingStore ?? SyncPendingStore();
 
   final ProgressRepository _local;
   final Future<ProgressRepository?> Function() _remoteFactory;
@@ -57,8 +57,10 @@ class HybridProgressRepository implements ProgressRepository {
     }
 
     final merged = ProgressMerge.mergeMaps(localData, remoteData);
-    final mergedSession =
-        ProgressMerge.pickNewerSession(localSession, remoteSession);
+    final mergedSession = ProgressMerge.pickNewerSession(
+      localSession,
+      remoteSession,
+    );
     await _persistMerged(
       merged: merged,
       mergedSession: mergedSession,
@@ -78,7 +80,10 @@ class HybridProgressRepository implements ProgressRepository {
   }
 
   @override
-  Future<void> save(Map<String, NoteData> noteData, {String? lastSession}) async {
+  Future<void> save(
+    Map<String, NoteData> noteData, {
+    String? lastSession,
+  }) async {
     final session = lastSession ?? DateTime.now().toIso8601String();
     await _local.save(noteData, lastSession: session);
 
@@ -86,7 +91,18 @@ class HybridProgressRepository implements ProgressRepository {
     if (remote == null) return;
 
     try {
-      await remote.save(noteData, lastSession: session);
+      final remoteData = await remote.load();
+      final remoteSession = await remote.loadLastSessionIso();
+      final merged = remoteData == null
+          ? noteData
+          : ProgressMerge.mergeMaps(noteData, remoteData);
+      final mergedSession = ProgressMerge.pickNewerSession(
+        session,
+        remoteSession,
+      );
+
+      await _local.save(merged, lastSession: mergedSession);
+      await remote.save(merged, lastSession: mergedSession);
       await _syncPending.clear();
     } catch (_) {
       await _syncPending.markPending();
@@ -114,8 +130,10 @@ class HybridProgressRepository implements ProgressRepository {
       final merged = remoteData != null
           ? ProgressMerge.mergeMaps(localData, remoteData)
           : localData;
-      final mergedSession =
-          ProgressMerge.pickNewerSession(localSession, remoteSession);
+      final mergedSession = ProgressMerge.pickNewerSession(
+        localSession,
+        remoteSession,
+      );
 
       await _persistMerged(
         merged: merged,
@@ -158,8 +176,10 @@ class HybridProgressRepository implements ProgressRepository {
 
     final remoteSession = await remote.loadLastSessionIso();
     final merged = ProgressMerge.mergeMaps(localData, remoteData);
-    final mergedSession =
-        ProgressMerge.pickNewerSession(localSession, remoteSession);
+    final mergedSession = ProgressMerge.pickNewerSession(
+      localSession,
+      remoteSession,
+    );
     await _persistMerged(
       merged: merged,
       mergedSession: mergedSession,

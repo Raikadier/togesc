@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../providers/session_history_provider.dart';
 import 'togesc_ui.dart';
 
@@ -24,15 +25,16 @@ class SessionHistoryCard extends ConsumerWidget {
     return '${when.day}/${when.month} · $time';
   }
 
-  Color _accuracyColor(double accuracy) {
-    if (accuracy >= 80) return DesignTokens.correct;
-    if (accuracy >= 50) return DesignTokens.selection;
-    return DesignTokens.incorrect;
+  Color _accuracyColor(double accuracy, TogescColors colors) {
+    if (accuracy >= 80) return colors.correct;
+    if (accuracy >= 50) return colors.selection;
+    return colors.incorrect;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historyAsync = ref.watch(sessionHistoryProvider);
+    final colors = TogescColors.of(context);
 
     return historyAsync.when(
       data: (history) {
@@ -64,7 +66,9 @@ class SessionHistoryCard extends ConsumerWidget {
               ...recent.map((entry) {
                 final accuracy = entry.accuracyPercent.round();
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: DesignTokens.spacingSm),
+                  padding: const EdgeInsets.only(
+                    bottom: DesignTokens.spacingSm,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -78,13 +82,11 @@ class SessionHistoryCard extends ConsumerWidget {
                             Text(
                               '${entry.roundsCompleted} rondas · '
                               '${entry.correctRounds} aciertos',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                             ),
                           ],
@@ -95,11 +97,12 @@ class SessionHistoryCard extends ConsumerWidget {
                         children: [
                           Text(
                             '$accuracy%',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
+                            style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(
-                                  color: _accuracyColor(accuracy.toDouble()),
+                                  color: _accuracyColor(
+                                    accuracy.toDouble(),
+                                    colors,
+                                  ),
                                 ),
                           ),
                           Text(

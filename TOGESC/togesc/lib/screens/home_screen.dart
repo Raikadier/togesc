@@ -17,6 +17,7 @@ import '../widgets/daily_focus_section.dart';
 import '../widgets/home_hub_views.dart';
 import '../widgets/mode_bento_card.dart';
 import '../widgets/session_evolution_chart.dart';
+import '../widgets/togesc_ui.dart';
 import '../providers/session_history_provider.dart';
 import '../utils/session_history_stats.dart';
 
@@ -125,16 +126,15 @@ class HomeScreen extends ConsumerWidget {
     ];
 
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(DesignTokens.marginMobile),
+      body: TogescPageBody(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               'Entrenador de Oido Absoluto',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: DesignTokens.spacingLg),
             if (lastPractice != null && lastPractice.mode != null) ...[
@@ -157,7 +157,8 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: DesignTokens.spacingLg),
             const HomeSectionHeader(
               title: 'Modos de Juego',
-              subtitle: 'Selecciona un ejercicio para comenzar tu entrenamiento.',
+              subtitle:
+                  'Selecciona un ejercicio para comenzar tu entrenamiento.',
             ),
             ModeBentoGrid(modes: bentoModes),
             if (hasWeeklyActivity) ...[

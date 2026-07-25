@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/game_constants.dart';
@@ -11,6 +13,7 @@ import 'practice_focus_provider.dart';
 import 'srs_provider.dart';
 import '../utils/note_pool.dart';
 import 'app_preferences_provider.dart';
+import 'ui_preferences_provider.dart';
 
 /// Estados posibles de la sesion de juego.
 enum GameState { idle, listening, waitingForAnswer, showingResult, playingCluster }
@@ -269,7 +272,12 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
   /// Reproduce cluster de limpieza y vuelve a idle.
   Future<void> playCluster() async {
     final audioPrefs = await _readAudioPreferences();
-    if (!audioPrefs.clusterEnabled) {
+    final reduceUi =
+        ref.read(uiPreferencesProvider).valueOrNull?.reduceAnimations ?? false;
+    final reduceSystem =
+        PlatformDispatcher.instance.accessibilityFeatures.disableAnimations;
+    // Reduced motion: salta el cluster (audio caotico + animacion).
+    if (!audioPrefs.clusterEnabled || reduceUi || reduceSystem) {
       state = state.copyWith(state: GameState.idle);
       return;
     }

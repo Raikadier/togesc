@@ -33,6 +33,20 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 body {
   margin: 0;
   font-family: 'Hanken Grotesk', system-ui, sans-serif;
@@ -145,13 +159,75 @@ img {
 .btn-ghost {
   background: transparent;
   color: var(--on-surface-variant);
-  min-height: auto;
+  min-height: 48px;
   padding: 0.5rem 1rem;
 }
 
 .hero {
   padding: 4.5rem 0 5rem;
   text-align: center;
+}
+
+.hero-product {
+  padding: 0;
+  text-align: left;
+  display: grid;
+  gap: 0;
+  background:
+    radial-gradient(120% 80% at 80% 0%, rgba(237, 118, 253, 0.16), transparent 55%),
+    linear-gradient(180deg, var(--surface) 0%, var(--surface-container-low) 100%);
+}
+
+.hero-copy {
+  padding: 3.5rem 0 2rem;
+}
+
+.brand-mark {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--primary);
+}
+
+.hero-product h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--on-surface);
+}
+
+.hero-product .hero-copy > p:not(.brand-mark) {
+  margin: 0 0 2rem;
+  max-width: 34rem;
+  color: var(--on-surface-variant);
+  font-size: 1.125rem;
+}
+
+.hero-stage {
+  width: min(100% - 2rem, var(--max-width));
+  margin: 0 auto 3rem;
+}
+
+.hero-session {
+  margin: 0;
+}
+
+.session-prompt {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.stat-ok {
+  color: var(--correct);
+}
+
+.stat-bad {
+  color: #c62828;
 }
 
 .badge {
@@ -179,6 +255,56 @@ img {
   max-width: 40rem;
   color: var(--on-surface-variant);
   font-size: 1.125rem;
+}
+
+.lede {
+  color: var(--on-surface-variant);
+  font-size: 1.125rem;
+}
+
+.cta-inline {
+  margin-top: 1.5rem;
+}
+
+.section-title-left {
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.trust-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+}
+
+.trust-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  padding: 0.35rem 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--radius-md);
+  background: var(--primary-fixed);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.footer-tag {
+  margin: 0;
+  color: var(--on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.mockup-bar-left {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.mockup-line-short {
+  width: 3rem;
 }
 
 .hero-actions {
@@ -242,6 +368,8 @@ img {
   place-items: center;
   border-radius: 1rem;
   background: var(--primary-fixed);
+  color: var(--primary-container);
+  margin-bottom: 1rem;
   color: var(--primary);
   font-size: 1.75rem;
   margin-bottom: 1.25rem;
@@ -567,6 +695,22 @@ img {
 @media (min-width: 768px) {
   .nav {
     display: flex;
+  }
+
+  .hero-product {
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: end;
+    min-height: min(88vh, 52rem);
+  }
+
+  .hero-copy {
+    padding: 5rem 0 4rem;
+  }
+
+  .hero-stage {
+    width: 100%;
+    margin: 0;
+    padding: 4rem 1.5rem 4rem 0;
   }
 
   .grid-3 {

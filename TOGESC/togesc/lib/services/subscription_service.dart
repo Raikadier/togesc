@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../config/subscription_config.dart';
-import '../constants/subscription_constants.dart';
 import '../models/subscription_status.dart';
 import 'mobile_purchases_service.dart';
 import 'supabase_subscription_repository.dart';
@@ -14,9 +13,9 @@ class SubscriptionService {
     required SupabaseClient? client,
     required String? userId,
     MobilePurchasesService? mobilePurchases,
-  })  : _client = client,
-        _userId = userId,
-        _mobile = mobilePurchases ?? MobilePurchasesService();
+  }) : _client = client,
+       _userId = userId,
+       _mobile = mobilePurchases ?? MobilePurchasesService();
 
   final SupabaseClient? _client;
   final String? _userId;
@@ -53,7 +52,8 @@ class SubscriptionService {
     if (!kIsWeb && _mobile.isAvailable) {
       final mobileStatus = await _mobile.fetchStatus();
       if (mobileStatus != null) {
-        await repo.upsert(mobileStatus);
+        // La tienda mejora la respuesta local, pero solo su webhook puede
+        // persistir el entitlement server-owned en Supabase.
         status = mobileStatus;
       }
     }
@@ -70,9 +70,6 @@ class SubscriptionService {
     }
 
     final mobileStatus = await _mobile.purchasePro();
-    if (mobileStatus != null) {
-      await _repo?.upsert(mobileStatus);
-    }
     return mobileStatus;
   }
 
@@ -85,9 +82,6 @@ class SubscriptionService {
     }
 
     final mobileStatus = await _mobile.restorePurchases();
-    if (mobileStatus != null) {
-      await _repo?.upsert(mobileStatus);
-    }
     return mobileStatus;
   }
 
@@ -122,18 +116,6 @@ class SubscriptionService {
     final repo = _repo;
     if (!SubscriptionConfig.isActive || repo == null) return;
 
-    final trialEnds = DateTime.now().add(
-      const Duration(days: SubscriptionConstants.trialDays),
-    );
-
-    await repo.upsert(
-      SubscriptionStatus(
-        plan: 'pro',
-        status: 'trialing',
-        source: 'manual',
-        trialEndsAt: trialEnds,
-        expiresAt: trialEnds,
-      ),
-    );
+    await repo.startTrial();
   }
 }

@@ -19,15 +19,12 @@ import 'widgets/subscription_checkout_listener.dart';
 
 Future<void> main() async {
   if (ObservabilityConfig.isSentryConfigured) {
-    await SentryFlutter.init(
-      (options) {
-        options.dsn = ObservabilityConfig.sentryDsn;
-        options.environment = 'production';
-        options.release = 'togesc@1.0.0';
-        options.tracesSampleRate = 0.2;
-      },
-      appRunner: _bootstrap,
-    );
+    await SentryFlutter.init((options) {
+      options.dsn = ObservabilityConfig.sentryDsn;
+      options.environment = 'production';
+      options.release = 'togesc@${ObservabilityConfig.appVersion}';
+      options.tracesSampleRate = 0.2;
+    }, appRunner: _bootstrap);
   } else {
     await _bootstrap();
   }
@@ -47,15 +44,12 @@ Future<void> _bootstrap() async {
   }
 
   final prefs = await SharedPreferences.getInstance();
-  final onboardingComplete =
-      prefs.getBool(onboardingCompleteKey) ?? false;
+  final onboardingComplete = prefs.getBool(onboardingCompleteKey) ?? false;
   final router = buildAppRouter(onboardingComplete: onboardingComplete);
 
   runApp(
     ProviderScope(
-      overrides: [
-        goRouterProvider.overrideWithValue(router),
-      ],
+      overrides: [goRouterProvider.overrideWithValue(router)],
       child: const AppStartupListener(
         child: CsatSurveyListener(
           child: SubscriptionCheckoutListener(

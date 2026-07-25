@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import 'togesc_ui.dart';
 
 /// Card premium de resultado de ronda (Stitch).
@@ -28,7 +29,8 @@ class ResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final color = isCorrect ? DesignTokens.correct : DesignTokens.incorrect;
+    final colors = TogescColors.of(context);
+    final color = isCorrect ? colors.correct : colors.incorrect;
     final title = isCorrect ? 'EXCELENTE' : 'INCORRECTO';
     final notesList = correctNotes.toList()..sort();
 
@@ -42,7 +44,7 @@ class ResultCard extends StatelessWidget {
         boxShadow: isCorrect
             ? [
                 BoxShadow(
-                  color: DesignTokens.correct.withValues(alpha: 0.12),
+                  color: colors.correct.withValues(alpha: 0.12),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -136,7 +138,7 @@ class ResultCard extends StatelessWidget {
                         value: _timeComment(),
                         valueColor: isCorrect
                             ? scheme.secondary
-                            : DesignTokens.incorrect,
+                            : colors.incorrect,
                         italic: true,
                       ),
                     ),
@@ -253,8 +255,8 @@ class _SrsNoteRow extends StatelessWidget {
     final consecutive = newData['consecutive_correct'] as int? ?? 0;
     final isLearning = newData['is_learning'] as bool? ?? true;
     final statusLabel = isLearning ? 'Aprendiendo' : 'Consolidada';
-    final statusColor =
-        isLearning ? DesignTokens.selection : DesignTokens.correct;
+    final colors = TogescColors.of(context);
+    final statusColor = isLearning ? colors.selection : colors.correct;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: DesignTokens.spacingSm),

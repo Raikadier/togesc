@@ -14,7 +14,15 @@ import 'audio_provider.dart';
 import 'srs_provider.dart';
 
 /// Estados de la sesion de velocidad.
-enum SpeedState { idle, playing, waitingForAnswer, correct, incorrect, timeout, gameOver }
+enum SpeedState {
+  idle,
+  playing,
+  waitingForAnswer,
+  correct,
+  incorrect,
+  timeout,
+  gameOver,
+}
 
 /// Estado de la sesion de velocidad.
 class SpeedSessionState {
@@ -44,11 +52,11 @@ class SpeedSessionState {
     this.correctRounds = 0,
   });
 
-  double get averageTime =>
-      responseTimes.isEmpty ? 0 : responseTimes.reduce((a, b) => a + b) / responseTimes.length;
+  double get averageTime => responseTimes.isEmpty
+      ? 0
+      : responseTimes.reduce((a, b) => a + b) / responseTimes.length;
 
-  double get bestTime =>
-      responseTimes.isEmpty ? 0 : responseTimes.reduce(min);
+  double get bestTime => responseTimes.isEmpty ? 0 : responseTimes.reduce(min);
 
   SpeedSessionState copyWith({
     SpeedState? state,
@@ -85,7 +93,8 @@ class SpeedSessionState {
 /// Provider para la sesion de velocidad.
 final speedSessionProvider =
     NotifierProvider<SpeedSessionNotifier, SpeedSessionState>(
-        SpeedSessionNotifier.new);
+      SpeedSessionNotifier.new,
+    );
 
 class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
   Timer? _countdownTimer;
@@ -98,14 +107,10 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
 
   void setTargetMode(GameMode mode) {
     final fixed = fixedNoteCountForMode(mode);
-    state = state.copyWith(
-      targetMode: mode,
-      numNotes: fixed ?? randomMinNotes,
-    );
-    ref.read(lastPracticeSessionProvider.notifier).record(
-          mode: mode,
-          kind: PracticeKind.speed,
-        );
+    state = state.copyWith(targetMode: mode, numNotes: fixed ?? randomMinNotes);
+    ref
+        .read(lastPracticeSessionProvider.notifier)
+        .record(mode: mode, kind: PracticeKind.speed);
   }
 
   void setSessionInstrumentOverride(String? overrideKey) {
@@ -173,12 +178,25 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
     _countdownTimer?.cancel();
     final startTime = DateTime.now();
 
-    _countdownTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      final elapsed = DateTime.now().difference(startTime).inMilliseconds / 1000;
+    _countdownTimer = Timer.periodic(const Duration(milliseconds: 100), (
+      timer,
+    ) {
+      final elapsed =
+          DateTime.now().difference(startTime).inMilliseconds / 1000;
       final remaining = state.currentTimeLimit - elapsed;
 
       if (remaining <= 0) {
         timer.cancel();
+        final srs = ref.read(srsSystemProvider).valueOrNull;
+        if (srs != null) {
+          srs.updateAfterResponse(
+            notes: state.currentNotes,
+            correctNotes: const [],
+            wrongNotes: state.currentNotes.toSet(),
+            responseTime: state.currentTimeLimit,
+          );
+          unawaited(ref.read(srsSystemProvider.notifier).saveProgress());
+        }
         state = state.copyWith(
           state: SpeedState.timeout,
           remainingTime: 0,
@@ -199,14 +217,32 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
 
     final correctNotesSet = state.currentNotes.toSet();
     final answerSet = answerNotes.toSet();
-    final isCorrect = answerSet.length == correctNotesSet.length &&
+    final isCorrect =
+        answerSet.length == correctNotesSet.length &&
         answerSet.containsAll(correctNotesSet);
+    final correctIdentified = answerSet.intersection(correctNotesSet).toList();
+    final wrongNotes = isCorrect
+        ? <String>{}
+        : answerSet.difference(correctNotesSet);
+
+    final srs = ref.read(srsSystemProvider).valueOrNull;
+    if (srs != null) {
+      srs.updateAfterResponse(
+        notes: state.currentNotes,
+        correctNotes: correctIdentified,
+        wrongNotes: wrongNotes,
+        responseTime: responseTime,
+      );
+      unawaited(ref.read(srsSystemProvider.notifier).saveProgress());
+    }
 
     final newTimes = [...state.responseTimes, responseTime];
 
     if (isCorrect) {
-      final newLimit = (state.currentTimeLimit - speedCorrectDecrease)
-          .clamp(speedMinTime, speedMaxTime);
+      final newLimit = (state.currentTimeLimit - speedCorrectDecrease).clamp(
+        speedMinTime,
+        speedMaxTime,
+      );
       state = state.copyWith(
         state: SpeedState.correct,
         consecutiveCorrect: state.consecutiveCorrect + 1,
@@ -216,8 +252,13 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
         correctRounds: state.correctRounds + 1,
       );
     } else {
+      final newLimit = (state.currentTimeLimit + speedWrongIncrease).clamp(
+        speedMinTime,
+        speedMaxTime,
+      );
       state = state.copyWith(
         state: SpeedState.incorrect,
+        currentTimeLimit: newLimit,
         responseTimes: newTimes,
         roundsPlayed: state.roundsPlayed + 1,
       );

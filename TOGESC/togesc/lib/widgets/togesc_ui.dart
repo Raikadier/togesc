@@ -84,16 +84,14 @@ class TogescCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cardColor = color ??
+    final cardColor =
+        color ??
         theme.cardTheme.color ??
         theme.colorScheme.surfaceContainerLowest;
 
     final card = Card(
       color: cardColor,
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: Padding(padding: padding, child: child),
     );
 
     if (onTap == null) return card;
@@ -103,6 +101,44 @@ class TogescCard extends StatelessWidget {
       borderRadius: DesignTokens.borderRadiusMd,
       child: card,
     );
+  }
+}
+
+/// Contenedor de pagina con max-width Stitch y margen responsive.
+class TogescPageBody extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final bool scrollable;
+
+  const TogescPageBody({
+    super.key,
+    required this.child,
+    this.padding,
+    this.scrollable = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final wide =
+        MediaQuery.sizeOf(context).width >= DesignTokens.shellBreakpoint;
+    final margin = wide
+        ? DesignTokens.marginDesktop
+        : DesignTokens.marginMobile;
+    final content = Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: DesignTokens.contentMaxWidth,
+        ),
+        child: Padding(
+          padding: padding ?? EdgeInsets.all(margin),
+          child: child,
+        ),
+      ),
+    );
+
+    if (!scrollable) return content;
+    return SingleChildScrollView(child: content);
   }
 }
 
@@ -169,9 +205,7 @@ class TogescSpeedMetricsBar extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow,
-        border: Border(
-          bottom: BorderSide(color: scheme.outlineVariant),
-        ),
+        border: Border(bottom: BorderSide(color: scheme.outlineVariant)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -200,11 +234,7 @@ class _Metric extends StatelessWidget {
   final String value;
   final TextStyle? style;
 
-  const _Metric({
-    required this.label,
-    required this.value,
-    this.style,
-  });
+  const _Metric({required this.label, required this.value, this.style});
 
   @override
   Widget build(BuildContext context) {
@@ -213,10 +243,7 @@ class _Metric extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          label,
-          style: style?.copyWith(color: scheme.onSurfaceVariant),
-        ),
+        Text(label, style: style?.copyWith(color: scheme.onSurfaceVariant)),
         Text(
           value,
           style: style?.copyWith(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../constants/game_constants.dart';
 import '../constants/note_naming.dart';
 import '../providers/app_preferences_provider.dart';
@@ -50,7 +51,9 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
   void deactivate() {
     final session = ref.read(speedSessionProvider);
     if (session.roundsPlayed > 0) {
-      ref.read(sessionHistoryProvider.notifier).record(
+      ref
+          .read(sessionHistoryProvider.notifier)
+          .record(
             mode: session.targetMode,
             kind: PracticeKind.speed,
             roundsCompleted: session.roundsPlayed,
@@ -195,8 +198,8 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
             '${_selectedNotes.length}/$required notas seleccionadas',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: DesignTokens.spacingLg),
           TogescCard(
@@ -219,13 +222,16 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
                 return InputChip(
                   label: Text(note),
                   onDeleted: () => _toggleNote(note, required),
-                  deleteIconColor: Theme.of(context).colorScheme.primaryContainer,
+                  deleteIconColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer,
                   side: BorderSide(
                     color: Theme.of(context).colorScheme.primaryContainer,
                     width: 2,
                   ),
-                  backgroundColor:
-                      DesignTokens.selection.withValues(alpha: 0.15),
+                  backgroundColor: TogescColors.of(
+                    context,
+                  ).selection.withValues(alpha: 0.15),
                 );
               }).toList(),
             ),
@@ -254,7 +260,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
   Widget _buildCorrectView(SpeedSessionState session) {
     return SpeedSessionFeedbackView(
       icon: Icons.check_circle_rounded,
-      accentColor: DesignTokens.correct,
+      accentColor: TogescColors.of(context).correct,
       title: 'CORRECTO!',
       subtitle:
           'Tiempo limite: ${session.currentTimeLimit.toStringAsFixed(1)}s',
@@ -272,7 +278,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
         children: [
           SpeedSessionFeedbackView(
             icon: Icons.cancel_rounded,
-            accentColor: DesignTokens.incorrect,
+            accentColor: TogescColors.of(context).incorrect,
             title: 'INCORRECTO',
             subtitle: 'Las notas eran: ${session.currentNotes.join(", ")}',
           ),
@@ -302,7 +308,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
         children: [
           SpeedSessionFeedbackView(
             icon: Icons.timer_off_rounded,
-            accentColor: DesignTokens.selection,
+            accentColor: TogescColors.of(context).selection,
             title: 'TIEMPO AGOTADO!',
             subtitle: 'Las notas eran: ${session.currentNotes.join(", ")}',
           ),

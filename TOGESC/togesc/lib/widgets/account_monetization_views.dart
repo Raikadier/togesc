@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import 'game_session_views.dart';
 import 'togesc_ui.dart';
 
@@ -129,9 +130,9 @@ class ProFeatureRow extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
-          const Icon(
+          Icon(
             Icons.check_circle_rounded,
-            color: DesignTokens.correct,
+            color: TogescColors.of(context).correct,
             size: 20,
           ),
         ],

@@ -11,11 +11,7 @@ import '../services/subscription_access.dart';
 
 /// Bloquea rutas Pro y redirige al paywall si hace falta.
 class ProRouteGuard extends ConsumerWidget {
-  const ProRouteGuard({
-    required this.mode,
-    required this.child,
-    super.key,
-  });
+  const ProRouteGuard({required this.mode, required this.child, super.key});
 
   final GameMode mode;
   final Widget child;
@@ -25,14 +21,10 @@ class ProRouteGuard extends ConsumerWidget {
     final statusAsync = ref.watch(subscriptionStatusProvider);
 
     return statusAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stackTrace) {
-        final cached = ref.read(subscriptionStatusProvider.notifier).lastKnown ??
-            const SubscriptionStatus.free();
-        return _guardWithStatus(context, cached);
-      },
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, stackTrace) =>
+          _guardWithStatus(context, const SubscriptionStatus.free()),
       data: (status) => _guardWithStatus(context, status),
     );
   }
@@ -50,8 +42,6 @@ class ProRouteGuard extends ConsumerWidget {
       );
     });
 
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }

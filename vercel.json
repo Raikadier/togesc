@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "ignoreCommand": "exit 0",
   "installCommand": "git clone https://github.com/flutter/flutter.git -b stable --depth 1 flutter && ./flutter/bin/flutter config --enable-web && ./flutter/bin/flutter pub get --directory=TOGESC/togesc",
   "buildCommand": "cd TOGESC/togesc && ../../flutter/bin/flutter build web --release --no-wasm-dry-run",
   "outputDirectory": "TOGESC/togesc/build/web",
