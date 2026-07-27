@@ -4,7 +4,7 @@ import '../app/design_tokens.dart';
 import '../widgets/info_views.dart';
 import '../widgets/togesc_ui.dart';
 
-/// Politica de privacidad (Stitch privacy_premium).
+/// Política de privacidad (Stitch privacy_premium).
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
@@ -13,7 +13,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TogescScaffold(
-      title: 'Politica de privacidad',
+      title: 'Política de privacidad',
       body: ListView(
         padding: const EdgeInsets.all(DesignTokens.marginMobile),
         children: const [
@@ -23,42 +23,42 @@ class PrivacyPolicyScreen extends StatelessWidget {
             title: 'Resumen',
             body:
                 'TOGESC guarda tu progreso de entrenamiento en tu dispositivo. '
-                'No hay analitica ni publicidad. Si activas una cuenta '
+                'No hay analítica ni publicidad. Si activas una cuenta '
                 'opcional (Supabase), tu progreso SRS se sincroniza de forma '
-                'cifrada en tránsito con tu email y contrasena; solo tu '
+                'cifrada en tránsito con tu email y contraseña; solo tu '
                 'usuario puede leer esos datos.',
           ),
           PolicySection(
             title: 'Datos que se guardan',
             body:
-                'Tu progreso de entrenamiento (pesos SRS, estadisticas, '
+                'Tu progreso de entrenamiento (pesos SRS, estadísticas, '
                 'historial local de sesiones y preferencias como onboarding '
                 'completado) se almacena en tu dispositivo mediante '
                 'almacenamiento local del sistema (SharedPreferences en '
-                'movil/escritorio; almacenamiento del navegador en web).',
+                'móvil/escritorio; almacenamiento del navegador en web).',
           ),
           PolicySection(
-            title: 'Cuenta opcional y sincronizacion',
+            title: 'Cuenta opcional y sincronización',
             body:
                 'Puedes entrenar sin registrarte. Si creas una cuenta, '
-                'almacenamos en Supabase (Postgres con politicas RLS) un '
+                'almacenamos en Supabase (Postgres con políticas RLS) un '
                 'JSON con tu progreso SRS vinculado a tu identificador de '
                 'usuario. No vendemos ni compartimos esos datos con terceros '
                 'con fines comerciales.',
           ),
           PolicySection(
-            title: 'Exportacion de datos',
+            title: 'Exportación de datos',
             body:
                 'En Cuenta puedes exportar un archivo JSON con tu progreso '
                 'SRS, preferencias e historial local de sesiones. En web se '
-                'descarga el archivo; en movil se copia al portapapeles. '
+                'descarga el archivo; en móvil se copia al portapapeles. '
                 'Sirve para respaldo o portabilidad (GDPR).',
           ),
           PolicySection(
             title: 'Datos que no recopilamos',
             body:
                 'No grabamos microfono ni subimos audio. No usamos servicios '
-                'de analitica ni publicidad de terceros.',
+                'de analítica ni publicidad de terceros.',
           ),
           PolicySection(
             title: 'Audio',
@@ -81,7 +81,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           PolicySection(
             title: 'Cambios futuros',
             body:
-                'Si se anaden analitica, pagos u otros servicios, esta politica '
+                'Si se anaden analítica, pagos u otros servicios, esta politica '
                 'se actualizara antes del lanzamiento.',
           ),
           PolicySection(

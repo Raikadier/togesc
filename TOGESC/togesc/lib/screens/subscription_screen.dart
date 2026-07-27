@@ -11,7 +11,7 @@ import '../providers/subscription_provider.dart';
 import '../widgets/account_monetization_views.dart';
 import '../widgets/togesc_ui.dart';
 
-/// Gestion de suscripcion Pro.
+/// Gestion de suscripción Pro.
 class SubscriptionScreen extends ConsumerStatefulWidget {
   const SubscriptionScreen({super.key});
 
@@ -40,7 +40,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              ok ? 'Suscripcion restaurada.' : 'No hay suscripcion activa.',
+              ok ? 'Suscripción restaurada.' : 'No hay suscripción activa.',
             ),
           ),
         );
@@ -65,11 +65,13 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(DesignTokens.marginMobile),
-        children: [
+      body: SafeArea(
+        child: TogescPageBody(
+          scrollable: false,
+          child: ListView(
+            children: [
           Text(
-            'Suscripcion Pro',
+            'Suscripción Pro',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: scheme.primary,
@@ -82,7 +84,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Monetizacion desactivada en este build.',
+                    'Monetización desactivada en este build.',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: DesignTokens.spacingSm),
@@ -99,7 +101,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           ] else
             statusAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => const Text('Error al cargar suscripcion.'),
+              error: (_, _) => const Text('Error al cargar suscripción.'),
               data: (status) {
                 final subtitle = status.isTrialing
                     ? 'Periodo de prueba activo'
@@ -145,13 +147,15 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           if (SubscriptionConfig.isActive && !signedIn) ...[
             const SizedBox(height: DesignTokens.spacingLg),
             Text(
-              'Inicia sesion para sincronizar tu suscripcion entre dispositivos.',
+              'Inicia sesión para sincronizar tu suscripción entre dispositivos.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
             ),
           ],
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

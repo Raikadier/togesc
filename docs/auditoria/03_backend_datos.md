@@ -2,10 +2,10 @@
 
 Estándares: 3FN/JSONB, RFC 3339 (UTC), migraciones inmutables, idempotencia (qstd §5.3, §10).
 
-> **Actualización 2026-07-24:** SYNC-001 y SEC-001 descritos abajo son
-> hallazgos históricos ya remediados en código. La revisión detectó además
-> escritura insegura de entitlements y lectura pública de métricas. Estado
-> vigente: [10_remediacion_2026-07-24.md](10_remediacion_2026-07-24.md).
+> **Actualización 2026-07-26:** SYNC-001 (merge atómico), entitlements y
+> candado Pro del sync están aplicados en producción. Pendientes de pagos y
+> sandbox: [11_estado_pendiente_2026-07-26.md](11_estado_pendiente_2026-07-26.md).
+> Historial: [10_remediacion_2026-07-24.md](10_remediacion_2026-07-24.md).
 
 ## Lo que está bien (no tocar)
 
@@ -15,6 +15,8 @@ Estándares: 3FN/JSONB, RFC 3339 (UTC), migraciones inmutables, idempotencia (qs
 - `delete_own_account()` `security definer` con `revoke all from public` + grant solo a `authenticated` (y revoke a `anon` en migración posterior). Buen patrón GDPR.
 - Timestamps `timestamptz` en UTC; índices por `user_id` y columnas de consulta. Correcto.
 - Migraciones numeradas `YYYYMMDDHHMMSS_*.sql`, inmutables.
+- Escritura de progreso solo vía `merge_user_progress()`; lectura condicionada
+  a `has_cloud_sync_access()`.
 
 ---
 

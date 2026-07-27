@@ -16,10 +16,11 @@ import '../widgets/account_data_section.dart';
 import '../widgets/account_sync_views.dart';
 import '../widgets/account_monetization_views.dart';
 import '../widgets/info_views.dart';
+import '../widgets/togesc_ui.dart';
 
 enum _AccountView { signIn, signUp, forgotPassword, updatePassword }
 
-/// Cuenta opcional y sincronizacion de progreso (Fase 4).
+/// Cuenta opcional y sincronización de progreso (Fase 4).
 class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key});
 
@@ -52,7 +53,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final password = _passwordController.text;
     if (email.isEmpty || password.length < 6) {
       setState(() {
-        _message = 'Introduce email y contrasena (min. 6 caracteres).';
+        _message = 'Introduce email y contraseña (min. 6 caracteres).';
       });
       return;
     }
@@ -85,15 +86,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         if (mounted) {
           setState(() {
             _message = _view == _AccountView.signUp
-                ? 'Sesion iniciada. Progreso local vinculado cuando sea posible.'
-                : 'Sesion iniciada. Progreso sincronizado.';
+                ? 'Sesión iniciada. Progreso local vinculado cuando sea posible.'
+                : 'Sesión iniciada. Progreso sincronizado.';
           });
         }
       }
     } on AuthException catch (e) {
       setState(() => _message = e.message);
     } catch (_) {
-      setState(() => _message = 'No se pudo completar la operacion.');
+      setState(() => _message = 'No se pudo completar la operación.');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -120,7 +121,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         redirectTo: Uri.base.origin,
       );
       setState(() {
-        _message = 'Revisa tu email para restablecer la contrasena.';
+        _message = 'Revisa tu email para restablecer la contraseña.';
         _view = _AccountView.signIn;
       });
     } on AuthException catch (e) {
@@ -138,7 +139,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
     final password = _newPasswordController.text;
     if (password.length < 6) {
-      setState(() => _message = 'La contrasena debe tener al menos 6 caracteres.');
+      setState(() => _message = 'La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
@@ -152,12 +153,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       setState(() {
         _recoveryMode = false;
         _view = _AccountView.signIn;
-        _message = 'Contrasena actualizada correctamente.';
+        _message = 'Contraseña actualizada correctamente.';
       });
     } on AuthException catch (e) {
       setState(() => _message = e.message);
     } catch (_) {
-      setState(() => _message = 'No se pudo actualizar la contrasena.');
+      setState(() => _message = 'No se pudo actualizar la contraseña.');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -177,7 +178,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
     try {
       await client.auth.resend(type: OtpType.signup, email: email);
-      setState(() => _message = 'Email de verificacion reenviado.');
+      setState(() => _message = 'Email de verificación reenviado.');
     } on AuthException catch (e) {
       setState(() => _message = e.message);
     } catch (_) {
@@ -203,11 +204,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       ref.invalidate(syncPendingProvider);
       ref.invalidate(subscriptionStatusProvider);
       if (mounted) {
-        setState(() => _message = 'Sesion cerrada. Tu progreso local se conserva.');
+        setState(() => _message = 'Sesión cerrada. Tu progreso local se conserva.');
       }
     } catch (_) {
       if (mounted) {
-        setState(() => _message = 'No se pudo cerrar sesion.');
+        setState(() => _message = 'No se pudo cerrar sesión.');
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -230,13 +231,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       if (mounted) {
         setState(() {
           _message = diagnostics.isInSync
-              ? 'Sincronizacion completada.'
+              ? 'Sincronización completada.'
               : diagnostics.statusLabel;
         });
       }
     } catch (_) {
       if (mounted) {
-        setState(() => _message = 'Error al sincronizar. Revisa tu conexion.');
+        setState(() => _message = 'Error al sincronizar. Revisa tu conexión.');
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -251,7 +252,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           setState(() {
             _recoveryMode = true;
             _view = _AccountView.updatePassword;
-            _message = 'Introduce tu nueva contrasena.';
+            _message = 'Introduce tu nueva contraseña.';
           });
         }
       });
@@ -269,45 +270,38 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final isSynced = syncDiagnostics?.isInSync ?? cloudSync;
 
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(DesignTokens.marginMobile),
-        children: [
+      body: SafeArea(
+        child: TogescPageBody(
+          scrollable: false,
+          child: ListView(
+            children: [
           Text(
-            'Cuenta y sincronizacion',
+            'Cuenta',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: DesignTokens.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
           ),
           const SizedBox(height: DesignTokens.spacingLg),
-          AccountSettingsShortcutCard(
-            onTap: () => context.push(AppRoutes.settings),
-          ),
-          const SizedBox(height: DesignTokens.spacingLg),
-          const InfoSectionHeader(title: 'Informacion'),
-          InfoLinkCard(
-            icon: Icons.info_outline_rounded,
-            title: 'Acerca de TOGESC',
-            subtitle: 'Pedagogia, tutorial y enlaces utiles',
-            onTap: () => context.push(AppRoutes.about),
-          ),
-          const SizedBox(height: DesignTokens.spacingLg),
           if (!available) ...[
-            const SizedBox(height: DesignTokens.spacingLg),
             const AccountOfflineView(),
+            const SizedBox(height: DesignTokens.spacingLg),
+            AccountSettingsShortcutCard(
+              onTap: () => context.push(AppRoutes.settings),
+            ),
           ] else if (_recoveryMode || _view == _AccountView.updatePassword) ...[
             AccountAuthFormCard(
-              badge: 'RECUPERACION',
-              title: 'Nueva contrasena',
+              badge: 'RECUPERACIÓN',
+              title: 'Nueva contraseña',
               children: [
                 AccountAuthTextField(
                   controller: _newPasswordController,
-                  label: 'Nueva contrasena',
+                  label: 'Nueva contraseña',
                   obscureText: true,
                 ),
                 const SizedBox(height: DesignTokens.spacingLg),
                 AccountAuthPrimaryButton(
-                  label: 'Guardar contrasena',
+                  label: 'Guardar contraseña',
                   onPressed: _busy ? null : _updatePassword,
                 ),
               ],
@@ -316,7 +310,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             AccountProfileHeader(
               email: email,
               userId: userId,
-              isSynced: isSynced && ! (pendingAsync.valueOrNull ?? false),
+              isSynced: isSynced && !(pendingAsync.valueOrNull ?? false),
             ),
             const SizedBox(height: DesignTokens.spacingMd),
             if (SubscriptionConfig.isActive && !hasPro) ...[
@@ -353,17 +347,23 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               error: (_, _) => const SizedBox.shrink(),
             ),
             const SizedBox(height: DesignTokens.spacingLg),
+            const AccountPracticePreferencesCard(),
+            const SizedBox(height: DesignTokens.spacingMd),
+            AccountSettingsShortcutCard(
+              onTap: () => context.push(AppRoutes.settings),
+            ),
+            const SizedBox(height: DesignTokens.spacingLg),
             AccountSyncActionButtons(
               showSync: cloudSync || !SubscriptionConfig.isActive,
               busy: _busy,
               onSync: _syncNow,
               onSignOut: _signOut,
-              signOutLabel: 'Cerrar sesion',
+              signOutLabel: 'Cerrar sesión',
             ),
           ] else if (_view == _AccountView.forgotPassword) ...[
             AccountAuthFormCard(
               badge: 'CUENTA',
-              title: 'Recuperar contrasena',
+              title: 'Recuperar contraseña',
               subtitle: 'Te enviaremos un enlace a tu email.',
               children: [
                 AccountAuthTextField(
@@ -384,7 +384,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                             _view = _AccountView.signIn;
                             _message = null;
                           }),
-                  child: const Text('Volver al inicio de sesion'),
+                  child: const Text('Volver al inicio de sesión'),
                 ),
               ],
             ),
@@ -393,7 +393,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               badge: 'CUENTA',
               title: _view == _AccountView.signUp
                   ? 'Crear cuenta'
-                  : 'Iniciar sesion',
+                  : 'Iniciar sesión',
               subtitle:
                   'Opcional. Vincula tu progreso SRS entre dispositivos. '
                   'Puedes seguir entrenando sin cuenta.',
@@ -406,7 +406,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 const SizedBox(height: DesignTokens.spacingMd),
                 AccountAuthTextField(
                   controller: _passwordController,
-                  label: 'Contrasena',
+                  label: 'Contraseña',
                   obscureText: true,
                 ),
                 const SizedBox(height: DesignTokens.spacingLg),
@@ -428,7 +428,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           }),
                   child: Text(
                     _view == _AccountView.signUp
-                        ? 'Ya tengo cuenta — iniciar sesion'
+                        ? 'Ya tengo cuenta — iniciar sesión'
                         : 'No tengo cuenta — registrarme',
                   ),
                 ),
@@ -440,9 +440,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                               _view = _AccountView.forgotPassword;
                               _message = null;
                             }),
-                    child: const Text('Olvide mi contrasena'),
+                    child: const Text('Olvidé mi contraseña'),
                   ),
               ],
+            ),
+            const SizedBox(height: DesignTokens.spacingLg),
+            AccountSettingsShortcutCard(
+              onTap: () => context.push(AppRoutes.settings),
             ),
           ],
           const SizedBox(height: DesignTokens.spacingLg),
@@ -451,14 +455,26 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             onBusyChanged: (value) => setState(() => _busy = value),
             onMessage: (value) => setState(() => _message = value),
           ),
+          const SizedBox(height: DesignTokens.spacingLg),
+          const InfoSectionHeader(title: 'Información'),
+          InfoLinkCard(
+            icon: Icons.info_outline_rounded,
+            title: 'Acerca de TOGESC',
+            subtitle: 'Pedagogía, tutorial y enlaces útiles',
+            onTap: () => context.push(AppRoutes.about),
+          ),
           if (_message != null) ...[
             const SizedBox(height: DesignTokens.spacingLg),
             Text(
               _message!,
-              style: TextStyle(color: DesignTokens.primaryContainer),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ],
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

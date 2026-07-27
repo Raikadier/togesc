@@ -6,7 +6,7 @@ import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../providers/subscription_provider.dart';
 
-/// Shell de navegacion principal (Stitch): header + bottom nav movil.
+/// Shell de navegación principal (Stitch): header + rail wide / bottom nav móvil.
 class TogescShell extends ConsumerWidget {
   final Widget child;
 
@@ -34,6 +34,29 @@ class TogescShell extends ConsumerWidget {
     }
   }
 
+  static const _railDestinations = [
+    NavigationRailDestination(
+      icon: Icon(Icons.music_note_outlined),
+      selectedIcon: Icon(Icons.music_note_rounded),
+      label: Text('Práctica'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.leaderboard_outlined),
+      selectedIcon: Icon(Icons.leaderboard_rounded),
+      label: Text('Estadísticas'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.workspace_premium_outlined),
+      selectedIcon: Icon(Icons.workspace_premium_rounded),
+      label: Text('Pro'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.person_outline_rounded),
+      selectedIcon: Icon(Icons.person_rounded),
+      label: Text('Perfil'),
+    ),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).matchedLocation;
@@ -41,15 +64,58 @@ class TogescShell extends ConsumerWidget {
     final selected = _selectedIndex(location, hasPro);
     final wide =
         MediaQuery.sizeOf(context).width >= DesignTokens.shellBreakpoint;
+    final scheme = Theme.of(context).colorScheme;
+
+    final content = SafeArea(
+      top: false,
+      bottom: wide,
+      child: child,
+    );
 
     return Scaffold(
       appBar: _TogescShellHeader(
-        selectedIndex: selected,
         hasPro: hasPro,
-        wide: wide,
-        onNavTap: (i) => _onTabSelected(context, i, hasPro),
+        onProTap: () => _onTabSelected(context, 2, hasPro),
+        onAccountTap: () => _onTabSelected(context, 3, hasPro),
       ),
-      body: child,
+      body: wide
+          ? Row(
+              children: [
+                NavigationRail(
+                  selectedIndex: selected,
+                  onDestinationSelected: (i) =>
+                      _onTabSelected(context, i, hasPro),
+                  labelType: NavigationRailLabelType.all,
+                  backgroundColor: scheme.surfaceContainerLowest,
+                  indicatorColor: scheme.primaryContainer.withValues(
+                    alpha: 0.28,
+                  ),
+                  selectedIconTheme: IconThemeData(color: scheme.primary),
+                  unselectedIconTheme: IconThemeData(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  selectedLabelTextStyle: Theme.of(context)
+                      .textTheme
+                      .labelMedium
+                      ?.copyWith(
+                        color: scheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                  unselectedLabelTextStyle: Theme.of(context)
+                      .textTheme
+                      .labelMedium
+                      ?.copyWith(color: scheme.onSurfaceVariant),
+                  destinations: _railDestinations,
+                ),
+                VerticalDivider(
+                  width: 1,
+                  thickness: 1,
+                  color: scheme.outlineVariant.withValues(alpha: 0.5),
+                ),
+                Expanded(child: content),
+              ],
+            )
+          : content,
       bottomNavigationBar: wide
           ? null
           : NavigationBar(
@@ -60,12 +126,12 @@ class TogescShell extends ConsumerWidget {
                 NavigationDestination(
                   icon: Icon(Icons.music_note_outlined),
                   selectedIcon: Icon(Icons.music_note_rounded),
-                  label: 'Practica',
+                  label: 'Práctica',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.leaderboard_outlined),
                   selectedIcon: Icon(Icons.leaderboard_rounded),
-                  label: 'Estadisticas',
+                  label: 'Estadísticas',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.workspace_premium_outlined),
@@ -85,16 +151,14 @@ class TogescShell extends ConsumerWidget {
 
 class _TogescShellHeader extends StatelessWidget
     implements PreferredSizeWidget {
-  final int selectedIndex;
   final bool hasPro;
-  final bool wide;
-  final ValueChanged<int> onNavTap;
+  final VoidCallback onProTap;
+  final VoidCallback onAccountTap;
 
   const _TogescShellHeader({
-    required this.selectedIndex,
     required this.hasPro,
-    required this.wide,
-    required this.onNavTap,
+    required this.onProTap,
+    required this.onAccountTap,
   });
 
   @override
@@ -118,28 +182,10 @@ class _TogescShellHeader extends StatelessWidget
         ),
       ),
       actions: [
-        if (wide) ...[
-          _DesktopNavLink(
-            label: 'Entrenamiento',
-            selected: selectedIndex == 0,
-            onTap: () => onNavTap(0),
-          ),
-          _DesktopNavLink(
-            label: 'Estadisticas',
-            selected: selectedIndex == 1,
-            onTap: () => onNavTap(1),
-          ),
-          _DesktopNavLink(
-            label: 'Pro',
-            selected: selectedIndex == 2,
-            onTap: () => onNavTap(2),
-          ),
-          const SizedBox(width: DesignTokens.spacingMd),
-        ],
         IconButton(
           icon: const Icon(Icons.workspace_premium_outlined),
-          tooltip: hasPro ? 'Suscripcion Pro' : 'TOGESC Pro',
-          onPressed: () => onNavTap(2),
+          tooltip: hasPro ? 'Suscripción Pro' : 'TOGESC Pro',
+          onPressed: onProTap,
         ),
         IconButton(
           icon: CircleAvatar(
@@ -148,7 +194,7 @@ class _TogescShellHeader extends StatelessWidget
             child: Icon(Icons.person_rounded, size: 18, color: scheme.primary),
           ),
           tooltip: 'Cuenta',
-          onPressed: () => onNavTap(3),
+          onPressed: onAccountTap,
         ),
         const SizedBox(width: DesignTokens.spacingSm),
       ],
@@ -156,36 +202,7 @@ class _TogescShellHeader extends StatelessWidget
   }
 }
 
-class _DesktopNavLink extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _DesktopNavLink({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final color = selected ? scheme.primary : scheme.onSurfaceVariant;
-
-    return TextButton(
-      onPressed: onTap,
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: color,
-          fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
-
-/// Boton CTA con gradiente Pro (Stitch).
+/// Botón CTA con gradiente Pro (Stitch).
 class TogescProButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;

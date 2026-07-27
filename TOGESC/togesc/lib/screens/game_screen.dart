@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/design_tokens.dart';
+import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../constants/note_naming.dart';
 import '../providers/app_preferences_provider.dart';
@@ -242,10 +243,20 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     });
 
     final targetRounds = _targetRounds();
+    final showRoundActions = session.state == GameState.waitingForAnswer ||
+        session.state == GameState.listening;
 
     return TogescScaffold(
       title: widget.mode.displayName,
       actions: [
+        if (showRoundActions)
+          GameSessionRoundAppBarActions(
+            isPaused: session.isPaused,
+            showPause: session.state == GameState.waitingForAnswer,
+            onPause: _pauseRound,
+            onResume: _resumeRound,
+            onSkip: _skipRound,
+          ),
         GameInstrumentToggleAction(
           sessionInstrumentOverride: session.sessionInstrumentOverride,
           onOverrideChanged: (key) => ref
@@ -253,24 +264,42 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               .setSessionInstrumentOverride(key),
         ),
       ],
-      body: Padding(
-        padding: const EdgeInsets.all(DesignTokens.marginMobile),
-        child: Column(
-          children: [
-            if (targetRounds > 0 &&
-                session.state != GameState.idle &&
-                !session.goalReached) ...[
-              GameSessionProgressBar(
+      body: Column(
+        children: [
+          if (targetRounds > 0 &&
+              session.state != GameState.idle &&
+              !session.goalReached) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                DesignTokens.marginMobile,
+                DesignTokens.spacingSm,
+                DesignTokens.marginMobile,
+                0,
+              ),
+              child: GameSessionProgressBar(
                 roundsCompleted: _displayRound(session),
                 targetRounds: targetRounds,
               ),
-              const SizedBox(height: DesignTokens.spacingMd),
-            ],
-            Expanded(child: _buildContent(session, targetRounds)),
-            if (session.state == GameState.showingResult)
-              _buildResultActions(session),
+            ),
+            const SizedBox(height: DesignTokens.spacingMd),
           ],
-        ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(DesignTokens.marginMobile),
+              child: _buildContent(session, targetRounds),
+            ),
+          ),
+          if (session.state == GameState.showingResult)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                DesignTokens.marginMobile,
+                0,
+                DesignTokens.marginMobile,
+                DesignTokens.spacingSm,
+              ),
+              child: _buildResultActions(session),
+            ),
+        ],
       ),
     );
   }
@@ -284,21 +313,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       case GameState.idle:
         return GameSessionIdleView(onPlay: _startRound);
       case GameState.listening:
-        return Column(
-          children: [
-            Expanded(
-              child: GameSessionListeningView(
-                numNotes: _requiredNotes(session),
-              ),
-            ),
-            GameSessionRoundControls(
-              isPaused: false,
-              onPause: () {},
-              onResume: () {},
-              onSkip: _skipRound,
-              showPause: false,
-            ),
-          ],
+        return GameSessionListeningView(
+          numNotes: _requiredNotes(session),
         );
       case GameState.waitingForAnswer:
         return _buildAnswerView(session);
@@ -314,113 +330,162 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
     final ui = ref.watch(uiPreferencesProvider).valueOrNull ?? const UiPreferences();
     final required = _requiredNotes(session);
-    final hint = namingMode == NoteNamingMode.solfege
-        ? 'O escribe aqui: Do Re Mi'
-        : 'O escribe aqui: C E G';
     final showMic = ui.inputMode == GameInputMode.humming;
     final showPiano =
         ui.inputMode != GameInputMode.textOnly && !showMic;
     final showText =
         ui.inputMode != GameInputMode.pianoOnly && !showMic;
-    final showConfirm = ui.confirmBeforeSubmit && showPiano;
+    final showBoth = showPiano && showText;
+    final showConfirm = ui.confirmBeforeSubmit && (showPiano || showMic);
+    final textHint = namingMode == NoteNamingMode.solfege
+        ? 'Escribe notas (Do, Re, Mi…)'
+        : 'Escribe notas (C, E, G…)';
+    final guidance = showMic
+        ? 'Canta o tararea la nota; confirma cuando esté lista.'
+        : showBoth
+            ? 'Toca el piano o escribe las notas — no hace falta usar ambos.'
+            : showPiano
+                ? 'Escucha el tono de referencia y responde en el piano.'
+                : 'Escucha el tono de referencia y escribe tu respuesta.';
+
+    final landscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+    final useLargePiano = ui.largePiano && !landscape;
+
+    final headerBlock = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GameSessionAnswerHeader(
+          numNotes: required,
+          guidance: guidance,
+        ),
+        const SizedBox(height: DesignTokens.spacingMd),
+        Center(
+          child: GameSelectionChips(
+            selectedNotes: _selectedNotes,
+            onRemove: showPiano || showMic
+                ? (note) => _toggleNote(note, required)
+                : null,
+          ),
+        ),
+        if (showMic) ...[
+          const SizedBox(height: DesignTokens.spacingLg),
+          MicrophoneAnswerPanel(
+            requiredNotes: required,
+            onNoteDetected: (note) => _toggleNote(note, required),
+            onSubmit: () => _confirmSelection(required),
+          ),
+        ],
+        if (showText) ...[
+          const SizedBox(height: DesignTokens.spacingLg),
+          if (showBoth)
+            Padding(
+              padding: const EdgeInsets.only(bottom: DesignTokens.spacingSm),
+              child: Text(
+                'Campo de texto (opcional)',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ),
+          NoteInputField(
+            onSubmitted: (notes) => _submitNotes(notes, required),
+            hintText: textHint,
+          ),
+        ],
+      ],
+    );
+
+    final pianoBlock = showPiano
+        ? Center(
+            child: PianoKeyboard(
+              selectedNotes: _selectedNotes,
+              onNoteTapped: (note) => _toggleNote(note, required),
+              noteNamingMode: namingMode,
+              large: useLargePiano,
+              hideLabels: ui.hidePianoLabels,
+            ),
+          )
+        : const SizedBox.shrink();
+
+    final actionsRow = Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: _startRound,
+            icon: const Icon(Icons.replay_rounded),
+            label: const Text('Repetir'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(
+                DesignTokens.touchTargetMin,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: DesignTokens.borderRadiusXl,
+              ),
+            ),
+          ),
+        ),
+        if (showConfirm) ...[
+          const SizedBox(width: DesignTokens.spacingMd),
+          Expanded(
+            flex: 2,
+            child: FilledButton.icon(
+              onPressed: _selectedNotes.isEmpty
+                  ? null
+                  : () => _confirmSelection(required),
+              icon: const Icon(Icons.check_rounded),
+              label: const Text('Confirmar'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(
+                  DesignTokens.touchTargetMin,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: DesignTokens.borderRadiusXl,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+
+    if (landscape && showPiano) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  headerBlock,
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  actionsRow,
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: DesignTokens.spacingMd),
+          Expanded(
+            child: SingleChildScrollView(
+              child: pianoBlock,
+            ),
+          ),
+        ],
+      );
+    }
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          GameSessionAnswerHeader(numNotes: required),
-          const SizedBox(height: DesignTokens.spacingLg),
-          Center(
-            child: GameSelectionChips(
-              selectedNotes: _selectedNotes,
-              onRemove: showPiano
-                  ? (note) => _toggleNote(note, required)
-                  : null,
-            ),
-          ),
-          if (showMic) ...[
-            const SizedBox(height: DesignTokens.spacingMd),
-            MicrophoneAnswerPanel(
-              requiredNotes: required,
-              onNoteDetected: (note) => _toggleNote(note, required),
-              onSubmit: () => _confirmSelection(required),
-            ),
-          ],
-          if (showText) ...[
-            const SizedBox(height: DesignTokens.spacingLg),
-            NoteInputField(
-              onSubmitted: (notes) => _submitNotes(notes, required),
-              hintText: hint,
-            ),
-          ],
+          headerBlock,
           if (showPiano) ...[
             const SizedBox(height: DesignTokens.spacingLg),
-            Center(
-              child: PianoKeyboard(
-                selectedNotes: _selectedNotes,
-                onNoteTapped: (note) => _toggleNote(note, required),
-                noteNamingMode: namingMode,
-                large: ui.largePiano,
-                hideLabels: ui.hidePianoLabels,
-              ),
-            ),
-            const SizedBox(height: DesignTokens.spacingLg),
-            GameSessionRoundControls(
-              isPaused: session.isPaused,
-              onPause: _pauseRound,
-              onResume: _resumeRound,
-              onSkip: _skipRound,
-            ),
-            const SizedBox(height: DesignTokens.spacingMd),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _startRound,
-                    icon: const Icon(Icons.replay_rounded),
-                    label: const Text('Repetir'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(
-                        DesignTokens.touchTargetMin,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: DesignTokens.borderRadiusXl,
-                      ),
-                    ),
-                  ),
-                ),
-                if (showConfirm) ...[
-                  const SizedBox(width: DesignTokens.spacingMd),
-                  Expanded(
-                    flex: 2,
-                    child: FilledButton.icon(
-                      onPressed: _selectedNotes.isEmpty
-                          ? null
-                          : () => _confirmSelection(required),
-                      icon: const Icon(Icons.check_rounded),
-                      label: const Text('Confirmar'),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(
-                          DesignTokens.touchTargetMin,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: DesignTokens.borderRadiusXl,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
+            pianoBlock,
           ],
-          if (!showPiano && showText) ...[
-            const SizedBox(height: DesignTokens.spacingMd),
-            OutlinedButton.icon(
-              onPressed: _startRound,
-              icon: const Icon(Icons.replay_rounded),
-              label: const Text('Repetir'),
-            ),
-          ],
+          const SizedBox(height: DesignTokens.spacingLg),
+          actionsRow,
         ],
       ),
     );
@@ -435,6 +500,62 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final namingMode =
         ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
     final ui = ref.watch(uiPreferencesProvider).valueOrNull ?? const UiPreferences();
+    final landscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+    final useLargePiano = ui.largePiano && !landscape;
+
+    final resultCard = ResultCard(
+      isCorrect: result.isCorrect,
+      correctNotes: result.correctNotes,
+      responseTime: result.responseTime,
+      srsChanges: result.srsChanges,
+      onViewFullReport: () => context.push(AppRoutes.statisticsNotes),
+    );
+
+    final piano = PianoKeyboard(
+      correctNotes: correctSet,
+      incorrectNotes: incorrectSet,
+      disabled: true,
+      noteNamingMode: namingMode,
+      large: useLargePiano,
+      hideLabels: ui.hidePianoLabels,
+    );
+
+    if (landscape) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (session.goalReached && targetRounds > 0) ...[
+                    GameSessionGoalCompleteBanner(targetRounds: targetRounds),
+                    const SizedBox(height: DesignTokens.spacingMd),
+                  ],
+                  resultCard,
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: DesignTokens.spacingMd),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const GameSessionResultSectionLabel(
+                    label: 'Visualización de respuesta',
+                  ),
+                  Center(child: piano),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
 
     return SingleChildScrollView(
       child: Column(
@@ -444,26 +565,12 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             GameSessionGoalCompleteBanner(targetRounds: targetRounds),
             const SizedBox(height: DesignTokens.spacingMd),
           ],
-          ResultCard(
-            isCorrect: result.isCorrect,
-            correctNotes: result.correctNotes,
-            responseTime: result.responseTime,
-            srsChanges: result.srsChanges,
-          ),
+          resultCard,
           const SizedBox(height: DesignTokens.spacingLg),
           const GameSessionResultSectionLabel(
-            label: 'Visualizacion de respuesta',
+            label: 'Visualización de respuesta',
           ),
-          Center(
-            child: PianoKeyboard(
-              correctNotes: correctSet,
-              incorrectNotes: incorrectSet,
-              disabled: true,
-              noteNamingMode: namingMode,
-              large: ui.largePiano,
-              hideLabels: ui.hidePianoLabels,
-            ),
-          ),
+          Center(child: piano),
         ],
       ),
     );
@@ -494,7 +601,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       return Padding(
         padding: const EdgeInsets.only(top: DesignTokens.spacingSm),
         child: Text(
-          'Siguiente ronda en breve...',
+          'Siguiente ronda en breve…',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -509,8 +616,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         width: double.infinity,
         child: FilledButton.icon(
           onPressed: _continueAfterResult,
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(56),
+            shape: RoundedRectangleBorder(
+              borderRadius: DesignTokens.borderRadiusXl,
+            ),
+          ),
           icon: const Icon(Icons.skip_next_rounded),
-          label: const Text('Siguiente'),
+          label: const Text('Siguiente round'),
         ),
       ),
     );

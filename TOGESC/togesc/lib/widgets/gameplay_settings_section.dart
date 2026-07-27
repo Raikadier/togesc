@@ -84,7 +84,7 @@ class GameplaySettingsSection extends ConsumerWidget {
               contentPadding: EdgeInsets.zero,
               title: const Text('Reducir animaciones'),
               subtitle: const Text(
-                'Transiciones mas rapidas y menos espera entre rondas.',
+                'Desactiva el movimiento de la interfaz y acorta esperas entre rondas.',
               ),
               value: prefs.reduceAnimations,
               onChanged: (value) {

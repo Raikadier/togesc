@@ -14,7 +14,11 @@ class SettingsScreen extends ConsumerWidget {
     return TogescScaffold(
       title: 'Ajustes',
       body: ListView(
-        padding: const EdgeInsets.all(DesignTokens.marginMobile),
+        padding: EdgeInsets.all(
+          MediaQuery.sizeOf(context).width >= DesignTokens.shellBreakpoint
+              ? DesignTokens.marginDesktop
+              : DesignTokens.marginMobile,
+        ),
         children: const [
           PracticeSettingsSection(),
         ],

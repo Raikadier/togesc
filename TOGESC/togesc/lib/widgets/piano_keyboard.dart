@@ -315,17 +315,16 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                                   note == 'B' ? 12 : 4,
                                 ),
                               ),
-                              boxShadow: pressed
-                                  ? null
-                                  : [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.05,
-                                        ),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
+                                      boxShadow: pressed
+                                          ? null
+                                          : [
+                                              BoxShadow(
+                                                color: scheme.shadow
+                                                    .withValues(alpha: 0.08),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
                             ),
                             alignment: Alignment.bottomCenter,
                             padding: const EdgeInsets.only(bottom: 8),
@@ -396,7 +395,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.3),
+                                  color: scheme.shadow.withValues(alpha: 0.35),
                                   blurRadius: 6,
                                   offset: const Offset(0, 3),
                                 ),

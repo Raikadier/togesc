@@ -286,7 +286,7 @@ Future<bool> showResetProgressDialog(BuildContext context) async {
     builder: (ctx) => TogescPremiumDialog(
       icon: Icons.restart_alt_rounded,
       destructive: true,
-      title: 'Reiniciar progreso?',
+      title: '¿Reiniciar progreso?',
       subtitle:
           'Se perderan todos los datos de entrenamiento. Esta accion no se puede deshacer.',
       content: const SizedBox.shrink(),

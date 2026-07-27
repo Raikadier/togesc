@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/design_tokens.dart';
 import '../app/togesc_colors.dart';
+import '../constants/note_naming.dart';
 import '../models/sync_diagnostics.dart';
+import '../providers/app_preferences_provider.dart';
 import '../providers/sync_provider.dart';
+import '../services/practice_reminder_service.dart';
 import 'togesc_ui.dart';
 
 /// Cabecera de perfil en cuenta (Stitch sync settings).
@@ -191,7 +194,7 @@ class AccountSyncProBanner extends StatelessWidget {
           const SizedBox(width: DesignTokens.spacingMd),
           Expanded(
             child: Text(
-              'La sincronizacion automatica es una funcion Pro exclusiva.',
+              'La sincronización automática es una función Pro exclusiva.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                     height: 1.3,
@@ -210,7 +213,7 @@ class AccountSyncProBanner extends StatelessWidget {
                 borderRadius: DesignTokens.borderRadiusXl,
               ),
             ),
-            child: const Text('Ver mas'),
+            child: const Text('Ver más'),
           ),
         ],
       ),
@@ -218,7 +221,7 @@ class AccountSyncProBanner extends StatelessWidget {
   }
 }
 
-/// Panel de diagnostico de sync (Stitch).
+/// Panel de diagnóstico de sync (Stitch).
 class AccountSyncDiagnosticsPanel extends ConsumerWidget {
   const AccountSyncDiagnosticsPanel({super.key});
 
@@ -246,7 +249,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
             Row(
               children: [
                 Text(
-                  'DIAGNOSTICO DEL SISTEMA',
+                  'DIAGNÓSTICO DEL SISTEMA',
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: scheme.primary,
                     fontWeight: FontWeight.w800,
@@ -330,7 +333,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
                   if (d.localSession != null)
                     _SyncDetailRow(
                       icon: Icons.laptop_rounded,
-                      title: 'Ultima marca local',
+                      title: 'Última marca local',
                       subtitle: 'Dispositivo actual',
                       value: d.localSession!,
                     ),
@@ -342,7 +345,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
                   if (d.remoteSession != null)
                     _SyncDetailRow(
                       icon: Icons.cloud_outlined,
-                      title: 'Sincronizacion cloud',
+                      title: 'Sincronización cloud',
                       subtitle: 'Servidores TOGESC',
                       value: d.remoteSession!,
                     ),
@@ -441,6 +444,128 @@ class _SyncDetailRow extends StatelessWidget {
   }
 }
 
+/// Preferencias de práctica inline en cuenta (Stitch sync settings).
+class AccountPracticePreferencesCard extends ConsumerWidget {
+  const AccountPracticePreferencesCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final namingAsync = ref.watch(noteNamingModeProvider);
+    final remindersAsync = ref.watch(practiceRemindersEnabledProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'PREFERENCIAS DE PRÁCTICA',
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: scheme.primary,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: DesignTokens.spacingMd),
+        Container(
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLowest,
+            borderRadius: DesignTokens.borderRadiusXl,
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          child: Column(
+            children: [
+              namingAsync.when(
+                data: (mode) => SwitchListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: DesignTokens.spacingMd,
+                    vertical: DesignTokens.spacingXs,
+                  ),
+                  secondary: Container(
+                    padding: const EdgeInsets.all(DesignTokens.spacingSm),
+                    decoration: BoxDecoration(
+                      color: scheme.primary.withValues(alpha: 0.06),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.music_note_rounded,
+                      color: scheme.primaryContainer,
+                    ),
+                  ),
+                  title: const Text('Notación Do/Re/Mi'),
+                  subtitle: const Text(
+                    'Usa solfeo en el piano y en las respuestas.',
+                  ),
+                  value: mode == NoteNamingMode.solfege,
+                  onChanged: (value) {
+                    ref.read(noteNamingModeProvider.notifier).setMode(
+                          value
+                              ? NoteNamingMode.solfege
+                              : NoteNamingMode.letter,
+                        );
+                  },
+                ),
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(DesignTokens.spacingMd),
+                  child: LinearProgressIndicator(),
+                ),
+                error: (_, _) => const SizedBox.shrink(),
+              ),
+              Divider(
+                height: 1,
+                color: scheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+              remindersAsync.when(
+                data: (enabled) => SwitchListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: DesignTokens.spacingMd,
+                    vertical: DesignTokens.spacingXs,
+                  ),
+                  secondary: Container(
+                    padding: const EdgeInsets.all(DesignTokens.spacingSm),
+                    decoration: BoxDecoration(
+                      color: scheme.primary.withValues(alpha: 0.06),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.notifications_active_rounded,
+                      color: scheme.primaryContainer,
+                    ),
+                  ),
+                  title: const Text('Recordatorios diarios'),
+                  subtitle: Text(
+                    PracticeReminderService.isSupported
+                        ? 'Notificación local si tienes notas vencidas.'
+                        : 'Disponible en Android e iOS.',
+                  ),
+                  value: enabled && PracticeReminderService.isSupported,
+                  onChanged: PracticeReminderService.isSupported
+                      ? (value) async {
+                          await ref
+                              .read(practiceRemindersEnabledProvider.notifier)
+                              .setEnabled(value);
+                          if (value) {
+                            await PracticeReminderService.instance
+                                .requestPermission();
+                          } else {
+                            await PracticeReminderService.instance.cancel();
+                          }
+                        }
+                      : null,
+                ),
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Atajo a ajustes de practica (Stitch tile).
 class AccountSettingsShortcutCard extends StatelessWidget {
   final VoidCallback onTap;
@@ -467,8 +592,8 @@ class AccountSettingsShortcutCard extends StatelessWidget {
             color: scheme.primaryContainer,
           ),
         ),
-        title: const Text('Ajustes de practica'),
-        subtitle: const Text('Sonido, sesion, apariencia y accesibilidad'),
+        title: const Text('Ajustes de práctica'),
+        subtitle: const Text('Sonido, sesión, apariencia y accesibilidad'),
         trailing: const Icon(Icons.chevron_right_rounded),
       ),
     );
@@ -524,7 +649,7 @@ class AccountSyncActionButtons extends StatelessWidget {
             ),
           ),
           icon: const Icon(Icons.logout_rounded),
-          label: Text(signOutLabel ?? 'Cerrar sesion'),
+          label: Text(signOutLabel ?? 'Cerrar sesión'),
         ),
       ],
     );

@@ -51,7 +51,7 @@ class _NoteInputFieldState extends State<NoteInputField> {
         borderRadius: DesignTokens.borderRadiusXl,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: scheme.shadow.withValues(alpha: 0.08),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -66,18 +66,11 @@ class _NoteInputFieldState extends State<NoteInputField> {
           filled: true,
           fillColor: scheme.surfaceContainerLowest,
           prefixIcon: const Icon(Icons.keyboard_rounded),
-          suffixIcon: Padding(
-            padding: const EdgeInsets.only(right: DesignTokens.spacingMd),
-            child: Text(
-              'INPUT',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: scheme.outline,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1,
-                  ),
-            ),
+          suffixIcon: IconButton(
+            tooltip: 'Enviar',
+            onPressed: widget.enabled ? _submit : null,
+            icon: Icon(Icons.send_rounded, color: scheme.primary),
           ),
-          suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
           border: OutlineInputBorder(
             borderRadius: DesignTokens.borderRadiusXl,
             borderSide: BorderSide.none,

@@ -28,6 +28,7 @@ enum SpeedState {
 class SpeedSessionState {
   final SpeedState state;
   final GameMode targetMode;
+  final double sessionInitialTime;
   final double currentTimeLimit;
   final double remainingTime;
   final List<String> currentNotes;
@@ -41,6 +42,7 @@ class SpeedSessionState {
   const SpeedSessionState({
     this.state = SpeedState.idle,
     this.targetMode = GameMode.singleNote,
+    this.sessionInitialTime = speedInitialTime,
     this.currentTimeLimit = speedInitialTime,
     this.remainingTime = speedInitialTime,
     this.currentNotes = const [],
@@ -61,6 +63,7 @@ class SpeedSessionState {
   SpeedSessionState copyWith({
     SpeedState? state,
     GameMode? targetMode,
+    double? sessionInitialTime,
     double? currentTimeLimit,
     double? remainingTime,
     List<String>? currentNotes,
@@ -75,6 +78,7 @@ class SpeedSessionState {
     return SpeedSessionState(
       state: state ?? this.state,
       targetMode: targetMode ?? this.targetMode,
+      sessionInitialTime: sessionInitialTime ?? this.sessionInitialTime,
       currentTimeLimit: currentTimeLimit ?? this.currentTimeLimit,
       remainingTime: remainingTime ?? this.remainingTime,
       currentNotes: currentNotes ?? this.currentNotes,
@@ -105,9 +109,19 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
     return const SpeedSessionState();
   }
 
-  void setTargetMode(GameMode mode) {
+  void setTargetMode(GameMode mode, {double? initialTime}) {
     final fixed = fixedNoteCountForMode(mode);
-    state = state.copyWith(targetMode: mode, numNotes: fixed ?? randomMinNotes);
+    final start = (initialTime ?? speedInitialTime).clamp(
+      speedMinTime,
+      speedMaxTime,
+    );
+    state = state.copyWith(
+      targetMode: mode,
+      numNotes: fixed ?? randomMinNotes,
+      sessionInitialTime: start,
+      currentTimeLimit: start,
+      remainingTime: start,
+    );
     ref
         .read(lastPracticeSessionProvider.notifier)
         .record(mode: mode, kind: PracticeKind.speed);
@@ -268,12 +282,15 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
   /// Reinicia la sesion para reintentar.
   void retry() {
     _countdownTimer?.cancel();
+    final start = state.sessionInitialTime;
     state = state.copyWith(
       state: SpeedState.idle,
-      currentTimeLimit: speedInitialTime,
-      remainingTime: speedInitialTime,
+      currentTimeLimit: start,
+      remainingTime: start,
       consecutiveCorrect: 0,
       responseTimes: const [],
+      roundsPlayed: 0,
+      correctRounds: 0,
     );
   }
 

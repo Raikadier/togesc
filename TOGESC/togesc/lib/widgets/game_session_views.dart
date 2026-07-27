@@ -210,7 +210,7 @@ class GameSessionProgressBar extends StatelessWidget {
   }
 }
 
-/// Controles de pausa y saltar nota durante la ronda.
+/// Controles de pausa y saltar nota durante la ronda (fila completa — preferir AppBar).
 class GameSessionRoundControls extends StatelessWidget {
   final bool isPaused;
   final VoidCallback onPause;
@@ -259,7 +259,45 @@ class GameSessionRoundControls extends StatelessWidget {
   }
 }
 
-/// Overlay cuando la sesion esta pausada.
+/// Acciones secundarias de ronda para AppBar (no compiten con Repetir/Confirmar).
+class GameSessionRoundAppBarActions extends StatelessWidget {
+  final bool isPaused;
+  final bool showPause;
+  final VoidCallback onPause;
+  final VoidCallback onResume;
+  final VoidCallback onSkip;
+
+  const GameSessionRoundAppBarActions({
+    super.key,
+    required this.isPaused,
+    required this.onPause,
+    required this.onResume,
+    required this.onSkip,
+    this.showPause = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showPause)
+          IconButton(
+            tooltip: isPaused ? 'Reanudar' : 'Pausar',
+            onPressed: isPaused ? onResume : onPause,
+            icon: Icon(isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded),
+          ),
+        IconButton(
+          tooltip: 'Saltar nota',
+          onPressed: onSkip,
+          icon: const Icon(Icons.skip_next_rounded),
+        ),
+      ],
+    );
+  }
+}
+
+/// Overlay cuando la sesión está pausada.
 class GameSessionPausedOverlay extends StatelessWidget {
   final VoidCallback onResume;
 
@@ -269,8 +307,8 @@ class GameSessionPausedOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return GameSessionPhaseLayout(
       icon: Icons.pause_circle_outline_rounded,
-      title: 'Sesion pausada',
-      subtitle: 'El tiempo de respuesta esta detenido',
+      title: 'Sesión pausada',
+      subtitle: 'El tiempo de respuesta está detenido',
       footer: FilledButton.icon(
         onPressed: onResume,
         icon: const Icon(Icons.play_arrow_rounded),
@@ -327,10 +365,10 @@ class GameSessionIdleView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GameSessionPhaseLayout(
-      badge: 'ENTRENAMIENTO DE OIDO',
+      badge: 'ENTRENAMIENTO DE OÍDO',
       icon: Icons.headphones_rounded,
-      title: 'Preparate para escuchar',
-      subtitle: 'Pulsa reproducir cuando estes listo',
+      title: 'Prepárate para escuchar',
+      subtitle: 'Pulsa reproducir cuando estés listo',
       footer: FilledButton.icon(
         onPressed: onPlay,
         style: FilledButton.styleFrom(
@@ -358,7 +396,7 @@ class GameSessionListeningView extends StatelessWidget {
       badge: 'ESCUCHANDO',
       icon: Icons.graphic_eq_rounded,
       title: 'Escucha atentamente',
-      subtitle: '$numNotes nota(s) — concentrate en cada altura',
+      subtitle: '$numNotes nota(s) — concéntrate en cada altura',
       showProgress: true,
       pulsingIcon: true,
     );
@@ -376,8 +414,8 @@ class GameSessionClusterView extends StatelessWidget {
       badge: 'LIMPIEZA TONAL',
       icon: Icons.waves_rounded,
       accentColor: scheme.tertiary,
-      title: 'Limpiando el oido...',
-      subtitle: 'Transicion tonal breve para romper el anclaje',
+      title: 'Limpiando el oído...',
+      subtitle: 'Transición tonal breve para romper el anclaje',
       showProgress: true,
       pulsingIcon: true,
     );
@@ -424,8 +462,13 @@ class GameSessionResultSectionLabel extends StatelessWidget {
 /// Encabezado de la fase de respuesta (Stitch).
 class GameSessionAnswerHeader extends StatelessWidget {
   final int numNotes;
+  final String? guidance;
 
-  const GameSessionAnswerHeader({super.key, required this.numNotes});
+  const GameSessionAnswerHeader({
+    super.key,
+    required this.numNotes,
+    this.guidance,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -453,7 +496,7 @@ class GameSessionAnswerHeader extends StatelessWidget {
               ),
               const SizedBox(width: DesignTokens.spacingSm),
               Text(
-                'ENTRENAMIENTO DE OIDO',
+                'ENTRENAMIENTO DE OÍDO',
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: scheme.onSecondaryContainer,
                   letterSpacing: 0.5,
@@ -466,13 +509,24 @@ class GameSessionAnswerHeader extends StatelessWidget {
         const SizedBox(height: DesignTokens.spacingMd),
         Text(
           numNotes == 1
-              ? 'Que nota escuchaste?'
-              : 'Que nota(s) escuchaste?',
+              ? '¿Qué nota escuchaste?'
+              : '¿Qué nota(s) escuchaste?',
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w700,
           ),
           textAlign: TextAlign.center,
         ),
+        if (guidance != null) ...[
+          const SizedBox(height: DesignTokens.spacingSm),
+          Text(
+            guidance!,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ],
     );
   }
@@ -548,12 +602,18 @@ class GameSelectionChips extends StatelessWidget {
               ),
               if (onRemove != null) ...[
                 const SizedBox(width: DesignTokens.spacingXs),
-                InkWell(
-                  onTap: () => onRemove!(note),
-                  child: Icon(
-                    Icons.close_rounded,
-                    size: 18,
-                    color: scheme.onPrimaryContainer,
+                SizedBox(
+                  width: DesignTokens.touchTargetMin,
+                  height: DesignTokens.touchTargetMin,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    tooltip: 'Quitar $note',
+                    onPressed: () => onRemove!(note),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      size: 20,
+                      color: scheme.onPrimaryContainer,
+                    ),
                   ),
                 ),
               ],

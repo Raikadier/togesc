@@ -2,10 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../app/design_tokens.dart';
 import '../models/note_progress_summary.dart';
 
-/// Radar de precision por las 12 notas (Stitch).
+/// Radar de precisión por las 12 notas (Stitch).
 class NoteAccuracyRadarChart extends StatelessWidget {
   final List<NoteProgressSummary> summaries;
 
@@ -15,10 +14,16 @@ class NoteAccuracyRadarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (summaries.isEmpty) return const SizedBox.shrink();
 
+    final scheme = Theme.of(context).colorScheme;
+
     return SizedBox(
       height: 220,
       child: CustomPaint(
-        painter: _RadarPainter(summaries: summaries),
+        painter: _RadarPainter(
+          summaries: summaries,
+          accent: scheme.primary,
+          grid: scheme.outlineVariant,
+        ),
         child: const SizedBox.expand(),
       ),
     );
@@ -27,15 +32,21 @@ class NoteAccuracyRadarChart extends StatelessWidget {
 
 class _RadarPainter extends CustomPainter {
   final List<NoteProgressSummary> summaries;
+  final Color accent;
+  final Color grid;
 
-  _RadarPainter({required this.summaries});
+  _RadarPainter({
+    required this.summaries,
+    required this.accent,
+    required this.grid,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = math.min(size.width, size.height) / 2 - 16;
     final gridPaint = Paint()
-      ..color = DesignTokens.outlineVariant
+      ..color = grid
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
@@ -76,18 +87,18 @@ class _RadarPainter extends CustomPainter {
     canvas.drawPath(
       fillPath,
       Paint()
-        ..color = DesignTokens.primary.withValues(alpha: 0.25)
+        ..color = accent.withValues(alpha: 0.25)
         ..style = PaintingStyle.fill,
     );
     canvas.drawPath(
       fillPath,
       Paint()
-        ..color = DesignTokens.primary
+        ..color = accent
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
 
-    final nodePaint = Paint()..color = DesignTokens.primary;
+    final nodePaint = Paint()..color = accent;
     for (final p in points) {
       canvas.drawCircle(p, 3, nodePaint);
     }
@@ -95,5 +106,7 @@ class _RadarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RadarPainter oldDelegate) =>
-      oldDelegate.summaries != summaries;
+      oldDelegate.summaries != summaries ||
+      oldDelegate.accent != accent ||
+      oldDelegate.grid != grid;
 }

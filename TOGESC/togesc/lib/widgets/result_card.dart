@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../app/design_tokens.dart';
+import '../app/router.dart';
 import '../app/togesc_colors.dart';
 import 'togesc_ui.dart';
 
@@ -10,6 +12,7 @@ class ResultCard extends StatelessWidget {
   final Set<String> correctNotes;
   final double responseTime;
   final Map<String, Map<String, dynamic>>? srsChanges;
+  final VoidCallback? onViewFullReport;
 
   const ResultCard({
     super.key,
@@ -17,12 +20,13 @@ class ResultCard extends StatelessWidget {
     required this.correctNotes,
     required this.responseTime,
     this.srsChanges,
+    this.onViewFullReport,
   });
 
   String _timeComment() {
-    if (responseTime < 2.0) return '¡Rapido!';
+    if (responseTime < 2.0) return '¡Rápido!';
     if (responseTime < 5.0) return 'Buen tiempo';
-    return 'Tomate tu tiempo';
+    return 'Tómate tu tiempo';
   }
 
   @override
@@ -134,7 +138,7 @@ class ResultCard extends StatelessWidget {
                     const SizedBox(width: DesignTokens.spacingMd),
                     Expanded(
                       child: _MetricTile(
-                        label: 'FEEDBACK',
+                        label: 'RITMO',
                         value: _timeComment(),
                         valueColor: isCorrect
                             ? scheme.secondary
@@ -146,12 +150,29 @@ class ResultCard extends StatelessWidget {
                 ),
                 if (srsChanges != null && srsChanges!.isNotEmpty) ...[
                   const SizedBox(height: DesignTokens.spacingLg),
-                  Text(
-                    'Dominio de notas',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: scheme.onSurface,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Dominio de notas',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: scheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: onViewFullReport ??
+                            () => context.push(AppRoutes.statisticsNotes),
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: DesignTokens.spacingSm,
+                          ),
+                        ),
+                        child: const Text('Ver reporte completo'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: DesignTokens.spacingSm),
                   ...srsChanges!.entries.map(
@@ -254,6 +275,7 @@ class _SrsNoteRow extends StatelessWidget {
     final scheme = theme.colorScheme;
     final consecutive = newData['consecutive_correct'] as int? ?? 0;
     final isLearning = newData['is_learning'] as bool? ?? true;
+    final threshold = newData['learning_threshold'] as int? ?? 5;
     final statusLabel = isLearning ? 'Aprendiendo' : 'Consolidada';
     final colors = TogescColors.of(context);
     final statusColor = isLearning ? colors.selection : colors.correct;
@@ -317,13 +339,74 @@ class _SrsNoteRow extends StatelessWidget {
               ),
             ),
             if (isLearning)
-              Text(
-                '$consecutive/5',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: scheme.primaryContainer,
-                  fontWeight: FontWeight.w700,
+              _LearningPills(
+                filled: consecutive,
+                total: threshold,
+              )
+            else
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DesignTokens.spacingSm,
+                  vertical: DesignTokens.spacingXs,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.correct.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'OK',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: colors.correct,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Pills de progreso SRS (Stitch: 5 segmentos en chip).
+class _LearningPills extends StatelessWidget {
+  final int filled;
+  final int total;
+
+  const _LearningPills({required this.filled, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final n = total.clamp(1, 8);
+
+    return Semantics(
+      label: 'Progreso $filled de $n',
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: DesignTokens.spacingSm,
+          vertical: DesignTokens.spacingXs,
+        ),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < n; i++) ...[
+              if (i > 0) const SizedBox(width: 3),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: i < filled
+                      ? scheme.primaryContainer
+                      : scheme.outlineVariant.withValues(alpha: 0.55),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
           ],
         ),
       ),

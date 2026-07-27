@@ -2,16 +2,20 @@
 
 Estándares: pirámide de tests, cobertura por capa, CI bloqueante, Conventional Commits, SemVer (qstd §2.6, §13.2).
 
-> **Actualización 2026-07-24:** INFRA-001/002 ya no describen el código
-> actual. Flutter está fijado a 3.41.4, CI genera cobertura y Deploy Web solo
-> corre después de CI exitoso. Ver
-> [10_remediacion_2026-07-24.md](10_remediacion_2026-07-24.md).
+> **Actualización 2026-07-26:** Deploy Web publicado en producción
+> (`workflow_dispatch`). Falta observar CI→Deploy en push a `main`, tests
+> SQL/Deno y E2E:
+> [11_estado_pendiente_2026-07-26.md](11_estado_pendiente_2026-07-26.md).
+>
+> **Nota 2026-07-24:** Flutter fijado a 3.41.4, CI con cobertura, Deploy
+> condicionado a CI. Ver [10_remediacion_2026-07-24.md](10_remediacion_2026-07-24.md).
 
 ## Lo que está bien (no tocar)
-- **47 archivos de test** en pirámide real; 309 tests aprobados y 1 omitido en
-  la última auditoría completa.
+- **47 archivos de test** en pirámide real; 309+ tests en la última corrida local relevante.
 - CI ejecuta `flutter analyze` y `flutter test --coverage`.
 - Uptime check horario, backup Supabase semanal, Dependabot activos.
+- Deploy Web a Vercel con artefacto prebuilt (run `30142644096`, alias
+  `togesc.vercel.app`).
 
 ---
 

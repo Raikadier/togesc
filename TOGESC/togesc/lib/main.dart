@@ -68,6 +68,8 @@ class TogescApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
     final themeMode = ref.watch(appThemeModeProvider);
+    final reduceAnimations =
+        ref.watch(uiPreferencesProvider).valueOrNull?.reduceAnimations ?? false;
 
     return MaterialApp.router(
       title: 'TOGESC',
@@ -84,6 +86,18 @@ class TogescApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
       routerConfig: router,
+      builder: (context, child) {
+        final media = MediaQuery.of(context);
+        return MediaQuery(
+          data: media.copyWith(
+            disableAnimations: media.disableAnimations || reduceAnimations,
+          ),
+          child: TickerMode(
+            enabled: !reduceAnimations,
+            child: child ?? const SizedBox.shrink(),
+          ),
+        );
+      },
     );
   }
 }

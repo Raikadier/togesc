@@ -35,4 +35,55 @@ void main() {
     expect(summaries[5].rounds, 3);
     expect(summaries.first.rounds, 0);
   });
+
+  test('filterHistoryByPeriod respeta 7 y 30 dias', () {
+    final now = DateTime(2026, 6, 21, 18);
+    final history = [
+      PracticeSessionLog(
+        modeId: 0,
+        kind: PracticeKind.game,
+        roundsCompleted: 1,
+        correctRounds: 1,
+        endedAt: DateTime(2026, 6, 21, 10),
+      ),
+      PracticeSessionLog(
+        modeId: 0,
+        kind: PracticeKind.game,
+        roundsCompleted: 1,
+        correctRounds: 0,
+        endedAt: DateTime(2026, 5, 1, 10),
+      ),
+    ];
+
+    final week = filterHistoryByPeriod(
+      history,
+      StatsPeriod.days7,
+      now: now,
+    );
+    expect(week, hasLength(1));
+
+    final month = filterHistoryByPeriod(
+      history,
+      StatsPeriod.days30,
+      now: now,
+    );
+    expect(month, hasLength(1));
+
+    final all = filterHistoryByPeriod(
+      history,
+      StatsPeriod.all,
+      now: now,
+    );
+    expect(all, hasLength(2));
+  });
+
+  test('buildPracticeSummariesForPeriod usa 30 dias', () {
+    final now = DateTime(2026, 6, 21, 18);
+    final summaries = buildPracticeSummariesForPeriod(
+      const [],
+      period: StatsPeriod.days30,
+      now: now,
+    );
+    expect(summaries, hasLength(30));
+  });
 }

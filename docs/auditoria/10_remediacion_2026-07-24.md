@@ -294,42 +294,56 @@ Cierre del gap visual priorizado tras la auditoría de diseño:
 - Cluster saltable con reduced motion (preferencia + sistema).
 - `account_*` / `sync_diagnostics_card` migrados a `TogescColors`.
 - Landing sin emojis, hero de producto, `prefers-reduced-motion`.
-- Candado Pro del sync activado (`20260724223000`); usuarios con progreso
+- Candado Pro del sync activado (`20260725033417`); usuarios con progreso
   previo recibieron trial de 14 dias.
+- Build web publicada en [togesc.vercel.app](https://togesc.vercel.app)
+  (`63eb776`, Deploy Web `30142644096`).
+
+Inventario de lo que **sigue abierto**: 
+[11_estado_pendiente_2026-07-26.md](11_estado_pendiente_2026-07-26.md).
 
 ## Pendientes priorizados
+
+> Inventario vigente y criterios de cierre:
+> [11_estado_pendiente_2026-07-26.md](11_estado_pendiente_2026-07-26.md).
 
 ### P0 antes de activar pagos reales
 
 - Crear la Checkout Session de Stripe en el servidor; no aceptar
-  `client_reference_id` construido por el navegador.
-- Validar `app_user_id` de RevenueCat contra `auth.users`.
-- Convertir el control de idempotencia de webhooks en una operación atómica.
-- Añadir pruebas SQL de RLS y RPC, y pruebas Deno de webhooks.
-- Desplegar build Flutter con RPC de merge (DEPLOY-001).
+  `client_reference_id` construido por el navegador (SEC-006).
+- Validar `app_user_id` de RevenueCat / customer Stripe contra `auth.users`
+  (SEC-007).
+- Convertir el control de idempotencia de webhooks en una operación atómica
+  (SEC-008).
+- Añadir pruebas SQL de RLS y RPC, y pruebas Deno de webhooks (TEST-002).
+- Sandbox de pagos + sync web↔móvil (QA-001).
+- ~~Desplegar build Flutter con RPC de merge (DEPLOY-001).~~ ✅ 2026-07-25
 
 ### P1
 
-- Rate-limit y retención de analytics.
+- Rate-limit y retención de analytics (SEC-002).
+- Protección de contraseñas filtradas en Auth (AUTH-001).
 - Reportar a Sentry los errores manejados de sincronización, audio y pagos.
-- Sustituir los errores invisibles en las secciones de ajustes.
-- Pruebas E2E reales en Chrome y Android.
-- Verificar la restauración de copias de seguridad.
-- Completar la reducción de movimiento y los colores semánticos oscuros.
-- Activar la protección de contraseñas filtradas.
+- Sustituir los errores invisibles en las secciones de ajustes (UX-003).
+- Pruebas E2E reales en Chrome y Android (TEST-003).
+- Verificar la restauración de copias de seguridad (OPS-001).
+- Reduced motion residual (hover bento) y contraste medido / Lighthouse ≥ 90.
+- Observar CI→Deploy en un push ordinario a `main` (CI-003).
 
 ### P2
 
 - Migración progresiva de textos a ARB.
-- Medición de Lighthouse y presupuesto de rendimiento.
+- Medición de Lighthouse performance y presupuesto de bundle.
 - Pipeline de iOS.
 - `CONTRIBUTING.md` y política de commits.
 - Robots, sitemap y canonical de la web.
 
 ## Riesgos que no deben declararse resueltos
 
-- La nueva build de Flutter todavía no está desplegada.
-- El workflow encadenado CI a Deploy no se ha observado en una ejecución real.
+- ~~La nueva build de Flutter todavía no está desplegada.~~ ✅ publicada.
+- El workflow encadenado CI→Deploy **en push a `main`** no se ha observado
+  (sí hubo Deploy por `workflow_dispatch`).
 - No hay rate-limit efectivo de analytics.
 - No existe entitlement offline firmado.
 - No se ha medido Lighthouse ni el rendimiento en dispositivo.
+- Pagos reales sin Checkout server-side ni sandbox pasado.

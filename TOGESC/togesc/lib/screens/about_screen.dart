@@ -11,7 +11,7 @@ import '../widgets/info_views.dart';
 import '../widgets/pedagogy_section_card.dart';
 import '../widgets/togesc_ui.dart';
 
-/// Informacion del proyecto y enfoque pedagogico (Stitch about hub).
+/// Información del proyecto y enfoque pedagógico (Stitch about hub).
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
@@ -27,22 +27,22 @@ class AboutScreen extends ConsumerWidget {
         children: [
           const AboutHeroCard(),
           const SizedBox(height: DesignTokens.spacingLg),
-          const InfoSectionHeader(title: 'Como entrena la app'),
+          const InfoSectionHeader(title: 'Cómo entrena la app'),
           PedagogySectionCard(
             icon: Icons.psychology_rounded,
             accentColor: scheme.primaryContainer,
-            title: 'Repeticion espaciada (SRS)',
+            title: 'Repetición espaciada (SRS)',
             body:
-                'El sistema repite mas las notas que te cuestan y espacia las '
-                'que ya dominas. Asi consolidas memoria a largo plazo.',
+                'El sistema repite más las notas que te cuestan y espacia las '
+                'que ya dominas. Así consolidas memoria a largo plazo.',
           ),
           PedagogySectionCard(
             icon: Icons.tune_rounded,
             accentColor: scheme.secondary,
-            title: 'Variacion de octavas y timbres',
+            title: 'Variación de octavas y timbres',
             body:
                 'Las notas suenan en distintas octavas y timbres para que '
-                'aprendas la clase de altura (Do, Re, Mi...) y no una '
+                'aprendas la clase de altura (Do, Re, Mi…) y no una '
                 'frecuencia fija.',
           ),
           PedagogySectionCard(
@@ -50,47 +50,47 @@ class AboutScreen extends ConsumerWidget {
             accentColor: scheme.tertiary,
             title: 'Limpieza tonal',
             body:
-                'Tras cada ejercicio oiras un sonido caotico breve que rompe '
-                'el anclaje al tono anterior y favorece oido absoluto.',
+                'Tras cada ejercicio oirás un sonido caótico breve que rompe '
+                'el anclaje al tono anterior y favorece oído absoluto.',
           ),
           PedagogySectionCard(
             icon: Icons.music_note_rounded,
             accentColor: scheme.primary,
-            title: 'Modos de practica',
+            title: 'Modos de práctica',
             body:
                 'Una nota, intervalos, acordes, aleatorio y velocidad. '
-                'Piano interactivo, entrada por texto y estadisticas locales.',
+                'Piano interactivo, entrada por texto y estadísticas locales.',
           ),
           const SizedBox(height: DesignTokens.spacingMd),
-          const InfoSectionHeader(title: 'Enlaces utiles'),
+          const InfoSectionHeader(title: 'Enlaces útiles'),
           InfoLinkCard(
             icon: Icons.school_outlined,
             title: 'Ver tutorial de nuevo',
-            subtitle: 'Repasa como funciona el entrenamiento',
+            subtitle: 'Repasa cómo funciona el entrenamiento',
             onTap: () => _replayOnboarding(context),
           ),
           InfoLinkCard(
             icon: Icons.workspace_premium_outlined,
-            title: 'Suscripcion Pro',
-            subtitle: 'Planes, prueba gratis y gestion',
+            title: 'Suscripción Pro',
+            subtitle: 'Planes, prueba gratis y gestión',
             onTap: () => context.push(AppRoutes.subscription),
           ),
           InfoLinkCard(
             icon: Icons.person_outline,
-            title: 'Cuenta y sincronizacion',
+            title: 'Cuenta y sincronización',
             subtitle: 'Opcional — vincular progreso entre dispositivos',
             onTap: () => context.push(AppRoutes.account),
           ),
           InfoLinkCard(
             icon: Icons.privacy_tip_outlined,
-            title: 'Politica de privacidad',
+            title: 'Política de privacidad',
             subtitle: 'Datos locales y cuenta opcional',
             onTap: () => context.push(AppRoutes.privacy),
           ),
           const SizedBox(height: DesignTokens.spacingLg),
           Center(
             child: Text(
-              'Version 1.0.0 · Proyecto educativo open source',
+              'Versión 1.0.0 · Proyecto educativo open source',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),

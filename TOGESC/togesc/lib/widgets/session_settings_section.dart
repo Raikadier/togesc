@@ -20,7 +20,7 @@ class SessionSettingsSection extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Sesion de practica',
+              'Sesión de práctica',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -48,7 +48,7 @@ class SessionSettingsSection extends ConsumerWidget {
             const SizedBox(height: 8),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Continuar automaticamente'),
+              title: const Text('Continuar automáticamente'),
               subtitle: const Text(
                 'Tras cada resultado, pasa al cluster y a la siguiente ronda sin pulsar Siguiente.',
               ),

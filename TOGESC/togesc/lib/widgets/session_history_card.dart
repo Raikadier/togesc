@@ -3,12 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/design_tokens.dart';
 import '../app/togesc_colors.dart';
+import '../models/practice_session_log.dart';
 import '../providers/session_history_provider.dart';
 import 'togesc_ui.dart';
 
 /// Ultimas sesiones de practica guardadas localmente (Fase 7C-2).
 class SessionHistoryCard extends ConsumerWidget {
-  const SessionHistoryCard({super.key});
+  /// Si se pasa, usa esta lista en lugar del historial completo.
+  final List<PracticeSessionLog>? entries;
+
+  const SessionHistoryCard({super.key, this.entries});
 
   String _formatWhen(DateTime when) {
     final now = DateTime.now();
@@ -38,9 +42,10 @@ class SessionHistoryCard extends ConsumerWidget {
 
     return historyAsync.when(
       data: (history) {
-        if (history.isEmpty) return const SizedBox.shrink();
+        final source = entries ?? history;
+        if (source.isEmpty) return const SizedBox.shrink();
 
-        final recent = history.take(8).toList();
+        final recent = source.take(8).toList();
 
         return TogescCard(
           child: Column(

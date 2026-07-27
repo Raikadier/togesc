@@ -48,7 +48,7 @@ class ContinuePracticeCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Continuar practica',
+                  'Continuar práctica',
                   style: theme.textTheme.titleLarge,
                 ),
               ),

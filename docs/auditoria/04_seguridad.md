@@ -2,16 +2,21 @@
 
 Estándares: OWASP Mobile Top 10, deny-by-default, tokens cortos + refresh, no service_role en cliente, validación server-side (qstd §3.3, §13.3).
 
-> **Actualización 2026-07-24:** esta página conserva el hallazgo original.
-> MON-001 quedó corregido y se descubrió un problema más grave: las políticas
-> permitían que el cliente escribiera su propio entitlement. La solución vigente
-> está en [10_remediacion_2026-07-24.md](10_remediacion_2026-07-24.md).
+> **Actualización 2026-07-26:** entitlements, merge atómico, candado Pro del
+> sync y deploy web están en producción. Lo que sigue abierto (Checkout,
+> webhooks, sandbox) está en
+> [11_estado_pendiente_2026-07-26.md](11_estado_pendiente_2026-07-26.md).
+> Historial de remediación:
+> [10_remediacion_2026-07-24.md](10_remediacion_2026-07-24.md).
 
 ## Lo que está bien (no tocar)
 - **PKCE** en `Supabase.initialize` ([`main.dart:43`](../../TOGESC/togesc/lib/main.dart#L43)).
 - `service_role` **solo** en Edge Functions (`Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")`); el cliente usa `anonKey` publishable. Correcto.
 - Verificación de firma Stripe con `stripe.webhooks.constructEvent`. Correcto.
 - RLS como autorización primaria (ver [03_backend_datos.md](03_backend_datos.md)).
+- Escritura de `user_subscriptions` revocada a `authenticated`; trial vía
+  `start_subscription_trial()`.
+- Sync en la nube gated por `has_cloud_sync_access()` (Pro vigente).
 
 ---
 
@@ -35,9 +40,9 @@ La monetización depende de este guard. Fail-open convierte el paywall en opcion
 - [ ] Diseñar entitlement offline firmado si el producto lo requiere.
 
 ### Observación complementaria (no bloqueante)
-`SubscriptionAccess` sigue siendo presentación cliente. La nueva
-`merge_user_progress()` exige Pro activo en servidor, por lo que el flag local
-no concede acceso a datos remotos.
+`SubscriptionAccess` sigue siendo presentación cliente. La función
+`has_cloud_sync_access()` / `merge_user_progress()` exige Pro activo en
+servidor, por lo que el flag local no concede acceso a datos remotos.
 
 ## SEC-003 — Escalada de privilegios Pro — CORREGIDO EN MIGRACIÓN
 

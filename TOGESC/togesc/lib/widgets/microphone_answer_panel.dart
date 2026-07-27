@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../app/design_tokens.dart';
 import '../services/microphone_pitch_service.dart';
 import 'togesc_ui.dart';
 
@@ -36,7 +35,7 @@ class _MicrophoneAnswerPanelState extends State<MicrophoneAnswerPanel> {
       await MicrophonePitchService.stopListening();
       setState(() {
         _listening = false;
-        _status = 'Microfono detenido.';
+        _status = 'Micrófono detenido.';
       });
       return;
     }
@@ -58,6 +57,8 @@ class _MicrophoneAnswerPanelState extends State<MicrophoneAnswerPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return TogescCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -67,8 +68,8 @@ class _MicrophoneAnswerPanelState extends State<MicrophoneAnswerPanel> {
               Icon(
                 Icons.mic_rounded,
                 color: _listening
-                    ? DesignTokens.primaryContainer
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ? scheme.primary
+                    : scheme.onSurfaceVariant,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -83,7 +84,7 @@ class _MicrophoneAnswerPanelState extends State<MicrophoneAnswerPanel> {
           Text(
             MicrophonePitchService.isSupported
                 ? 'Canta o tararea la nota. El audio no se sube a internet.'
-                : 'Disponible en web. En movil usa piano o texto por ahora.',
+                : 'Disponible en web. En móvil usa piano o texto por ahora.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (_status != null) ...[
@@ -91,7 +92,7 @@ class _MicrophoneAnswerPanelState extends State<MicrophoneAnswerPanel> {
             Text(
               _status!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: DesignTokens.primaryContainer,
+                    color: scheme.primary,
                   ),
             ),
           ],
@@ -100,7 +101,7 @@ class _MicrophoneAnswerPanelState extends State<MicrophoneAnswerPanel> {
             onPressed:
                 MicrophonePitchService.isSupported ? _toggleListening : null,
             icon: Icon(_listening ? Icons.stop_rounded : Icons.mic_none_rounded),
-            label: Text(_listening ? 'Detener microfono' : 'Escuchar nota'),
+            label: Text(_listening ? 'Detener micrófono' : 'Escuchar nota'),
           ),
           const SizedBox(height: 8),
           OutlinedButton.icon(

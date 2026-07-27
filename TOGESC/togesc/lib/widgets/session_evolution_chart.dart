@@ -24,10 +24,10 @@ class SessionEvolutionChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Evolucion 7 dias', style: theme.textTheme.titleLarge),
+          Text('Evolución 7 días', style: theme.textTheme.titleLarge),
           const SizedBox(height: 4),
           Text(
-            'Precision diaria y rondas practicadas (historial local).',
+            'Precisión diaria y rondas practicadas (historial local).',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

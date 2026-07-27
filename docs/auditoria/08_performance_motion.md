@@ -1,5 +1,9 @@
 # Performance y motion
 
+> **Actualización 2026-07-26:** piano y cluster respetan reduced motion.
+> Residual (hover bento, Lighthouse):
+> [11_estado_pendiente_2026-07-26.md](11_estado_pendiente_2026-07-26.md).
+
 Estándares: Core Web Vitals, 60 fps, GPU-friendly motion, prefers-reduced-motion (qstd §2.5, §9.5, §11.7).
 
 ## Lo que está bien (no tocar)

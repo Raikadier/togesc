@@ -39,7 +39,7 @@ void main() {
     expect(find.text('TOGESC'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
 
-    await tester.tap(find.text('Stats'));
+    await tester.tap(find.text('Estadísticas'));
     await tester.pumpAndSettle();
 
     expect(find.byType(StatisticsScreen), findsOneWidget);
@@ -57,12 +57,28 @@ void main() {
   testWidgets('tab practica vuelve a home', (tester) async {
     await pumpMobileShell(tester);
 
-    await tester.tap(find.text('Stats'));
+    await tester.tap(find.text('Estadísticas'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Practica'));
+    await tester.tap(find.text('Práctica'));
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeScreen), findsOneWidget);
+  });
+
+  testWidgets('shell wide muestra NavigationRail', (tester) async {
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp.router(routerConfig: buildRouter()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
   });
 }

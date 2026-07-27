@@ -104,7 +104,7 @@ class StatsBentoHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'PRECISION GLOBAL',
+            'PRECISIÓN GLOBAL',
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.outline,
               letterSpacing: 1,
@@ -118,7 +118,14 @@ class StatsBentoHeader extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: DesignTokens.spacingMd),
+          const SizedBox(height: DesignTokens.spacingSm),
+          Text(
+            'Progreso hacia meta (90%)',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spacingXs),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
@@ -126,6 +133,16 @@ class StatsBentoHeader extends StatelessWidget {
               minHeight: 8,
               backgroundColor: scheme.surfaceContainerHigh,
               color: scheme.primary,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spacingXs),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '${(goalProgress * 100).round()}%',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: scheme.outline,
+              ),
             ),
           ),
         ],

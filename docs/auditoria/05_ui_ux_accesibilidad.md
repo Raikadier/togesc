@@ -1,8 +1,13 @@
 # UI/UX y accesibilidad
 
+> **Actualización 2026-07-26:** UX-001 (tokens dark semánticos) y A11Y-002
+> parcial (piano + cluster) cerrados en código. Pendiente contraste medido,
+> Lighthouse y motion residual:
+> [11_estado_pendiente_2026-07-26.md](11_estado_pendiente_2026-07-26.md).
+
 Estándares: WCAG 2.2 AA, WAI-ARIA, Material Design 3, NN/g, leyes de Fitts/Hick (qstd §1, §2.4, §11.6).
 
-> **Actualización 2026-07-24:** A11Y-001 quedó corregido después de la
+> **Nota 2026-07-24:** A11Y-001 quedó corregido después de la
 > auditoría original. El piano actual incluye Semantics, foco, teclado,
 > indicadores ✓/✗ y área táctil negra de 48 dp.
 

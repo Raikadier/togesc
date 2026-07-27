@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Modo de entrada de respuesta en sesion de juego.
 enum GameInputMode {
-  both('Ambos', 'Piano y campo de texto'),
+  both('Ambos', 'Piano principal; texto opcional como alternativa'),
   pianoOnly('Solo piano', 'Toca las teclas para responder'),
   textOnly('Solo texto', 'Escribe las notas con el teclado'),
   humming('Canto / tarareo', 'Experimental: responde cantando o tarareando');

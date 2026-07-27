@@ -11,11 +11,10 @@ import '../providers/audio_provider.dart';
 import '../providers/router_provider.dart';
 import '../services/app_preferences.dart';
 import '../widgets/audio_test_button.dart';
-import '../widgets/home_hub_views.dart';
-import '../widgets/pedagogy_section_card.dart';
+import '../widgets/onboarding_views.dart';
 import '../widgets/togesc_ui.dart';
 
-/// Introduccion pedagogica: por que SRS, octavas y cluster de limpieza.
+/// Introducción pedagógica: por qué SRS, octavas y cluster de limpieza.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -28,7 +27,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final wide =
         MediaQuery.sizeOf(context).width >= DesignTokens.shellBreakpoint;
     final margin = wide
@@ -36,7 +34,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         : DesignTokens.marginMobile;
 
     return TogescScaffold(
-      title: 'Como funciona',
+      title: 'Cómo funciona',
       automaticallyImplyLeading: false,
       body: ListView(
         padding: EdgeInsets.all(margin),
@@ -50,83 +48,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const OnboardingWelcomeHeader(),
+                  const SizedBox(height: DesignTokens.spacingLg * 2),
+                  const OnboardingPedagogyBento(),
+                  const SizedBox(height: DesignTokens.spacingLg * 2),
+                  const OnboardingVisualHero(),
+                  const SizedBox(height: DesignTokens.spacingLg * 2),
+                  OnboardingSetupCard(
+                    useSolfege: _useSolfege,
+                    onSolfegeChanged: (value) =>
+                        setState(() => _useSolfege = value),
+                    audioTest: const AudioTestButton(outlined: false),
+                  ),
+                  const SizedBox(height: DesignTokens.spacingLg * 2),
+                  OnboardingStartCta(onPressed: () => _complete(context)),
                   const SizedBox(height: DesignTokens.spacingLg),
-                  PedagogySectionCard(
-                    icon: Icons.psychology_rounded,
-                    accentColor: scheme.primaryContainer,
-                    title: 'Repeticion espaciada (SRS)',
-                    body:
-                        'El sistema repite mas las notas que te cuestan y espacia las que '
-                        'ya dominas. Asi consolidas memoria a largo plazo, no memorizacion '
-                        'de un dia.',
-                  ),
-                  PedagogySectionCard(
-                    icon: Icons.tune_rounded,
-                    accentColor: scheme.secondary,
-                    title: 'Variacion de octavas y timbres',
-                    body:
-                        'Las notas suenan en distintas octavas y con distintos colores '
-                        'timbrales para que aprendas la clase de altura (Do, Re, Mi...) '
-                        'y no una frecuencia fija en Hz.',
-                  ),
-                  PedagogySectionCard(
-                    icon: Icons.blur_on_rounded,
-                    accentColor: scheme.tertiary,
-                    title: 'Limpieza tonal',
-                    body:
-                        'Tras cada ejercicio oiras un sonido caotico breve que rompe el '
-                        'anclaje al tono anterior. Asi entrenas identificacion absoluta, '
-                        'no memoria relativa entre ejercicios.',
-                  ),
-                  const SizedBox(height: DesignTokens.spacingMd),
-                  TogescCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('Notacion Do/Re/Mi'),
-                          subtitle: const Text(
-                            'Puedes cambiarlo despues en Ajustes.',
+                  Center(
+                    child: Text(
+                      'TOGESC',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant
+                                .withValues(alpha: 0.35),
+                            letterSpacing: 1.5,
                           ),
-                          value: _useSolfege,
-                          onChanged: (value) =>
-                              setState(() => _useSolfege = value),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Vista previa',
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _useSolfege
-                              ? const ['Do', 'Re', 'Mi', 'Fa', 'Sol']
-                                    .map((note) => Chip(label: Text(note)))
-                                    .toList()
-                              : const ['C', 'D', 'E', 'F', 'G']
-                                    .map((note) => Chip(label: Text(note)))
-                                    .toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: DesignTokens.spacingMd),
-                  const AudioTestButton(outlined: false),
-                  const SizedBox(height: DesignTokens.spacingLg),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => _complete(context),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: DesignTokens.borderRadiusXl,
-                        ),
-                      ),
-                      child: const Text('Entendido, empezar'),
                     ),
                   ),
                 ],

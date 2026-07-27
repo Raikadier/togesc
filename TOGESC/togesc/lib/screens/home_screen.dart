@@ -6,6 +6,7 @@ import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../constants/subscription_constants.dart';
+import '../models/practice_session_log.dart';
 import '../models/subscription_status.dart';
 import '../providers/audio_provider.dart';
 import '../providers/engagement_stats_provider.dart';
@@ -21,9 +22,19 @@ import '../widgets/togesc_ui.dart';
 import '../providers/session_history_provider.dart';
 import '../utils/session_history_stats.dart';
 
-/// Pantalla principal con menu de modos de juego y recomendaciones.
-class HomeScreen extends ConsumerWidget {
+/// Pantalla principal: enfoque académico (qué practicar hoy) antes que gamificación.
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final _modesGridKey = GlobalKey<ModeBentoGridState>();
+  bool _modesExpanded = false;
+  List<PracticeSessionLog>? _cachedHistory;
+  List<DayPracticeSummary>? _cachedWeekly;
 
   static const _modes = [
     (
@@ -37,21 +48,21 @@ class HomeScreen extends ConsumerWidget {
       GameMode.interval,
       Icons.music_note_outlined,
       'Intervalo (2 notas)',
-      'Identifica dos notas simultaneas',
+      'Identifica dos notas simultáneas',
       false,
     ),
     (
       GameMode.chord,
       Icons.piano_rounded,
       'Acorde (3 notas)',
-      'Identifica tres notas simultaneas',
+      'Identifica tres notas simultáneas',
       true,
     ),
     (
       GameMode.random,
-      Icons.casino_rounded,
+      Icons.shuffle_rounded,
       'Aleatorio (1-5 notas)',
-      'Numero aleatorio de notas',
+      'Número aleatorio de notas',
       true,
     ),
     (
@@ -64,13 +75,17 @@ class HomeScreen extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final lastPractice = ref.watch(lastPracticeSessionProvider).valueOrNull;
     final status = ref.watch(subscriptionStatusProvider).valueOrNull;
     final effectiveStatus = status ?? const SubscriptionStatus.free();
     final engagement = ref.watch(engagementStatsProvider);
     final history = ref.watch(sessionHistoryProvider).valueOrNull ?? [];
-    final weeklySummaries = buildDailyPracticeSummaries(history);
+    if (!identical(history, _cachedHistory)) {
+      _cachedHistory = history;
+      _cachedWeekly = buildDailyPracticeSummaries(history);
+    }
+    final weeklySummaries = _cachedWeekly ?? const <DayPracticeSummary>[];
     final hasWeeklyActivity = weeklySummaries.any((d) => d.hasActivity);
 
     void openGame(String route, GameMode mode) {
@@ -125,18 +140,25 @@ class HomeScreen extends ConsumerWidget {
       ),
     ];
 
+    final hiddenProCount = bentoModes.where((m) => m.isPro).length;
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      body: TogescPageBody(
-        child: Column(
+      body: SafeArea(
+        top: false,
+        child: TogescPageBody(
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Entrenador de Oido Absoluto',
+              'Entrenador de Oído Absoluto',
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
+            const PracticeStreakLabel(),
             const SizedBox(height: DesignTokens.spacingLg),
+            const DailyFocusSection(),
             if (lastPractice != null && lastPractice.mode != null) ...[
               ContinuePracticeCard(
                 session: lastPractice,
@@ -153,19 +175,62 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: DesignTokens.spacingLg),
             ],
-            const DailyFocusSection(),
-            const SizedBox(height: DesignTokens.spacingLg),
-            const HomeSectionHeader(
-              title: 'Modos de Juego',
-              subtitle:
-                  'Selecciona un ejercicio para comenzar tu entrenamiento.',
+            HomeSectionHeader(
+              title: 'Modos de juego',
+              subtitle: _modesExpanded
+                  ? 'Todos los ejercicios, con free primero y Pro después.'
+                  : 'Empieza por los ejercicios básicos. Los modos Pro están en Ver todos.',
+              trailing: hiddenProCount > 0
+                  ? TextButton(
+                      onPressed: () {
+                        final state = _modesGridKey.currentState;
+                        if (state == null) return;
+                        state.toggle();
+                        setState(() => _modesExpanded = state.expanded);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: scheme.primary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: DesignTokens.spacingSm,
+                        ),
+                        minimumSize: const Size(
+                          DesignTokens.touchTargetMin,
+                          DesignTokens.touchTargetMin,
+                        ),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _modesExpanded
+                                ? 'Ver menos'
+                                : 'Ver todos ($hiddenProCount)',
+                          ),
+                          Icon(
+                            _modesExpanded
+                                ? Icons.expand_less_rounded
+                                : Icons.arrow_forward_rounded,
+                            size: 18,
+                          ),
+                        ],
+                      ),
+                    )
+                  : null,
             ),
-            ModeBentoGrid(modes: bentoModes),
+            ModeBentoGrid(
+              key: _modesGridKey,
+              modes: bentoModes,
+              onExpandedChanged: (expanded) {
+                setState(() => _modesExpanded = expanded);
+              },
+            ),
             if (hasWeeklyActivity) ...[
               const SizedBox(height: DesignTokens.spacingLg),
               SessionEvolutionChart(summaries: weeklySummaries),
             ],
           ],
+          ),
         ),
       ),
     );

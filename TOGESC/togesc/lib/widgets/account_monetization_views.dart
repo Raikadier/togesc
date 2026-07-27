@@ -159,9 +159,9 @@ class ProLockedFeatureCard extends StatelessWidget {
           Icons.lock_outline_rounded,
           color: scheme.secondary,
         ),
-        title: const Text('Estadisticas avanzadas (Pro)'),
+        title: const Text('Estadísticas avanzadas (Pro)'),
         subtitle: const Text(
-          'Notas mas dificiles y mas faciles con TOGESC Pro.',
+          'Notas más difíciles y más fáciles con TOGESC Pro.',
         ),
         trailing: Icon(
           Icons.chevron_right_rounded,
@@ -356,63 +356,90 @@ class PaywallHero extends StatelessWidget {
     return Column(
       children: [
         Container(
+          width: double.infinity,
           padding: const EdgeInsets.symmetric(
-            horizontal: DesignTokens.spacingMd,
-            vertical: DesignTokens.spacingXs,
+            vertical: DesignTokens.spacingLg * 2,
+            horizontal: DesignTokens.spacingLg,
           ),
           decoration: BoxDecoration(
-            gradient: DesignTokens.proGradient,
             borderRadius: DesignTokens.borderRadiusXl,
-          ),
-          child: Text(
-            'TOGESC PRO',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: DesignTokens.onPrimary,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                scheme.primaryContainer.withValues(alpha: 0.2),
+                scheme.secondaryContainer.withValues(alpha: 0.18),
+                scheme.surfaceContainerLow,
+              ],
+            ),
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: 0.4),
             ),
           ),
-        ),
-        const SizedBox(height: DesignTokens.spacingLg),
-        Container(
-          width: 88,
-          height: 88,
-          decoration: BoxDecoration(
-            gradient: DesignTokens.proGradient,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: scheme.primaryContainer.withValues(alpha: 0.25),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DesignTokens.spacingMd,
+                  vertical: DesignTokens.spacingXs,
+                ),
+                decoration: BoxDecoration(
+                  gradient: DesignTokens.proGradient,
+                  borderRadius: DesignTokens.borderRadiusXl,
+                ),
+                child: Text(
+                  'TOGESC PRO',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: DesignTokens.onPrimary,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spacingLg),
+              Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  gradient: DesignTokens.proGradient,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: scheme.shadow.withValues(alpha: 0.12),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.workspace_premium_rounded,
+                  size: 44,
+                  color: DesignTokens.onPrimary,
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spacingLg),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: scheme.primary,
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spacingMd),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  height: 1.4,
+                ),
               ),
             ],
-          ),
-          child: const Icon(
-            Icons.workspace_premium_rounded,
-            size: 44,
-            color: DesignTokens.onPrimary,
-          ),
-        ),
-        const SizedBox(height: DesignTokens.spacingLg),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: scheme.primary,
-          ),
-        ),
-        const SizedBox(height: DesignTokens.spacingMd),
-        Text(
-          subtitle,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: scheme.onSurfaceVariant,
-            height: 1.4,
           ),
         ),
       ],
     );
   }
 }
+

@@ -41,14 +41,14 @@ class PracticeSettingsSection extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Preferencias de practica',
+                'Preferencias de práctica',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               namingAsync.when(
               data: (mode) => SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Notacion Do/Re/Mi'),
+                title: const Text('Notación Do/Re/Mi'),
                 subtitle: const Text(
                   'Muestra solfeo en el piano y acepta respuestas en solfeo.',
                 ),
@@ -68,7 +68,7 @@ class PracticeSettingsSection extends ConsumerWidget {
                 title: const Text('Recordatorios de repaso'),
                 subtitle: Text(
                   PracticeReminderService.isSupported
-                      ? 'Notificacion local si tienes notas vencidas.'
+                      ? 'Notificación local si tienes notas vencidas.'
                       : 'Disponible en Android e iOS.',
                 ),
                 value: enabled && PracticeReminderService.isSupported,

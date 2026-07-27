@@ -24,13 +24,13 @@ class NotePoolSettingsSection extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Notas en practica',
+              'Notas en práctica',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              'Elige que alturas pueden salir en los modos generales '
-              '(minimo 1). Los modos especiales siguen sus propias reglas.',
+              'Elige qué alturas pueden salir en los modos generales '
+              '(mínimo 1). Los modos especiales siguen sus propias reglas.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),

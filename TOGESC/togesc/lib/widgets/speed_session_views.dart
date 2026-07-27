@@ -8,8 +8,13 @@ import 'game_session_views.dart';
 /// Vista idle del modo velocidad.
 class SpeedSessionIdleView extends StatelessWidget {
   final VoidCallback onStart;
+  final double initialTime;
 
-  const SpeedSessionIdleView({super.key, required this.onStart});
+  const SpeedSessionIdleView({
+    super.key,
+    required this.onStart,
+    this.initialTime = speedInitialTime,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +24,8 @@ class SpeedSessionIdleView extends StatelessWidget {
       icon: Icons.speed_rounded,
       accentColor: speed,
       iconGradient: DesignTokens.speedGradient,
-      title: 'Listo para el desafio',
-      subtitle: 'Tiempo inicial: ${speedInitialTime.toStringAsFixed(0)}s',
+      title: 'Listo para el desafío',
+      subtitle: 'Tiempo inicial: ${initialTime.toStringAsFixed(0)}s',
       footer: FilledButton.icon(
         onPressed: onStart,
         style: FilledButton.styleFrom(
@@ -142,7 +147,7 @@ class SpeedSessionSummaryCard extends StatelessWidget {
             value: '${bestTime.toStringAsFixed(2)}s',
           ),
           _StatRow(
-            label: 'Tiempo limite',
+            label: 'Tiempo límite',
             value: '${timeLimit.toStringAsFixed(1)}s',
           ),
         ],
@@ -210,7 +215,7 @@ class SpeedSessionRetryActions extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: onMenu,
             icon: const Icon(Icons.home_rounded),
-            label: const Text('Menu'),
+            label: const Text('Menú'),
           ),
         ),
       ],
@@ -219,11 +224,16 @@ class SpeedSessionRetryActions extends StatelessWidget {
 }
 
 /// Opción de modo en el selector de velocidad (bento Stitch).
+enum SpeedModeCardVariant { standard, chaos, darkKeys }
+
 class SpeedModeOptionCard extends StatelessWidget {
   final String title;
   final String? subtitle;
   final IconData icon;
   final VoidCallback onTap;
+  final SpeedModeCardVariant variant;
+  final bool compact;
+  final bool showCta;
 
   const SpeedModeOptionCard({
     super.key,
@@ -231,6 +241,9 @@ class SpeedModeOptionCard extends StatelessWidget {
     this.subtitle,
     required this.icon,
     required this.onTap,
+    this.variant = SpeedModeCardVariant.standard,
+    this.compact = false,
+    this.showCta = true,
   });
 
   @override
@@ -238,70 +251,111 @@ class SpeedModeOptionCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final speed = TogescColors.of(context);
+    final isChaos = variant == SpeedModeCardVariant.chaos;
+    final isDark = variant == SpeedModeCardVariant.darkKeys;
+    final onCard = isChaos || isDark ? Colors.white : scheme.onSurface;
+    final onMuted = isChaos || isDark
+        ? Colors.white.withValues(alpha: 0.85)
+        : scheme.onSurfaceVariant;
+    final ctaColor = isChaos || isDark ? Colors.white : speed.speedAccent;
+    final iconBg = isChaos
+        ? Colors.white.withValues(alpha: 0.2)
+        : isDark
+        ? Colors.white.withValues(alpha: 0.1)
+        : speed.speedContainer;
+    final iconColor = isChaos
+        ? Colors.white
+        : isDark
+        ? speed.speedAccent
+        : speed.speedAccent;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: DesignTokens.spacingMd),
+    return Semantics(
+      button: true,
+      label: title,
+      hint: subtitle,
       child: Material(
-        color: scheme.surfaceContainerLowest,
+        color: Colors.transparent,
         borderRadius: DesignTokens.borderRadiusXl,
         child: InkWell(
           onTap: onTap,
           borderRadius: DesignTokens.borderRadiusXl,
-          child: Container(
-            padding: const EdgeInsets.all(DesignTokens.spacingLg),
+          child: Ink(
             decoration: BoxDecoration(
               borderRadius: DesignTokens.borderRadiusXl,
+              gradient: isChaos ? DesignTokens.speedGradient : null,
+              color: isChaos
+                  ? null
+                  : isDark
+                  ? DesignTokens.pianoBlack
+                  : scheme.surfaceContainerLowest,
               border: Border.all(
-                color: scheme.outlineVariant.withValues(alpha: 0.6),
+                color: isChaos || isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : scheme.outlineVariant.withValues(alpha: 0.6),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: speed.speedContainer,
-                    borderRadius: DesignTokens.borderRadiusMd,
-                  ),
-                  child: Icon(icon, color: speed.speedAccent),
-                ),
-                const SizedBox(height: DesignTokens.spacingMd),
-                Text(
-                  title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: DesignTokens.spacingXs),
-                  Text(
-                    subtitle!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
+            child: Padding(
+              padding: EdgeInsets.all(
+                compact ? DesignTokens.spacingMd : DesignTokens.spacingLg,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: compact ? 40 : 48,
+                    height: compact ? 40 : 48,
+                    decoration: BoxDecoration(
+                      color: iconBg,
+                      borderRadius: DesignTokens.borderRadiusMd,
                     ),
+                    child: Icon(icon, color: iconColor),
                   ),
-                ],
-                const SizedBox(height: DesignTokens.spacingMd),
-                Row(
-                  children: [
+                  SizedBox(
+                    height: compact
+                        ? DesignTokens.spacingSm
+                        : DesignTokens.spacingMd,
+                  ),
+                  Text(
+                    title,
+                    style:
+                        (compact
+                                ? theme.textTheme.titleLarge
+                                : theme.textTheme.headlineSmall)
+                            ?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: onCard,
+                            ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: DesignTokens.spacingXs),
                     Text(
-                      'Empieza ahora',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: speed.speedAccent,
-                        fontWeight: FontWeight.w700,
+                      subtitle!,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: onMuted,
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: speed.speedAccent,
-                      size: 20,
+                  ],
+                  if (showCta) ...[
+                    const SizedBox(height: DesignTokens.spacingMd),
+                    Row(
+                      children: [
+                        Text(
+                          'Empieza ahora',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: ctaColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: ctaColor,
+                          size: 20,
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -352,8 +406,8 @@ class SpeedSessionAnswerHeader extends StatelessWidget {
         const SizedBox(height: DesignTokens.spacingMd),
         Text(
           numNotes == 1
-              ? 'Que nota escuchaste?'
-              : 'Que nota(s) escuchaste? ($numNotes)',
+              ? '¿Qué nota escuchaste?'
+              : '¿Qué nota(s) escuchaste? ($numNotes)',
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),

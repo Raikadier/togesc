@@ -5,8 +5,8 @@ import 'dart:math';
 
 enum GameMode {
   singleNote(1, 'Una sola nota'),
-  interval(2, 'Dos notas simultaneas (Intervalo)'),
-  chord(3, 'Tres notas simultaneas (Acorde)'),
+  interval(2, 'Dos notas simultáneas (Intervalo)'),
+  chord(3, 'Tres notas simultáneas (Acorde)'),
   random(4, 'Aleatorio (1 a 5 notas)'),
   sharpsOnly(5, 'Solo sostenidos (C#/Db, D#/Eb...)'),
   exit(6, 'Salir'),
@@ -23,6 +23,18 @@ enum GameMode {
     }
     return null;
   }
+}
+
+/// Nivel de dificultad del modo velocidad (tiempo inicial).
+enum SpeedDifficulty {
+  easy(15.0, 'Fácil'),
+  pro(10.0, 'Pro'),
+  elite(5.0, 'Elite');
+
+  const SpeedDifficulty(this.initialTime, this.label);
+
+  final double initialTime;
+  final String label;
 }
 
 // Limites para modo aleatorio

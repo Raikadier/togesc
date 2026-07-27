@@ -9,6 +9,7 @@ import '../providers/app_preferences_provider.dart';
 import '../providers/audio_provider.dart';
 import '../models/last_practice_session.dart';
 import '../providers/session_history_provider.dart';
+import '../providers/speed_difficulty_provider.dart';
 import '../providers/speed_session_provider.dart';
 import '../utils/piano_note_selection.dart';
 import '../widgets/countdown_timer_widget.dart';
@@ -43,7 +44,10 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(speedSessionProvider.notifier).setTargetMode(widget.targetMode);
+      final initial = ref.read(speedDifficultyProvider).initialTime;
+      ref
+          .read(speedSessionProvider.notifier)
+          .setTargetMode(widget.targetMode, initialTime: initial);
     });
   }
 
@@ -145,7 +149,11 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
             ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(DesignTokens.marginMobile),
+              padding: EdgeInsets.all(
+                MediaQuery.sizeOf(context).width >= DesignTokens.shellBreakpoint
+                    ? DesignTokens.marginDesktop
+                    : DesignTokens.marginMobile,
+              ),
               child: _buildContent(session),
             ),
           ),
@@ -157,7 +165,10 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
   Widget _buildContent(SpeedSessionState session) {
     switch (session.state) {
       case SpeedState.idle:
-        return SpeedSessionIdleView(onStart: _startRound);
+        return SpeedSessionIdleView(
+          onStart: _startRound,
+          initialTime: session.sessionInitialTime,
+        );
       case SpeedState.playing:
         return SpeedSessionListeningView(numNotes: _requiredNotes(session));
       case SpeedState.waitingForAnswer:
@@ -261,9 +272,9 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     return SpeedSessionFeedbackView(
       icon: Icons.check_circle_rounded,
       accentColor: TogescColors.of(context).correct,
-      title: 'CORRECTO!',
+      title: '¡CORRECTO!',
       subtitle:
-          'Tiempo limite: ${session.currentTimeLimit.toStringAsFixed(1)}s',
+          'Tiempo límite: ${session.currentTimeLimit.toStringAsFixed(1)}s',
       footer: FilledButton.icon(
         onPressed: _startRound,
         icon: const Icon(Icons.skip_next_rounded),
@@ -309,7 +320,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
           SpeedSessionFeedbackView(
             icon: Icons.timer_off_rounded,
             accentColor: TogescColors.of(context).selection,
-            title: 'TIEMPO AGOTADO!',
+            title: '¡TIEMPO AGOTADO!',
             subtitle: 'Las notas eran: ${session.currentNotes.join(", ")}',
           ),
           if (session.responseTimes.isNotEmpty) ...[
@@ -337,7 +348,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
       child: Column(
         children: [
           Text(
-            'Fin de sesion',
+            'Fin de sesión',
             style: Theme.of(context).textTheme.headlineMedium,
             textAlign: TextAlign.center,
           ),

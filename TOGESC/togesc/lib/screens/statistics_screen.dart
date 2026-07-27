@@ -23,12 +23,19 @@ import '../widgets/stats_bento_grid.dart';
 import '../widgets/stats_free_dashboard.dart';
 import '../widgets/togesc_ui.dart';
 
-/// Pantalla de estadisticas del sistema SRS (dashboard Stitch).
-class StatisticsScreen extends ConsumerWidget {
+/// Pantalla de estadísticas del sistema SRS (dashboard Stitch).
+class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StatisticsScreen> createState() => _StatisticsScreenState();
+}
+
+class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
+  StatsPeriod _period = StatsPeriod.days7;
+
+  @override
+  Widget build(BuildContext context) {
     final srsState = ref.watch(srsSystemProvider);
     if (srsState.isLoading && !srsState.hasValue) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -72,8 +79,12 @@ class StatisticsScreen extends ConsumerWidget {
     final totalNotes = stats['total_notes'] as int? ?? 12;
     final overdueCount = stats['overdue_count'] as int? ?? 0;
     final history = ref.watch(sessionHistoryProvider).valueOrNull ?? [];
-    final weeklySummaries = buildDailyPracticeSummaries(history);
-    final hasWeeklyActivity = weeklySummaries.any((day) => day.hasActivity);
+    final filteredHistory = filterHistoryByPeriod(history, _period);
+    final weeklySummaries = buildPracticeSummariesForPeriod(
+      history,
+      period: _period,
+    );
+    final hasPeriodActivity = weeklySummaries.any((day) => day.hasActivity);
 
     final sortedByAccuracy = List.of(summaries)
       ..sort((a, b) => a.accuracyPercent.compareTo(b.accuracyPercent));
@@ -83,133 +94,216 @@ class StatisticsScreen extends ConsumerWidget {
     final colors = TogescColors.of(context);
 
     return Scaffold(
-      body: TogescPageBody(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            StatsDashboardHeader(isPro: advancedStats),
-            const SizedBox(height: DesignTokens.spacingLg),
-            StatsBentoHeader(
-              accuracy: accuracy,
-              totalSeen: totalSeen,
-              overdueCount: overdueCount,
-              onReviewNow: () => startReviewPractice(context, ref),
-            ),
-            const SizedBox(height: DesignTokens.spacingLg),
-            TogescCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Estado del dominio',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: DesignTokens.spacingMd),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _DomainStatBox(
-                          label: 'En aprendizaje',
-                          value: '$learningPhase/$totalNotes',
-                          color: scheme.secondary,
-                        ),
+      body: SafeArea(
+        top: false,
+        child: TogescPageBody(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              StatsDashboardHeader(isPro: advancedStats),
+              const SizedBox(height: DesignTokens.spacingMd),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SegmentedButton<StatsPeriod>(
+                  segments: [
+                    for (final p in StatsPeriod.values)
+                      ButtonSegment(
+                        value: p,
+                        label: Text(p.label),
                       ),
-                      const SizedBox(width: DesignTokens.spacingMd),
-                      Expanded(
-                        child: _DomainStatBox(
-                          label: 'Dominadas',
-                          value: '$graduated/$totalNotes',
-                          color: colors.correct,
+                  ],
+                  selected: {_period},
+                  onSelectionChanged: (next) {
+                    if (next.isEmpty) return;
+                    setState(() => _period = next.first);
+                  },
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spacingSm),
+              Text(
+                'El filtro aplica al gráfico de evolución y al historial. '
+                'Precisión e intentos reflejan el progreso SRS acumulado.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spacingLg),
+              StatsBentoHeader(
+                accuracy: accuracy,
+                totalSeen: totalSeen,
+                overdueCount: overdueCount,
+                onReviewNow: () => startReviewPractice(context, ref),
+              ),
+              const SizedBox(height: DesignTokens.spacingLg),
+              TogescCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Estado del dominio',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: DesignTokens.spacingMd),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _DomainStatBox(
+                            label: 'En aprendizaje',
+                            value: '$learningPhase/$totalNotes',
+                            color: scheme.secondary,
+                          ),
                         ),
+                        const SizedBox(width: DesignTokens.spacingMd),
+                        Expanded(
+                          child: _DomainStatBox(
+                            label: 'Dominadas',
+                            value: '$graduated/$totalNotes',
+                            color: colors.correct,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (advancedStats) ...[
+                      const SizedBox(height: DesignTokens.spacingLg),
+                      NoteAccuracyRadarChart(summaries: summaries),
+                      Text(
+                        'Distribución de precisión por nota',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: scheme.outline,
+                              fontStyle: FontStyle.italic,
+                            ),
                       ),
                     ],
-                  ),
-                  if (advancedStats) ...[
-                    const SizedBox(height: DesignTokens.spacingLg),
-                    NoteAccuracyRadarChart(summaries: summaries),
+                  ],
+                ),
+              ),
+              if (!advancedStats) ...[
+                const SizedBox(height: DesignTokens.spacingLg),
+                StatsFreeAdvancedLockSection(
+                  onUnlock: () => context.push(AppRoutes.paywall),
+                ),
+                const SizedBox(height: DesignTokens.spacingMd),
+                StatsFreeProUpsellCard(
+                  onTap: () => context.push(AppRoutes.paywall),
+                ),
+              ],
+              if (hasPeriodActivity) ...[
+                const SizedBox(height: DesignTokens.spacingMd),
+                SessionEvolutionChart(summaries: weeklySummaries),
+              ],
+              const SizedBox(height: DesignTokens.spacingMd),
+              SessionHistoryCard(entries: filteredHistory),
+              const SizedBox(height: DesignTokens.spacingMd),
+              OutlinedButton.icon(
+                onPressed: () => context.push(AppRoutes.statisticsNotes),
+                icon: const Icon(Icons.grid_view_rounded),
+                label: const Text('Ver progreso por nota (12)'),
+              ),
+              if (advancedStats &&
+                  (hardest.isNotEmpty || easiest.isNotEmpty)) ...[
+                const SizedBox(height: DesignTokens.spacingMd),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final sideBySide = constraints.maxWidth >= 640;
+                    final hardCard = hardest.isEmpty
+                        ? null
+                        : TogescCard(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Dificultad alta',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleLarge,
+                                ),
+                                ...hardest.map(
+                                  (s) => StatsNoteRow(
+                                    summary: s,
+                                    highlightError: true,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                    final easyCard = easiest.isEmpty
+                        ? null
+                        : TogescCard(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Mayor dominio',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleLarge,
+                                ),
+                                ...easiest.map((s) => StatsNoteRow(summary: s)),
+                              ],
+                            ),
+                          );
+
+                    if (sideBySide && hardCard != null && easyCard != null) {
+                      return IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(child: hardCard),
+                            const SizedBox(width: DesignTokens.spacingMd),
+                            Expanded(child: easyCard),
+                          ],
+                        ),
+                      );
+                    }
+                    return Column(
+                      children: [
+                        ?hardCard,
+                        if (hardCard != null && easyCard != null)
+                          const SizedBox(height: DesignTokens.spacingMd),
+                        ?easyCard,
+                      ],
+                    );
+                  },
+                ),
+              ],
+              const SizedBox(height: DesignTokens.spacingLg),
+              TogescCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                     Text(
-                      'Distribucion de precision por nota',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: scheme.outline,
-                        fontStyle: FontStyle.italic,
+                      'Gestión de datos',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: DesignTokens.spacingMd),
+                    if (advancedStats) ...[
+                      OutlinedButton.icon(
+                        onPressed: () => _exportProgress(context, ref),
+                        icon: const Icon(Icons.download_outlined),
+                        label: const Text('Exportar progreso (CSV)'),
+                      ),
+                      const SizedBox(height: DesignTokens.spacingMd),
+                    ],
+                    OutlinedButton.icon(
+                      onPressed: () => confirmAndResetProgress(context, ref),
+                      icon: Icon(
+                        Icons.restart_alt_rounded,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      label: Text(
+                        'Reiniciar progreso',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
                     ),
                   ],
-                ],
-              ),
-            ),
-            if (!advancedStats) ...[
-              const SizedBox(height: DesignTokens.spacingLg),
-              StatsFreeAdvancedLockSection(
-                onUnlock: () => context.push(AppRoutes.paywall),
-              ),
-              const SizedBox(height: DesignTokens.spacingMd),
-              StatsFreeProUpsellCard(
-                onTap: () => context.push(AppRoutes.paywall),
-              ),
-            ],
-            if (hasWeeklyActivity) ...[
-              const SizedBox(height: DesignTokens.spacingMd),
-              SessionEvolutionChart(summaries: weeklySummaries),
-            ],
-            const SizedBox(height: DesignTokens.spacingMd),
-            const SessionHistoryCard(),
-            const SizedBox(height: DesignTokens.spacingMd),
-            OutlinedButton.icon(
-              onPressed: () => context.push(AppRoutes.statisticsNotes),
-              icon: const Icon(Icons.grid_view_rounded),
-              label: const Text('Ver progreso por nota (12)'),
-            ),
-            if (advancedStats && hardest.isNotEmpty) ...[
-              const SizedBox(height: DesignTokens.spacingMd),
-              TogescCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Dificultad alta',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    ...hardest.map(
-                      (s) => StatsNoteRow(summary: s, highlightError: true),
-                    ),
-                  ],
                 ),
               ),
             ],
-            if (advancedStats && easiest.isNotEmpty) ...[
-              const SizedBox(height: DesignTokens.spacingMd),
-              TogescCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Mayor dominio',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    ...easiest.map((s) => StatsNoteRow(summary: s)),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: DesignTokens.spacingLg),
-            if (advancedStats)
-              OutlinedButton.icon(
-                onPressed: () => _exportProgress(context, ref),
-                icon: const Icon(Icons.download_outlined),
-                label: const Text('Exportar progreso (CSV)'),
-              ),
-            if (advancedStats) const SizedBox(height: DesignTokens.spacingMd),
-            OutlinedButton.icon(
-              onPressed: () => confirmAndResetProgress(context, ref),
-              icon: Icon(Icons.restart_alt_rounded, color: DesignTokens.error),
-              label: Text(
-                'Reiniciar progreso',
-                style: TextStyle(color: DesignTokens.error),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

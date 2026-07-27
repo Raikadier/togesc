@@ -40,7 +40,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Inicia sesion antes de suscribirte.'),
+            content: Text('Inicia sesión antes de suscribirte.'),
           ),
         );
         context.push(AppRoutes.account);
@@ -56,7 +56,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                'Completa el pago en el navegador. Vuelve aqui y pulsa '
+                'Completa el pago en el navegador. Vuelve aquí y pulsa '
                 'Restaurar para actualizar tu plan.',
               ),
             ),
@@ -105,7 +105,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           context.pop(true);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No se encontro suscripcion activa.')),
+            const SnackBar(content: Text('No se encontró suscripción activa.')),
           );
         }
       }
@@ -120,9 +120,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(DesignTokens.marginMobile),
-        children: [
+      body: SafeArea(
+        child: TogescPageBody(
+          scrollable: false,
+          child: ListView(
+            children: [
           Align(
             alignment: Alignment.centerLeft,
             child: IconButton(
@@ -133,8 +135,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           PaywallHero(
             title: feature != null ? 'Desbloquea $feature' : 'Pasa a TOGESC Pro',
             subtitle:
-                'Entrena con todos los modos, estadisticas avanzadas y '
-                'sincronizacion entre dispositivos.',
+                'Entrena con todos los modos, estadísticas avanzadas y '
+                'sincronización entre dispositivos.',
           ),
           const SizedBox(height: DesignTokens.spacingLg),
           TogescCard(
@@ -146,11 +148,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 ),
                 ProFeatureRow(
                   icon: Icons.sync_rounded,
-                  text: 'Sincronizacion SRS en la nube',
+                  text: 'Sincronización SRS en la nube',
                 ),
                 ProFeatureRow(
                   icon: Icons.analytics_rounded,
-                  text: 'Estadisticas avanzadas',
+                  text: 'Estadísticas avanzadas',
                 ),
               ],
             ),
@@ -167,7 +169,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               child: OutlinedButton(
                 onPressed: _busy ? null : _startTrial,
                 child: Text(
-                  'Probar ${SubscriptionConstants.trialDays} dias gratis',
+                  'Probar ${SubscriptionConstants.trialDays} días gratis',
                 ),
               ),
             ),
@@ -180,7 +182,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             ),
           ] else ...[
             Text(
-              'Monetizacion no activa en este build. Todos los modos estan '
+              'Monetización no activa en este build. Todos los modos están '
               'disponibles.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -196,7 +198,17 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               ),
             ),
           ],
-        ],
+          const SizedBox(height: DesignTokens.spacingMd),
+          Text(
+            'Cancela cuando quieras. El progreso SRS local siempre se conserva.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
+                ),
+          ),
+            ],
+          ),
+        ),
       ),
     );
   }

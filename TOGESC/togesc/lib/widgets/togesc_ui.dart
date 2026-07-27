@@ -30,7 +30,17 @@ class TogescScaffold extends StatelessWidget {
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
       ),
-      body: body,
+      body: SafeArea(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: DesignTokens.contentMaxWidth,
+            ),
+            child: body,
+          ),
+        ),
+      ),
       floatingActionButton: floatingActionButton,
     );
   }
