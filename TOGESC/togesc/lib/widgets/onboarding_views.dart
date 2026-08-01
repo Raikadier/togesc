@@ -16,43 +16,22 @@ class OnboardingWelcomeHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: DesignTokens.spacingMd,
-            vertical: DesignTokens.spacingXs,
-          ),
-          decoration: BoxDecoration(
-            color: scheme.primary.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: scheme.primary.withValues(alpha: 0.12),
-            ),
-          ),
-          child: Text(
-            'FORMACIÓN AUDITIVA AVANZADA',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: scheme.primary,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-            ),
-          ),
-        ),
-        const SizedBox(height: DesignTokens.spacingLg),
         Text(
           'TOGESC',
           textAlign: TextAlign.center,
           style: theme.textTheme.displaySmall?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             color: scheme.primary,
-            letterSpacing: -0.5,
+            letterSpacing: -0.8,
+            height: 1.05,
           ),
         ),
         const SizedBox(height: DesignTokens.spacingSm),
         Text(
           'Entrenador de oído absoluto',
           textAlign: TextAlign.center,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
             color: scheme.onSurface,
           ),
         ),
@@ -86,79 +65,47 @@ class OnboardingVisualHero extends StatelessWidget {
       child: Container(
         height: 160,
         decoration: BoxDecoration(
-          borderRadius: DesignTokens.borderRadiusXl,
-          border: Border.all(
-            color: scheme.outlineVariant.withValues(alpha: 0.45),
-          ),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              scheme.primaryContainer.withValues(alpha: 0.35),
-              scheme.secondaryContainer.withValues(alpha: 0.25),
-              scheme.tertiaryContainer.withValues(alpha: 0.3),
-            ],
-          ),
+          borderRadius: DesignTokens.borderRadiusMd,
+          color: scheme.surfaceContainer,
+          border: Border.all(color: scheme.outlineVariant),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           fit: StackFit.expand,
           children: [
             Positioned(
-              right: -24,
-              bottom: -28,
+              right: -20,
+              bottom: -24,
               child: Icon(
                 Icons.piano_rounded,
-                size: reduceMotion ? 120 : 140,
-                color: scheme.primary.withValues(alpha: 0.14),
-              ),
-            ),
-            Positioned(
-              left: -12,
-              top: -16,
-              child: Icon(
-                Icons.graphic_eq_rounded,
-                size: 88,
-                color: scheme.secondary.withValues(alpha: 0.12),
+                size: reduceMotion ? 110 : 128,
+                color: scheme.primary.withValues(alpha: 0.12),
               ),
             ),
             Align(
-              alignment: Alignment.bottomCenter,
+              alignment: Alignment.centerLeft,
               child: Padding(
-                padding: const EdgeInsets.only(bottom: DesignTokens.spacingLg),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: DesignTokens.spacingMd,
-                    vertical: DesignTokens.spacingSm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: scheme.surfaceContainerLowest.withValues(alpha: 0.92),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: scheme.outlineVariant.withValues(alpha: 0.5),
+                padding: const EdgeInsets.all(DesignTokens.spacingLg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Motor pedagógico',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: scheme.primary,
+                        letterSpacing: -0.3,
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: scheme.primary,
-                          shape: BoxShape.circle,
-                        ),
+                    const SizedBox(height: DesignTokens.spacingXs),
+                    Text(
+                      'SRS · variación · limpieza tonal',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
                       ),
-                      const SizedBox(width: DesignTokens.spacingSm),
-                      Text(
-                        'Motor pedagógico TOGESC',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: scheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -256,7 +203,7 @@ class OnboardingStartCta extends StatelessWidget {
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(56),
               shape: RoundedRectangleBorder(
-                borderRadius: DesignTokens.borderRadiusXl,
+                borderRadius: DesignTokens.borderRadiusMd,
               ),
             ),
             child: const Row(

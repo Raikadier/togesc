@@ -65,12 +65,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   Center(
                     child: Text(
                       'TOGESC',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSurfaceVariant
-                                .withValues(alpha: 0.35),
-                            letterSpacing: 1.5,
+                                .withValues(alpha: 0.45),
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.3,
                           ),
                     ),
                   ),

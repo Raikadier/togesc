@@ -623,7 +623,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             ),
           ),
           icon: const Icon(Icons.skip_next_rounded),
-          label: const Text('Siguiente round'),
+          label: const Text('Siguiente ronda'),
         ),
       ),
     );

@@ -178,7 +178,7 @@ class _TogescShellHeader extends StatelessWidget
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w700,
           color: scheme.primary,
-          letterSpacing: -0.5,
+          letterSpacing: -0.8,
         ),
       ),
       actions: [
@@ -215,11 +215,11 @@ class TogescProButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: DesignTokens.borderRadiusXl,
+        borderRadius: DesignTokens.borderRadiusMd,
         child: Ink(
           decoration: BoxDecoration(
-            gradient: DesignTokens.proGradient,
-            borderRadius: DesignTokens.borderRadiusXl,
+            color: DesignTokens.primaryContainer,
+            borderRadius: DesignTokens.borderRadiusMd,
           ),
           child: Container(
             constraints: const BoxConstraints(

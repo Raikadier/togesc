@@ -362,19 +362,9 @@ class PaywallHero extends StatelessWidget {
             horizontal: DesignTokens.spacingLg,
           ),
           decoration: BoxDecoration(
-            borderRadius: DesignTokens.borderRadiusXl,
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                scheme.primaryContainer.withValues(alpha: 0.2),
-                scheme.secondaryContainer.withValues(alpha: 0.18),
-                scheme.surfaceContainerLow,
-              ],
-            ),
-            border: Border.all(
-              color: scheme.outlineVariant.withValues(alpha: 0.4),
-            ),
+            borderRadius: DesignTokens.borderRadiusMd,
+            color: scheme.surfaceContainerLow,
+            border: Border.all(color: scheme.outlineVariant),
           ),
           child: Column(
             children: [
@@ -384,15 +374,14 @@ class PaywallHero extends StatelessWidget {
                   vertical: DesignTokens.spacingXs,
                 ),
                 decoration: BoxDecoration(
-                  gradient: DesignTokens.proGradient,
-                  borderRadius: DesignTokens.borderRadiusXl,
+                  color: scheme.primaryContainer,
+                  borderRadius: DesignTokens.borderRadiusMd,
                 ),
                 child: Text(
-                  'TOGESC PRO',
+                  'TOGESC Pro',
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: DesignTokens.onPrimary,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1,
+                    color: scheme.onPrimary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -401,20 +390,16 @@ class PaywallHero extends StatelessWidget {
                 width: 88,
                 height: 88,
                 decoration: BoxDecoration(
-                  gradient: DesignTokens.proGradient,
+                  color: scheme.primaryContainer,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: scheme.shadow.withValues(alpha: 0.12),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                  border: Border.all(
+                    color: scheme.primary.withValues(alpha: 0.35),
+                  ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.workspace_premium_rounded,
                   size: 44,
-                  color: DesignTokens.onPrimary,
+                  color: scheme.onPrimary,
                 ),
               ),
               const SizedBox(height: DesignTokens.spacingLg),
@@ -422,7 +407,8 @@ class PaywallHero extends StatelessWidget {
                 title,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
                   color: scheme.primary,
                 ),
               ),

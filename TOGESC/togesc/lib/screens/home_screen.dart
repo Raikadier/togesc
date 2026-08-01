@@ -151,10 +151,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Entrenador de Oído Absoluto',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
+              'TOGESC',
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.8,
+                    color: scheme.primary,
+                    height: 1.05,
+                  ),
+            ),
+            const SizedBox(height: DesignTokens.spacingXs),
+            Text(
+              'Entrenador de oído absoluto',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: scheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const PracticeStreakLabel(),
             const SizedBox(height: DesignTokens.spacingLg),
@@ -176,10 +187,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: DesignTokens.spacingLg),
             ],
             HomeSectionHeader(
-              title: 'Modos de juego',
+              title: 'Modos de entrenamiento',
               subtitle: _modesExpanded
                   ? 'Todos los ejercicios, con free primero y Pro después.'
-                  : 'Empieza por los ejercicios básicos. Los modos Pro están en Ver todos.',
+                  : 'Empieza por lo básico. Los modos Pro están en Ver todos.',
               trailing: hiddenProCount > 0
                   ? TextButton(
                       onPressed: () {

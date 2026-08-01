@@ -80,23 +80,16 @@ class _ModeBentoCardState extends State<ModeBentoCard> {
         ),
       );
     }
+    // Capas tonales + outline (Harmonic Precision); sin glow de primary.
     final decoration = BoxDecoration(
       color: scheme.surfaceContainerLowest,
-      borderRadius: DesignTokens.borderRadiusXl,
+      borderRadius: DesignTokens.borderRadiusMd,
       border: Border.all(
+        width: _hovered ? 2 : 1,
         color: _hovered
-            ? scheme.primary
-            : scheme.outlineVariant.withValues(alpha: 0.6),
+            ? TogescColors.of(context).selection
+            : scheme.outlineVariant,
       ),
-      boxShadow: _hovered
-          ? [
-              BoxShadow(
-                color: scheme.primary.withValues(alpha: 0.12),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ]
-          : null,
     );
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
@@ -111,12 +104,9 @@ class _ModeBentoCardState extends State<ModeBentoCard> {
           color: Colors.transparent,
           child: InkWell(
             onTap: widget.onTap,
-            borderRadius: DesignTokens.borderRadiusXl,
+            borderRadius: DesignTokens.borderRadiusMd,
             child: AnimatedContainer(
               duration: Duration(milliseconds: reduceMotion ? 0 : 200),
-              transform: (!reduceMotion && _hovered)
-                  ? (Matrix4.identity()..translateByDouble(0.0, -2.0, 0.0, 1.0))
-                  : Matrix4.identity(),
               padding: const EdgeInsets.all(DesignTokens.spacingLg),
               decoration: decoration,
               child: Column(
@@ -125,7 +115,7 @@ class _ModeBentoCardState extends State<ModeBentoCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _ModeIcon(icon: widget.icon, highlighted: _hovered),
+                      _ModeIcon(icon: widget.icon),
                       if (widget.mastery != null &&
                           widget.mastery!.sessionsCount > 0)
                         _MasteryBadge(mastery: widget.mastery!)
@@ -137,7 +127,7 @@ class _ModeBentoCardState extends State<ModeBentoCard> {
                   Text(
                     widget.title,
                     style: theme.textTheme.titleLarge?.copyWith(
-                      color: _hovered ? scheme.primary : scheme.onSurface,
+                      color: scheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: DesignTokens.spacingSm),
@@ -181,11 +171,9 @@ class _ModeBentoCardState extends State<ModeBentoCard> {
 class _ModeIcon extends StatelessWidget {
   final IconData icon;
   final bool dimmed;
-  final bool highlighted;
   const _ModeIcon({
     required this.icon,
     this.dimmed = false,
-    this.highlighted = false,
   });
   @override
   Widget build(BuildContext context) {
@@ -194,15 +182,14 @@ class _ModeIcon extends StatelessWidget {
       width: 56,
       height: 56,
       decoration: BoxDecoration(
-        color: highlighted ? scheme.primary : scheme.surfaceContainer,
-        borderRadius: DesignTokens.borderRadiusXl,
+        color: scheme.surfaceContainer,
+        borderRadius: DesignTokens.borderRadiusMd,
+        border: Border.all(color: scheme.outlineVariant),
       ),
       child: Icon(
         icon,
-        size: 32,
-        color: highlighted
-            ? scheme.onPrimary
-            : (dimmed ? scheme.onSurfaceVariant : scheme.primaryContainer),
+        size: 28,
+        color: dimmed ? scheme.onSurfaceVariant : scheme.primaryContainer,
       ),
     );
   }

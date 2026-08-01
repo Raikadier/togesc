@@ -18,63 +18,49 @@ class StatsDashboardHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (isPro)
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spacingMd,
-              vertical: DesignTokens.spacingXs,
-            ),
-            decoration: BoxDecoration(
-              gradient: DesignTokens.proGradient,
-              borderRadius: DesignTokens.borderRadiusXl,
-            ),
-            child: Text(
-              'ESTADISTICAS PRO',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: DesignTokens.onPrimary,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.8,
-              ),
-            ),
-          )
-        else
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spacingMd,
-              vertical: DesignTokens.spacingXs,
-            ),
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              'PLAN GRATUITO',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        const SizedBox(height: DesignTokens.spacingMd),
         Text(
-          isPro ? 'Estadisticas Pro' : 'Estadisticas',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+          isPro ? 'Estadísticas Pro' : 'Estadísticas',
+          style: theme.textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.6,
             color: scheme.primary,
+            height: 1.1,
           ),
         ),
         const SizedBox(height: DesignTokens.spacingXs),
         Text(
           isPro
-              ? 'Analisis de rendimiento y retencion cognitiva.'
-              : 'Resumen basico de tu entrenamiento. Desbloquea Pro para radar, '
-                  'notas dificiles y exportacion.',
+              ? 'Análisis de rendimiento y retención cognitiva.'
+              : 'Resumen básico de tu entrenamiento. Desbloquea Pro para radar, '
+                  'notas difíciles y exportación.',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: scheme.onSurfaceVariant,
             height: 1.4,
           ),
         ),
+        if (isPro) ...[
+          const SizedBox(height: DesignTokens.spacingMd),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spacingMd,
+                vertical: DesignTokens.spacingXs,
+              ),
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer,
+                borderRadius: DesignTokens.borderRadiusMd,
+              ),
+              child: Text(
+                'Pro',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: scheme.onPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -120,7 +106,7 @@ class StatsFreeAdvancedLockSection extends StatelessWidget {
                   ),
                   const SizedBox(height: DesignTokens.spacingSm),
                   Text(
-                    'Radar de precision, notas dificiles y export CSV',
+                    'Radar de precisión, notas difíciles y export CSV',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.outline,
                     ),
@@ -146,17 +132,20 @@ class StatsFreeAdvancedLockSection extends StatelessWidget {
                       width: 56,
                       height: 56,
                       decoration: BoxDecoration(
-                        gradient: DesignTokens.proGradient,
+                        color: scheme.primaryContainer,
                         shape: BoxShape.circle,
+                        border: Border.all(
+                          color: scheme.primary.withValues(alpha: 0.35),
+                        ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.lock_rounded,
-                        color: DesignTokens.onPrimary,
+                        color: scheme.onPrimary,
                       ),
                     ),
                     const SizedBox(height: DesignTokens.spacingMd),
                     Text(
-                      'Estadisticas avanzadas (Pro)',
+                      'Estadísticas avanzadas (Pro)',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
@@ -165,8 +154,8 @@ class StatsFreeAdvancedLockSection extends StatelessWidget {
                     ),
                     const SizedBox(height: DesignTokens.spacingSm),
                     Text(
-                      'Notas mas dificiles, mayor dominio, radar 12 notas '
-                      'y exportacion CSV.',
+                      'Notas más difíciles, mayor dominio, radar 12 notas '
+                      'y exportación CSV.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
@@ -226,7 +215,7 @@ class StatsFreeProUpsellCard extends StatelessWidget {
                       ),
                 ),
                 Text(
-                  'Radar, analisis por nota y sync en la nube.',
+                  'Radar, análisis por nota y sync en la nube.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),

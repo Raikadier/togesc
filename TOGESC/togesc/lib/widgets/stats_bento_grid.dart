@@ -104,18 +104,18 @@ class StatsBentoHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'PRECISIÓN GLOBAL',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: scheme.outline,
-              letterSpacing: 1,
-              fontWeight: FontWeight.w700,
+            'Precisión global',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: scheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
             ),
           ),
           Text(
             '${accuracy.toStringAsFixed(1)}%',
             style: theme.textTheme.displaySmall?.copyWith(
               color: scheme.primary,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.8,
             ),
           ),
           const SizedBox(height: DesignTokens.spacingSm),
@@ -154,18 +154,20 @@ class StatsBentoHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.analytics_rounded, color: scheme.secondary),
+          const SizedBox(height: DesignTokens.spacingSm),
           Text(
-            'INTENTOS TOTALES',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: scheme.outline,
-              letterSpacing: 1,
+            'Intentos totales',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: scheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
             ),
           ),
           Text(
             '$totalSeen',
             style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: scheme.onSurface,
+              letterSpacing: -0.4,
             ),
           ),
         ],
@@ -175,23 +177,26 @@ class StatsBentoHeader extends StatelessWidget {
     final pendingCard = Container(
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
       decoration: BoxDecoration(
-        gradient: DesignTokens.proGradient,
-        borderRadius: DesignTokens.borderRadiusXl,
+        color: scheme.primaryContainer,
+        borderRadius: DesignTokens.borderRadiusMd,
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'PENDIENTES HOY',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: DesignTokens.onPrimary.withValues(alpha: 0.85),
+            'Pendientes hoy',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: scheme.onPrimary.withValues(alpha: 0.85),
+              fontWeight: FontWeight.w600,
             ),
           ),
           Text(
             '$overdueCount',
             style: theme.textTheme.headlineMedium?.copyWith(
-              color: DesignTokens.onPrimary,
-              fontWeight: FontWeight.w800,
+              color: scheme.onPrimary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: DesignTokens.spacingMd),
@@ -200,6 +205,7 @@ class StatsBentoHeader extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: scheme.surfaceContainerLowest,
               foregroundColor: scheme.primary,
+              minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
             ),
             child: const Text('Repasar ahora'),
           ),

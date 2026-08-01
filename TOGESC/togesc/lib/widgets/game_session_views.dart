@@ -39,15 +39,17 @@ class GameSessionPhaseLayout extends StatelessWidget {
     final color = accentColor ?? scheme.primaryContainer;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final usePulse = pulsingIcon && !reduceMotion;
-    final gradient = iconGradient ??
-        LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.18),
-            color.withValues(alpha: 0.06),
-          ],
-        );
+    final iconFill = iconGradient == null
+        ? Decoration(
+            color: color.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+            border: Border.all(color: color.withValues(alpha: 0.35)),
+          )
+        : BoxDecoration(
+            gradient: iconGradient,
+            shape: BoxShape.circle,
+            border: Border.all(color: color.withValues(alpha: 0.35)),
+          );
 
     return Center(
       child: Padding(
@@ -72,8 +74,7 @@ class GameSessionPhaseLayout extends StatelessWidget {
                   badge!,
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: color,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -109,20 +110,7 @@ class GameSessionPhaseLayout extends StatelessWidget {
                   Container(
                     width: 88,
                     height: 88,
-                    decoration: BoxDecoration(
-                      gradient: gradient,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: color.withValues(alpha: 0.25)),
-                      boxShadow: reduceMotion
-                          ? null
-                          : [
-                              BoxShadow(
-                                color: color.withValues(alpha: 0.15),
-                                blurRadius: 16,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                    ),
+                    decoration: iconFill,
                     child: Icon(icon, size: 44, color: color),
                   ),
                 ],
@@ -365,7 +353,7 @@ class GameSessionIdleView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GameSessionPhaseLayout(
-      badge: 'ENTRENAMIENTO DE OÍDO',
+      badge: 'Sesión',
       icon: Icons.headphones_rounded,
       title: 'Prepárate para escuchar',
       subtitle: 'Pulsa reproducir cuando estés listo',
@@ -374,7 +362,7 @@ class GameSessionIdleView extends StatelessWidget {
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
           shape: RoundedRectangleBorder(
-            borderRadius: DesignTokens.borderRadiusXl,
+            borderRadius: DesignTokens.borderRadiusMd,
           ),
         ),
         icon: const Icon(Icons.play_arrow_rounded),
@@ -393,7 +381,7 @@ class GameSessionListeningView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GameSessionPhaseLayout(
-      badge: 'ESCUCHANDO',
+      badge: 'Escuchando',
       icon: Icons.graphic_eq_rounded,
       title: 'Escucha atentamente',
       subtitle: '$numNotes nota(s) — concéntrate en cada altura',
@@ -411,11 +399,11 @@ class GameSessionClusterView extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return GameSessionPhaseLayout(
-      badge: 'LIMPIEZA TONAL',
+      badge: 'Limpieza tonal',
       icon: Icons.waves_rounded,
       accentColor: scheme.tertiary,
-      title: 'Limpiando el oído...',
-      subtitle: 'Transición tonal breve para romper el anclaje',
+      title: 'Limpiando el oído…',
+      subtitle: 'Transición breve para romper el anclaje al tono anterior',
       showProgress: true,
       pulsingIcon: true,
     );
@@ -434,26 +422,12 @@ class GameSessionResultSectionLabel extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: DesignTokens.spacingMd),
-      child: Row(
-        children: [
-          Container(
-            width: 3,
-            height: 20,
-            decoration: BoxDecoration(
-              color: scheme.primary,
-              borderRadius: BorderRadius.circular(2),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: scheme.onSurface,
+              fontWeight: FontWeight.w600,
             ),
-          ),
-          const SizedBox(width: DesignTokens.spacingSm),
-          Text(
-            label.toUpperCase(),
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: scheme.outline,
-                  letterSpacing: 1,
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-        ],
       ),
     );
   }
@@ -477,42 +451,13 @@ class GameSessionAnswerHeader extends StatelessWidget {
 
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: DesignTokens.spacingMd,
-            vertical: DesignTokens.spacingSm,
-          ),
-          decoration: BoxDecoration(
-            color: scheme.secondaryContainer.withValues(alpha: 0.45),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.hearing_rounded,
-                size: 18,
-                color: scheme.onSecondaryContainer,
-              ),
-              const SizedBox(width: DesignTokens.spacingSm),
-              Text(
-                'ENTRENAMIENTO DE OÍDO',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: scheme.onSecondaryContainer,
-                  letterSpacing: 0.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: DesignTokens.spacingMd),
         Text(
           numNotes == 1
               ? '¿Qué nota escuchaste?'
               : '¿Qué nota(s) escuchaste?',
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w700,
+            letterSpacing: -0.4,
           ),
           textAlign: TextAlign.center,
         ),
@@ -522,7 +467,6 @@ class GameSessionAnswerHeader extends StatelessWidget {
             guidance!,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: scheme.onSurfaceVariant,
-              fontStyle: FontStyle.italic,
             ),
             textAlign: TextAlign.center,
           ),
@@ -581,14 +525,11 @@ class GameSelectionChips extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: scheme.primaryContainer,
-            borderRadius: BorderRadius.circular(999),
-            boxShadow: [
-              BoxShadow(
-                color: scheme.primary.withValues(alpha: 0.2),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+            border: Border.all(
+              color: TogescColors.of(context).selection,
+              width: 2,
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

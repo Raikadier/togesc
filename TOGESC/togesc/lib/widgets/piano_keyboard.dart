@@ -263,17 +263,8 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
           child: Container(
             decoration: BoxDecoration(
               color: scheme.surfaceContainerLow,
-              borderRadius: DesignTokens.borderRadiusXl,
-              border: Border.all(
-                color: scheme.outlineVariant.withValues(alpha: 0.5),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: scheme.shadow.withValues(alpha: 0.12),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+              borderRadius: DesignTokens.borderRadiusMd,
+              border: Border.all(color: scheme.outlineVariant),
             ),
             padding: const EdgeInsets.all(4),
             child: SizedBox(
@@ -309,22 +300,12 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                               ),
                               borderRadius: BorderRadius.only(
                                 bottomLeft: Radius.circular(
-                                  note == 'C' ? 12 : 4,
+                                  note == 'C' ? 8 : 2,
                                 ),
                                 bottomRight: Radius.circular(
-                                  note == 'B' ? 12 : 4,
+                                  note == 'B' ? 8 : 2,
                                 ),
                               ),
-                                      boxShadow: pressed
-                                          ? null
-                                          : [
-                                              BoxShadow(
-                                                color: scheme.shadow
-                                                    .withValues(alpha: 0.08),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
                             ),
                             alignment: Alignment.bottomCenter,
                             padding: const EdgeInsets.only(bottom: 8),
@@ -390,16 +371,9 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                                     : 0,
                               ),
                               borderRadius: const BorderRadius.only(
-                                bottomLeft: Radius.circular(6),
-                                bottomRight: Radius.circular(6),
+                                bottomLeft: Radius.circular(4),
+                                bottomRight: Radius.circular(4),
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: scheme.shadow.withValues(alpha: 0.35),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
                             ),
                             alignment: Alignment.bottomCenter,
                             padding: const EdgeInsets.only(bottom: 4),

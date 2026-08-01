@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TOGESC | Domina el oido absoluto</title>
-  <meta name="description" content="Entrena identificacion de alturas musicales con repeticion espaciada (SRS), limpieza tonal y piano interactivo. Gratis en el navegador.">
+  <title>TOGESC | Entrenador de oído absoluto</title>
+  <meta name="description" content="Entrena identificación de alturas musicales con repetición espaciada (SRS), limpieza tonal y piano interactivo. Gratis en el navegador.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="TOGESC — Entrenador de Oido Absoluto">
-  <meta property="og:description" content="Domina el oido absoluto con precision pedagogica. SRS adaptativo, modos de practica y estadisticas locales.">
+  <meta property="og:title" content="TOGESC — Entrenador de Oído Absoluto">
+  <meta property="og:description" content="Domina el oído absoluto con precisión pedagógica. SRS adaptativo, modos de práctica y estadísticas locales.">
   <meta property="og:image" content="icons/Icon-512.png">
   <meta name="theme-color" content="#6A1B9A">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
@@ -18,215 +18,213 @@
   <link rel="stylesheet" href="landing.css">
 </head>
 <body>
-  <header class="site-header container">
-    <a class="logo" href="landing.html">TOGESC</a>
-    <nav class="nav" aria-label="Principal">
-      <a class="is-active" href="#metodo">Metodo</a>
-      <a href="#app">App</a>
-      <a href="#modos">Modos</a>
-      <a href="#cta">Empezar</a>
-    </nav>
-    <div class="header-actions">
-      <a class="btn btn-ghost" href="./">Iniciar sesion</a>
-      <a class="btn btn-accent" href="./">Abrir app</a>
+  <!--
+    THESIS: La sesión de entrenamiento es la partitura viva; rechaza el hero de métricas y cards de marketing.
+    OWN-WORLD: Harmonic Precision — capas tonales #FFF7FC/#6A1B9A, Hanken Grotesk, piano real, outline 1px.
+    STORY: Creer que el oído absoluto se entrena con SRS serio; actuar: abrir la app gratis.
+    FIRST VIEWPORT: Marca TOGESC dominante, un headline, una frase, CTAs, piano full-bleed debajo/atrás.
+    FORM: Partitura viva · refinamiento · seed user-confirmed 3+A.
+  -->
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="landing.html" aria-label="TOGESC inicio">TOGESC</a>
+      <nav class="nav" aria-label="Principal">
+        <a href="#metodo">Método</a>
+        <a href="#modos">Modos</a>
+        <a href="#confianza">Proyecto</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn btn-ghost" href="./">Iniciar sesión</a>
+        <a class="btn btn-primary" href="./">Abrir app</a>
+      </div>
     </div>
   </header>
 
-  <main>
-    <section class="hero hero-product" aria-label="Presentacion">
-      <div class="hero-copy container">
-        <p class="brand-mark">TOGESC</p>
-        <h1>Entrenador de oido absoluto</h1>
-        <p>
-          Identifica notas con SRS adaptativo, limpieza tonal y piano interactivo.
-          El entrenamiento ocurre en tu dispositivo.
+  <main id="contenido">
+    <section class="hero" aria-label="Presentación">
+      <div class="hero-atmosphere" aria-hidden="true">
+        <div class="staff-lines"></div>
+        <div class="tone-wash"></div>
+      </div>
+
+      <div class="container hero-copy">
+        <p class="brand-mark reveal" style="--d: 0">TOGESC</p>
+        <h1 class="reveal" style="--d: 1">Entrenador de oído absoluto</h1>
+        <p class="hero-lead reveal" style="--d: 2">
+          Identifica notas con SRS adaptativo, limpieza tonal y piano interactivo — en tu dispositivo.
         </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="./">Empezar a entrenar gratis</a>
-          <a class="btn btn-secondary" href="#metodo">Ver como funciona</a>
+        <div class="hero-actions reveal" style="--d: 3">
+          <a class="btn btn-primary btn-lg" href="./">Empezar a entrenar gratis</a>
+          <a class="btn btn-secondary" href="#metodo">Ver cómo funciona</a>
         </div>
       </div>
-      <div class="hero-stage" aria-hidden="true">
-        <div class="session-panel hero-session">
-          <div class="session-stats">
-            <span>Ronda 4</span>
-            <span class="stat-ok">18 correctas</span>
-            <span class="stat-bad">2 errores</span>
-          </div>
-          <div class="session-center">
-            <p class="session-prompt">Que nota escuchaste?</p>
-          </div>
-          <div class="piano">
-            <div class="piano-key"></div>
-            <div class="piano-key"></div>
-            <div class="piano-key selected"></div>
-            <div class="piano-key"></div>
-            <div class="piano-key"></div>
-            <div class="piano-key"></div>
-            <div class="piano-key"></div>
+
+      <div class="hero-plane reveal" style="--d: 4" aria-hidden="true">
+        <div class="session-stage">
+          <p class="session-prompt">
+            <span class="prompt-pulse"></span>
+            ¿Qué nota escuchaste?
+          </p>
+          <div class="piano" role="presentation">
+            <div class="white-keys">
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+              <span class="key-w is-selected"></span>
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+              <span class="key-w"></span>
+            </div>
+            <div class="black-keys">
+              <span class="key-b"></span>
+              <span class="key-b"></span>
+              <span class="key-b"></span>
+              <span class="key-b"></span>
+              <span class="key-b"></span>
+              <span class="key-b"></span>
+              <span class="key-b"></span>
+              <span class="key-b"></span>
+              <span class="key-b"></span>
+              <span class="key-b"></span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section section-alt" id="metodo">
+    <section class="section method" id="metodo">
       <div class="container">
-        <div class="section-title">
-          <h2>El metodo pedagogico</h2>
-          <div class="divider" aria-hidden="true"></div>
-        </div>
-        <div class="grid-3">
-          <article class="card">
-            <div class="card-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M4 19V5m0 14h16M8 15l3-4 3 2 4-6"/>
-              </svg>
+        <header class="section-head">
+          <h2>El método pedagógico</h2>
+          <p>Tres principios que hacen del entrenamiento algo serio, no un quiz.</p>
+        </header>
+
+        <ol class="method-rail">
+          <li class="method-step">
+            <span class="method-index" aria-hidden="true">01</span>
+            <div>
+              <h3>Algoritmo SRS</h3>
+              <p>
+                Repite lo que te cuesta y espacia lo que dominas. El motor optimiza cada sesión
+                según tus tiempos de respuesta y errores recientes.
+              </p>
             </div>
-            <h3>Algoritmo SRS</h3>
-            <p>
-              Repite lo que te cuesta y espacia lo que dominas. El motor optimiza cada sesion
-              segun tus tiempos de respuesta y errores recientes.
-            </p>
-          </article>
-          <article class="card">
-            <div class="card-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
-                <rect x="3" y="8" width="3" height="12" rx="1"/><rect x="8" y="4" width="3" height="16" rx="1"/>
-                <rect x="13" y="10" width="3" height="10" rx="1"/><rect x="18" y="6" width="3" height="14" rx="1"/>
-              </svg>
+          </li>
+          <li class="method-step">
+            <span class="method-index" aria-hidden="true">02</span>
+            <div>
+              <h3>Variación universal</h3>
+              <p>
+                Entrena con múltiples timbres y octavas. Aprende la clase de altura (Do, Re, Mi…)
+                y no una frecuencia fija en un solo instrumento.
+              </p>
             </div>
-            <h3>Variacion universal</h3>
-            <p>
-              Entrena con multiples timbres y octavas. Aprende la clase de altura (Do, Re, Mi...)
-              y no una frecuencia fija en un solo instrumento.
-            </p>
-          </article>
-          <article class="card">
-            <div class="card-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/>
-              </svg>
+          </li>
+          <li class="method-step">
+            <span class="method-index" aria-hidden="true">03</span>
+            <div>
+              <h3>Limpieza tonal</h3>
+              <p>
+                Tras cada ejercicio, un cluster breve rompe el anclaje al tono anterior
+                y favorece oído absoluto puro.
+              </p>
             </div>
-            <h3>Limpieza tonal</h3>
-            <p>
-              Tras cada ejercicio, un cluster breve rompe el anclaje al tono anterior
-              y favorece oido absoluto puro.
-            </p>
-          </article>
-        </div>
+          </li>
+        </ol>
       </div>
     </section>
 
-    <section class="section" id="app">
-      <div class="container split">
+    <section class="section modes" id="modos">
+      <div class="container">
+        <header class="section-head section-head-split">
+          <div>
+            <h2>Modos de entrenamiento</h2>
+            <p>Diseñados para cada etapa de tu desarrollo auditivo.</p>
+          </div>
+          <a class="btn btn-secondary" href="./">Practicar ahora</a>
+        </header>
+
+        <ul class="mode-list">
+          <li>
+            <h3>Una sola nota</h3>
+            <p>La base. Identifica tonos aislados en cualquier octava.</p>
+          </li>
+          <li>
+            <h3>Intervalos</h3>
+            <p>Distancias entre dos notas con feedback inmediato.</p>
+          </li>
+          <li>
+            <h3>Acordes</h3>
+            <p>Armonías y notas individuales dentro del bloque.</p>
+          </li>
+          <li>
+            <h3>Modo velocidad</h3>
+            <p>Ráfagas cortas para afilar reflejos de identificación.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section trust" id="confianza">
+      <div class="container trust-layout">
         <div>
-          <h2>Tu hub de entrenamiento</h2>
-          <p class="lede">
-            Interfaz pensada para el foco: modos de practica, piano interactivo,
-            estadisticas locales y cuenta opcional para sincronizar progreso entre dispositivos.
-          </p>
-          <ul class="check-list">
-            <li>Repeticion espaciada en el cliente</li>
-            <li>Estadisticas de retencion y notas dificiles</li>
-            <li>Modo velocidad para reflejos rapidos</li>
-            <li>Progreso local siempre; sync en la nube con Pro</li>
-          </ul>
-          <p class="cta-inline">
-            <a class="btn btn-primary" href="./">Abrir TOGESC en el navegador</a>
+          <h2>Proyecto educativo, open source</h2>
+          <p>
+            El entrenamiento y el SRS ocurren en el cliente. La cuenta en la nube es opcional
+            para sincronizar progreso Pro entre dispositivos.
           </p>
         </div>
-        <div class="mockup" aria-hidden="true">
-          <div class="mockup-inner">
-            <div class="mockup-bar">
-              <div class="mockup-bar-left">
-                <div class="mockup-dot"></div>
-                <div class="mockup-line"></div>
-              </div>
-              <div class="mockup-line mockup-line-short"></div>
-            </div>
-            <div class="mockup-body">
-              <div class="mockup-highlight">
-                <div>
-                  <strong>87%</strong>
-                  <span>Retencion SRS</span>
-                </div>
-              </div>
-              <div class="mockup-tile"></div>
-              <div class="mockup-tile"></div>
-            </div>
+        <dl class="trust-facts">
+          <div>
+            <dt>Núcleo</dt>
+            <dd>Offline-first</dd>
           </div>
-        </div>
+          <div>
+            <dt>Código</dt>
+            <dd>Open source</dd>
+          </div>
+          <div>
+            <dt>Audio</dt>
+            <dd>En el dispositivo</dd>
+          </div>
+        </dl>
       </div>
     </section>
 
-    <section class="section section-alt" id="modos">
+    <section class="section cta-section" id="cta">
       <div class="container">
-        <div class="section-title section-title-left">
-          <h2>Modos de entrenamiento</h2>
-          <p class="lede">Disenados para cada etapa de tu desarrollo auditivo.</p>
-        </div>
-        <div class="grid-4">
-          <div>
-            <div class="mode-card"><h3>Una sola nota</h3></div>
-            <p class="mode-copy">La base fundamental. Identifica tonos aislados en cualquier octava.</p>
-          </div>
-          <div>
-            <div class="mode-card"><h3>Intervalos</h3></div>
-            <p class="mode-copy">Entrena distancias entre dos notas con feedback inmediato.</p>
-          </div>
-          <div>
-            <div class="mode-card"><h3>Acordes</h3></div>
-            <p class="mode-copy">Reconoce armonias y notas individuales dentro del bloque.</p>
-          </div>
-          <div>
-            <div class="mode-card"><h3>Modo velocidad</h3></div>
-            <p class="mode-copy">Desafia tus reflejos con rafagas de identificacion rapida.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section trust">
-      <div class="container trust-grid">
-        <div>
-          <p class="trust-label">Transparencia y rigor</p>
-          <h2 class="trust-title">Basado en estrategias pedagogicas abiertas</h2>
-          <p class="lede">
-            TOGESC es un proyecto educativo open source. El entrenamiento y el SRS ocurren en el cliente;
-            la cuenta en la nube es opcional para sincronizar progreso Pro.
-          </p>
-        </div>
-        <div class="trust-icons" aria-hidden="true">
-          <div><span class="trust-badge">OSS</span>Open Source</div>
-          <div><span class="trust-badge">SRS</span>Pedagogico</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="cta">
-      <div class="container">
-        <div class="cta-panel">
-          <h2>Listo para transformar tu oido? Empieza hoy.</h2>
+        <div class="cta-band">
+          <h2>Listo para transformar tu oído</h2>
+          <p>Empieza gratis en el navegador. Sin instalar nada para la primera sesión.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="./">Entrar a la app</a>
-            <a class="btn btn-secondary" href="#metodo">Explorar el metodo</a>
+            <a class="btn btn-on-primary btn-lg" href="./">Entrar a la app</a>
+            <a class="btn btn-on-primary-ghost" href="#metodo">Explorar el método</a>
           </div>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer container">
-    <div>
-      <div class="logo">TOGESC</div>
-      <p class="footer-tag">
-        Entrenador de oido absoluto · Proyecto educativo open source
-      </p>
-    </div>
-    <div class="footer-links">
-      <a href="https://github.com/Raikadier/togesc" rel="noopener noreferrer">GitHub</a>
-      <a href="./">App web</a>
-      <a href="landing.html">Landing</a>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <div class="logo">TOGESC</div>
+        <p class="footer-tag">Entrenador de oído absoluto · Proyecto educativo open source</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/Raikadier/togesc" rel="noopener noreferrer">GitHub</a>
+        <a href="./">App web</a>
+        <a href="landing.html">Landing</a>
+      </div>
     </div>
   </footer>
 </body>

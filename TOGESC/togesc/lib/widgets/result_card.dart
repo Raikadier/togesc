@@ -35,35 +35,27 @@ class ResultCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final colors = TogescColors.of(context);
     final color = isCorrect ? colors.correct : colors.incorrect;
-    final title = isCorrect ? 'EXCELENTE' : 'INCORRECTO';
+    final title = isCorrect ? 'Correcto' : 'Incorrecto';
     final notesList = correctNotes.toList()..sort();
 
     return Container(
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLowest,
-        borderRadius: DesignTokens.borderRadiusXl,
+        borderRadius: DesignTokens.borderRadiusMd,
         border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.6),
+          width: 2,
+          color: color.withValues(alpha: 0.55),
         ),
-        boxShadow: isCorrect
-            ? [
-                BoxShadow(
-                  color: colors.correct.withValues(alpha: 0.12),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            height: 4,
+            height: 3,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.25),
+              color: color,
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(DesignTokens.radiusXl),
+                top: Radius.circular(DesignTokens.radiusMd - 1),
               ),
             ),
           ),
@@ -83,8 +75,8 @@ class ResultCard extends StatelessWidget {
                             title,
                             style: theme.textTheme.headlineSmall?.copyWith(
                               color: color,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.4,
                             ),
                           ),
                           const SizedBox(height: DesignTokens.spacingXs),
@@ -104,21 +96,15 @@ class ResultCard extends StatelessWidget {
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: DesignTokens.borderRadiusXl,
-                        boxShadow: [
-                          BoxShadow(
-                            color: color.withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: DesignTokens.borderRadiusMd,
+                        border: Border.all(color: color.withValues(alpha: 0.45)),
                       ),
                       child: Icon(
                         isCorrect
                             ? Icons.check_circle_rounded
                             : Icons.cancel_rounded,
-                        color: DesignTokens.onPrimary,
+                        color: color,
                         size: 28,
                       ),
                     ),
@@ -129,7 +115,7 @@ class ResultCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _MetricTile(
-                        label: 'TIEMPO',
+                        label: 'Tiempo',
                         value: responseTime.toStringAsFixed(1),
                         unit: 'seg',
                         valueColor: scheme.primary,
@@ -138,7 +124,7 @@ class ResultCard extends StatelessWidget {
                     const SizedBox(width: DesignTokens.spacingMd),
                     Expanded(
                       child: _MetricTile(
-                        label: 'RITMO',
+                        label: 'Ritmo',
                         value: _timeComment(),
                         valueColor: isCorrect
                             ? scheme.secondary
