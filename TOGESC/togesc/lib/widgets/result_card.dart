@@ -79,10 +79,21 @@ class ResultCard extends StatelessWidget {
                               letterSpacing: -0.4,
                             ),
                           ),
+                          if (isCorrect) ...[
+                            const SizedBox(height: DesignTokens.spacingSm),
+                            Text(
+                              notesList.join(' · '),
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.6,
+                                color: scheme.onSurface,
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: DesignTokens.spacingXs),
                           Text(
                             isCorrect
-                                ? 'Has identificado la nota correctamente.'
+                                ? 'Identificación correcta.'
                                 : 'Las notas correctas eran: ${notesList.join(", ")}',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: scheme.onSurfaceVariant,

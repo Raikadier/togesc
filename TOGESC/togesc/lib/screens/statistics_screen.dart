@@ -89,7 +89,6 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     final sortedByAccuracy = List.of(summaries)
       ..sort((a, b) => a.accuracyPercent.compareTo(b.accuracyPercent));
     final hardest = sortedByAccuracy.take(3).toList();
-    final easiest = sortedByAccuracy.reversed.take(3).toList();
     final scheme = Theme.of(context).colorScheme;
     final colors = TogescColors.of(context);
 
@@ -117,14 +116,6 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                     if (next.isEmpty) return;
                     setState(() => _period = next.first);
                   },
-                ),
-              ),
-              const SizedBox(height: DesignTokens.spacingSm),
-              Text(
-                'El filtro aplica al gráfico de evolución y al historial. '
-                'Precisión e intentos reflejan el progreso SRS acumulado.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: DesignTokens.spacingLg),
@@ -167,13 +158,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       const SizedBox(height: DesignTokens.spacingLg),
                       NoteAccuracyRadarChart(summaries: summaries),
                       Text(
-                        'Distribución de precisión por nota',
+                        'Precisión por nota',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: scheme.outline,
-                              fontStyle: FontStyle.italic,
-                            ),
+                            ?.copyWith(color: scheme.outline),
                       ),
                     ],
                   ],
@@ -181,16 +169,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               ),
               if (!advancedStats) ...[
                 const SizedBox(height: DesignTokens.spacingLg),
-                StatsFreeAdvancedLockSection(
-                  onUnlock: () => context.push(AppRoutes.paywall),
-                ),
-                const SizedBox(height: DesignTokens.spacingMd),
                 StatsFreeProUpsellCard(
                   onTap: () => context.push(AppRoutes.paywall),
                 ),
               ],
               if (hasPeriodActivity) ...[
-                const SizedBox(height: DesignTokens.spacingMd),
+                const SizedBox(height: DesignTokens.spacingLg),
                 SessionEvolutionChart(summaries: weeklySummaries),
               ],
               const SizedBox(height: DesignTokens.spacingMd),
@@ -201,71 +185,24 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 icon: const Icon(Icons.grid_view_rounded),
                 label: const Text('Ver progreso por nota (12)'),
               ),
-              if (advancedStats &&
-                  (hardest.isNotEmpty || easiest.isNotEmpty)) ...[
+              if (advancedStats && hardest.isNotEmpty) ...[
                 const SizedBox(height: DesignTokens.spacingMd),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final sideBySide = constraints.maxWidth >= 640;
-                    final hardCard = hardest.isEmpty
-                        ? null
-                        : TogescCard(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Dificultad alta',
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleLarge,
-                                ),
-                                ...hardest.map(
-                                  (s) => StatsNoteRow(
-                                    summary: s,
-                                    highlightError: true,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                    final easyCard = easiest.isEmpty
-                        ? null
-                        : TogescCard(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Mayor dominio',
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleLarge,
-                                ),
-                                ...easiest.map((s) => StatsNoteRow(summary: s)),
-                              ],
-                            ),
-                          );
-
-                    if (sideBySide && hardCard != null && easyCard != null) {
-                      return IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(child: hardCard),
-                            const SizedBox(width: DesignTokens.spacingMd),
-                            Expanded(child: easyCard),
-                          ],
+                TogescCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Notas a reforzar',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      ...hardest.map(
+                        (s) => StatsNoteRow(
+                          summary: s,
+                          highlightError: true,
                         ),
-                      );
-                    }
-                    return Column(
-                      children: [
-                        ?hardCard,
-                        if (hardCard != null && easyCard != null)
-                          const SizedBox(height: DesignTokens.spacingMd),
-                        ?easyCard,
-                      ],
-                    );
-                  },
+                      ),
+                    ],
+                  ),
                 ),
               ],
               const SizedBox(height: DesignTokens.spacingLg),

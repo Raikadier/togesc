@@ -6,7 +6,6 @@ import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../constants/subscription_constants.dart';
-import '../models/practice_session_log.dart';
 import '../models/subscription_status.dart';
 import '../providers/audio_provider.dart';
 import '../providers/engagement_stats_provider.dart';
@@ -17,10 +16,7 @@ import '../widgets/continue_practice_card.dart';
 import '../widgets/daily_focus_section.dart';
 import '../widgets/home_hub_views.dart';
 import '../widgets/mode_bento_card.dart';
-import '../widgets/session_evolution_chart.dart';
 import '../widgets/togesc_ui.dart';
-import '../providers/session_history_provider.dart';
-import '../utils/session_history_stats.dart';
 
 /// Pantalla principal: enfoque académico (qué practicar hoy) antes que gamificación.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -33,8 +29,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _modesGridKey = GlobalKey<ModeBentoGridState>();
   bool _modesExpanded = false;
-  List<PracticeSessionLog>? _cachedHistory;
-  List<DayPracticeSummary>? _cachedWeekly;
 
   static const _modes = [
     (
@@ -80,13 +74,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final status = ref.watch(subscriptionStatusProvider).valueOrNull;
     final effectiveStatus = status ?? const SubscriptionStatus.free();
     final engagement = ref.watch(engagementStatsProvider);
-    final history = ref.watch(sessionHistoryProvider).valueOrNull ?? [];
-    if (!identical(history, _cachedHistory)) {
-      _cachedHistory = history;
-      _cachedWeekly = buildDailyPracticeSummaries(history);
-    }
-    final weeklySummaries = _cachedWeekly ?? const <DayPracticeSummary>[];
-    final hasWeeklyActivity = weeklySummaries.any((d) => d.hasActivity);
 
     void openGame(String route, GameMode mode) {
       if (!SubscriptionAccess.canPlayMode(effectiveStatus, mode)) {
@@ -189,8 +176,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             HomeSectionHeader(
               title: 'Modos de entrenamiento',
               subtitle: _modesExpanded
-                  ? 'Todos los ejercicios, con free primero y Pro después.'
-                  : 'Empieza por lo básico. Los modos Pro están en Ver todos.',
+                  ? 'Todos los ejercicios, free primero y Pro después.'
+                  : 'Elige un modo para practicar ahora.',
               trailing: hiddenProCount > 0
                   ? TextButton(
                       onPressed: () {
@@ -236,10 +223,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 setState(() => _modesExpanded = expanded);
               },
             ),
-            if (hasWeeklyActivity) ...[
-              const SizedBox(height: DesignTokens.spacingLg),
-              SessionEvolutionChart(summaries: weeklySummaries),
-            ],
           ],
           ),
         ),

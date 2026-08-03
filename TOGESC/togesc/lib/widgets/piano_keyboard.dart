@@ -173,11 +173,12 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
 
   void _tap(String note) {
     if (widget.disabled) return;
+    HapticFeedback.selectionClick();
     setState(() => _pressed.add(note));
     widget.onNoteTapped?.call(note);
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     Future<void>.delayed(
-      reduceMotion ? Duration.zero : const Duration(milliseconds: 80),
+      reduceMotion ? Duration.zero : DesignTokens.motionKeyPress,
       () {
         if (mounted) setState(() => _pressed.remove(note));
       },
@@ -243,7 +244,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final animDuration = reduceMotion
         ? Duration.zero
-        : const Duration(milliseconds: 50);
+        : DesignTokens.motionFast;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -284,7 +285,8 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                             duration: animDuration,
                             transform: pressed
                                 ? (Matrix4.identity()
-                                    ..translateByDouble(0.0, 2.0, 0.0, 1.0))
+                                    ..translateByDouble(0.0, 4.0, 0.0, 1.0)
+                                    ..scaleByDouble(0.985, 0.985, 1.0, 1.0))
                                 : Matrix4.identity(),
                             margin: const EdgeInsets.symmetric(horizontal: 0.5),
                             decoration: BoxDecoration(
@@ -317,11 +319,15 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                                         note,
                                         widget.noteNamingMode,
                                       ),
-                                      style: TextStyle(
-                                        fontSize: widget.large ? 16 : 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: scheme.outline,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontSize: widget.large ? 18 : 15,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: -0.3,
+                                            color: scheme.onSurfaceVariant,
+                                          ),
                                     ),
                                   ),
                           ),
@@ -354,7 +360,8 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                             height: blackKeyHeight,
                             transform: pressed
                                 ? (Matrix4.identity()
-                                    ..translateByDouble(0.0, 3.0, 0.0, 1.0))
+                                    ..translateByDouble(0.0, 5.0, 0.0, 1.0)
+                                    ..scaleByDouble(0.97, 0.97, 1.0, 1.0))
                                 : Matrix4.identity(),
                             decoration: BoxDecoration(
                               gradient: _blackGradient(
@@ -385,11 +392,14 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                                         sharpNote,
                                         widget.noteNamingMode,
                                       ),
-                                      style: TextStyle(
-                                        fontSize: widget.large ? 12 : 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge
+                                          ?.copyWith(
+                                            fontSize: widget.large ? 12 : 10,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
                                     ),
                                   ),
                           ),

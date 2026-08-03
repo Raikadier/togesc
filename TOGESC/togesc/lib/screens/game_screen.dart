@@ -286,7 +286,29 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(DesignTokens.marginMobile),
-              child: _buildContent(session, targetRounds),
+              child: AnimatedSwitcher(
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : DesignTokens.motionMedium,
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  final offset = Tween<Offset>(
+                    begin: const Offset(0, 0.04),
+                    end: Offset.zero,
+                  ).animate(animation);
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(position: offset, child: child),
+                  );
+                },
+                child: KeyedSubtree(
+                  key: ValueKey(
+                    '${session.state.name}-${session.isPaused}',
+                  ),
+                  child: _buildContent(session, targetRounds),
+                ),
+              ),
             ),
           ),
           if (session.state == GameState.showingResult)

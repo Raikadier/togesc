@@ -77,6 +77,11 @@ abstract final class DesignTokens {
   static const double marginMobile = 16;
   static const double marginDesktop = 24;
 
+  /// Motion canónico (Operate). Honrar reduceAnimations vía MediaQuery.
+  static const Duration motionFast = Duration(milliseconds: 120);
+  static const Duration motionMedium = Duration(milliseconds: 280);
+  static const Duration motionKeyPress = Duration(milliseconds: 90);
+
   static BorderRadius get borderRadiusMd => BorderRadius.circular(radiusMd);
 
   static BorderRadius get borderRadiusXl => BorderRadius.circular(radiusXl);
@@ -91,7 +96,7 @@ abstract final class DesignTokens {
     colors: [Color(0xFFFF5722), Color(0xFFB71C1C)],
   );
 
-  /// Gradiente Pro (Stitch pro-gradient).
+  /// Gradiente Pro (legacy Stitch; preferir primaryContainer sólido en UI nueva).
   static const LinearGradient proGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
