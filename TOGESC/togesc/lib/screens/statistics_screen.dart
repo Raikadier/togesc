@@ -292,10 +292,11 @@ class _DomainStatBox extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            label.toUpperCase(),
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: scheme.outline),
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           Text(
             value,

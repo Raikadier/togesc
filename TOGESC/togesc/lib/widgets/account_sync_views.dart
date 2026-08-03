@@ -38,25 +38,9 @@ class AccountProfileHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            scheme.surfaceContainerLowest,
-            scheme.surfaceContainerLow,
-          ],
-        ),
-        borderRadius: DesignTokens.borderRadiusXl,
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.6),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        color: scheme.surfaceContainerLow,
+        borderRadius: DesignTokens.borderRadiusMd,
+        border: Border.all(color: scheme.outlineVariant),
       ),
       child: Row(
         children: [

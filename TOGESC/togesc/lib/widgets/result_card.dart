@@ -222,10 +222,9 @@ class _MetricTile extends StatelessWidget {
         children: [
           Text(
             label,
-            style: theme.textTheme.labelSmall?.copyWith(
+            style: theme.textTheme.labelMedium?.copyWith(
               color: scheme.onSurfaceVariant,
-              letterSpacing: 1,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: DesignTokens.spacingXs),
@@ -238,7 +237,7 @@ class _MetricTile extends StatelessWidget {
                   value,
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: valueColor,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     fontStyle: italic ? FontStyle.italic : null,
                   ),
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../services/note_parser.dart';
 
 /// Campo de texto estilo command-bar (Stitch).
@@ -48,14 +49,8 @@ class _NoteInputFieldState extends State<NoteInputField> {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: DesignTokens.borderRadiusXl,
-        boxShadow: [
-          BoxShadow(
-            color: scheme.shadow.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: DesignTokens.borderRadiusMd,
+        border: Border.all(color: scheme.outlineVariant),
       ),
       child: TextField(
         controller: _controller,
@@ -72,17 +67,17 @@ class _NoteInputFieldState extends State<NoteInputField> {
             icon: Icon(Icons.send_rounded, color: scheme.primary),
           ),
           border: OutlineInputBorder(
-            borderRadius: DesignTokens.borderRadiusXl,
+            borderRadius: DesignTokens.borderRadiusMd,
             borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: DesignTokens.borderRadiusXl,
-            borderSide: BorderSide(color: scheme.outlineVariant),
+            borderRadius: DesignTokens.borderRadiusMd,
+            borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: DesignTokens.borderRadiusXl,
+            borderRadius: DesignTokens.borderRadiusMd,
             borderSide: BorderSide(
-              color: scheme.primary,
+              color: TogescColors.of(context).selection,
               width: 2,
             ),
           ),

@@ -18,45 +18,17 @@ class SpeedModeSelectHero extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: DesignTokens.spacingMd,
-            vertical: DesignTokens.spacingXs,
-          ),
-          decoration: BoxDecoration(
-            color: speed.speedContainer,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: speed.speedAccent.withValues(alpha: 0.12),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.bolt_rounded, size: 16, color: speed.speedAccent),
-              const SizedBox(width: DesignTokens.spacingXs),
-              Text(
-                'MODO ENTRENAMIENTO',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: speed.speedAccent,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: DesignTokens.spacingMd),
         Text(
-          'Velocidad: elige tu desafío',
+          'Modo velocidad',
           style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.5,
             color: scheme.primary,
           ),
         ),
         const SizedBox(height: DesignTokens.spacingSm),
         Text(
-          'Lleva tu oído al siguiente nivel con ráfagas de notas en tiempo real.',
+          'Elige un desafío de ráfagas. El tiempo límite baja con cada acierto.',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: scheme.onSurfaceVariant,
           ),
@@ -73,9 +45,12 @@ class SpeedModeSelectHero extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: speed.speedContainer,
                   borderRadius: DesignTokens.borderRadiusMd,
+                  border: Border.all(
+                    color: speed.speedAccent.withValues(alpha: 0.25),
+                  ),
                 ),
                 child: Icon(
-                  Icons.notifications_active_rounded,
+                  Icons.timer_outlined,
                   color: speed.speedAccent,
                 ),
               ),
@@ -85,17 +60,16 @@ class SpeedModeSelectHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'NOTA IMPORTANTE',
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      'Cómo funciona',
+                      style: theme.textTheme.titleMedium?.copyWith(
                         color: speed.speedAccent,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: DesignTokens.spacingXs),
                     Text(
-                      'El tiempo límite disminuirá con cada respuesta correcta. '
-                      'Mantén la concentración al máximo.',
+                      'El tiempo límite disminuye con cada respuesta correcta. '
+                      'Mantén la concentración.',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         height: 1.4,
                         color: scheme.onSurface,
