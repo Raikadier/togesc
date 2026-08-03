@@ -63,6 +63,12 @@ html {
   .key-w {
     transition: none !important;
   }
+
+  .site-header::after {
+    animation: none !important;
+    transform: none !important;
+    opacity: 0;
+  }
 }
 
 body {
@@ -110,12 +116,39 @@ a {
   border-bottom: 1px solid var(--outline-variant);
 }
 
+.site-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--primary-container);
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: reading-progress linear forwards;
+  animation-timeline: scroll(root);
+}
+
 .header-inner {
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+@keyframes reading-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@supports not (animation-timeline: scroll(root)) {
+  .site-header::after {
+    animation: none;
+    transform: scaleX(0);
+  }
 }
 
 .logo {
