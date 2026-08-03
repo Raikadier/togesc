@@ -111,13 +111,12 @@ class AccountProfileHeader extends StatelessWidget {
                           ),
                           const SizedBox(width: DesignTokens.spacingXs),
                           Text(
-                            isSynced ? 'SINCRONIZADO' : 'PENDIENTE',
+                            isSynced ? 'Sincronizado' : 'Pendiente',
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: isSynced
                                   ? colors.correct
                                   : colors.selection,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.3,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -233,11 +232,10 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
             Row(
               children: [
                 Text(
-                  'DIAGNÓSTICO DEL SISTEMA',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: scheme.primary,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
+                  'Diagnóstico del sistema',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: scheme.onSurface,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const Spacer(),
@@ -285,10 +283,10 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'ESTADO GLOBAL',
-                          style: theme.textTheme.labelSmall?.copyWith(
+                          'Estado global',
+                          style: theme.textTheme.labelMedium?.copyWith(
                             color: scheme.onSurfaceVariant,
-                            letterSpacing: 0.8,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
@@ -443,11 +441,10 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'PREFERENCIAS DE PRÁCTICA',
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: scheme.primary,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.8,
+          'Preferencias de práctica',
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: scheme.onSurface,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: DesignTokens.spacingMd),

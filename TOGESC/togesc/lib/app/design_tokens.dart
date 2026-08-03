@@ -96,19 +96,11 @@ abstract final class DesignTokens {
     colors: [Color(0xFFFF5722), Color(0xFFB71C1C)],
   );
 
-  /// Gradiente Pro (legacy Stitch; preferir primaryContainer sólido en UI nueva).
+  /// Gradiente Pro legacy — evitar en UI nueva (usar primaryContainer).
+  @Deprecated('Prefer primaryContainer solid fills')
   static const LinearGradient proGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [primaryContainer, secondary],
   );
-
-  /// Sombra suave para cards hover (web/desktop).
-  static List<BoxShadow> get cardHoverShadow => [
-    BoxShadow(
-      color: primary.withValues(alpha: 0.08),
-      blurRadius: 20,
-      offset: const Offset(0, 8),
-    ),
-  ];
 }

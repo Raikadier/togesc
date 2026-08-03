@@ -395,11 +395,10 @@ class SpeedSessionAnswerHeader extends StatelessWidget {
               Icon(Icons.bolt_rounded, size: 16, color: speed.speedAccent),
               const SizedBox(width: DesignTokens.spacingXs),
               Text(
-                'MODO VELOCIDAD',
+                'Modo velocidad',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: speed.speedAccent,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
