@@ -277,19 +277,19 @@ class SubscriptionPlanCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'PLAN ACTUAL',
-          style: theme.textTheme.labelSmall?.copyWith(
+          'Plan actual',
+          style: theme.textTheme.labelLarge?.copyWith(
             color: isPro
-                ? scheme.onPrimary.withValues(alpha: 0.85)
-                : scheme.outline,
-            letterSpacing: 1,
-            fontWeight: FontWeight.w700,
+                ? scheme.onPrimary.withValues(alpha: 0.9)
+                : scheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
           ),
         ),
         Text(
           planLabel,
           style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.4,
             color: isPro ? scheme.onPrimary : scheme.primary,
           ),
         ),
@@ -309,8 +309,9 @@ class SubscriptionPlanCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(DesignTokens.spacingLg),
         decoration: BoxDecoration(
-          gradient: DesignTokens.proGradient,
-          borderRadius: DesignTokens.borderRadiusXl,
+          color: scheme.primaryContainer,
+          borderRadius: DesignTokens.borderRadiusMd,
+          border: Border.all(color: scheme.primary.withValues(alpha: 0.35)),
         ),
         child: Row(
           children: [
@@ -318,12 +319,12 @@ class SubscriptionPlanCard extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: DesignTokens.borderRadiusXl,
+                color: scheme.onPrimary.withValues(alpha: 0.15),
+                borderRadius: DesignTokens.borderRadiusMd,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.workspace_premium_rounded,
-                color: DesignTokens.onPrimary,
+                color: scheme.onPrimary,
               ),
             ),
             const SizedBox(width: DesignTokens.spacingMd),

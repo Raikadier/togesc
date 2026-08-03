@@ -128,7 +128,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     final showMetrics = session.state != SpeedState.idle;
 
     return TogescScaffold(
-      title: 'Velocidad - ${widget.targetMode.displayName}',
+      title: 'Velocidad · ${widget.targetMode.displayName}',
       actions: [
         GameInstrumentToggleAction(
           sessionInstrumentOverride: session.sessionInstrumentOverride,
@@ -154,7 +154,27 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
                     ? DesignTokens.marginDesktop
                     : DesignTokens.marginMobile,
               ),
-              child: _buildContent(session),
+              child: AnimatedSwitcher(
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : DesignTokens.motionMedium,
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  final offset = Tween<Offset>(
+                    begin: const Offset(0, 0.04),
+                    end: Offset.zero,
+                  ).animate(animation);
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(position: offset, child: child),
+                  );
+                },
+                child: KeyedSubtree(
+                  key: ValueKey(session.state.name),
+                  child: _buildContent(session),
+                ),
+              ),
             ),
           ),
         ],

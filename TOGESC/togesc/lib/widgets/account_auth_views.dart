@@ -33,15 +33,14 @@ class AccountAuthFormCard extends StatelessWidget {
               vertical: DesignTokens.spacingXs,
             ),
             decoration: BoxDecoration(
-              gradient: DesignTokens.proGradient,
-              borderRadius: DesignTokens.borderRadiusXl,
+              color: scheme.primaryContainer,
+              borderRadius: DesignTokens.borderRadiusMd,
             ),
             child: Text(
               badge,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: DesignTokens.onPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
+                color: scheme.onPrimary,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -50,6 +49,7 @@ class AccountAuthFormCard extends StatelessWidget {
             title,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
+              letterSpacing: -0.4,
               color: scheme.primary,
             ),
           ),

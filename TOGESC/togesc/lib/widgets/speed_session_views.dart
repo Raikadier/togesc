@@ -20,10 +20,9 @@ class SpeedSessionIdleView extends StatelessWidget {
   Widget build(BuildContext context) {
     final speed = TogescColors.of(context).speedAccent;
     return GameSessionPhaseLayout(
-      badge: 'MODO VELOCIDAD',
+      badge: 'Modo velocidad',
       icon: Icons.speed_rounded,
       accentColor: speed,
-      iconGradient: DesignTokens.speedGradient,
       title: 'Listo para el desafío',
       subtitle: 'Tiempo inicial: ${initialTime.toStringAsFixed(0)}s',
       footer: FilledButton.icon(
@@ -32,7 +31,7 @@ class SpeedSessionIdleView extends StatelessWidget {
           minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
           backgroundColor: speed,
           shape: RoundedRectangleBorder(
-            borderRadius: DesignTokens.borderRadiusXl,
+            borderRadius: DesignTokens.borderRadiusMd,
           ),
         ),
         icon: const Icon(Icons.play_arrow_rounded),
@@ -51,10 +50,10 @@ class SpeedSessionListeningView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GameSessionPhaseLayout(
-      badge: 'RÁFAGA ACTIVA',
+      badge: 'Ráfaga activa',
       icon: Icons.graphic_eq_rounded,
       accentColor: TogescColors.of(context).speedAccent,
-      title: 'Escucha...',
+      title: 'Escucha…',
       subtitle: '$numNotes nota(s) — responde al terminar el audio',
       showProgress: true,
       pulsingIcon: true,
@@ -111,28 +110,31 @@ class SpeedSessionSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final speed = TogescColors.of(context).speedAccent;
 
     return Container(
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
       decoration: BoxDecoration(
-        gradient: DesignTokens.speedGradient,
-        borderRadius: DesignTokens.borderRadiusXl,
+        color: speed,
+        borderRadius: DesignTokens.borderRadiusMd,
+        border: Border.all(color: speed.withValues(alpha: 0.85)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'FIN DE SESION',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: DesignTokens.onPrimary.withValues(alpha: 0.85),
-              letterSpacing: 0.5,
+            'Fin de sesión',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: DesignTokens.onPrimary.withValues(alpha: 0.9),
+              fontWeight: FontWeight.w600,
             ),
           ),
           Text(
             'Resumen de velocidad',
             style: theme.textTheme.headlineSmall?.copyWith(
               color: DesignTokens.onPrimary,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: DesignTokens.spacingLg),
@@ -275,23 +277,23 @@ class SpeedModeOptionCard extends StatelessWidget {
       hint: subtitle,
       child: Material(
         color: Colors.transparent,
-        borderRadius: DesignTokens.borderRadiusXl,
+        borderRadius: DesignTokens.borderRadiusMd,
         child: InkWell(
           onTap: onTap,
-          borderRadius: DesignTokens.borderRadiusXl,
+          borderRadius: DesignTokens.borderRadiusMd,
           child: Ink(
             decoration: BoxDecoration(
-              borderRadius: DesignTokens.borderRadiusXl,
-              gradient: isChaos ? DesignTokens.speedGradient : null,
+              borderRadius: DesignTokens.borderRadiusMd,
+              gradient: null,
               color: isChaos
-                  ? null
+                  ? speed.speedAccent
                   : isDark
                   ? DesignTokens.pianoBlack
                   : scheme.surfaceContainerLowest,
               border: Border.all(
                 color: isChaos || isDark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : scheme.outlineVariant.withValues(alpha: 0.6),
+                    ? Colors.white.withValues(alpha: 0.12)
+                    : scheme.outlineVariant,
               ),
             ),
             child: Padding(

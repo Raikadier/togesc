@@ -22,11 +22,10 @@ class InfoSectionHeader extends StatelessWidget {
         top: DesignTokens.spacingSm,
       ),
       child: Text(
-        title.toUpperCase(),
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: scheme.primary,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.8,
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: scheme.onSurface,
+              fontWeight: FontWeight.w600,
             ),
       ),
     );
@@ -45,60 +44,34 @@ class AboutHeroCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            scheme.surfaceContainerLowest,
-            scheme.surfaceContainerLow,
-          ],
-        ),
-        borderRadius: DesignTokens.borderRadiusXl,
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.6),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        color: scheme.surfaceContainerLow,
+        borderRadius: DesignTokens.borderRadiusMd,
+        border: Border.all(color: scheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spacingMd,
-              vertical: DesignTokens.spacingXs,
-            ),
-            decoration: BoxDecoration(
-              gradient: DesignTokens.proGradient,
-              borderRadius: DesignTokens.borderRadiusXl,
-            ),
-            child: Text(
-              'TOGESC',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: DesignTokens.onPrimary,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
-          const SizedBox(height: DesignTokens.spacingMd),
           Text(
-            'Entrenador de Oido Absoluto',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
+            'TOGESC',
+            style: theme.textTheme.headlineMedium?.copyWith(
               color: scheme.primary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.8,
             ),
           ),
           const SizedBox(height: DesignTokens.spacingSm),
           Text(
-            'TOGESC (TOne GEneration SCript) es una app educativa de codigo '
-            'abierto para entrenar identificacion de alturas musicales con '
-            'metodos basados en evidencia. El entrenamiento ocurre en tu '
+            'Entrenador de oído absoluto',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spacingSm),
+          Text(
+            'TOGESC (TOne GEneration SCript) es una app educativa de código '
+            'abierto para entrenar identificación de alturas musicales con '
+            'métodos basados en evidencia. El entrenamiento ocurre en tu '
             'dispositivo; la cuenta en la nube es opcional para sincronizar '
             'progreso entre dispositivos.',
             style: theme.textTheme.bodyMedium?.copyWith(
