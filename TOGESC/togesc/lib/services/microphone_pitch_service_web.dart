@@ -45,7 +45,7 @@ abstract final class MicrophonePitchService {
       onStatus?.call('Escuchando... canta o tararea la nota.');
       return true;
     } catch (_) {
-      onStatus?.call('No se pudo acceder al microfono.');
+      onStatus?.call('No se pudo acceder al micrófono.');
       await stopListening();
       return false;
     }

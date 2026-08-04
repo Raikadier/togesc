@@ -30,7 +30,7 @@ abstract final class MicrophonePitchService {
 
     try {
       if (!await _recorder.hasPermission()) {
-        onStatus?.call('Permiso de microfono denegado.');
+        onStatus?.call('Permiso de micrófono denegado.');
         return false;
       }
 
@@ -45,14 +45,14 @@ abstract final class MicrophonePitchService {
       _subscription = stream.listen(
         (chunk) => _handleChunk(chunk, onStatus),
         onError: (_) {
-          onStatus?.call('Error al leer el microfono.');
+          onStatus?.call('Error al leer el micrófono.');
         },
       );
 
       onStatus?.call('Escuchando... canta o tararea la nota.');
       return true;
     } catch (_) {
-      onStatus?.call('No se pudo acceder al microfono.');
+      onStatus?.call('No se pudo acceder al micrófono.');
       await stopListening();
       return false;
     }

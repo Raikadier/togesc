@@ -32,7 +32,7 @@ class SyncDiagnostics {
     if (!cloudSyncEnabled) {
       return 'Sync en nube requiere plan Pro (o monetizacion desactivada).';
     }
-    if (!hasSession) return 'Inicia sesion para sincronizar.';
+    if (!hasSession) return 'Inicia sesión para sincronizar.';
     if (pendingUpload) return 'Cambios locales pendientes de subir.';
     if (!remoteReachable) return 'No se pudo contactar la nube.';
     if (isInSync) return 'Local y nube alineados.';

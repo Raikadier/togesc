@@ -36,7 +36,7 @@ _SyncStatusVisual _visualFor(
   }
   if (!d.hasSession) {
     return _SyncStatusVisual(
-      label: 'Sin sesion',
+      label: 'Sin sesión',
       icon: Icons.person_off_outlined,
       color: scheme.onSurfaceVariant,
       background: scheme.surfaceContainer,

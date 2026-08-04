@@ -151,7 +151,7 @@ class _AudioSettingsBody extends ConsumerWidget {
         const AudioTestButton(),
         const SizedBox(height: DesignTokens.spacingXs),
         Text(
-          'Durante el juego puedes cambiar el timbre solo para esa sesion '
+          'Durante el juego puedes cambiar el timbre solo para esa sesión '
           'desde el icono de la barra superior.',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,

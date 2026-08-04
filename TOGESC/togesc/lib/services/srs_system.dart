@@ -339,15 +339,15 @@ class SRSSystem {
     int daysSince,
   ) {
     if (criticalCount > 5) {
-      return 'Tienes $criticalCount notas muy atrasadas. Es momento de una sesion de recuperacion!';
+      return 'Tienes $criticalCount notas muy atrasadas. Es momento de una sesión de recuperación.';
     } else if (overdueCount > 10) {
-      return 'Tienes $overdueCount notas pendientes de revision.';
+      return 'Tienes $overdueCount notas pendientes de revisión.';
     } else if (daysSince >= 3) {
-      return 'Han pasado $daysSince dias desde tu ultima sesion. Es el momento optimo para practicar!';
+      return 'Han pasado $daysSince días desde tu última sesión. Es el momento óptimo para practicar.';
     } else if (overdueCount > 0) {
       return 'Tienes $overdueCount notas listas para revisar.';
     } else {
-      return 'Estas al dia! Practica las notas en fase de aprendizaje para avanzar.';
+      return 'Estás al día. Practica las notas en fase de aprendizaje para avanzar.';
     }
   }
 

@@ -6,7 +6,7 @@ abstract final class MicrophonePitchService {
     required void Function(String note) onNoteDetected,
     void Function(String message)? onStatus,
   }) async {
-    onStatus?.call('El modo canto solo esta disponible en web por ahora.');
+    onStatus?.call('El modo canto solo está disponible en web por ahora.');
     return false;
   }
 

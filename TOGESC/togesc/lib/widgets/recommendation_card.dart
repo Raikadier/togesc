@@ -40,7 +40,7 @@ class RecommendationCard extends StatelessWidget {
           _buildStatRow(context, 'Notas pendientes', '$totalOverdue'),
           _buildStatRow(context, 'En aprendizaje', '$learningCount'),
           if (daysSince > 0)
-            _buildStatRow(context, 'Ultima sesion', 'hace $daysSince dia(s)'),
+            _buildStatRow(context, 'Última sesión', 'hace $daysSince día(s)'),
           if (criticalNotes.isNotEmpty) ...[
             const SizedBox(height: DesignTokens.spacingSm),
             Text(

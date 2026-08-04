@@ -33,5 +33,5 @@ class AppLocalizationsEs extends AppLocalizations {
   String get microphoneListen => 'Escuchar nota';
 
   @override
-  String get microphoneStop => 'Detener microfono';
+  String get microphoneStop => 'Detener micrófono';
 }
