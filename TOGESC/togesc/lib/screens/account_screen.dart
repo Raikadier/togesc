@@ -291,7 +291,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ),
           ] else if (_recoveryMode || _view == _AccountView.updatePassword) ...[
             AccountAuthFormCard(
-              badge: 'RECUPERACIÓN',
+              badge: 'Recuperación',
               title: 'Nueva contraseña',
               children: [
                 AccountAuthTextField(
@@ -362,7 +362,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ),
           ] else if (_view == _AccountView.forgotPassword) ...[
             AccountAuthFormCard(
-              badge: 'CUENTA',
+              badge: 'Cuenta',
               title: 'Recuperar contraseña',
               subtitle: 'Te enviaremos un enlace a tu email.',
               children: [
@@ -390,7 +390,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ),
           ] else ...[
             AccountAuthFormCard(
-              badge: 'CUENTA',
+              badge: 'Cuenta',
               title: _view == _AccountView.signUp
                   ? 'Crear cuenta'
                   : 'Iniciar sesión',

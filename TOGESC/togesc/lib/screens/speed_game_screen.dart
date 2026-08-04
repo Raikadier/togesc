@@ -292,7 +292,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     return SpeedSessionFeedbackView(
       icon: Icons.check_circle_rounded,
       accentColor: TogescColors.of(context).correct,
-      title: '¡CORRECTO!',
+      title: 'Correcto',
       subtitle:
           'Tiempo límite: ${session.currentTimeLimit.toStringAsFixed(1)}s',
       footer: FilledButton.icon(
@@ -310,7 +310,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
           SpeedSessionFeedbackView(
             icon: Icons.cancel_rounded,
             accentColor: TogescColors.of(context).incorrect,
-            title: 'INCORRECTO',
+            title: 'Incorrecto',
             subtitle: 'Las notas eran: ${session.currentNotes.join(", ")}',
           ),
           if (session.responseTimes.isNotEmpty) ...[
@@ -340,7 +340,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
           SpeedSessionFeedbackView(
             icon: Icons.timer_off_rounded,
             accentColor: TogescColors.of(context).selection,
-            title: '¡TIEMPO AGOTADO!',
+            title: 'Tiempo agotado',
             subtitle: 'Las notas eran: ${session.currentNotes.join(", ")}',
           ),
           if (session.responseTimes.isNotEmpty) ...[

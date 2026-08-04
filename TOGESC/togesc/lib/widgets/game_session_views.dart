@@ -40,7 +40,7 @@ class GameSessionPhaseLayout extends StatelessWidget {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final usePulse = pulsingIcon && !reduceMotion;
     final iconFill = iconGradient == null
-        ? Decoration(
+        ? BoxDecoration(
             color: color.withValues(alpha: 0.12),
             shape: BoxShape.circle,
             border: Border.all(color: color.withValues(alpha: 0.35)),

@@ -74,7 +74,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Modos de Juego'), findsOneWidget);
+      expect(find.text('Modos de entrenamiento'), findsOneWidget);
       expect(find.text('Una sola nota'), findsOneWidget);
 
       await tester.tap(find.text('Una sola nota').first);
@@ -122,7 +122,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Stats'));
+      await tester.tap(find.text('Estadísticas'));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Estadisticas'), findsAtLeast(1));

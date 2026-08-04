@@ -39,23 +39,27 @@ void main() {
   }
 
   group('HomeScreen', () {
-    testWidgets('muestra enfoque diario o modos', (tester) async {
+    testWidgets('muestra marca y modos de entrenamiento', (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Entrenador de Oido Absoluto'), findsOneWidget);
-      expect(find.text('Modos de Juego'), findsOneWidget);
+      expect(find.text('Entrenador de oído absoluto'), findsOneWidget);
+      expect(find.text('Modos de entrenamiento'), findsOneWidget);
     });
 
-    testWidgets('muestra 6 opciones de modo de juego', (tester) async {
+    testWidgets('muestra modos free y expande Pro', (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
       expect(find.text('Una sola nota'), findsOneWidget);
       expect(find.text('Intervalo (2 notas)'), findsOneWidget);
+      expect(find.text('Solo sostenidos'), findsOneWidget);
+
+      await tester.tap(find.textContaining('Ver todos'));
+      await tester.pumpAndSettle();
+
       expect(find.text('Acorde (3 notas)'), findsOneWidget);
       expect(find.text('Aleatorio (1-5 notas)'), findsOneWidget);
-      expect(find.text('Solo sostenidos'), findsOneWidget);
       expect(find.text('Entrenamiento de velocidad'), findsOneWidget);
     });
 
@@ -67,15 +71,15 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('TOGESC'), findsOneWidget);
-      expect(find.text('Stats'), findsOneWidget);
+      expect(find.text('TOGESC'), findsWidgets);
+      expect(find.text('Estadísticas'), findsOneWidget);
     });
 
-    testWidgets('muestra enfoque diario cuando hay recomendaciones', (tester) async {
+    testWidgets('oculta enfoque diario sin notas críticas', (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Enfoque diario'), findsOneWidget);
+      expect(find.text('Enfoque diario'), findsNothing);
     });
 
     testWidgets('muestra continuar practica tras guardar ultimo modo',
@@ -89,7 +93,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Continuar practica'), findsOneWidget);
+      expect(find.text('Continuar práctica'), findsOneWidget);
       expect(find.text('Intervalo (2 notas)'), findsWidgets);
     });
 

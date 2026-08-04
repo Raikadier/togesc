@@ -74,7 +74,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('TOGESC'), findsOneWidget);
-      expect(find.text('Modos de Juego'), findsOneWidget);
+      expect(find.text('Modos de entrenamiento'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -128,7 +128,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Stats'));
+      await tester.tap(find.text('Estadísticas'));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Estadisticas'), findsAtLeast(1));

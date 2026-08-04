@@ -97,7 +97,7 @@ abstract class AppLocalizations {
   /// Titulo de la aplicacion
   ///
   /// In es, this message translates to:
-  /// **'Entrenador de Oido Absoluto'**
+  /// **'Entrenador de oído absoluto'**
   String get appTitle;
 
   /// No description provided for @srsIntensityTitle.

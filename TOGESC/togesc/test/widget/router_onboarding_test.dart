@@ -45,7 +45,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Modos de Juego'), findsOneWidget);
+    expect(find.text('Modos de entrenamiento'), findsOneWidget);
     expect(find.text('Entendido, empezar'), findsNothing);
   });
 
