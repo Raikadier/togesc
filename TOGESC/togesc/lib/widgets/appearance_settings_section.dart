@@ -21,14 +21,18 @@ class AppearanceSettingsSection extends ConsumerWidget {
           children: [
             Text(
               'Apariencia',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: DesignTokens.spacingSm),
             Text(
               'Tema de la app',
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: DesignTokens.spacingSm),
             Wrap(
               spacing: DesignTokens.spacingSm,
               runSpacing: DesignTokens.spacingSm,

@@ -21,7 +21,7 @@ Future<void> showSessionInstrumentSheet({
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Timbre de esta sesion',
+                'Timbre de esta sesión',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),

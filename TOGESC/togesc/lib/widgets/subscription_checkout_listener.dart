@@ -43,7 +43,7 @@ class _SubscriptionCheckoutListenerState
     final messenger = ScaffoldMessenger.maybeOf(context);
     if (checkout == 'success') {
       messenger?.showSnackBar(
-        const SnackBar(content: Text('Suscripcion activada. ¡Disfruta TOGESC Pro!')),
+        const SnackBar(content: Text('Suscripción activada. ¡Disfruta TOGESC Pro!')),
       );
     } else if (checkout == 'cancel') {
       messenger?.showSnackBar(

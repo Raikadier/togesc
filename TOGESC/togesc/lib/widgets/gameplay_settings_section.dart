@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../app/design_tokens.dart';
 import '../models/ui_preferences.dart';
 import '../providers/ui_preferences_provider.dart';
 import 'togesc_ui.dart';
@@ -19,15 +20,19 @@ class GameplaySettingsSection extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Juego y accesibilidad',
-              style: Theme.of(context).textTheme.titleMedium,
+              'Práctica y accesibilidad',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: DesignTokens.spacingSm),
             Text(
               'Modo de respuesta',
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: DesignTokens.spacingSm),
             RadioGroup<GameInputMode>(
               groupValue: prefs.inputMode,
               onChanged: (value) {
@@ -51,7 +56,7 @@ class GameplaySettingsSection extends ConsumerWidget {
               contentPadding: EdgeInsets.zero,
               title: const Text('Confirmar antes de enviar'),
               subtitle: const Text(
-                'Si esta desactivado, al completar la seleccion en el piano se envia la respuesta al instante.',
+                'Si está desactivado, al completar la selección en el piano se envía la respuesta al instante.',
               ),
               value: prefs.confirmBeforeSubmit,
               onChanged: (value) {
@@ -73,8 +78,8 @@ class GameplaySettingsSection extends ConsumerWidget {
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Piano mas grande'),
-              subtitle: const Text('Teclas mas amplias para facilitar el toque.'),
+              title: const Text('Piano más grande'),
+              subtitle: const Text('Teclas más amplias para facilitar el toque.'),
               value: prefs.largePiano,
               onChanged: (value) {
                 ref.read(uiPreferencesProvider.notifier).setLargePiano(value);

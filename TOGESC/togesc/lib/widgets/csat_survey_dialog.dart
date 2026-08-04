@@ -29,7 +29,7 @@ class _CsatSurveyDialogState extends State<CsatSurveyDialog> {
       icon: Icons.star_rounded,
       accentColor: DesignTokens.selection,
       title: 'Como va tu experiencia?',
-      subtitle: 'Tu opinion nos ayuda a mejorar TOGESC. Califica del 1 al 5.',
+      subtitle: 'Tu opinión nos ayuda a mejorar TOGESC. Califica del 1 al 5.',
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

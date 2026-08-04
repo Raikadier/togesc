@@ -57,21 +57,21 @@ class PrivacyPolicyScreen extends StatelessWidget {
           PolicySection(
             title: 'Datos que no recopilamos',
             body:
-                'No grabamos microfono ni subimos audio. No usamos servicios '
+                'No grabamos micrófono ni subimos audio. No usamos servicios '
                 'de analítica ni publicidad de terceros.',
           ),
           PolicySection(
             title: 'Audio',
             body:
                 'Los ejercicios se sintetizan en tu dispositivo. El modo canto '
-                'experimental usa el microfono solo en tu dispositivo para '
-                'detectar la nota; el audio no se almacena ni se envia a '
+                'experimental usa el micrófono solo en tu dispositivo para '
+                'detectar la nota; el audio no se almacena ni se envía a '
                 'internet.',
           ),
           PolicySection(
-            title: 'Eliminacion de datos',
+            title: 'Eliminación de datos',
             body:
-                'Puedes borrar tu progreso local desde Estadisticas '
+                'Puedes borrar tu progreso local desde Estadísticas '
                 '(Reiniciar progreso) o desinstalando la app. Si tienes '
                 'cuenta, en Cuenta puedes eliminarla: se borra tu usuario '
                 'en Supabase y el progreso sincronizado en la nube. El '
@@ -81,8 +81,8 @@ class PrivacyPolicyScreen extends StatelessWidget {
           PolicySection(
             title: 'Cambios futuros',
             body:
-                'Si se anaden analítica, pagos u otros servicios, esta politica '
-                'se actualizara antes del lanzamiento.',
+                'Si se añaden analítica, pagos u otros servicios, esta política '
+                'se actualizará antes del lanzamiento.',
           ),
           PolicySection(
             title: 'Contacto',

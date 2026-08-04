@@ -40,14 +40,16 @@ class _AudioSettingsBody extends ConsumerWidget {
       children: [
         Text(
           'Sonido',
-          style: Theme.of(context).textTheme.titleMedium,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spacingSm),
         Text(
           'Timbre por defecto',
           style: Theme.of(context).textTheme.titleSmall,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spacingSm),
         SegmentedButton<InstrumentMode>(
           segments: const [
             ButtonSegment(
