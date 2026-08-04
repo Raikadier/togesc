@@ -139,7 +139,7 @@ abstract class AppLocalizations {
   /// No description provided for @microphoneStop.
   ///
   /// In es, this message translates to:
-  /// **'Detener microfono'**
+  /// **'Detener micrófono'**
   String get microphoneStop;
 }
 

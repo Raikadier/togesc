@@ -1,6 +1,6 @@
 /// Objetivo de rondas por sesion de practica (Fase 7B-2).
 enum SessionRoundGoal {
-  unlimited(0, 'Sin limite'),
+  unlimited(0, 'Sin límite'),
   five(5, '5 rondas'),
   ten(10, '10 rondas'),
   twenty(20, '20 rondas');

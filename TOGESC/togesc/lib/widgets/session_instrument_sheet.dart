@@ -103,7 +103,7 @@ String sessionInstrumentSummary({
     return 'Preferencias: ${instrumentLabel(prefs.fixedInstrumentId)}';
   }
   if (sessionOverrideKey == AudioPreferences.sessionOverrideRandom) {
-    return 'Sesion: aleatorio';
+    return 'Sesión: aleatorio';
   }
-  return 'Sesion: ${instrumentLabel(sessionOverrideKey)}';
+  return 'Sesión: ${instrumentLabel(sessionOverrideKey)}';
 }

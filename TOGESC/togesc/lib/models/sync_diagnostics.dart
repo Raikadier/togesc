@@ -30,7 +30,7 @@ class SyncDiagnostics {
 
   String get statusLabel {
     if (!cloudSyncEnabled) {
-      return 'Sync en nube requiere plan Pro (o monetizacion desactivada).';
+      return 'Sync en nube requiere plan Pro (o monetización desactivada).';
     }
     if (!hasSession) return 'Inicia sesión para sincronizar.';
     if (pendingUpload) return 'Cambios locales pendientes de subir.';

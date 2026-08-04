@@ -44,7 +44,7 @@ _SyncStatusVisual _visualFor(
   }
   if (!d.remoteReachable) {
     return _SyncStatusVisual(
-      label: 'Sin conexion',
+      label: 'Sin conexión',
       icon: Icons.cloud_off_rounded,
       color: scheme.error,
       background: colors.incorrectContainer,

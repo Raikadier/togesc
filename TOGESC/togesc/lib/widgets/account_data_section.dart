@@ -70,9 +70,9 @@ class AccountDataSection extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Eliminar cuenta'),
         content: Text(
-          'Se borraran tu cuenta ($email) y el progreso sincronizado '
+          'Se borrarán tu cuenta ($email) y el progreso sincronizado '
           'en la nube. El progreso local en este dispositivo se conserva. '
-          'Esta accion no se puede deshacer.',
+          'Esta acción no se puede deshacer.',
         ),
         actions: [
           TextButton(
@@ -108,7 +108,7 @@ class AccountDataSection extends ConsumerWidget {
       onMessage(e.message);
     } catch (_) {
       onMessage(
-        'No se pudo eliminar la cuenta. Comprueba la conexion o contacta '
+        'No se pudo eliminar la cuenta. Comprueba la conexión o contacta '
         'con soporte.',
       );
     } finally {

@@ -95,7 +95,7 @@ class SRSSystem {
 
     if (numNotes > pool.length) {
       throw ArgumentError(
-        'No se pueden seleccionar $numNotes notas unicas de ${pool.length}',
+        'No se pueden seleccionar $numNotes notas únicas de ${pool.length}',
       );
     }
 

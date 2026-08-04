@@ -136,7 +136,7 @@ class PrivacyHeroHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
-            'Ultima actualizacion: $lastUpdated',
+            'Última actualización: $lastUpdated',
             style: theme.textTheme.labelMedium?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -261,7 +261,7 @@ Future<bool> showResetProgressDialog(BuildContext context) async {
       destructive: true,
       title: '¿Reiniciar progreso?',
       subtitle:
-          'Se perderan todos los datos de entrenamiento. Esta accion no se puede deshacer.',
+          'Se perderán todos los datos de entrenamiento. Esta acción no se puede deshacer.',
       content: const SizedBox.shrink(),
       actions: [
         TextButton(
