@@ -8,7 +8,7 @@
 | `96bac51` | Settings + copy ES |
 | `858a8b2` | Microcopy SRS / mic / sync |
 | `e81d82c` | Copy visible cuenta / sesión |
-| (L11) | Demo «una ronda» en landing (escuchar → elegir → feedback) |
+| `0bfc993` | Demo «una ronda» en landing |
 
 ## Operativa
 
