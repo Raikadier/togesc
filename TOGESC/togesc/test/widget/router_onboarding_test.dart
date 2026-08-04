@@ -24,7 +24,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Como funciona'), findsOneWidget);
+    expect(find.text('Cómo funciona'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Entendido, empezar'),
       100,

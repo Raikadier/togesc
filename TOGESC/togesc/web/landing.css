@@ -327,7 +327,7 @@ a {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 2.5rem 0 1.5rem;
+  padding: 1.75rem 0 0.85rem;
   max-width: 40rem;
   margin-inline: auto 0;
   margin-left: max(1rem, calc((100% - var(--max-width)) / 2 + 1rem));
@@ -382,12 +382,23 @@ a {
   );
 }
 
+.session-badge {
+  margin: 0 0 0.5rem;
+  padding-inline: 1rem;
+  text-align: center;
+  color: color-mix(in srgb, var(--on-primary) 55%, transparent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .session-prompt {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
   padding-inline: 1rem;
   color: color-mix(in srgb, var(--on-primary) 88%, transparent);
   font-size: clamp(1rem, 2.4vw, 1.25rem);
@@ -402,6 +413,25 @@ a {
 
 .session-prompt.is-wrong {
   color: color-mix(in srgb, #ffd0c8 75%, var(--on-primary));
+}
+
+.demo-result {
+  margin: 0 0 0.65rem;
+  padding-inline: 1rem;
+  text-align: center;
+  font-size: clamp(2.25rem, 8vw, 3.75rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--on-primary);
+}
+
+.demo-result.is-correct {
+  color: color-mix(in srgb, #c8f0d8 80%, var(--on-primary));
+}
+
+.demo-result.is-wrong {
+  color: color-mix(in srgb, #ffd0c8 85%, var(--on-primary));
 }
 
 .demo-actions {
@@ -469,7 +499,6 @@ a {
   height: clamp(8.5rem, 22vw, 13rem);
   pointer-events: auto;
 }
-}
 
 .white-keys {
   display: grid;
@@ -479,10 +508,12 @@ a {
 }
 
 .key-w {
-  display: block;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   height: 100%;
   width: 100%;
-  padding: 0;
+  padding: 0 0 0.55rem;
   border-radius: 0 0 4px 4px;
   background: var(--piano-white);
   border: 1px solid var(--outline-variant);
@@ -492,12 +523,28 @@ a {
   appearance: none;
   font: inherit;
   color: inherit;
-  transition: transform 0.15s var(--ease-out), background 0.15s var(--ease-out),
+  pointer-events: auto;
+  transition: transform 0.12s var(--ease-out), background 0.15s var(--ease-out),
     border-color 0.15s var(--ease-out);
+}
+
+.key-label {
+  font-size: clamp(0.55rem, 1.4vw, 0.72rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: color-mix(in srgb, var(--piano-black) 55%, transparent);
+  pointer-events: none;
+  user-select: none;
 }
 
 .key-w:hover {
   background: color-mix(in srgb, var(--primary-fixed) 35%, var(--piano-white));
+}
+
+.key-w:active,
+.key-w.is-pressed {
+  transform: translateY(4px);
+  border-bottom-width: 1px;
 }
 
 .key-w:focus-visible {

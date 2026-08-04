@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:togesc/models/subscription_status.dart';
 import 'package:togesc/providers/audio_provider.dart';
 import 'package:togesc/providers/srs_provider.dart';
+import 'package:togesc/providers/subscription_provider.dart';
 import 'package:togesc/services/audio_generator.dart';
 import 'package:togesc/services/audio_player_service.dart';
 import 'package:togesc/services/progress_repository.dart';
@@ -30,6 +32,16 @@ class _TestSRSNotifier extends AsyncNotifier<SRSSystem>
   }
 }
 
+class _TestSubscriptionNotifier extends SubscriptionNotifier {
+  @override
+  Future<SubscriptionStatus> build() async {
+    return const SubscriptionStatus(
+      plan: 'pro',
+      status: 'active',
+    );
+  }
+}
+
 void main() {
   group('E2E: Smoke test de la aplicacion completa', () {
     late ProviderContainer container;
@@ -49,6 +61,9 @@ void main() {
           progressRepositoryProvider
               .overrideWithValue(InMemoryProgressRepository()),
           srsSystemProvider.overrideWith(() => _TestSRSNotifier(srs)),
+          subscriptionStatusProvider.overrideWith(
+            () => _TestSubscriptionNotifier(),
+          ),
           audioPlayerServiceProvider.overrideWithValue(
             AudioPlayerService(generator: AudioGenerator(random: Random(42))),
           ),
@@ -73,32 +88,45 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('TOGESC'), findsOneWidget);
+      expect(find.text('TOGESC'), findsWidgets);
       expect(find.text('Modos de entrenamiento'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('navegacion a todos los modos basicos sin errores',
-        (tester) async {
+    testWidgets('navegacion a modos free y Pro expandidos', (tester) async {
+      tester.view.physicalSize = const Size(400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      final modos = [
+      final freeModes = [
         'Una sola nota',
         'Intervalo (2 notas)',
-        'Acorde (3 notas)',
-        'Aleatorio (1-5 notas)',
         'Solo sostenidos',
       ];
 
-      for (final modo in modos) {
-        await tester.scrollUntilVisible(find.text(modo), 100,
-            scrollable: find.byType(Scrollable).first);
+      for (final modo in freeModes) {
+        await tester.ensureVisible(find.text(modo).first);
         await tester.tap(find.text(modo).first);
         await tester.pumpAndSettle();
         expect(find.text('Reproducir'), findsOneWidget,
             reason: 'Modo $modo deberia mostrar boton Reproducir');
-        // Volver a home
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+      }
+
+      await tester.ensureVisible(find.textContaining('Ver todos'));
+      await tester.tap(find.textContaining('Ver todos'));
+      await tester.pumpAndSettle();
+
+      for (final modo in ['Acorde (3 notas)', 'Aleatorio (1-5 notas)']) {
+        await tester.ensureVisible(find.text(modo).first);
+        await tester.tap(find.text(modo).first);
+        await tester.pumpAndSettle();
+        expect(find.text('Reproducir'), findsOneWidget,
+            reason: 'Modo $modo deberia mostrar boton Reproducir');
         await tester.pageBack();
         await tester.pumpAndSettle();
       }
@@ -107,16 +135,21 @@ void main() {
     });
 
     testWidgets('navegacion a entrenamiento de velocidad', (tester) async {
+      tester.view.physicalSize = const Size(400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(
-          find.text('Entrenamiento de velocidad'), 100,
-          scrollable: find.byType(Scrollable).first);
+      await tester.ensureVisible(find.textContaining('Ver todos'));
+      await tester.tap(find.textContaining('Ver todos'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Entrenamiento de velocidad'));
       await tester.tap(find.text('Entrenamiento de velocidad').first);
       await tester.pumpAndSettle();
 
-      expect(find.text('Velocidad - Elige modo'), findsOneWidget);
+      expect(find.text('Velocidad — Elige modo'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -131,7 +164,7 @@ void main() {
       await tester.tap(find.text('Estadísticas'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Estadisticas'), findsAtLeast(1));
+      expect(find.textContaining('Estadísticas'), findsAtLeast(1));
       expect(tester.takeException(), isNull);
     });
   });

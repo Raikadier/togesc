@@ -2,6 +2,7 @@
   const piano = document.getElementById('hero-piano');
   const promptText = document.getElementById('prompt-text');
   const promptEl = document.getElementById('session-prompt');
+  const resultEl = document.getElementById('demo-result');
   const listenBtn = document.getElementById('demo-listen');
   const nextBtn = document.getElementById('demo-next');
   const hint = document.getElementById('demo-hint');
@@ -43,23 +44,33 @@
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = 'sine';
+    osc.type = 'triangle';
     osc.frequency.setValueAtTime(Number(freq), now);
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.12, now + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+    gain.gain.exponentialRampToValueAtTime(0.14, now + 0.018);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(now);
-    osc.stop(now + 0.6);
+    osc.stop(now + 0.65);
   }
 
   function clearKeyStates() {
     keys.forEach((k) => {
-      k.classList.remove('is-selected', 'is-correct', 'is-wrong');
+      k.classList.remove('is-selected', 'is-correct', 'is-wrong', 'is-pressed');
       k.setAttribute('aria-pressed', 'false');
     });
     promptEl?.classList.remove('is-correct', 'is-wrong');
+    if (resultEl) {
+      resultEl.hidden = true;
+      resultEl.textContent = '';
+      resultEl.classList.remove('is-correct', 'is-wrong');
+    }
+  }
+
+  function flashPress(key) {
+    key.classList.add('is-pressed');
+    window.setTimeout(() => key.classList.remove('is-pressed'), reduceMotion ? 0 : 140);
   }
 
   function pickTarget() {
@@ -88,21 +99,27 @@
     pickTarget();
     setPhase('listening');
     promptText.textContent = '¿Qué nota escuchaste?';
-    if (hint) hint.textContent = 'Puedes pulsar Escuchar de nuevo si lo necesitas.';
+    if (hint) hint.textContent = 'Puedes pulsar Repetir si lo necesitas.';
     listenBtn.textContent = 'Repetir';
     if (targetKey) playTone(targetKey.dataset.freq);
   }
 
   function answerWith(key) {
     if (phase !== 'listening' || !targetKey) return;
+    flashPress(key);
     const ok = pitchClass(key.dataset.note) === pitchClass(targetKey.dataset.note);
     clearKeyStates();
     key.classList.add(ok ? 'is-correct' : 'is-wrong');
     key.setAttribute('aria-pressed', 'true');
     targetKey.classList.add('is-correct');
     const name = labels[pitchClass(targetKey.dataset.note)] || targetKey.dataset.note;
-    promptText.textContent = ok ? `Correcto — ${name}` : `Incorrecto — era ${name}`;
+    promptText.textContent = ok ? 'Correcto' : 'Incorrecto';
     promptEl?.classList.add(ok ? 'is-correct' : 'is-wrong');
+    if (resultEl) {
+      resultEl.hidden = false;
+      resultEl.textContent = name;
+      resultEl.classList.add(ok ? 'is-correct' : 'is-wrong');
+    }
     if (hint) {
       hint.textContent = ok
         ? 'Buena lectura. Prueba otra ronda o entra a entrenar de verdad.'

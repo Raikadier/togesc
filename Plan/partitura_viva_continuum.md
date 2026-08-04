@@ -4,15 +4,13 @@
 
 | Commit | Fase |
 |--------|------|
-| `db0634f`…`6324b2c` | Landing signature, Mk.2, residuales, scroll progress |
-| `96bac51`…`1dcc1d0` | Copy ES + demo ronda |
-| (QA) | pointer-events demo; BoxDecoration; speed/account sentence-case; tests Home |
+| `db0634f`…`65c805f` | Landing, Mk.2, copy ES, demo ronda, QA pointer-events |
+| (cierre) | Demo tipográfica (labels + nota dominante); smoke e2e; meta web |
 
-## Hallazgos QA
+## Estado
 
-- Desktop: `.hero-plane { pointer-events: none }` bloqueaba Escuchar/piano → `auto` en controles.
-- Tipografía: `Decorations` → `BoxDecoration` (rompía compilación).
-- Tests Home alineados a copy Partitura viva.
+Partitura viva **cerrado** en craft web + Operate alineado.  
+Pendiente solo si aparece: validación táctil en dispositivo físico.
 
 ## Operativa
 

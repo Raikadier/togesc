@@ -26,8 +26,8 @@ Future<void> showSessionInstrumentSheet({
               ),
               const SizedBox(height: 8),
               _OptionTile(
-                title: 'Segun preferencias',
-                subtitle: 'Usa la configuracion de Cuenta',
+                title: 'Según preferencias',
+                subtitle: 'Usa la configuración de Cuenta',
                 selected: sessionOverrideKey == null,
                 onTap: () {
                   onSelected(null);

@@ -123,7 +123,7 @@ class _AudioSettingsBody extends ConsumerWidget {
         const SizedBox(height: 16),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Variacion de octavas'),
+          title: const Text('Variación de octavas'),
           subtitle: const Text(
             'Las notas pueden sonar una octava arriba o abajo en cada ronda.',
           ),

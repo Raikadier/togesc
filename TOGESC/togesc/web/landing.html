@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="landing.css?v=3">
+  <link rel="stylesheet" href="landing.css?v=4">
 </head>
 <body>
   <!--
@@ -63,30 +63,32 @@
 
       <div class="hero-plane reveal" style="--d: 4">
         <div class="session-stage" id="demo">
+          <p class="session-badge">Sesión · una ronda</p>
           <p class="session-prompt" id="session-prompt">
             <span class="prompt-pulse" aria-hidden="true"></span>
             <span id="prompt-text">Escucha la nota y elige en el piano</span>
           </p>
+          <p class="demo-result" id="demo-result" hidden aria-live="polite"></p>
           <div class="demo-actions">
             <button type="button" class="btn-listen" id="demo-listen">Escuchar</button>
             <button type="button" class="btn-listen" id="demo-next" hidden>Siguiente ronda</button>
           </div>
           <div class="piano" id="hero-piano" role="group" aria-label="Piano de una ronda">
             <div class="white-keys">
-              <button type="button" class="key-w" data-note="C" data-freq="261.63" aria-label="Do / C"></button>
-              <button type="button" class="key-w" data-note="D" data-freq="293.66" aria-label="Re / D"></button>
-              <button type="button" class="key-w" data-note="E" data-freq="329.63" aria-label="Mi / E"></button>
-              <button type="button" class="key-w" data-note="F" data-freq="349.23" aria-label="Fa / F"></button>
-              <button type="button" class="key-w" data-note="G" data-freq="392.00" aria-label="Sol / G"></button>
-              <button type="button" class="key-w" data-note="A" data-freq="440.00" aria-label="La / A"></button>
-              <button type="button" class="key-w" data-note="B" data-freq="493.88" aria-label="Si / B"></button>
-              <button type="button" class="key-w" data-note="C2" data-freq="523.25" aria-label="Do agudo / C"></button>
-              <button type="button" class="key-w" data-note="D2" data-freq="587.33" aria-label="Re agudo / D"></button>
-              <button type="button" class="key-w" data-note="E2" data-freq="659.25" aria-label="Mi agudo / E"></button>
-              <button type="button" class="key-w" data-note="F2" data-freq="698.46" aria-label="Fa agudo / F"></button>
-              <button type="button" class="key-w" data-note="G2" data-freq="783.99" aria-label="Sol agudo / G"></button>
-              <button type="button" class="key-w" data-note="A2" data-freq="880.00" aria-label="La agudo / A"></button>
-              <button type="button" class="key-w" data-note="B2" data-freq="987.77" aria-label="Si agudo / B"></button>
+              <button type="button" class="key-w" data-note="C" data-freq="261.63" aria-label="Do / C"><span class="key-label">Do</span></button>
+              <button type="button" class="key-w" data-note="D" data-freq="293.66" aria-label="Re / D"><span class="key-label">Re</span></button>
+              <button type="button" class="key-w" data-note="E" data-freq="329.63" aria-label="Mi / E"><span class="key-label">Mi</span></button>
+              <button type="button" class="key-w" data-note="F" data-freq="349.23" aria-label="Fa / F"><span class="key-label">Fa</span></button>
+              <button type="button" class="key-w" data-note="G" data-freq="392.00" aria-label="Sol / G"><span class="key-label">Sol</span></button>
+              <button type="button" class="key-w" data-note="A" data-freq="440.00" aria-label="La / A"><span class="key-label">La</span></button>
+              <button type="button" class="key-w" data-note="B" data-freq="493.88" aria-label="Si / B"><span class="key-label">Si</span></button>
+              <button type="button" class="key-w" data-note="C2" data-freq="523.25" aria-label="Do agudo / C"><span class="key-label">Do</span></button>
+              <button type="button" class="key-w" data-note="D2" data-freq="587.33" aria-label="Re agudo / D"><span class="key-label">Re</span></button>
+              <button type="button" class="key-w" data-note="E2" data-freq="659.25" aria-label="Mi agudo / E"><span class="key-label">Mi</span></button>
+              <button type="button" class="key-w" data-note="F2" data-freq="698.46" aria-label="Fa agudo / F"><span class="key-label">Fa</span></button>
+              <button type="button" class="key-w" data-note="G2" data-freq="783.99" aria-label="Sol agudo / G"><span class="key-label">Sol</span></button>
+              <button type="button" class="key-w" data-note="A2" data-freq="880.00" aria-label="La agudo / A"><span class="key-label">La</span></button>
+              <button type="button" class="key-w" data-note="B2" data-freq="987.77" aria-label="Si agudo / B"><span class="key-label">Si</span></button>
             </div>
             <div class="black-keys" aria-hidden="true">
               <span class="key-b"></span>
@@ -232,6 +234,6 @@
       </div>
     </div>
   </footer>
-  <script src="landing.js?v=3" defer></script>
+  <script src="landing.js?v=4" defer></script>
 </body>
 </html>
