@@ -1,7 +1,11 @@
 (() => {
   const piano = document.getElementById('hero-piano');
   const promptText = document.getElementById('prompt-text');
-  if (!piano || !promptText) return;
+  const promptEl = document.getElementById('session-prompt');
+  const listenBtn = document.getElementById('demo-listen');
+  const nextBtn = document.getElementById('demo-next');
+  const hint = document.getElementById('demo-hint');
+  if (!piano || !promptText || !listenBtn || !nextBtn) return;
 
   const keys = [...piano.querySelectorAll('.key-w')];
   const labels = {
@@ -12,17 +16,16 @@
     G: 'Sol',
     A: 'La',
     B: 'Si',
-    C2: 'Do',
-    D2: 'Re',
-    E2: 'Mi',
-    F2: 'Fa',
-    G2: 'Sol',
-    A2: 'La',
-    B2: 'Si',
   };
 
   let audioCtx = null;
+  let targetKey = null;
+  let phase = 'idle'; // idle | listening | answered
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function pitchClass(note) {
+    return String(note || '').replace(/[0-9]/g, '');
+  }
 
   function ensureAudio() {
     if (!audioCtx) {
@@ -51,40 +54,83 @@
     osc.stop(now + 0.6);
   }
 
-  function selectKey(key) {
+  function clearKeyStates() {
     keys.forEach((k) => {
-      const on = k === key;
-      k.classList.toggle('is-selected', on);
-      k.setAttribute('aria-pressed', on ? 'true' : 'false');
+      k.classList.remove('is-selected', 'is-correct', 'is-wrong');
+      k.setAttribute('aria-pressed', 'false');
     });
-    const note = key.dataset.note || '';
-    const name = labels[note] || note;
-    promptText.textContent = name ? `¿Era ${name}?` : '¿Qué nota escuchaste?';
-    playTone(key.dataset.freq);
+    promptEl?.classList.remove('is-correct', 'is-wrong');
   }
 
-  keys.forEach((key) => {
-    key.addEventListener('click', () => selectKey(key));
+  function pickTarget() {
+    targetKey = keys[Math.floor(Math.random() * keys.length)];
+  }
+
+  function setPhase(next) {
+    phase = next;
+    const answering = phase === 'listening';
+    keys.forEach((k) => {
+      k.disabled = !answering;
+    });
+    listenBtn.hidden = phase === 'answered';
+    nextBtn.hidden = phase !== 'answered';
+    if (phase === 'idle') {
+      listenBtn.textContent = 'Escuchar';
+      promptText.textContent = 'Escucha la nota y elige en el piano';
+      if (hint) {
+        hint.textContent = 'Pulsa Escuchar, luego toca la tecla que creas correcta.';
+      }
+    }
+  }
+
+  function startRound() {
+    clearKeyStates();
+    pickTarget();
+    setPhase('listening');
+    promptText.textContent = '¿Qué nota escuchaste?';
+    if (hint) hint.textContent = 'Puedes pulsar Escuchar de nuevo si lo necesitas.';
+    listenBtn.textContent = 'Repetir';
+    if (targetKey) playTone(targetKey.dataset.freq);
+  }
+
+  function answerWith(key) {
+    if (phase !== 'listening' || !targetKey) return;
+    const ok = pitchClass(key.dataset.note) === pitchClass(targetKey.dataset.note);
+    clearKeyStates();
+    key.classList.add(ok ? 'is-correct' : 'is-wrong');
+    key.setAttribute('aria-pressed', 'true');
+    targetKey.classList.add('is-correct');
+    const name = labels[pitchClass(targetKey.dataset.note)] || targetKey.dataset.note;
+    promptText.textContent = ok ? `Correcto — ${name}` : `Incorrecto — era ${name}`;
+    promptEl?.classList.add(ok ? 'is-correct' : 'is-wrong');
+    if (hint) {
+      hint.textContent = ok
+        ? 'Buena lectura. Prueba otra ronda o entra a entrenar de verdad.'
+        : 'La clase de altura importa más que la octava. Siguiente ronda cuando quieras.';
+    }
+    playTone(key.dataset.freq);
+    setPhase('answered');
+  }
+
+  listenBtn.addEventListener('click', () => {
+    if (phase === 'answered') return;
+    if (phase === 'idle') startRound();
+    else if (targetKey) playTone(targetKey.dataset.freq);
   });
 
-  if (!reduceMotion && 'IntersectionObserver' in window) {
-    let i = keys.findIndex((k) => k.classList.contains('is-selected'));
-    if (i < 0) i = 2;
-    const stage = piano.closest('.session-stage');
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          i = (i + 1) % keys.length;
-          keys.forEach((k, idx) => {
-            const on = idx === i;
-            k.classList.toggle('is-selected', on);
-            k.setAttribute('aria-pressed', on ? 'true' : 'false');
-          });
-        });
-      },
-      { threshold: [0.35, 0.7] }
-    );
-    if (stage) io.observe(stage);
-  }
+  nextBtn.addEventListener('click', () => startRound());
+
+  keys.forEach((key) => {
+    key.addEventListener('click', () => answerWith(key));
+  });
+
+  document.querySelectorAll('a[href="#demo"]').forEach((link) => {
+    link.addEventListener('click', () => {
+      window.setTimeout(() => {
+        if (phase === 'idle') startRound();
+      }, reduceMotion ? 0 : 280);
+    });
+  });
+
+  setPhase('idle');
 })();

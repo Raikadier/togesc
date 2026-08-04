@@ -57,21 +57,25 @@
         </p>
         <div class="hero-actions reveal" style="--d: 3">
           <a class="btn btn-primary btn-lg" href="./">Empezar a entrenar gratis</a>
-          <a class="btn btn-secondary" href="#metodo">Ver cómo funciona</a>
+          <a class="btn btn-secondary" href="#demo">Probar una ronda</a>
         </div>
       </div>
 
       <div class="hero-plane reveal" style="--d: 4">
-        <div class="session-stage">
+        <div class="session-stage" id="demo">
           <p class="session-prompt" id="session-prompt">
             <span class="prompt-pulse" aria-hidden="true"></span>
-            <span id="prompt-text">¿Qué nota escuchaste?</span>
+            <span id="prompt-text">Escucha la nota y elige en el piano</span>
           </p>
-          <div class="piano" id="hero-piano" role="group" aria-label="Piano de demostración">
+          <div class="demo-actions">
+            <button type="button" class="btn-listen" id="demo-listen">Escuchar</button>
+            <button type="button" class="btn-listen" id="demo-next" hidden>Siguiente ronda</button>
+          </div>
+          <div class="piano" id="hero-piano" role="group" aria-label="Piano de una ronda">
             <div class="white-keys">
               <button type="button" class="key-w" data-note="C" data-freq="261.63" aria-label="Do / C"></button>
               <button type="button" class="key-w" data-note="D" data-freq="293.66" aria-label="Re / D"></button>
-              <button type="button" class="key-w is-selected" data-note="E" data-freq="329.63" aria-label="Mi / E" aria-pressed="true"></button>
+              <button type="button" class="key-w" data-note="E" data-freq="329.63" aria-label="Mi / E"></button>
               <button type="button" class="key-w" data-note="F" data-freq="349.23" aria-label="Fa / F"></button>
               <button type="button" class="key-w" data-note="G" data-freq="392.00" aria-label="Sol / G"></button>
               <button type="button" class="key-w" data-note="A" data-freq="440.00" aria-label="La / A"></button>
@@ -97,7 +101,7 @@
               <span class="key-b"></span>
             </div>
           </div>
-          <p class="piano-hint">Toca una tecla para oír una altura de referencia.</p>
+          <p class="piano-hint" id="demo-hint">Pulsa Escuchar, luego toca la tecla que creas correcta.</p>
         </div>
       </div>
     </section>
