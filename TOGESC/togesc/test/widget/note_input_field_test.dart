@@ -31,7 +31,10 @@ void main() {
       await tester.pumpWidget(buildApp(onSubmitted: (_) {}));
 
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('INPUT'), findsOneWidget);
+      // El rediseño Stitch (ed0a963) quitó la etiqueta 'INPUT': la barra se
+      // identifica por su hint y por el botón de enviar.
+      expect(find.text('Escribe notas (C, Do, Mi...)'), findsOneWidget);
+      expect(find.byTooltip('Enviar'), findsOneWidget);
     });
 
     testWidgets('parsea notas separadas por espacios', (tester) async {

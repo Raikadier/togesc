@@ -5,7 +5,19 @@ import '../app/design_tokens.dart';
 import '../app/togesc_colors.dart';
 import '../constants/note_naming.dart';
 
-/// Teclado de piano interactivo (Stitch skeuominimalist).
+/// Estética del teclado.
+///
+/// - [classic]: teclado claro original (velocidad y resto de pantallas).
+/// - [session]: teclado v2 de la sesión oscura móvil (1b): 230 de alto,
+///   contenedor `#1A121E` con radio 16 y negras de 38×140.
+/// - [sessionWide]: teclado ancho de escritorio (1d): 210 de alto y negras
+///   de 52×126.
+enum PianoKeyboardVariant { classic, session, sessionWide }
+
+/// Teclado de piano interactivo.
+///
+/// La API es retrocompatible: los parámetros nuevos ([variant], [dimOthers])
+/// son opcionales y por defecto reproducen el teclado clásico.
 class PianoKeyboard extends StatefulWidget {
   final Set<String> selectedNotes;
   final Set<String> correctNotes;
@@ -15,6 +27,13 @@ class PianoKeyboard extends StatefulWidget {
   final NoteNamingMode noteNamingMode;
   final bool large;
   final bool hideLabels;
+
+  /// Estética del teclado (por defecto la clásica).
+  final PianoKeyboardVariant variant;
+
+  /// Atenúa las teclas sin feedback cuando hay alguna correcta o errónea
+  /// (fase `result` de la sesión v2). Solo afecta a las variantes de sesión.
+  final bool dimOthers;
 
   const PianoKeyboard({
     super.key,
@@ -26,6 +45,8 @@ class PianoKeyboard extends StatefulWidget {
     this.noteNamingMode = NoteNamingMode.letter,
     this.large = false,
     this.hideLabels = false,
+    this.variant = PianoKeyboardVariant.classic,
+    this.dimOthers = false,
   });
 
   static const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -147,29 +168,43 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     return null;
   }
 
+  bool get _isSession => widget.variant != PianoKeyboardVariant.classic;
+
   Widget? _statusBadge(
     String note, {
     required bool onDarkKey,
     required TogescColors colors,
   }) {
+    // En sesión las teclas blancas con feedback son verde o rojo claros:
+    // el icono va en el tono profundo (>=4,5:1) y en las negras, en blanco.
+    final size = _isSession ? 20.0 : (widget.large ? 18.0 : 14.0);
     if (widget.correctNotes.contains(note)) {
       return Icon(
         Icons.check_circle,
-        size: widget.large ? 18 : 14,
-        color: onDarkKey ? Colors.white : colors.correct,
+        size: size,
+        color: onDarkKey
+            ? Colors.white
+            : (_isSession ? _sessionCorrectInk : colors.correct),
         semanticLabel: 'correcta',
       );
     }
     if (widget.incorrectNotes.contains(note)) {
       return Icon(
         Icons.cancel,
-        size: widget.large ? 18 : 14,
-        color: onDarkKey ? Colors.white : colors.incorrect,
+        size: size,
+        color: onDarkKey
+            ? Colors.white
+            : (_isSession ? _sessionWrongInk : colors.incorrect),
         semanticLabel: 'incorrecta',
       );
     }
     return null;
   }
+
+  /// Tinta sobre las teclas blancas de sesión con feedback.
+  static const _sessionCorrectInk = Color(0xFF1B5E20);
+  static const _sessionWrongInk = Color(0xFF7A1010);
+  static const _sessionWhiteLabel = Color(0xFF4D4351);
 
   void _tap(String note) {
     if (widget.disabled) return;
@@ -224,11 +259,24 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
             hoverColor: colors.selection.withValues(alpha: 0.1),
             splashColor: colors.selection.withValues(alpha: 0.15),
             child: Stack(
-              alignment: Alignment.topCenter,
+              alignment:
+                  _isSession ? Alignment.bottomCenter : Alignment.topCenter,
               children: [
                 visual,
                 if (badge != null)
-                  Padding(padding: const EdgeInsets.only(top: 4), child: badge),
+                  Padding(
+                    // En sesión el badge va sobre la etiqueta, en la parte
+                    // visible de la tecla (las negras tapan el borde superior
+                    // de las blancas).
+                    padding: _isSession
+                        ? EdgeInsets.only(
+                            bottom: onDarkKey
+                                ? (widget.hideLabels ? 8 : 24)
+                                : (widget.hideLabels ? 12 : 34),
+                          )
+                        : const EdgeInsets.only(top: 4),
+                    child: badge,
+                  ),
               ],
             ),
           ),
@@ -239,6 +287,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isSession) return _buildSession(context);
     final scheme = Theme.of(context).colorScheme;
     final colors = TogescColors.of(context);
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
@@ -409,6 +458,216 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                   }),
                 ],
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Variantes de sesión v2 (1b móvil y 1d escritorio).
+  // ---------------------------------------------------------------------------
+
+  bool get _hasFeedback =>
+      widget.correctNotes.isNotEmpty || widget.incorrectNotes.isNotEmpty;
+
+  bool _isDimmed(String note) =>
+      widget.dimOthers &&
+      _hasFeedback &&
+      !widget.correctNotes.contains(note) &&
+      !widget.incorrectNotes.contains(note);
+
+  LinearGradient _sessionGradient(
+    String note, {
+    required bool black,
+    required TogescColors colors,
+  }) {
+    if (widget.correctNotes.contains(note)) {
+      return black ? colors.pianoBlackKeyCorrect : colors.pianoWhiteKeyCorrect;
+    }
+    if (widget.incorrectNotes.contains(note)) {
+      return black ? colors.pianoBlackKeyWrong : colors.pianoWhiteKeyWrong;
+    }
+    if (_isDimmed(note)) {
+      return black ? colors.pianoBlackKeyDimmed : colors.pianoWhiteKeyDimmed;
+    }
+    return black ? colors.pianoBlackKey : colors.pianoWhiteKey;
+  }
+
+  Widget _sessionLabel(String note, {required bool black}) {
+    if (widget.hideLabels) return const SizedBox.shrink();
+    final wide = widget.variant == PianoKeyboardVariant.sessionWide;
+    final Color color;
+    if (black) {
+      color = Colors.white.withValues(alpha: _isDimmed(note) ? 0.6 : 0.92);
+    } else if (widget.correctNotes.contains(note)) {
+      color = _sessionCorrectInk;
+    } else if (widget.incorrectNotes.contains(note)) {
+      color = _sessionWrongInk;
+    } else {
+      color = _isDimmed(note) ? const Color(0xFF2A2230) : _sessionWhiteLabel;
+    }
+    return ExcludeSemantics(
+      child: Text(
+        formatNoteLabel(note, widget.noteNamingMode),
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.visible,
+        style: TextStyle(
+          fontSize: black ? (wide ? 12 : 10) : (wide ? 15 : 14),
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.2,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSession(BuildContext context) {
+    final colors = TogescColors.of(context);
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final animDuration = reduceMotion ? Duration.zero : DesignTokens.motionFast;
+    final wide = widget.variant == PianoKeyboardVariant.sessionWide;
+    final containerHeight = wide
+        ? DesignTokens.pianoSessionWideHeight
+        : DesignTokens.pianoSessionHeight;
+    final blackSize = wide
+        ? DesignTokens.pianoSessionWideBlackKeySize
+        : DesignTokens.pianoSessionBlackKeySize;
+    const padding = 8.0;
+    // Zona táctil de las negras: nunca menos de 48 (WCAG 2.5.8), aunque
+    // visualmente midan 38.
+    final blackHitWidth = blackSize.width < DesignTokens.touchTargetMin
+        ? DesignTokens.touchTargetMin
+        : blackSize.width;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = wide ? 960.0 : 560.0;
+        // 7 teclas x 48 dp mínimo + relleno del contenedor.
+        const minWidth = 336.0 + padding * 2;
+        final available =
+            constraints.hasBoundedWidth ? constraints.maxWidth : maxWidth;
+        final totalWidth = available.clamp(minWidth, maxWidth);
+        final innerWidth = totalWidth - padding * 2;
+        final keysHeight = containerHeight - padding * 2;
+        final whiteKeyWidth = innerWidth / 7;
+        final blackHeight = blackSize.height.clamp(0.0, keysHeight * 0.7);
+
+        return Semantics(
+          container: true,
+          label: 'Teclado de piano',
+          child: Container(
+            key: const ValueKey('piano-session-container'),
+            width: totalWidth,
+            height: containerHeight,
+            padding: const EdgeInsets.all(padding),
+            decoration: BoxDecoration(
+              color: DesignTokens.pianoSessionContainer,
+              borderRadius: BorderRadius.circular(
+                DesignTokens.pianoSessionRadius,
+              ),
+              border: Border.all(color: DesignTokens.sessionBorderSubtle),
+            ),
+            child: Stack(
+              children: [
+                Row(
+                  children: PianoKeyboard.whiteNotes.map((note) {
+                    final pressed = _pressed.contains(note);
+                    final selected = widget.selectedNotes.contains(note);
+                    return Expanded(
+                      child: _accessibleKey(
+                        note: note,
+                        onDarkKey: false,
+                        colors: colors,
+                        visual: AnimatedContainer(
+                          key: ValueKey('piano-key-$note'),
+                          duration: animDuration,
+                          transform: pressed
+                              ? (Matrix4.identity()
+                                ..translateByDouble(0.0, 3.0, 0.0, 1.0))
+                              : Matrix4.identity(),
+                          margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                          decoration: BoxDecoration(
+                            gradient: _sessionGradient(
+                              note,
+                              black: false,
+                              colors: colors,
+                            ),
+                            border: selected
+                                ? Border.all(color: colors.selection, width: 3)
+                                : null,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(3),
+                              bottom: Radius.circular(8),
+                            ),
+                          ),
+                          alignment: Alignment.bottomCenter,
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _sessionLabel(note, black: false),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                ...PianoKeyboard.blackNoteMap.entries.map((entry) {
+                  final whiteIndex =
+                      PianoKeyboard.whiteNotes.indexOf(entry.key);
+                  final sharpNote = entry.value;
+                  final pressed = _pressed.contains(sharpNote);
+                  final selected = widget.selectedNotes.contains(sharpNote);
+                  final leftOffset =
+                      (whiteIndex + 1) * whiteKeyWidth - blackHitWidth / 2;
+                  return Positioned(
+                    left: leftOffset,
+                    top: 0,
+                    width: blackHitWidth,
+                    height: blackHeight,
+                    child: _accessibleKey(
+                      note: sharpNote,
+                      onDarkKey: true,
+                      colors: colors,
+                      visual: Align(
+                        alignment: Alignment.topCenter,
+                        child: AnimatedContainer(
+                          key: ValueKey('piano-key-$sharpNote'),
+                          duration: animDuration,
+                          width: blackSize.width,
+                          height: blackHeight,
+                          transform: pressed
+                              ? (Matrix4.identity()
+                                ..translateByDouble(0.0, 3.0, 0.0, 1.0))
+                              : Matrix4.identity(),
+                          decoration: BoxDecoration(
+                            gradient: _sessionGradient(
+                              sharpNote,
+                              black: true,
+                              colors: colors,
+                            ),
+                            border: selected
+                                ? Border.all(color: colors.selection, width: 3)
+                                : null,
+                            borderRadius: const BorderRadius.vertical(
+                              bottom: Radius.circular(6),
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x66000000),
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.bottomCenter,
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _sessionLabel(sharpNote, black: true),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ],
             ),
           ),
         );

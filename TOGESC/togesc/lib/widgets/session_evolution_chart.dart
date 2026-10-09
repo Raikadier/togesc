@@ -7,9 +7,16 @@ import 'togesc_ui.dart';
 
 /// Grafico de barras de precision diaria (Fase 7C-3).
 class SessionEvolutionChart extends StatelessWidget {
-  const SessionEvolutionChart({super.key, required this.summaries});
+  const SessionEvolutionChart({
+    super.key,
+    required this.summaries,
+    this.title = 'Evolución 7 días',
+  });
 
   final List<DayPracticeSummary> summaries;
+
+  /// Título de la card (el periodo lo elige la pantalla).
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +31,7 @@ class SessionEvolutionChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Evolución 7 días', style: theme.textTheme.titleLarge),
+          Text(title, style: theme.textTheme.titleLarge),
           const SizedBox(height: 4),
           Text(
             'Precisión diaria y rondas practicadas (historial local).',

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:togesc/app/router.dart';
 import 'package:togesc/providers/router_provider.dart';
+import 'package:togesc/screens/home_screen.dart';
 import 'package:togesc/services/app_preferences.dart';
 
 void main() {
@@ -45,7 +46,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Modos de entrenamiento'), findsOneWidget);
+    // Independiente del copy de Home (rediseño v2, lote 1A).
+    expect(find.byType(HomeScreen), findsOneWidget);
     expect(find.text('Entendido, empezar'), findsNothing);
   });
 

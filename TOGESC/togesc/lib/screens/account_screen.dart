@@ -283,6 +283,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 ),
           ),
           const SizedBox(height: DesignTokens.spacingLg),
+          // D8: Pro sale de la nav; Perfil es su entrada permanente.
+          InfoLinkCard(
+            key: const ValueKey('account-pro-entry'),
+            icon: Icons.workspace_premium_rounded,
+            title: 'TOGESC Pro',
+            subtitle: hasPro
+                ? 'Gestiona tu suscripción'
+                : 'Todos los modos, estadísticas avanzadas y sincronización',
+            onTap: () => context.push(
+              hasPro ? AppRoutes.subscription : AppRoutes.paywall,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spacingMd),
           if (!available) ...[
             const AccountOfflineView(),
             const SizedBox(height: DesignTokens.spacingLg),

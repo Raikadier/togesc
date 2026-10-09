@@ -2,6 +2,126 @@
 
 Log en orden cronológico inverso.
 
+## 2026-10-09 · Lotes 1C + 1D + 2: sesión v2, piano y escritorio · Senior Developer (Flutter)
+- **Estado:** `flutter analyze` sin issues. `flutter test test/widget/game_screen_test.dart test/widget/piano_keyboard_test.dart test/unit/session_v2_test.dart test/unit/speed_session_provider_test.dart`: +57, todo en verde. No hay tests de widget de velocidad (`test/widget/speed*` no existe); se incluye `test/unit/speed_session_provider_test.dart`.
+- **Pantalla (`lib/screens/game_screen.dart`, reescrita):**
+  - Tema forzado `AppTheme.session`. Máquina de estados listen (mínimo 1,5 s, `DesignTokens.sessionListenDuration`) → answer → result → cluster opcional → listen.
+  - Avance con `resultAutoAdvanceDelay` (2,2 s) o `resultAutoAdvanceDelayReducedMotion` si `reduceAnimations` o `disableAnimations`. Con lector de pantalla (`accessibleNavigation`) el retardo se duplica (4,4 s) para que dé tiempo al anuncio.
+  - **D4:** el parámetro `GameScreen.autoStart` es opcional. Con `null`, fuera de web siempre arranca directo; en web, solo si hay ruta previa (`Navigator.canPop`, es decir, se llegó navegando con gesto). Un enlace directo o una recarga muestran «Toca para empezar». El router no se tocó.
+  - Resultado sobre la tecla: correcta en verde y errónea en rojo, tomadas de `lastResult.wrongNotes` (corrige el fallo `:145/521`). El resto de teclas se atenúa. Se borraron `result_card.dart` y el segundo teclado.
+  - Modo confirmar y avance manual de Ajustes: botones «Confirmar» y «Siguiente ronda» en el pie del anillo.
+  - «Repetir» vuelve a reproducir **la misma** ronda; antes sacaba notas nuevas. «Saltar» descarta la ronda sin tocar el SRS y empieza otra.
+  - Copy real (D10): el subtítulo de escucha incluye el instrumento solo si es fijo y «octava 4» solo si la octava no varía.
+- **Piano (`lib/widgets/piano_keyboard.dart`):** parámetros opcionales nuevos `variant: PianoKeyboardVariant.classic|session|sessionWide` y `dimOthers`. El valor por defecto (`classic`) no cambia, así que velocidad y el resto de consumidores siguen igual.
+  - Variante `session`: 230 de alto, negras de 38×140. Variante `sessionWide`: 210 de alto, negras de 52×126.
+  - Gradientes de `TogescColors`. Las negras tienen una zona táctil de 48 aunque midan 38.
+  - Se mantienen los badges ✓/✗, los `Semantics` por tecla y Enter/Espacio sobre la tecla enfocada.
+- **Nuevos widgets en `lib/widgets/session_v2/`:**
+  - `session_phase` (enum y copy puro), `session_phase_ring` (región viva y barras animadas que respetan el movimiento reducido), `srs_level_pill`, `session_top_bar` (chips, progreso de 3 px, instrumento y pausa), `session_key_actions`, `session_srs_panel` y `session_shortcuts`.
+  - Panel SRS: muestra el foco capturado al entrar o, si no hay, `todayFocusNotesProvider`. Estados: Crítica, En curso, Consolidando y Sin datos.
+  - Atajos: A–G, ⇧ sostenido (⇧E y ⇧B se ignoran), R repetir y Espacio siguiente o saltar.
+    - Se ignoran con Ctrl, Alt o Meta, para no pisar Ctrl+R, y cuando hay un `EditableText` con el foco.
+    - Espacio solo actúa si ningún control concreto tiene el foco; la tecla del piano enfocada consume su Enter/Espacio antes.
+  - A11y: el resultado va en `Semantics(liveRegion)`. En iOS y escritorio se añade `SemanticsService.sendAnnouncement`, porque esas plataformas no leen `liveRegion`.
+- **`game_session_views.dart`:** solo quedan `GameSessionPhaseLayout` y `GameInstrumentToggleAction`, que usan velocidad y cuenta. El resto era código muerto tras v2.
+- **Tests:**
+  - `test/widget/game_screen_test.dart`, reescrito con 17 tests: fases, idle D4, acierto y fallo con color y hint por tecla, «Era D, respondiste E», región viva, avance a los 2,2 s, modos manual y confirmar, Repetir, Saltar, atajos (letra, ⇧, R, Espacio y campo de texto con foco) y escritorio frente a móvil.
+  - `piano_keyboard_test.dart`: +5 tests de la variante de sesión (medidas, zona táctil de 48, badges y gradientes, 320 px sin desbordar).
+  - Nuevo `test/unit/session_v2_test.dart`.
+- **Pendiente u observaciones:**
+  - `test/integration/full_game_flow_test.dart` y `e2e` buscan textos antiguos («Confirmar», «Siguiente», «Reproducir»); los actualiza el lote 3.
+  - Si el Home quiere forzar la entrada directa en web aunque no haya ruta previa, puede pasar `autoStart: true` desde el router.
+  - El fin de sesión (meta cumplida) muestra el anillo con «Objetivo cumplido» y «Volver al inicio»: no hay hoja de cierre diseñada.
+
+## 2026-10-09 · Lote 1A: Home v2 «una sola decisión» · Frontend Developer (Flutter)
+- **Pantalla 1a** (`lib/screens/home_screen.dart`, reescrita). Orden: fecha (overline) con racha, hero «Sesión de hoy», «Retomar» (solo si existe), «Práctica libre» y «Esta semana». El contenido se centra con un ancho máximo de 720 (`homeContentMaxWidth`).
+- **App bar:**
+  - En móvil el shell ya pinta el logo y el avatar en su app bar de 56. El Home pone el chip de racha a la derecha de la fecha, para no duplicar la barra.
+  - En escritorio (≥1024) el shell solo muestra el rail, sin app bar, así que el Home pinta `HomeAppBar` con logo, racha y avatar. El avatar lleva a `/account`.
+  - **Pendiente para 1B:** si se prefiere la racha dentro del app bar del shell en móvil, hay que moverla allí y quitar `StreakChip` del Home.
+- **Hero** (`home_v2/today_session_hero.dart`):
+  - Muestra «12 rondas · ≈ 6 min (estimado)». Su Semantics dice «unos 6 minutos estimados».
+  - 3 mini-cards con barra de 3 px (`masteryBarColorOnDark`) y %. Las notas sin datos se marcan «Nueva».
+  - **D10:** el copy sale de `todayHeroCopy`, que usa solo datos reales. Cubre 4 casos: sin foco, ninguna nota vista, menos de 3 vistas y todas vistas. En el último el texto cambia según el motivo: atrasadas, en aprendizaje o menor precisión.
+  - CTA ámbar de 58: `captureUserGesture`, limpia `practiceFocusNoteProvider`, llama a `setPracticeFocusNotes(plan.focusNoteNames)` y hace `push('/game/1')`. No había un parámetro previo para entrar directamente en `listen`; eso lo resuelve 1D dentro de la sesión.
+  - «Ajustar enfoque y duración» lleva a `/settings`.
+- **Retomar** (`home_v2/resume_row.dart`): fila con borde discontinuo y «N rondas · hace X», que sale de `resumeSessionProvider` y `formatRelativeTimeEs`. Si el modo es Pro y el usuario no tiene acceso, muestra un candado y lleva al paywall.
+- **Práctica libre** (`home_v2/free_practice_tiles.dart`):
+  - Tiles Una nota, Intervalo y Acorde con «86% · 24 ses.» o «Sin sesiones» (`engagementStatsProvider`).
+  - **D8:** los modos Pro llevan la marca PRO y, si están bloqueados, un candado; al tocarlos se abre `paywall?feature=…`.
+  - «Ver todos» abre el catálogo de los 6 modos en un bottom sheet; sustituye a la rejilla expandible anterior.
+  - El acceso se resuelve con `homeModeAccessProvider`, que se puede sobrescribir en los tests.
+- **Semana** (`home_v2/week_strip.dart`): 7 celdas de 44 de alto (L–D). Cada estado lleva un icono (✓, reloj, ✕ o ninguno) y una Semantics por día, por ejemplo «Martes: práctica parcial, 5 de 12 rondas». Hoy lleva un borde primario.
+- **Borrados:** `daily_focus_section.dart`, `continue_practice_card.dart`, `mode_bento_card.dart` y `home_hub_views.dart`. Los helpers `*LastPracticeSession` pasan a `home_v2/home_mode_access.dart`. `recommendation_card.dart` sigue en el repo porque no entraba en el alcance.
+- **Tests:**
+  - `test/widget/home_screen_test.dart`, reescrito con 13 casos: hero con datos, dos estados vacíos, Retomar oculto o visible, CTA con su pool, ajustes, candado Pro y paywall, «Ver todos», semana con Semantics, web ancho y móvil.
+  - Nuevo `test/widget/home_v2_widgets_test.dart` con 10 casos.
+- **Rotos fuera de mi alcance (lote 3 / dueños):** los tests que buscan «Modos de entrenamiento» o «Reproducir» desde el Home antiguo: `test/e2e/app_smoke_test.dart:92` y `test/integration/full_game_flow_test.dart:77`. `router_onboarding_test.dart:48` también lo buscaba, pero otro agente ya lo está modificando.
+
+## 2026-10-09 · Lote 1E: Progreso v2 con la rejilla de 12 notas · Frontend Developer (Flutter)
+- **Pantalla 1c** (`lib/screens/statistics_screen.dart`, reescrita). Orden: título «Progreso», precisión global, KPI, rejilla, últimas sesiones, sección Pro «Evolución» y, al final, «Reiniciar progreso».
+- **Precisión global** (`progress_v2/global_accuracy_header.dart`): número 52/800 tabular (`bigNumberLarge`), barra «Y% de la meta (90%)» con `accuracyGoalPercent`.
+  - **D10:** el delta sale de `weeklyAccuracyDeltaProvider` y se rotula «+X pts vs. semana pasada · precisión de rondas»; su Semantics dice «Precisión de rondas: …». El número grande se anuncia como «Precisión global por nota». Si falta alguna semana, el delta no se pinta.
+- **KPI** (`progress_v2/progress_kpi_row.dart`): «Latencia media · aprox.» (media de la EMA por nota ponderada por `timesSeen`, ignorando ceros; «—» sin datos), «Intentos · notas escuchadas» (`total_seen`) y «Pendientes» en card `hero`, que con pendientes > 0 abre un repaso.
+- **Rejilla 4×3** (`progress_v2/note_mastery_grid.dart`): `masteryColor(pct, srsLevel: srsLevelForSummary(...))` y texto `masteryOnColor`; nota nunca vista = «—» sobre `masteryEmpty`. Subtítulo «N consolidadas · M en curso» (`graduated` / `learning_phase`). La leyenda lleva texto con los rangos.
+  - Semantics por celda: «A sostenido, 42 %, crítica, nivel 1 de 5» o «C, sin datos todavía». Estados: crítica / en curso / dominada. Respeta la notación letra/solfeo.
+  - Tocar una celda abre un bottom sheet con `NoteSrsDetailCard`, que ya existía; no hay ruta de detalle por nota.
+- **Últimas sesiones** (`progress_v2/recent_sessions_list.dart`): 3 filas con el % en una píldora `masteryColor`/`masteryOnColor` (el ámbar sobre blanco no llega a AA como texto) y la fecha con `formatRelativeTimeEs` + `clockProvider`.
+  - «Historial»: con Pro abre `SessionHistoryPage` (`Navigator.push`, sin ruta nueva en el router); sin Pro lleva candado y abre `/paywall?feature=historial`.
+- **Sección Pro (D7):** selector 7 días / 30 días / Todo + `SessionEvolutionChart` (con un nuevo parámetro `title`) y exportar CSV. El usuario gratis ve `StatsFreeProUpsellCard` con candado. La rejilla es gratis.
+- **Estado vacío** (sin `total_seen` ni historial): card «Aún no hay progreso» con «Empezar a practicar» (va a `/`) y la rejilla con las 12 notas en «—».
+- **Web ancho:** columna centrada con `StatisticsScreen.maxContentWidth = 720`.
+- **Acceso Pro:** `progressProAccessProvider` (`progress_v2/progress_access.dart`) envuelve `SubscriptionAccess.canViewAdvancedStats`. Existe para poder simular un usuario gratis en los tests, porque sin `MONETIZATION_ENABLED` todos son Pro.
+- **Borrados:**
+  - `lib/widgets/stats_bento_grid.dart` (`StatsBentoHeader`, `StatsNoteRow` y `startReviewPractice` pasan a un método privado de la pantalla).
+  - En `stats_free_dashboard.dart`: `StatsDashboardHeader` y `StatsFreeAdvancedLockSection`.
+  - `_DomainStatBox`.
+- **Rehecho:** `session_history_card.dart` lista el historial completo reutilizando `SessionLogRow`.
+- **Fuera de mi alcance (pendiente):** `lib/widgets/note_accuracy_radar_chart.dart` queda sin uso; se puede borrar en limpieza. Mover «Reiniciar progreso» a Ajustes, como sugiere el gap analysis, queda para quien lleve Ajustes.
+- **Tests:** nuevo `test/widget/statistics_screen_test.dart` (9 casos):
+  - rejilla de 12 celdas y colores por umbral;
+  - Semantics;
+  - estado vacío;
+  - delta oculto y delta visible;
+  - usuario gratis: rejilla visible, candado y paywall;
+  - usuario Pro: historial sin candado;
+  - detalle de la nota;
+  - centrado en web ancho.
+  - No existe ningún `test/widget/stats*`.
+
+## 2026-10-09 · Lote 1B: shell y navegación · Frontend Developer (Flutter)
+- **Decisión D8 aplicada:** la nav pasa a Práctica / Progreso / Velocidad / Perfil, definida en el enum `TogescNavDestination`. Pro deja de ser pestaña y se llega a él desde Perfil, con la tarjeta «TOGESC Pro» (`account-pro-entry`), y desde los candados.
+  - En el build sin monetización, `hasPro` es `true` y la tarjeta lleva a `/subscription`; con monetización y sin Pro, lleva a `/paywall`.
+- **Barra inferior móvil (`TogescBottomNav`):** 76 de alto, fondo `navBar` y borde superior `divider`.
+  - El destino activo usa `Icons.*_rounded`, `primary` y w700; el resto, `*_outlined` en `textSecondary`.
+  - Cada destino ocupa ≥48 y tiene `Semantics(button, selected, label)`.
+  - La barra se usa por debajo de `desktopBreakpoint` (1024). El rail antiguo a partir de 600 desaparece.
+- **Rail ≥1024 (`TogescNavRail`):** 76 de ancho, «TG» y 4 destinos de 48×48 solo con icono, cada uno con tooltip y etiqueta semántica. Se navega con Tab y se activa con Enter o Espacio (InkWell focusable dentro de un `FocusTraversalGroup`).
+  - El activo lleva fondo `hero` (#2A0640) e icono `onHeroAccent` (#DA9CFF), a 8,5:1.
+  - **Elección de tema:** en las pantallas del shell, el rail usa la variante clara (`navBar` y borde `divider`) con el activo oscuro igual que en 1d. La variante `dark: true` (`sessionBackground` y borde `sessionChip`) queda pública para el layout de escritorio de la sesión (1D).
+- **Router:**
+  - `/speed` entra en el `ShellRoute` para que la pestaña Velocidad muestre la nav. Sigue protegida por `ProRouteGuard`.
+  - `/speed/game/:id` y `/game/:id` siguen fuera del shell, así que la sesión nunca muestra la barra inferior.
+  - `/paywall` y `/subscription` se conservan dentro del shell para deep links; `/paywall?feature=Entrenamiento de velocidad` marca Velocidad y el resto marca Perfil.
+  - Si un usuario sin Pro toca Velocidad, se hace `go('/')` y luego `push(paywall)`, para que el botón de cerrar del paywall (`context.pop()`) tenga adónde volver.
+- **App bar del shell:** mide 56, con el logo `DesignTokens.logo` y el avatar; ya no lleva icono Pro. Se oculta en `/speed`, que trae su propio `TogescScaffold`. El chip de racha queda pendiente porque no hay provider de racha en el alcance de 1B.
+- **Archivos:** `lib/widgets/togesc_shell.dart`, `lib/app/router.dart`, `lib/screens/account_screen.dart` (solo la tarjeta Pro) y `test/widget/togesc_shell_test.dart`, que se reescribió.
+- **Tests que romperán, con su dueño:**
+  - Los que tocan el texto de la pestaña «Estadísticas»: `test/integration/full_game_flow_test.dart:125` y `test/e2e/app_smoke_test.dart:164`. Ahora es «Progreso», o la clave `nav-progress`.
+  - `test/helpers/test_app_router.dart` todavía tiene `/speed` fuera del shell. Funciona, pero sin nav.
+- **Pendiente conocido:** el paywall abierto con `go` por un deep link directo no puede hacer `pop()`. Es un problema anterior a este lote y pertenece al paywall.
+
+## 2026-10-09 · Tests rotos de about, onboarding y note_input_field · Test Automation Engineer
+- **Estado:** los 6 tests pasan (12/12 en los 3 archivos) y `flutter analyze` no da issues en los archivos tocados. Solo se tocaron tests; el código de producción quedó como estaba.
+- **Causas raíz (todas en tests desactualizados, ninguna en el código):**
+  - `about_screen_test` (2): copy sin tildes. `96bac51` cambió «Repeticion»/«Politica» por «Repetición»/«Política». En el test de navegación, `scrollUntilVisible` nunca encontraba el texto y lanzaba `Bad state: No element`.
+  - `onboarding_screen_test` «tres secciones»: el bento Stitch renombró los pilares a «Algoritmo SRS», «Timbre universal» y «Neutralidad tonal», y la etiqueta ahora es «Notación Do/Re/Mi».
+  - `onboarding_screen_test` «guarda preferencia» y «solfeo»: el `ListView` tiene un único hijo (una `Column`), así que todo está construido desde el principio. `scrollUntilVisible` da el finder por encontrado sin desplazar, el CTA queda fuera de pantalla (y≈1205) y `tap()` solo avisa. El botón nunca se pulsaba y la preferencia nunca se guardaba. Arreglo: `ensureVisible` antes del tap, más `WidgetController.hitTestWarningShouldBeFatal = true` para que un tap fallido rompa el test.
+  - `note_input_field_test`: `ed0a963` quitó la etiqueta «INPUT». Ahora el test comprueba el hint y el tooltip «Enviar».
+- **`ProviderContainer already disposed` / `_FocusInheritedScope`:** no aparece en estos 3 archivos, y `test/helpers/test_app_router.dart` no gestiona providers, así que no hacía falta ningún cambio en el helper. Si aparece, estará en game/shell/home.
+- **Patrón para los demás agentes:** en pantallas con `ListView(children: [Column(...)])` no uséis `scrollUntilVisible`. Usad `ensureVisible` + `pumpAndSettle` + `tap`, y activad `hitTestWarningShouldBeFatal` para que un tap fuera de pantalla no pase en silencio.
+- **Archivos:** `TOGESC/togesc/test/widget/about_screen_test.dart`, `onboarding_screen_test.dart` y `note_input_field_test.dart`.
+
 ## 2026-10-09 · Lote 0B: dominio, providers y preferencias · Senior Developer (Flutter)
 - **Estado:** pendiente de compilar. En esta máquina no hay Flutter: falta pasar `flutter analyze` y `flutter test`. Cada símbolo del proyecto se verificó con grep.
 - **Decisiones aplicadas:**

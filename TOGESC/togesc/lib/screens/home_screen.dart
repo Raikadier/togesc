@@ -6,224 +6,223 @@ import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../constants/subscription_constants.dart';
-import '../models/subscription_status.dart';
 import '../providers/audio_provider.dart';
+import '../providers/clock_provider.dart';
 import '../providers/engagement_stats_provider.dart';
-import '../providers/last_practice_provider.dart';
-import '../providers/subscription_provider.dart';
-import '../services/subscription_access.dart';
-import '../widgets/continue_practice_card.dart';
-import '../widgets/daily_focus_section.dart';
-import '../widgets/home_hub_views.dart';
-import '../widgets/mode_bento_card.dart';
-import '../widgets/togesc_ui.dart';
+import '../providers/practice_focus_provider.dart';
+import '../providers/today_session_provider.dart';
+import '../utils/relative_time.dart';
+import '../widgets/home_v2/free_practice_tiles.dart';
+import '../widgets/home_v2/home_app_bar.dart';
+import '../widgets/home_v2/home_mode_access.dart';
+import '../widgets/home_v2/resume_row.dart';
+import '../widgets/home_v2/today_session_hero.dart';
+import '../widgets/home_v2/week_strip.dart';
 
-/// Pantalla principal: enfoque académico (qué practicar hoy) antes que gamificación.
-class HomeScreen extends ConsumerStatefulWidget {
+/// Ancho máximo del contenido del Home en web ancho (el rail lo pone el shell).
+const double homeContentMaxWidth = 720;
+
+/// Home v2 «una sola decisión» (spec 1a): la sesión de hoy primero; retomar,
+/// práctica libre y la semana después.
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  final _modesGridKey = GlobalKey<ModeBentoGridState>();
-  bool _modesExpanded = false;
-
-  static const _modes = [
+  static const _modeCatalog = [
     (
       GameMode.singleNote,
       Icons.music_note_rounded,
-      'Una sola nota',
+      'Una nota',
       'Identifica notas individuales',
-      false,
     ),
     (
       GameMode.interval,
-      Icons.music_note_outlined,
-      'Intervalo (2 notas)',
-      'Identifica dos notas simultáneas',
-      false,
+      Icons.queue_music_rounded,
+      'Intervalo',
+      'Dos notas simultáneas',
     ),
     (
       GameMode.chord,
       Icons.piano_rounded,
-      'Acorde (3 notas)',
-      'Identifica tres notas simultáneas',
-      true,
+      'Acorde',
+      'Tres notas simultáneas',
     ),
     (
       GameMode.random,
       Icons.shuffle_rounded,
-      'Aleatorio (1-5 notas)',
-      'Número aleatorio de notas',
-      true,
+      'Aleatorio',
+      'De 1 a 5 notas',
     ),
     (
       GameMode.sharpsOnly,
       Icons.tag_rounded,
       'Solo sostenidos',
       'C#, D#, F#, G#, A#',
-      false,
+    ),
+    (
+      GameMode.speedTraining,
+      Icons.speed_rounded,
+      'Velocidad',
+      'Responde antes de que se agote el tiempo',
     ),
   ];
 
-  @override
-  Widget build(BuildContext context) {
-    final lastPractice = ref.watch(lastPracticeSessionProvider).valueOrNull;
-    final status = ref.watch(subscriptionStatusProvider).valueOrNull;
-    final effectiveStatus = status ?? const SubscriptionStatus.free();
-    final engagement = ref.watch(engagementStatsProvider);
+  static const _freeTileModes = {
+    GameMode.singleNote,
+    GameMode.interval,
+    GameMode.chord,
+  };
 
-    void openGame(String route, GameMode mode) {
-      if (!SubscriptionAccess.canPlayMode(effectiveStatus, mode)) {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final now = ref.watch(clockProvider)();
+    final plan = ref.watch(todaySessionPlanProvider);
+    final resume = ref.watch(resumeSessionProvider);
+    final week = ref.watch(calendarWeekProvider);
+    final engagement = ref.watch(engagementStatsProvider);
+    final canPlay = ref.watch(homeModeAccessProvider);
+    final desktop =
+        MediaQuery.sizeOf(context).width >= DesignTokens.desktopBreakpoint;
+
+    void captureGesture() =>
         ref.read(audioPlayerServiceProvider).captureUserGesture();
-        context.push(
-          '${AppRoutes.paywall}?feature=${Uri.encodeComponent(SubscriptionConstants.modeProLabel(mode))}',
-        );
+
+    void openMode(GameMode mode) {
+      captureGesture();
+      if (!canPlay(mode)) {
+        context.push(paywallRouteFor(mode));
         return;
       }
-      ref.read(audioPlayerServiceProvider).captureUserGesture();
-      context.push(route);
+      // La práctica libre no hereda el foco de la sesión de hoy.
+      clearPracticeFocusNote(ref);
+      if (mode == GameMode.speedTraining) {
+        context.push(AppRoutes.speedSelect);
+      } else {
+        context.push('${AppRoutes.game}/${mode.id}');
+      }
     }
 
-    final bentoModes = [
-      for (final (mode, icon, title, subtitle, isPro) in _modes)
-        (
+    void startTodaySession() {
+      captureGesture();
+      ref.read(practiceFocusNoteProvider.notifier).state = null;
+      setPracticeFocusNotes(ref, plan.focusNoteNames);
+      context.push('${AppRoutes.game}/${GameMode.singleNote.id}');
+    }
+
+    final entries = [
+      for (final (mode, icon, title, subtitle) in _modeCatalog)
+        HomeModeEntry(
           mode: mode,
-          icon: icon,
           title: title,
           subtitle: subtitle,
-          isPro: isPro,
-          locked:
-              isPro && !SubscriptionAccess.canPlayMode(effectiveStatus, mode),
+          icon: icon,
+          isPro: !SubscriptionConstants.isModeFree(mode),
+          locked: !canPlay(mode),
           mastery: engagement.masteryFor(mode),
-          onTap: () => openGame('${AppRoutes.game}/${mode.id}', mode),
+          onTap: () => openMode(mode),
         ),
-      (
-        mode: GameMode.speedTraining,
-        icon: Icons.speed_rounded,
-        title: 'Entrenamiento de velocidad',
-        subtitle: 'Responde antes de que se agote el tiempo',
-        isPro: true,
-        locked: !SubscriptionAccess.canPlayMode(
-          effectiveStatus,
-          GameMode.speedTraining,
-        ),
-        mastery: engagement.masteryFor(GameMode.speedTraining),
-        onTap: () {
-          ref.read(audioPlayerServiceProvider).captureUserGesture();
-          if (!SubscriptionAccess.canPlayMode(
-            effectiveStatus,
-            GameMode.speedTraining,
-          )) {
-            context.push(
-              '${AppRoutes.paywall}?feature=${Uri.encodeComponent('Entrenamiento de velocidad')}',
-            );
-            return;
-          }
-          context.push(AppRoutes.speedSelect);
-        },
-      ),
     ];
-
-    final hiddenProCount = bentoModes.where((m) => m.isPro).length;
-    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: SafeArea(
         top: false,
-        child: TogescPageBody(
-          child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'TOGESC',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.8,
-                    color: scheme.primary,
-                    height: 1.05,
-                  ),
-            ),
-            const SizedBox(height: DesignTokens.spacingXs),
-            Text(
-              'Entrenador de oído absoluto',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: scheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const PracticeStreakLabel(),
-            const SizedBox(height: DesignTokens.spacingLg),
-            const DailyFocusSection(),
-            if (lastPractice != null && lastPractice.mode != null) ...[
-              ContinuePracticeCard(
-                session: lastPractice,
-                subscriptionStatus: effectiveStatus,
-                onContinue: () {
-                  ref.read(audioPlayerServiceProvider).captureUserGesture();
-                  openLastPracticeSession(
-                    context: context,
-                    session: lastPractice,
-                    subscriptionStatus: effectiveStatus,
-                    onOpenRoute: (route) => context.push(route),
-                  );
-                },
+        child: SingleChildScrollView(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: homeContentMaxWidth),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  DesignTokens.marginMobile,
+                  0,
+                  DesignTokens.marginMobile,
+                  DesignTokens.marginDesktop,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // En móvil el shell ya pinta logo y avatar en su app
+                    // bar; el Home añade la racha junto a la fecha. En
+                    // escritorio (rail, sin app bar) el Home pinta la suya.
+                    if (desktop) ...[
+                      HomeAppBar(
+                        streakDays: engagement.currentStreakDays,
+                        onAvatarTap: () => context.go(AppRoutes.account),
+                      ),
+                      HomeOverline(formatLongDateEs(now)),
+                    ] else
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: DesignTokens.spacingSm,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: HomeOverline(formatLongDateEs(now)),
+                            ),
+                            StreakChip(
+                              streakDays: engagement.currentStreakDays,
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: DesignTokens.spacingMd),
+                    TodaySessionHero(
+                      plan: plan,
+                      onStart: startTodaySession,
+                      onAdjust: () => context.push(AppRoutes.settings),
+                    ),
+                    if (resume != null) ...[
+                      const SizedBox(height: DesignTokens.spacingLg),
+                      ResumeRow(
+                        info: resume,
+                        now: now,
+                        locked: !canOpenLastPracticeSession(
+                          session: resume.session,
+                          canPlay: canPlay,
+                        ),
+                        onTap: () {
+                          captureGesture();
+                          clearPracticeFocusNote(ref);
+                          openLastPracticeSession(
+                            context: context,
+                            session: resume.session,
+                            canPlay: canPlay,
+                          );
+                        },
+                      ),
+                    ],
+                    const SizedBox(height: DesignTokens.spacingLg + 8),
+                    HomeV2SectionHeader(
+                      title: 'Práctica libre',
+                      trailing: TextButton(
+                        key: const ValueKey('home-see-all-modes'),
+                        onPressed: () => showAllModesSheet(context, entries),
+                        style: TextButton.styleFrom(
+                          foregroundColor: DesignTokens.primary,
+                          minimumSize: const Size(
+                            DesignTokens.touchTargetMin,
+                            DesignTokens.touchTargetMin,
+                          ),
+                        ),
+                        child: const Text('Ver todos'),
+                      ),
+                    ),
+                    FreePracticeTiles(
+                      entries: [
+                        for (final e in entries)
+                          if (_freeTileModes.contains(e.mode)) e,
+                      ],
+                    ),
+                    const SizedBox(height: DesignTokens.spacingLg + 8),
+                    HomeV2SectionHeader(
+                      title:
+                          'Esta semana · ${week.practicedDays} de 7 días',
+                    ),
+                    WeekStrip(week: week),
+                  ],
+                ),
               ),
-              const SizedBox(height: DesignTokens.spacingLg),
-            ],
-            HomeSectionHeader(
-              title: 'Modos de entrenamiento',
-              subtitle: _modesExpanded
-                  ? 'Todos los ejercicios, free primero y Pro después.'
-                  : 'Elige un modo para practicar ahora.',
-              trailing: hiddenProCount > 0
-                  ? TextButton(
-                      onPressed: () {
-                        final state = _modesGridKey.currentState;
-                        if (state == null) return;
-                        state.toggle();
-                        setState(() => _modesExpanded = state.expanded);
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: scheme.primary,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: DesignTokens.spacingSm,
-                        ),
-                        minimumSize: const Size(
-                          DesignTokens.touchTargetMin,
-                          DesignTokens.touchTargetMin,
-                        ),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _modesExpanded
-                                ? 'Ver menos'
-                                : 'Ver todos ($hiddenProCount)',
-                          ),
-                          Icon(
-                            _modesExpanded
-                                ? Icons.expand_less_rounded
-                                : Icons.arrow_forward_rounded,
-                            size: 18,
-                          ),
-                        ],
-                      ),
-                    )
-                  : null,
             ),
-            ModeBentoGrid(
-              key: _modesGridKey,
-              modes: bentoModes,
-              onExpandedChanged: (expanded) {
-                setState(() => _modesExpanded = expanded);
-              },
-            ),
-          ],
           ),
         ),
       ),

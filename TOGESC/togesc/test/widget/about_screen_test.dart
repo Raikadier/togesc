@@ -33,14 +33,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Acerca de TOGESC'), findsOneWidget);
-    expect(find.text('Repeticion espaciada (SRS)'), findsOneWidget);
+    expect(find.text('Repetición espaciada (SRS)'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('Politica de privacidad'),
+      find.text('Política de privacidad'),
       100,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Politica de privacidad'), findsOneWidget);
+    expect(find.text('Política de privacidad'), findsOneWidget);
     expect(find.text('Ver tutorial de nuevo'), findsOneWidget);
   });
 
@@ -63,13 +63,13 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.scrollUntilVisible(
-      find.text('Politica de privacidad'),
+      find.text('Política de privacidad'),
       200,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Politica de privacidad'));
-    await tester.tap(find.text('Politica de privacidad'), warnIfMissed: false);
+    await tester.ensureVisible(find.text('Política de privacidad'));
+    await tester.tap(find.text('Política de privacidad'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(find.text('Resumen'), findsOneWidget);

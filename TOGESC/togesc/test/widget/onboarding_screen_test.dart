@@ -12,10 +12,28 @@ import 'package:togesc/services/app_preferences.dart';
 import 'package:togesc/services/audio_generator.dart';
 import 'package:togesc/services/audio_player_service.dart';
 import 'dart:math';
+
+/// El ListView del onboarding tiene un único hijo (una Column), así que todo
+/// está construido desde el inicio y `scrollUntilVisible` no desplaza nada:
+/// el finder "existe" aunque esté fuera de pantalla. `ensureVisible` sí
+/// desplaza hasta el widget antes de tocarlo.
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
+}
+
+final _startButton = find.widgetWithText(FilledButton, 'Entendido, empezar');
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    // Un tap fuera de pantalla debe fallar, no solo avisar (fue la causa
+    // silenciosa de que la preferencia nunca se guardara).
+    WidgetController.hitTestWarningShouldBeFatal = true;
   });
+  tearDown(() => WidgetController.hitTestWarningShouldBeFatal = false);
 
   testWidgets('muestra las tres secciones pedagogicas', (tester) async {
     await tester.binding.setSurfaceSize(const Size(800, 1200));
@@ -33,24 +51,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Repeticion espaciada (SRS)'), findsOneWidget);
-    expect(find.text('Variacion de octavas y timbres'), findsOneWidget);
+    // Bento de tres pilares del rediseño Stitch.
+    expect(find.text('Algoritmo SRS'), findsOneWidget);
+    expect(find.text('Timbre universal'), findsOneWidget);
+    expect(find.text('Neutralidad tonal'), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      find.text('Limpieza tonal'),
-      100,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Limpieza tonal'), findsOneWidget);
-
-    await tester.scrollUntilVisible(
-      find.text('Entendido, empezar'),
-      100,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Entendido, empezar'), findsOneWidget);
+    await tester.ensureVisible(_startButton);
+    await tester.pumpAndSettle();
+    expect(_startButton, findsOneWidget);
     expect(find.text('Probar sonido'), findsOneWidget);
-    expect(find.text('Notacion Do/Re/Mi'), findsOneWidget);
+    expect(find.text('Notación Do/Re/Mi'), findsOneWidget);
   });
 
   testWidgets('completar onboarding guarda preferencia', (tester) async {
@@ -83,14 +93,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final button = find.text('Entendido, empezar');
-    await tester.scrollUntilVisible(
-      button,
-      100,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(button);
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, _startButton);
 
     final prefs = AppPreferences(await SharedPreferences.getInstance());
     expect(prefs.onboardingComplete, isTrue);
@@ -128,16 +131,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(Switch));
-    await tester.pumpAndSettle();
-
-    await tester.scrollUntilVisible(
-      find.text('Entendido, empezar'),
-      100,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Entendido, empezar'));
-    await tester.pumpAndSettle();
+    await _tapVisible(tester, find.byType(Switch));
+    await _tapVisible(tester, _startButton);
 
     final prefs = AppPreferences(await SharedPreferences.getInstance());
     expect(prefs.noteNamingMode, NoteNamingMode.solfege);
