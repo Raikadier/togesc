@@ -21,6 +21,7 @@ class TogescColors extends ThemeExtension<TogescColors> {
     required this.correctDeep,
     required this.incorrectDeep,
     required this.selectionDeep,
+    this.onSpeedAccent = DesignTokens.onPrimary,
     this.pianoWhiteKey = DesignTokens.pianoWhiteKeyGradient,
     this.pianoBlackKey = DesignTokens.pianoBlackKeyGradient,
     this.pianoWhiteKeyCorrect = DesignTokens.pianoWhiteKeyCorrectGradient,
@@ -45,6 +46,10 @@ class TogescColors extends ThemeExtension<TogescColors> {
   final Color correctDeep;
   final Color incorrectDeep;
   final Color selectionDeep;
+
+  /// Texto e iconos sobre un relleno [speedAccent] (≥5,6:1 en los tres
+  /// temas): blanco en claro y `hero` en oscuro y sesión.
+  final Color onSpeedAccent;
 
   /// Gradientes del teclado v2 (iguales en claro, oscuro y sesión).
   /// Reposo, correcta, errónea y atenuada, para teclas blancas y negras.
@@ -82,7 +87,8 @@ class TogescColors extends ThemeExtension<TogescColors> {
     correct: Color(0xFF81C784),
     incorrect: Color(0xFFEF9A9A),
     selection: Color(0xFFFFD54F),
-    speedAccent: Color(0xFFFF8A65),
+    speedAccent: DesignTokens.speedAccentOnDark,
+    onSpeedAccent: DesignTokens.hero,
     speedContainer: Color(0xFF3D231C),
     correctContainer: Color(0xFF1B3D24),
     onCorrectContainer: Color(0xFFA5D6A7),
@@ -100,7 +106,8 @@ class TogescColors extends ThemeExtension<TogescColors> {
     correct: DesignTokens.sessionSuccess,
     incorrect: DesignTokens.sessionError,
     selection: DesignTokens.sessionAmber,
-    speedAccent: Color(0xFFFF8A65),
+    speedAccent: DesignTokens.speedAccentOnDark,
+    onSpeedAccent: DesignTokens.hero,
     speedContainer: Color(0xFF3D231C),
     correctContainer: Color(0xFF1B3D24),
     onCorrectContainer: Color(0xFFA5D6A7),
@@ -125,6 +132,7 @@ class TogescColors extends ThemeExtension<TogescColors> {
     Color? correctDeep,
     Color? incorrectDeep,
     Color? selectionDeep,
+    Color? onSpeedAccent,
     LinearGradient? pianoWhiteKey,
     LinearGradient? pianoBlackKey,
     LinearGradient? pianoWhiteKeyCorrect,
@@ -147,6 +155,7 @@ class TogescColors extends ThemeExtension<TogescColors> {
       correctDeep: correctDeep ?? this.correctDeep,
       incorrectDeep: incorrectDeep ?? this.incorrectDeep,
       selectionDeep: selectionDeep ?? this.selectionDeep,
+      onSpeedAccent: onSpeedAccent ?? this.onSpeedAccent,
       pianoWhiteKey: pianoWhiteKey ?? this.pianoWhiteKey,
       pianoBlackKey: pianoBlackKey ?? this.pianoBlackKey,
       pianoWhiteKeyCorrect: pianoWhiteKeyCorrect ?? this.pianoWhiteKeyCorrect,
@@ -190,6 +199,7 @@ class TogescColors extends ThemeExtension<TogescColors> {
       correctDeep: Color.lerp(correctDeep, other.correctDeep, t)!,
       incorrectDeep: Color.lerp(incorrectDeep, other.incorrectDeep, t)!,
       selectionDeep: Color.lerp(selectionDeep, other.selectionDeep, t)!,
+      onSpeedAccent: Color.lerp(onSpeedAccent, other.onSpeedAccent, t)!,
       pianoWhiteKey: LinearGradient.lerp(pianoWhiteKey, other.pianoWhiteKey, t)!,
       pianoBlackKey: LinearGradient.lerp(pianoBlackKey, other.pianoBlackKey, t)!,
       pianoWhiteKeyCorrect: LinearGradient.lerp(pianoWhiteKeyCorrect, other.pianoWhiteKeyCorrect, t)!,

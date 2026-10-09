@@ -18,7 +18,8 @@ class SpeedSessionIdleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final speed = TogescColors.of(context).speedAccent;
+    final colors = TogescColors.of(context);
+    final speed = colors.speedAccent;
     return GameSessionPhaseLayout(
       badge: 'Modo velocidad',
       icon: Icons.speed_rounded,
@@ -30,8 +31,9 @@ class SpeedSessionIdleView extends StatelessWidget {
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
           backgroundColor: speed,
+          foregroundColor: colors.onSpeedAccent,
           shape: RoundedRectangleBorder(
-            borderRadius: DesignTokens.borderRadiusMd,
+            borderRadius: DesignTokens.borderRadiusCta,
           ),
         ),
         icon: const Icon(Icons.play_arrow_rounded),
@@ -110,47 +112,48 @@ class SpeedSessionSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final speed = TogescColors.of(context).speedAccent;
+    final colors = TogescColors.of(context);
+    final speed = colors.speedAccent;
+    final onSpeed = colors.onSpeedAccent;
 
     return Container(
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
       decoration: BoxDecoration(
         color: speed,
-        borderRadius: DesignTokens.borderRadiusMd,
-        border: Border.all(color: speed.withValues(alpha: 0.85)),
+        borderRadius: DesignTokens.borderRadiusCard,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Fin de sesión',
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: DesignTokens.onPrimary.withValues(alpha: 0.9),
-              fontWeight: FontWeight.w600,
-            ),
+            'Fin de sesión'.toUpperCase(),
+            style: DesignTokens.overline.copyWith(color: onSpeed),
           ),
           Text(
             'Resumen de velocidad',
             style: theme.textTheme.headlineSmall?.copyWith(
-              color: DesignTokens.onPrimary,
+              color: onSpeed,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: DesignTokens.spacingLg),
-          _StatRow(label: 'Respuestas', value: '$responses'),
-          _StatRow(label: 'Racha final', value: '$streak'),
+          _StatRow(label: 'Respuestas', value: '$responses', color: onSpeed),
+          _StatRow(label: 'Racha final', value: '$streak', color: onSpeed),
           _StatRow(
             label: 'Promedio',
             value: '${averageTime.toStringAsFixed(2)}s',
+            color: onSpeed,
           ),
           _StatRow(
             label: 'Mejor tiempo',
             value: '${bestTime.toStringAsFixed(2)}s',
+            color: onSpeed,
           ),
           _StatRow(
             label: 'Tiempo límite',
             value: '${timeLimit.toStringAsFixed(1)}s',
+            color: onSpeed,
           ),
         ],
       ),
@@ -161,8 +164,13 @@ class SpeedSessionSummaryCard extends StatelessWidget {
 class _StatRow extends StatelessWidget {
   final String label;
   final String value;
+  final Color color;
 
-  const _StatRow({required this.label, required this.value});
+  const _StatRow({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -171,18 +179,13 @@ class _StatRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: DesignTokens.onPrimary.withValues(alpha: 0.85),
-            ),
-          ),
+          Text(label, style: TextStyle(color: color)),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
-              color: DesignTokens.onPrimary,
-            ),
+              color: color,
+            ).merge(DesignTokens.tabularNumbers),
           ),
         ],
       ),
@@ -255,46 +258,48 @@ class SpeedModeOptionCard extends StatelessWidget {
     final speed = TogescColors.of(context);
     final isChaos = variant == SpeedModeCardVariant.chaos;
     final isDark = variant == SpeedModeCardVariant.darkKeys;
-    final onCard = isChaos || isDark ? Colors.white : scheme.onSurface;
-    final onMuted = isChaos || isDark
-        ? Colors.white.withValues(alpha: 0.85)
-        : scheme.onSurfaceVariant;
-    final ctaColor = isChaos || isDark ? Colors.white : speed.speedAccent;
-    final iconBg = isChaos
-        ? Colors.white.withValues(alpha: 0.2)
+    // Chaos: relleno de acento con `onSpeedAccent`. Teclas negras: card
+    // `hero` (#2A0640) de v2 con texto `onHero` y el acento claro de
+    // velocidad (7,6:1), en lugar del negro de piano.
+    final Color onCard = isChaos
+        ? speed.onSpeedAccent
         : isDark
-        ? Colors.white.withValues(alpha: 0.1)
+        ? DesignTokens.onHero
+        : scheme.onSurface;
+    final Color onMuted = isChaos || isDark ? onCard : scheme.onSurfaceVariant;
+    final Color ctaColor = isChaos || isDark ? onCard : speed.speedAccent;
+    final Color iconBg = isChaos || isDark
+        ? onCard.withValues(alpha: 0.14)
         : speed.speedContainer;
-    final iconColor = isChaos
-        ? Colors.white
+    final Color iconColor = isChaos
+        ? speed.onSpeedAccent
         : isDark
-        ? speed.speedAccent
+        ? DesignTokens.speedAccentOnDark
         : speed.speedAccent;
+    final Color cardColor = isChaos
+        ? speed.speedAccent
+        : isDark
+        ? DesignTokens.hero
+        : scheme.surfaceContainerLowest;
+    final Color borderColor = isChaos || isDark
+        ? cardColor
+        : scheme.outlineVariant;
 
     return Semantics(
       button: true,
       label: title,
       hint: subtitle,
       child: Material(
-        color: Colors.transparent,
-        borderRadius: DesignTokens.borderRadiusMd,
+        type: MaterialType.transparency,
+        borderRadius: DesignTokens.borderRadiusCard,
         child: InkWell(
           onTap: onTap,
-          borderRadius: DesignTokens.borderRadiusMd,
+          borderRadius: DesignTokens.borderRadiusCard,
           child: Ink(
             decoration: BoxDecoration(
-              borderRadius: DesignTokens.borderRadiusMd,
-              gradient: null,
-              color: isChaos
-                  ? speed.speedAccent
-                  : isDark
-                  ? DesignTokens.pianoBlack
-                  : scheme.surfaceContainerLowest,
-              border: Border.all(
-                color: isChaos || isDark
-                    ? Colors.white.withValues(alpha: 0.12)
-                    : scheme.outlineVariant,
-              ),
+              borderRadius: DesignTokens.borderRadiusCard,
+              color: cardColor,
+              border: Border.all(color: borderColor),
             ),
             child: Padding(
               padding: EdgeInsets.all(
@@ -384,7 +389,7 @@ class SpeedSessionAnswerHeader extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: speed.speedContainer,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: DesignTokens.borderRadiusPill,
             border: Border.all(
               color: speed.speedAccent.withValues(alpha: 0.15),
             ),
@@ -395,10 +400,9 @@ class SpeedSessionAnswerHeader extends StatelessWidget {
               Icon(Icons.bolt_rounded, size: 16, color: speed.speedAccent),
               const SizedBox(width: DesignTokens.spacingXs),
               Text(
-                'Modo velocidad',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                'Modo velocidad'.toUpperCase(),
+                style: DesignTokens.overline.copyWith(
                   color: speed.speedAccent,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

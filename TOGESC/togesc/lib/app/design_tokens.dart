@@ -73,7 +73,6 @@ abstract final class DesignTokens {
 
   // --- Forma y espaciado ---
   static const double radiusMd = 12;
-  static const double radiusXl = 16;
   static const double shellBreakpoint = 600;
   static const double contentMaxWidth = 1200;
   static const double touchTargetMin = 48;
@@ -91,25 +90,18 @@ abstract final class DesignTokens {
 
   static BorderRadius get borderRadiusMd => BorderRadius.circular(radiusMd);
 
-  static BorderRadius get borderRadiusXl => BorderRadius.circular(radiusXl);
-
-  // --- Modo velocidad (Stitch speed-gradient) ---
-  static const Color speedAccent = Color(0xFFE64A19);
+  // --- Modo velocidad ---
+  /// Acento de velocidad en claro. v2 no cubre velocidad y el `#E64A19`
+  /// original no llegaba a AA (3,9:1 con blanco encima y 3,7:1 como texto
+  /// sobre `background`). Se usa el mismo tono más profundo: blanco encima
+  /// 5,6:1, como texto 5,3:1 sobre `background` y 4,9:1 sobre
+  /// `speedContainer`.
+  static const Color speedAccent = Color(0xFFBF360C);
   static const Color speedContainer = Color(0xFFFFEBE6);
 
-  static const LinearGradient speedGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0xFFFF5722), Color(0xFFB71C1C)],
-  );
-
-  /// Gradiente Pro legacy — evitar en UI nueva (usar primaryContainer).
-  @Deprecated('Prefer primaryContainer solid fills')
-  static const LinearGradient proGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [primaryContainer, secondary],
-  );
+  /// Acento de velocidad en oscuro y en la sesión: 8,1:1 sobre
+  /// `sessionBackground` y 7,6:1 con `hero` encima.
+  static const Color speedAccentOnDark = Color(0xFFFF8A65);
 
   // ===========================================================================
   // Rediseño v2 «La sesión como instrumento»

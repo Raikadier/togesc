@@ -126,10 +126,9 @@ class SpeedDifficultySelector extends StatelessWidget {
         ),
         const SizedBox(height: DesignTokens.spacingLg),
         Text(
-          'Tiempo inicial',
-          style: theme.textTheme.labelMedium?.copyWith(
+          'Tiempo inicial'.toUpperCase(),
+          style: DesignTokens.overline.copyWith(
             color: scheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: DesignTokens.spacingMd),
@@ -185,10 +184,10 @@ class _DifficultyChip extends StatelessWidget {
         color: selected
             ? accent.withValues(alpha: 0.12)
             : scheme.surfaceContainerLowest,
-        borderRadius: DesignTokens.borderRadiusXl,
+        borderRadius: DesignTokens.borderRadiusCard,
         child: InkWell(
           onTap: onTap,
-          borderRadius: DesignTokens.borderRadiusXl,
+          borderRadius: DesignTokens.borderRadiusCard,
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               minWidth: DesignTokens.touchTargetMin,
@@ -216,9 +215,9 @@ class _DifficultyChip extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.labelSmall
+                        ?.copyWith(color: scheme.onSurfaceVariant)
+                        .merge(DesignTokens.tabularNumbers),
                   ),
                 ],
               ),

@@ -69,7 +69,7 @@ abstract final class AppTheme {
         color: DesignTokens.surfaceContainerLowest,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: DesignTokens.borderRadiusMd,
+          borderRadius: DesignTokens.borderRadiusCard,
           side: const BorderSide(color: DesignTokens.outlineVariant),
         ),
       ),
@@ -228,7 +228,7 @@ abstract final class AppTheme {
         color: DesignTokens.darkSurfaceContainerLowest,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: DesignTokens.borderRadiusMd,
+          borderRadius: DesignTokens.borderRadiusCard,
           side: const BorderSide(color: DesignTokens.darkOutlineVariant),
         ),
       ),

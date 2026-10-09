@@ -154,7 +154,15 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             correctRounds: session.correctRounds,
           );
     }
-    clearPracticeFocusNote(ref);
+    // Riverpod prohíbe modificar providers mientras se desmonta el árbol
+    // (con foco de la «Sesión de hoy», volver rompía el árbol en debug):
+    // se limpia el foco justo después del frame.
+    final focusNote = ref.read(practiceFocusNoteProvider.notifier);
+    final focusNotes = ref.read(practiceFocusNotesProvider.notifier);
+    Future.microtask(() {
+      focusNote.state = null;
+      focusNotes.state = const [];
+    });
     super.deactivate();
   }
 

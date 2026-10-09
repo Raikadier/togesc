@@ -3,19 +3,27 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:togesc/app/router.dart';
 import 'package:togesc/models/subscription_status.dart';
 import 'package:togesc/providers/audio_provider.dart';
 import 'package:togesc/providers/srs_provider.dart';
 import 'package:togesc/providers/subscription_provider.dart';
+import 'package:togesc/screens/account_screen.dart';
+import 'package:togesc/screens/game_screen.dart';
+import 'package:togesc/screens/home_screen.dart';
+import 'package:togesc/screens/speed_mode_select_screen.dart';
+import 'package:togesc/screens/statistics_screen.dart';
+import 'package:togesc/screens/subscription_screen.dart';
+import 'package:togesc/services/app_preferences.dart';
 import 'package:togesc/services/audio_generator.dart';
 import 'package:togesc/services/audio_player_service.dart';
 import 'package:togesc/services/progress_repository.dart';
 import 'package:togesc/services/srs_system.dart';
-import '../helpers/test_app_router.dart';
+import 'package:togesc/widgets/togesc_shell.dart';
 
-class _TestSRSNotifier extends AsyncNotifier<SRSSystem>
-    implements SRSNotifier {
+class _TestSRSNotifier extends AsyncNotifier<SRSSystem> implements SRSNotifier {
   final SRSSystem _srs;
   _TestSRSNotifier(this._srs);
 
@@ -35,21 +43,20 @@ class _TestSRSNotifier extends AsyncNotifier<SRSSystem>
 class _TestSubscriptionNotifier extends SubscriptionNotifier {
   @override
   Future<SubscriptionStatus> build() async {
-    return const SubscriptionStatus(
-      plan: 'pro',
-      status: 'active',
-    );
+    return const SubscriptionStatus(plan: 'pro', status: 'active');
   }
 }
 
+Finder _nav(TogescNavDestination d) => find.byKey(ValueKey('nav-${d.name}'));
+
 void main() {
-  group('E2E: Smoke test de la aplicacion completa', () {
+  group('E2E v2: smoke de la aplicación completa', () {
     late ProviderContainer container;
-    late SRSSystem srs;
 
     setUp(() async {
-      markOnboardingCompleteForTests();
-      srs = SRSSystem(
+      TestWidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences.setMockInitialValues({onboardingCompleteKey: true});
+      final srs = SRSSystem(
         repository: InMemoryProgressRepository(),
         random: Random(42),
         clock: () => DateTime(2026, 1, 1),
@@ -58,8 +65,9 @@ void main() {
 
       container = ProviderContainer(
         overrides: [
-          progressRepositoryProvider
-              .overrideWithValue(InMemoryProgressRepository()),
+          progressRepositoryProvider.overrideWithValue(
+            InMemoryProgressRepository(),
+          ),
           srsSystemProvider.overrideWith(() => _TestSRSNotifier(srs)),
           subscriptionStatusProvider.overrideWith(
             () => _TestSubscriptionNotifier(),
@@ -67,104 +75,118 @@ void main() {
           audioPlayerServiceProvider.overrideWithValue(
             AudioPlayerService(generator: AudioGenerator(random: Random(42))),
           ),
-          audioGeneratorProvider
-              .overrideWithValue(AudioGenerator(random: Random(42))),
+          audioGeneratorProvider.overrideWithValue(
+            AudioGenerator(random: Random(42)),
+          ),
         ],
       );
       await container.read(srsSystemProvider.future);
+      await container.read(subscriptionStatusProvider.future);
     });
 
     tearDown(() => container.dispose());
 
-    Widget buildApp() {
-      return UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp.router(routerConfig: buildTestRouter()),
+    /// App con el router real (shell con las 4 pestañas), en móvil.
+    Future<void> pumpApp(
+      WidgetTester tester, {
+      Size size = const Size(400, 900),
+    }) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      WidgetController.hitTestWarningShouldBeFatal = true;
+      addTearDown(() => WidgetController.hitTestWarningShouldBeFatal = false);
+
+      final router = createAppRouter(refreshListenable: ValueNotifier(0));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(routerConfig: router),
+        ),
       );
+      await tester.pumpAndSettle();
     }
 
-    testWidgets('app inicia y renderiza HomeScreen sin errores',
-        (tester) async {
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
+    testWidgets('la app arranca en el Home v2 sin errores', (tester) async {
+      await pumpApp(tester);
 
+      expect(find.byType(HomeScreen), findsOneWidget);
       expect(find.text('TOGESC'), findsWidgets);
-      expect(find.text('Modos de entrenamiento'), findsOneWidget);
+      expect(find.byKey(const ValueKey('today-session-hero')), findsOneWidget);
+      expect(find.byKey(const ValueKey('today-start-cta')), findsOneWidget);
+      expect(find.text('Empezar sesión'), findsOneWidget);
+      expect(find.byKey(const ValueKey('home-week-strip')), findsOneWidget);
+      expect(find.byType(TogescBottomNav), findsOneWidget);
+      for (final d in TogescNavDestination.values) {
+        expect(_nav(d), findsOneWidget, reason: d.label);
+      }
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('navegacion a modos free y Pro expandidos', (tester) async {
-      tester.view.physicalSize = const Size(400, 1400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets('recorre las 4 pestañas: Práctica, Progreso, Velocidad y '
+        'Perfil', (tester) async {
+      await pumpApp(tester);
 
-      await tester.pumpWidget(buildApp());
+      await tester.tap(_nav(TogescNavDestination.progress));
       await tester.pumpAndSettle();
+      expect(find.byType(StatisticsScreen), findsOneWidget);
+      expect(find.text('Progreso'), findsWidgets);
 
-      final freeModes = [
-        'Una sola nota',
-        'Intervalo (2 notas)',
-        'Solo sostenidos',
-      ];
-
-      for (final modo in freeModes) {
-        await tester.ensureVisible(find.text(modo).first);
-        await tester.tap(find.text(modo).first);
-        await tester.pumpAndSettle();
-        expect(find.text('Reproducir'), findsOneWidget,
-            reason: 'Modo $modo deberia mostrar boton Reproducir');
-        await tester.pageBack();
-        await tester.pumpAndSettle();
-      }
-
-      await tester.ensureVisible(find.textContaining('Ver todos'));
-      await tester.tap(find.textContaining('Ver todos'));
+      await tester.tap(_nav(TogescNavDestination.speed));
       await tester.pumpAndSettle();
-
-      for (final modo in ['Acorde (3 notas)', 'Aleatorio (1-5 notas)']) {
-        await tester.ensureVisible(find.text(modo).first);
-        await tester.tap(find.text(modo).first);
-        await tester.pumpAndSettle();
-        expect(find.text('Reproducir'), findsOneWidget,
-            reason: 'Modo $modo deberia mostrar boton Reproducir');
-        await tester.pageBack();
-        await tester.pumpAndSettle();
-      }
-
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('navegacion a entrenamiento de velocidad', (tester) async {
-      tester.view.physicalSize = const Size(400, 1400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
-
-      await tester.ensureVisible(find.textContaining('Ver todos'));
-      await tester.tap(find.textContaining('Ver todos'));
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Entrenamiento de velocidad'));
-      await tester.tap(find.text('Entrenamiento de velocidad').first);
-      await tester.pumpAndSettle();
-
+      expect(find.byType(SpeedModeSelectScreen), findsOneWidget);
       expect(find.text('Velocidad — Elige modo'), findsOneWidget);
+
+      await tester.tap(_nav(TogescNavDestination.profile));
+      await tester.pumpAndSettle();
+      expect(find.byType(AccountScreen), findsOneWidget);
+
+      await tester.tap(_nav(TogescNavDestination.practice));
+      await tester.pumpAndSettle();
+      expect(find.byType(HomeScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('navegacion a estadisticas', (tester) async {
-      tester.view.physicalSize = const Size(400, 900);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets('Pro se abre desde Perfil («TOGESC Pro»)', (tester) async {
+      await pumpApp(tester);
 
-      await tester.pumpWidget(buildApp());
+      await tester.tap(_nav(TogescNavDestination.profile));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Estadísticas'));
+      final entry = find.byKey(const ValueKey('account-pro-entry'));
+      await tester.ensureVisible(entry);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: entry, matching: find.text('TOGESC Pro')),
+        findsOneWidget,
+      );
+      await tester.tap(entry);
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Estadísticas'), findsAtLeast(1));
+      // Usuario Pro → gestión de la suscripción, sin salir de Perfil.
+      expect(find.byType(SubscriptionScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('práctica libre: cada tile abre su sesión', (tester) async {
+      await pumpApp(tester);
+
+      for (final mode in ['singleNote', 'interval', 'chord']) {
+        final tile = find.byKey(ValueKey('free-tile-$mode'));
+        await tester.ensureVisible(tile);
+        await tester.pumpAndSettle();
+        await tester.tap(tile);
+        // La sesión anima en bucle: sin pumpAndSettle.
+        for (var i = 0; i < 5; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        expect(find.byType(GameScreen), findsOneWidget, reason: mode);
+        expect(find.text('ESCUCHANDO'), findsOneWidget, reason: mode);
+
+        await tester.tap(find.byTooltip('Volver'));
+        await tester.pumpAndSettle();
+        expect(find.byType(HomeScreen), findsOneWidget, reason: mode);
+      }
       expect(tester.takeException(), isNull);
     });
   });

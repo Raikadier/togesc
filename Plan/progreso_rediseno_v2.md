@@ -2,6 +2,108 @@
 
 Log en orden cronológico inverso.
 
+## 2026-10-09 · Lote 3: tests funcionales v2 (VM y dispositivo) · Test Automation Engineer
+- **Estado:** `flutter analyze` sin issues. `flutter test` completo: +504, ~1 (el skip previo de `pro_route_guard_test` sin monetización), 0 fallos. `flutter test integration_test -d flutter-tester`: +2. Los archivos reescritos pasan 5 de 5 ejecuciones seguidas.
+- **`test/e2e/app_smoke_test.dart` (reescrito, 4 tests):** usa el router real (`createAppRouter`) en lugar de `buildTestRouter`, para tener las 4 pestañas. Cubre el Home v2 (hero, CTA, semana y nav), el recorrido Práctica → Progreso → Velocidad → Perfil → Práctica con las claves `nav-*`, Pro desde Perfil (`account-pro-entry` → `SubscriptionScreen`) y los 3 tiles de práctica libre (`free-tile-*`), que abren la sesión en listen.
+- **`test/integration/full_game_flow_test.dart` (reescrito, 2 tests):** CTA `today-start-cta` → sesión directa en listen, sin idle. Sesión de 5 rondas (`sessionRoundGoalV2Key`, sin cluster): acierto con la tecla en verde, avance automático, fallo con «Era X, respondiste Y» y verde/rojo en `PianoKeyboard`, meta cumplida, «Volver al inicio», y Progreso con «5 rondas · 4 aciertos» y 80 % en esa fila.
+  - La nota pedida se lee de `gameSessionProvider.currentNotes`, así el test no depende del sorteo.
+  - `hitTestWarningShouldBeFatal = true`, para que un toque que no llega rompa el test.
+  - Las teclas blancas se tocan en su franja inferior; en el centro las tapan las negras.
+- **Nuevos tests de dispositivo, `integration_test/app_journey_test.dart` (2 tests):**
+  - Móvil (412×915): Home → sesión corta → acierto y fallo → Progreso → pestañas → Pro.
+  - Escritorio (1280×800): rail, panel SRS, teclado ancho y atajos (letra, ⇧, Espacio y R), con Progreso desde el rail.
+  - El tamaño se fija con `tester.view` (breakpoints) más `binding.setSurfaceSize` (escala a la pantalla real), así que no depende de la ventana de Chrome ni del emulador.
+  - Todas las esperas son por condición (`pumpUntilFound`), sin tiempos fijos.
+  - Capturas: 01_home, 02_session_listen, 03_session_answer, 04_result_correct, 05_result_wrong, 06_progress, 06b_progress_sessions, 07_profile y 08–12 de escritorio.
+- **Arnés (`integration_test/support/e2e_harness.dart`):** `TogescApp` real con el router de producción y datos propios del test (prefs en memoria, SRS vacío y Pro).
+  - El audio es silencioso por defecto (`SilentAudioPlayerService`). Con `--dart-define=E2E_REAL_AUDIO=true` se usa el motor real; el CTA ya llama a `captureUserGesture`.
+  - `Evidence`: en Android hace `convertFlutterSurfaceToImage` y luego `takeScreenshot("<plataforma>__<nombre>")`. En VM no hay plugin y la captura se omite.
+- **`test_driver/integration_test.dart`:** el `onScreenshot` guarda en `build/evidence/<plataforma>/<nombre>.png`. Los `args` de `takeScreenshot` solo existen en web, así que la plataforma va en el nombre.
+- **`pubspec.yaml`:** se añaden `integration_test` y `flutter_driver` (sdk) como dev_dependencies.
+- **Fallos reales de la app, arreglados con cambios mínimos:**
+  - `lib/screens/game_screen.dart` `deactivate`: `clearPracticeFocusNote(ref)` modificaba providers mientras se desmontaba el árbol. Al salir de una «Sesión de hoy» (foco no vacío), Riverpod lanzaba «Tried to modify a provider while the widget tree was building» y en debug el Home no volvía a construirse. Ahora se leen los notifiers y la limpieza se hace en un `Future.microtask`.
+  - `lib/services/microphone_pitch_service_io.dart` `stopListening`: cada salida de la sesión creaba el grabador nativo (`isRecording`) aunque no se hubiera usado el micrófono; era un future sin esperar que fallaba sin control donde no hay plugin. Se añade la guarda `_recorderUsed`.
+- **Observación (sin cambio):** `ProRouteGuard` pinta un frame de carga aunque el modo sea gratis, mientras se resuelve la suscripción. Los tests precargan `subscriptionStatusProvider`, como pasa en la app real.
+- **Ejecutar en dispositivo:**
+  - Android: `flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_journey_test.dart -d emulator-5554`
+  - Chrome, con `chromedriver --port=4444` en marcha: el mismo comando con `-d chrome`.
+  - También vale `flutter test integration_test -d emulator-5554`, que no guarda las capturas.
+
+## 2026-10-09 · Lote 3: coherencia visual, limpieza y DESIGN.md · UI Designer
+- **Estado:**
+  - `flutter analyze` deja 1 issue info ajeno, en `integration_test/support/e2e_harness.dart:4` (`unnecessary_import`). Ese archivo es nuevo y sin seguimiento; lo está escribiendo el agente de e2e. En `lib/` y `test/` no queda ningún issue.
+  - `flutter test` de speed, about, onboarding, paywall, piano, `speed_session_provider`, `design_tokens_v2` y `app_theme` pasa: +94.
+  - No existen tests de widget de ajustes ni de cuenta.
+  - Regresión completa `flutter test test/widget test/unit`: +484 ~1, «All tests passed!».
+- **Tokens (`lib/app`):**
+  - `speedAccent`: `#E64A19` pasa a `#BF360C`. El valor anterior daba 3,9:1 con blanco encima y 3,7:1 como texto; el nuevo, 5,6:1 y 5,3:1.
+  - Nuevos: `speedAccentOnDark` (#FF8A65) y `TogescColors.onSpeedAccent` (blanco en claro y `hero` en oscuro y sesión).
+  - `cardTheme` pasa a `radiusCard` (14).
+  - Borrados: `radiusXl` y `borderRadiusXl` (todos sus usos pasan a `borderRadiusCard`), `speedGradient` y `proGradient` (sin uso).
+  - `pianoWhite` y `pianoBlack` **se quedan**: los usa `PianoKeyboardVariant.classic`, que ya no monta ninguna pantalla. Borrarlos implica quitar la variante clásica, lo que es un cambio de estructura y queda pendiente.
+- **Velocidad:**
+  - `speed_game_screen` se envuelve en `Theme(AppTheme.session)` con un `Builder`. Los `_build*View` reciben el contexto interior.
+  - El teclado pasa a `PianoKeyboardVariant.session` y la selección va con el borde ámbar. Se quita la `TogescCard` que lo envolvía, porque duplicaba el contenedor del teclado.
+  - Las métricas usan overline y cifras tabulares, y su valor va en `primary`: `primaryContainer` daba 1,2:1 en oscuro.
+  - Los chips de selección van en ámbar.
+  - El resumen usa `onSpeedAccent`, overline y cifras tabulares.
+  - La card «Teclas negras» va sobre `hero` y «Chaos» usa `onSpeedAccent`.
+  - «Tiempo inicial» pasa a overline.
+- **Otras pantallas** (cambio solo de color, radio y tipografía):
+  - Onboarding:
+    - El logo del pie pasa a `logo` en `outline`; antes iba al 45 % de opacidad.
+    - El texto de pie pasa a `outline`.
+    - El CTA pasa a 58 con `radiusCta`.
+    - «Vista previa» pasa a overline.
+  - Paywall:
+    - La insignia pasa a `pro` en píldora con overline.
+    - El icono va sobre `hero`.
+    - El hero lleva `radiusHero` y el pie pasa a `outline`.
+  - Suscripción: el plan Pro va sobre `hero`/`onHero`; antes era `primaryContainer`/`onPrimary`, morado sobre morado en oscuro.
+  - Acerca de y privacidad:
+    - `InfoSectionHeader` pasa a overline 13 con `Semantics(header)`.
+    - El logo del hero usa el token `logo`.
+    - Los iconos `primaryContainer` pasan a `primary`.
+  - Cuenta:
+    - La insignia pasa a `hero` con overline.
+    - El estado «Pendiente» de sync y su icono usan `selectionDeep` en claro (#FFB300 daba 1,8:1).
+    - Los iconos pasan a `primary`.
+  - No se tocó `privacy_policy_screen.dart`: tiene cambios sin commitear de otro agente.
+- **Limpieza (sin referencias en `lib/` ni en `test/`):**
+  - Archivos borrados: `note_accuracy_radar_chart.dart`, `recommendation_card.dart` y `sync_diagnostics_card.dart`.
+  - Clases borradas: `StatsMetricRow` y `StatsNotesSection` (de `account_monetization_views.dart`) y `TogescChip` (de `togesc_ui.dart`).
+  - Ninguna tenía tests.
+- **Tests:** nuevo `test/widget/speed_screens_test.dart` con 6 casos:
+  - contraste AA del acento claro, del oscuro y de «Teclas negras»;
+  - `SpeedGameScreen` en tema de sesión;
+  - resumen con `onSpeedAccent` y cifras tabulares;
+  - selector con los 5 modos.
+- **`DESIGN.md`:** reescrito para v2. Incluye la tabla «vigente / sustituido» de Harmonic Precision, los tokens claros y de sesión, la rejilla, la sesión, la navegación, los atajos y la a11y.
+- **Para el agente de e2e:** el texto visible de algunas cabeceras ahora va en mayúsculas («CÓMO ENTRENA LA APP», «INFORMACIÓN», «TIEMPO INICIAL», «MODO VELOCIDAD», «PLAN ACTUAL», «TOGESC PRO» en el paywall) y «Limite» pasa a «Límite». La tarjeta «TOGESC Pro» de Perfil no cambia.
+
+## 2026-10-09 · Pentest 12: PT-01, PT-02 y PT-03 corregidos en código · Senior SecOps
+- **Estado:** corregido en código, **pendiente de deploy**. No hay commits ni despliegues, y no se ha tocado producción, Supabase, Stripe ni RevenueCat.
+- **PT-02 (cabeceras web):**
+  - Fuente única: `scripts/web-security-headers.mjs`. Tiene CSP, HSTS, nosniff, XFO DENY/frame-ancestors, Referrer-Policy, Permissions-Policy y COOP, y documenta cada origen de la CSP.
+  - `deploy-web.yml` ya no escribe `config.json` a mano. Ahora llama a `scripts/generate-vercel-output-config.mjs` y usa `scripts/check-security-headers.mjs` como puerta antes de `vercel deploy --prebuilt`.
+  - `vercel.json` lleva el mismo bloque `headers`, y el check falla si diverge.
+  - Para el pentest dinámico hay un servidor local: `scripts/serve-web-with-headers.mjs`, que escucha en 127.0.0.1.
+  - Verificación local: con `build/web` servido con las cabeceras, `/` carga hasta `#/onboarding` y `/promo` también carga. La consola no muestra violaciones de CSP. Los orígenes cargados son self, www.gstatic.com y fonts.gstatic.com.
+- **PT-03 (privacidad):**
+  - `lib/screens/privacy_policy_screen.dart`: solo cambian el texto y la fecha (9-oct-2026); no se tocaron estilos.
+  - La política declara ahora: analítica activa por defecto con `user_id`, sin interruptor en la app (se evita sin cuenta o con `ANALYTICS_ENABLED=false`), CSAT con texto libre, Sentry (20 % de trazas), Google Fonts/CanvasKit, Stripe/RevenueCat «cuando se activen», Supabase como encargado y Vercel. Al borrar la cuenta, la analítica queda con `user_id` a null y aún no hay retención automática.
+  - No existe versión web ni docs de la política.
+  - Test nuevo: `test/widget/privacy_policy_screen_test.dart`.
+- **PT-01 (RevenueCat):**
+  - Lógica pura en `supabase/functions/revenuecat-webhook/logic.ts` y `index.ts` adelgazado.
+  - SANDBOX se rechaza salvo `REVENUECAT_ALLOW_SANDBOX=true`.
+  - Lista permitida de entitlements (`REVENUECAT_PRO_ENTITLEMENTS`, por defecto `pro`) y de productos opcional (`REVENUECAT_PRO_PRODUCTS`).
+  - CANCELLATION y BILLING_ISSUE mantienen Pro hasta `expiration_at_ms`. Solo revocan EXPIRATION, el reembolso (`cancel_reason=CUSTOMER_SUPPORT`) o una expiración ya pasada.
+  - Bearer comparado en tiempo constante (SHA-256 + XOR).
+  - Se rechazan el JSON inválido (400) y los `app_user_id` que no son uuid. Se añade REFUND_REVERSED. TRANSFER se ignora.
+  - Tests: `logic_test.ts` (18 casos). Deno no está instalado; se ejecutaron con Node 24 (strip-types + shim de asserts) y pasan 18/18.
+- **Pendiente:** interruptor de analítica en Ajustes y canal privado de contacto RGPD (PRIV-001), TRANSFER con la API REST de RC, CanvasKit/fuentes en local para quitar gstatic de la CSP, y ejecutar `deno test` en CI (TEST-002).
+
 ## 2026-10-09 · Lotes 1C + 1D + 2: sesión v2, piano y escritorio · Senior Developer (Flutter)
 - **Estado:** `flutter analyze` sin issues. `flutter test test/widget/game_screen_test.dart test/widget/piano_keyboard_test.dart test/unit/session_v2_test.dart test/unit/speed_session_provider_test.dart`: +57, todo en verde. No hay tests de widget de velocidad (`test/widget/speed*` no existe); se incluye `test/unit/speed_session_provider_test.dart`.
 - **Pantalla (`lib/screens/game_screen.dart`, reescrita):**

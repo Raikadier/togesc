@@ -203,7 +203,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             'Cancela cuando quieras. El progreso SRS local siempre se conserva.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
+                  color: scheme.outline,
                 ),
           ),
             ],

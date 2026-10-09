@@ -63,16 +63,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   OnboardingStartCta(onPressed: () => _complete(context)),
                   const SizedBox(height: DesignTokens.spacingLg),
                   Center(
+                    // Logo v2 (15/800, ls 2,4) en texto terciario AA; antes
+                    // iba al 45 % de opacidad (≈2:1).
                     child: Text(
                       'TOGESC',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant
-                                .withValues(alpha: 0.45),
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.3,
-                          ),
+                      style: DesignTokens.logo.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
                     ),
                   ),
                 ],

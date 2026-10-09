@@ -34,12 +34,13 @@ class AccountProfileHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = TogescColors.of(context);
+    final statusInk = _statusInk(context, synced: isSynced);
 
     return Container(
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow,
-        borderRadius: DesignTokens.borderRadiusMd,
+        borderRadius: DesignTokens.borderRadiusCard,
         border: Border.all(color: scheme.outlineVariant),
       ),
       child: Row(
@@ -89,7 +90,7 @@ class AccountProfileHeader extends StatelessWidget {
                                 ? colors.correct
                                 : colors.selection)
                             .withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: DesignTokens.borderRadiusPill,
                         border: Border.all(
                           color: (isSynced
                                   ? colors.correct
@@ -105,17 +106,13 @@ class AccountProfileHeader extends StatelessWidget {
                                 ? Icons.cloud_done_rounded
                                 : Icons.cloud_sync_rounded,
                             size: 16,
-                            color: isSynced
-                                ? colors.correct
-                                : colors.selection,
+                            color: statusInk,
                           ),
                           const SizedBox(width: DesignTokens.spacingXs),
                           Text(
                             isSynced ? 'Sincronizado' : 'Pendiente',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: isSynced
-                                  ? colors.correct
-                                  : colors.selection,
+                              color: statusInk,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -154,7 +151,7 @@ class AccountSyncProBanner extends StatelessWidget {
       padding: const EdgeInsets.all(DesignTokens.spacingMd),
       decoration: BoxDecoration(
         color: scheme.secondaryContainer.withValues(alpha: 0.3),
-        borderRadius: DesignTokens.borderRadiusXl,
+        borderRadius: DesignTokens.borderRadiusCard,
         border: Border.all(
           color: scheme.outlineVariant.withValues(alpha: 0.35),
         ),
@@ -193,7 +190,7 @@ class AccountSyncProBanner extends StatelessWidget {
                 vertical: DesignTokens.spacingSm,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: DesignTokens.borderRadiusXl,
+                borderRadius: DesignTokens.borderRadiusCard,
               ),
             ),
             child: const Text('Ver más'),
@@ -251,7 +248,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
               padding: const EdgeInsets.all(DesignTokens.spacingMd),
               decoration: BoxDecoration(
                 color: scheme.surfaceContainer,
-                borderRadius: DesignTokens.borderRadiusXl,
+                borderRadius: DesignTokens.borderRadiusCard,
                 border: Border.all(
                   color: scheme.outlineVariant.withValues(alpha: 0.5),
                 ),
@@ -272,9 +269,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
                       globalOk
                           ? Icons.check_circle_rounded
                           : Icons.warning_amber_rounded,
-                      color: globalOk
-                          ? colors.correct
-                          : colors.selection,
+                      color: _statusInk(context, synced: globalOk),
                     ),
                   ),
                   const SizedBox(width: DesignTokens.spacingMd),
@@ -283,10 +278,9 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Estado global',
-                          style: theme.textTheme.labelMedium?.copyWith(
+                          'Estado global'.toUpperCase(),
+                          style: DesignTokens.overline.copyWith(
                             color: scheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
@@ -305,7 +299,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
             Container(
               decoration: BoxDecoration(
                 color: scheme.surfaceContainerLowest,
-                borderRadius: DesignTokens.borderRadiusXl,
+                borderRadius: DesignTokens.borderRadiusCard,
                 border: Border.all(
                   color: scheme.outlineVariant.withValues(alpha: 0.5),
                 ),
@@ -451,7 +445,7 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
         Container(
           decoration: BoxDecoration(
             color: scheme.surfaceContainerLowest,
-            borderRadius: DesignTokens.borderRadiusXl,
+            borderRadius: DesignTokens.borderRadiusCard,
             border: Border.all(
               color: scheme.outlineVariant.withValues(alpha: 0.5),
             ),
@@ -472,7 +466,7 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
                     ),
                     child: Icon(
                       Icons.music_note_rounded,
-                      color: scheme.primaryContainer,
+                      color: scheme.primary,
                     ),
                   ),
                   title: const Text('Notación Do/Re/Mi'),
@@ -512,7 +506,7 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
                     ),
                     child: Icon(
                       Icons.notifications_active_rounded,
-                      color: scheme.primaryContainer,
+                      color: scheme.primary,
                     ),
                   ),
                   title: const Text('Recordatorios diarios'),
@@ -570,7 +564,7 @@ class AccountSettingsShortcutCard extends StatelessWidget {
           ),
           child: Icon(
             Icons.tune_rounded,
-            color: scheme.primaryContainer,
+            color: scheme.primary,
           ),
         ),
         title: const Text('Ajustes de práctica'),
@@ -611,7 +605,7 @@ class AccountSyncActionButtons extends StatelessWidget {
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(52),
               shape: RoundedRectangleBorder(
-                borderRadius: DesignTokens.borderRadiusXl,
+                borderRadius: DesignTokens.borderRadiusCard,
               ),
             ),
             icon: const Icon(Icons.sync_rounded),
@@ -623,7 +617,7 @@ class AccountSyncActionButtons extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             minimumSize: const Size.fromHeight(48),
             shape: RoundedRectangleBorder(
-              borderRadius: DesignTokens.borderRadiusXl,
+              borderRadius: DesignTokens.borderRadiusCard,
             ),
             side: BorderSide(
               color: scheme.outlineVariant.withValues(alpha: 0.8),
@@ -635,4 +629,15 @@ class AccountSyncActionButtons extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Tinta AA del estado de sincronización. El ámbar de selección (#FFB300)
+/// no llega a 3:1 sobre fondos claros, así que en claro el estado pendiente
+/// usa `selectionDeep` (#5D4800) y en oscuro el ámbar claro.
+Color _statusInk(BuildContext context, {required bool synced}) {
+  final colors = TogescColors.of(context);
+  if (synced) return colors.correct;
+  return Theme.of(context).brightness == Brightness.dark
+      ? colors.selection
+      : colors.selectionDeep;
 }

@@ -76,7 +76,7 @@ class TogescAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// Card con borde outline y radio 12px (estilo Stitch).
+/// Card con borde outline y radio de card v2 (14, `radiusCard`).
 class TogescCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -108,7 +108,7 @@ class TogescCard extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: DesignTokens.borderRadiusMd,
+      borderRadius: DesignTokens.borderRadiusCard,
       child: card,
     );
   }
@@ -152,43 +152,6 @@ class TogescPageBody extends StatelessWidget {
   }
 }
 
-/// Chip de modo o filtro con icono opcional.
-class TogescChip extends StatelessWidget {
-  final String label;
-  final IconData? icon;
-  final bool selected;
-  final VoidCallback? onTap;
-
-  const TogescChip({
-    super.key,
-    required this.label,
-    this.icon,
-    this.selected = false,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return FilterChip(
-      label: Text(label),
-      avatar: icon != null ? Icon(icon, size: 18) : null,
-      selected: selected,
-      onSelected: onTap == null ? null : (_) => onTap!(),
-      showCheckmark: false,
-      labelStyle: theme.textTheme.labelLarge?.copyWith(
-        color: selected ? scheme.primaryContainer : scheme.onSurface,
-      ),
-      side: BorderSide(
-        color: selected ? scheme.primaryContainer : scheme.outlineVariant,
-        width: selected ? 2 : 1,
-      ),
-    );
-  }
-}
-
 /// Barra de métricas del modo velocidad (racha, límite, promedio).
 class TogescSpeedMetricsBar extends StatelessWidget {
   final int streak;
@@ -222,7 +185,7 @@ class TogescSpeedMetricsBar extends StatelessWidget {
         children: [
           _Metric(label: 'Racha', value: '$streak', style: style),
           _Metric(
-            label: 'Limite',
+            label: 'Límite',
             value: '${timeLimit.toStringAsFixed(1)}s',
             style: style,
           ),
@@ -250,16 +213,21 @@ class _Metric extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
+    // Etiqueta en overline v2 y valor con cifras tabulares. El valor usa
+    // `primary` (#4E0078 en claro y #DA9CFF en la sesión oscura): con
+    // `primaryContainer` quedaba a 1,2:1 sobre el fondo de la sesión.
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label, style: style?.copyWith(color: scheme.onSurfaceVariant)),
+        Text(
+          label.toUpperCase(),
+          style: DesignTokens.overline.copyWith(color: scheme.onSurfaceVariant),
+        ),
         Text(
           value,
-          style: style?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: scheme.primaryContainer,
-          ),
+          style: style
+              ?.copyWith(fontWeight: FontWeight.w700, color: scheme.primary)
+              .merge(DesignTokens.tabularNumbers),
         ),
       ],
     );

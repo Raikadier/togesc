@@ -65,7 +65,7 @@ class OnboardingVisualHero extends StatelessWidget {
       child: Container(
         height: 160,
         decoration: BoxDecoration(
-          borderRadius: DesignTokens.borderRadiusMd,
+          borderRadius: DesignTokens.borderRadiusCard,
           color: scheme.surfaceContainer,
           border: Border.all(color: scheme.outlineVariant),
         ),
@@ -201,9 +201,9 @@ class OnboardingStartCta extends StatelessWidget {
           child: FilledButton(
             onPressed: onPressed,
             style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(56),
+              minimumSize: const Size.fromHeight(DesignTokens.ctaHeight),
               shape: RoundedRectangleBorder(
-                borderRadius: DesignTokens.borderRadiusMd,
+                borderRadius: DesignTokens.borderRadiusCta,
               ),
             ),
             child: const Row(
@@ -223,13 +223,13 @@ class OnboardingStartCta extends StatelessWidget {
             Icon(
               Icons.verified_rounded,
               size: 16,
-              color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
+              color: scheme.outline,
             ),
             const SizedBox(width: DesignTokens.spacingXs),
             Text(
               'Progreso SRS local incluido desde el primer día',
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
+                    color: scheme.outline,
                   ),
             ),
           ],
@@ -275,7 +275,12 @@ class OnboardingSetupCard extends StatelessWidget {
             value: useSolfege,
             onChanged: onSolfegeChanged,
           ),
-          Text('Vista previa', style: theme.textTheme.labelLarge),
+          Text(
+            'Vista previa'.toUpperCase(),
+            style: DesignTokens.overline.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: DesignTokens.spacingSm),
           Wrap(
             spacing: DesignTokens.spacingSm,

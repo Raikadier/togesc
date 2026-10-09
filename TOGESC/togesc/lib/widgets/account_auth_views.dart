@@ -32,15 +32,16 @@ class AccountAuthFormCard extends StatelessWidget {
               horizontal: DesignTokens.spacingMd,
               vertical: DesignTokens.spacingXs,
             ),
+            // Insignia en `hero` v2 con overline `onHeroAccent` (8,5:1),
+            // legible en claro y en oscuro.
             decoration: BoxDecoration(
-              color: scheme.primaryContainer,
-              borderRadius: DesignTokens.borderRadiusMd,
+              color: DesignTokens.hero,
+              borderRadius: DesignTokens.borderRadiusPill,
             ),
             child: Text(
-              badge,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: scheme.onPrimary,
-                fontWeight: FontWeight.w600,
+              badge.toUpperCase(),
+              style: DesignTokens.overline.copyWith(
+                color: DesignTokens.onHeroAccent,
               ),
             ),
           ),
@@ -100,13 +101,13 @@ class AccountAuthTextField extends StatelessWidget {
         filled: true,
         fillColor: scheme.surfaceContainerLow,
         border: OutlineInputBorder(
-          borderRadius: DesignTokens.borderRadiusXl,
+          borderRadius: DesignTokens.borderRadiusCard,
           borderSide: BorderSide(
             color: scheme.outlineVariant.withValues(alpha: 0.6),
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: DesignTokens.borderRadiusXl,
+          borderRadius: DesignTokens.borderRadiusCard,
           borderSide: BorderSide(
             color: scheme.outlineVariant.withValues(alpha: 0.6),
           ),
@@ -136,7 +137,7 @@ class AccountAuthPrimaryButton extends StatelessWidget {
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
           shape: RoundedRectangleBorder(
-            borderRadius: DesignTokens.borderRadiusXl,
+            borderRadius: DesignTokens.borderRadiusCard,
           ),
         ),
         child: Text(label),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../app/app_theme.dart';
 import '../app/design_tokens.dart';
 import '../app/togesc_colors.dart';
 import '../constants/game_constants.dart';
@@ -20,6 +21,9 @@ import '../widgets/speed_session_views.dart';
 import '../widgets/togesc_ui.dart';
 
 /// Pantalla del juego de velocidad con countdown.
+///
+/// Usa el tema oscuro forzado de la sesión v2 (`AppTheme.session`), igual
+/// que la sesión normal: la práctica siempre se hace «en el instrumento».
 class SpeedGameScreen extends ConsumerStatefulWidget {
   final GameMode targetMode;
 
@@ -127,6 +131,21 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     final session = ref.watch(speedSessionProvider);
     final showMetrics = session.state != SpeedState.idle;
 
+    return Theme(
+      data: AppTheme.session,
+      // El Builder da un contexto bajo el tema de sesión a todo el contenido
+      // (TogescColors y colorScheme de sesión).
+      child: Builder(
+        builder: (context) => _buildScaffold(context, session, showMetrics),
+      ),
+    );
+  }
+
+  Widget _buildScaffold(
+    BuildContext context,
+    SpeedSessionState session,
+    bool showMetrics,
+  ) {
     return TogescScaffold(
       title: 'Velocidad · ${widget.targetMode.displayName}',
       actions: [
@@ -172,7 +191,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
                 },
                 child: KeyedSubtree(
                   key: ValueKey(session.state.name),
-                  child: _buildContent(session),
+                  child: _buildContent(context, session),
                 ),
               ),
             ),
@@ -182,7 +201,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     );
   }
 
-  Widget _buildContent(SpeedSessionState session) {
+  Widget _buildContent(BuildContext context, SpeedSessionState session) {
     switch (session.state) {
       case SpeedState.idle:
         return SpeedSessionIdleView(
@@ -192,19 +211,19 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
       case SpeedState.playing:
         return SpeedSessionListeningView(numNotes: _requiredNotes(session));
       case SpeedState.waitingForAnswer:
-        return _buildAnswerView(session);
+        return _buildAnswerView(context, session);
       case SpeedState.correct:
-        return _buildCorrectView(session);
+        return _buildCorrectView(context, session);
       case SpeedState.incorrect:
-        return _buildIncorrectView(session);
+        return _buildIncorrectView(context, session);
       case SpeedState.timeout:
-        return _buildTimeoutView(session);
+        return _buildTimeoutView(context, session);
       case SpeedState.gameOver:
-        return _buildGameOverView(session);
+        return _buildGameOverView(context, session);
     }
   }
 
-  Widget _buildAnswerView(SpeedSessionState session) {
+  Widget _buildAnswerView(BuildContext context, SpeedSessionState session) {
     final namingMode =
         ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
     final required = _requiredNotes(session);
@@ -228,19 +247,17 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
           Text(
             '${_selectedNotes.length}/$required notas seleccionadas',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)
+                .merge(DesignTokens.tabularNumbers),
           ),
           const SizedBox(height: DesignTokens.spacingLg),
-          TogescCard(
-            padding: const EdgeInsets.all(DesignTokens.spacingMd),
-            child: Center(
-              child: PianoKeyboard(
-                selectedNotes: _selectedNotes,
-                onNoteTapped: (note) => _toggleNote(note, required),
-                noteNamingMode: namingMode,
-              ),
+          Center(
+            child: PianoKeyboard(
+              selectedNotes: _selectedNotes,
+              onNoteTapped: (note) => _toggleNote(note, required),
+              noteNamingMode: namingMode,
+              variant: PianoKeyboardVariant.session,
             ),
           ),
           if (_selectedNotes.isNotEmpty) ...[
@@ -253,11 +270,11 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
                 return InputChip(
                   label: Text(note),
                   onDeleted: () => _toggleNote(note, required),
-                  deleteIconColor: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer,
+                  // `primaryContainer` es #2A0640 en la sesión (1,2:1 sobre
+                  // el fondo): borde e icono van en el ámbar de selección.
+                  deleteIconColor: TogescColors.of(context).selection,
                   side: BorderSide(
-                    color: Theme.of(context).colorScheme.primaryContainer,
+                    color: TogescColors.of(context).selection,
                     width: 2,
                   ),
                   backgroundColor: TogescColors.of(
@@ -288,7 +305,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     );
   }
 
-  Widget _buildCorrectView(SpeedSessionState session) {
+  Widget _buildCorrectView(BuildContext context, SpeedSessionState session) {
     return SpeedSessionFeedbackView(
       icon: Icons.check_circle_rounded,
       accentColor: TogescColors.of(context).correct,
@@ -303,7 +320,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     );
   }
 
-  Widget _buildIncorrectView(SpeedSessionState session) {
+  Widget _buildIncorrectView(BuildContext context, SpeedSessionState session) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -333,7 +350,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     );
   }
 
-  Widget _buildTimeoutView(SpeedSessionState session) {
+  Widget _buildTimeoutView(BuildContext context, SpeedSessionState session) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -363,7 +380,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     );
   }
 
-  Widget _buildGameOverView(SpeedSessionState session) {
+  Widget _buildGameOverView(BuildContext context, SpeedSessionState session) {
     return SingleChildScrollView(
       child: Column(
         children: [

@@ -32,7 +32,7 @@ class TogescPremiumDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: scheme.surfaceContainerLowest,
       shape: RoundedRectangleBorder(
-        borderRadius: DesignTokens.borderRadiusXl,
+        borderRadius: DesignTokens.borderRadiusCard,
         side: BorderSide(
           color: scheme.outlineVariant.withValues(alpha: 0.5),
         ),
@@ -51,7 +51,7 @@ class TogescPremiumDialog extends StatelessWidget {
                   height: 52,
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
-                    borderRadius: DesignTokens.borderRadiusXl,
+                    borderRadius: DesignTokens.borderRadiusCard,
                   ),
                   child: Icon(icon, color: color, size: 28),
                 ),

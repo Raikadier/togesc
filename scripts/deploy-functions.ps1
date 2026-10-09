@@ -2,6 +2,9 @@
 # Secrets en Supabase Dashboard > Edge Functions:
 #   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
 #   REVENUECAT_WEBHOOK_SECRET
+#   Opcionales (PT-01): REVENUECAT_ALLOW_SANDBOX (por defecto false; poner "true"
+#   sólo en staging), REVENUECAT_PRO_ENTITLEMENTS (por defecto "pro"),
+#   REVENUECAT_PRO_PRODUCTS (lista separada por comas; vacía = sin filtro por producto)
 #   SUPABASE_SERVICE_ROLE_KEY (auto en hosted)
 
 $ErrorActionPreference = "Stop"
