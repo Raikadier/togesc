@@ -15,10 +15,18 @@ enum GameInputMode {
   static GameInputMode fromId(String? raw) {
     return GameInputMode.values.firstWhere(
       (m) => m.name == raw,
-      orElse: () => GameInputMode.both,
+      orElse: () => defaultGameInputMode,
     );
   }
 }
+
+/// Modo de entrada por defecto (rediseño v2, D6): solo piano.
+/// La entrada por texto sigue disponible como opción en Ajustes.
+const GameInputMode defaultGameInputMode = GameInputMode.pianoOnly;
+
+/// Confirmar antes de enviar, por defecto (rediseño v2, D1): un solo toque.
+/// Se puede reactivar en Ajustes por accesibilidad.
+const bool defaultConfirmBeforeSubmit = false;
 
 /// Preferencia de tema de la aplicacion.
 enum AppThemePreference {
@@ -49,8 +57,8 @@ class UiPreferences {
   final AppThemePreference themePreference;
 
   const UiPreferences({
-    this.inputMode = GameInputMode.both,
-    this.confirmBeforeSubmit = true,
+    this.inputMode = defaultGameInputMode,
+    this.confirmBeforeSubmit = defaultConfirmBeforeSubmit,
     this.hidePianoLabels = false,
     this.largePiano = false,
     this.reduceAnimations = false,

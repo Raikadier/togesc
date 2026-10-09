@@ -21,6 +21,14 @@ class TogescColors extends ThemeExtension<TogescColors> {
     required this.correctDeep,
     required this.incorrectDeep,
     required this.selectionDeep,
+    this.pianoWhiteKey = DesignTokens.pianoWhiteKeyGradient,
+    this.pianoBlackKey = DesignTokens.pianoBlackKeyGradient,
+    this.pianoWhiteKeyCorrect = DesignTokens.pianoWhiteKeyCorrectGradient,
+    this.pianoBlackKeyCorrect = DesignTokens.pianoBlackKeyCorrectGradient,
+    this.pianoWhiteKeyWrong = DesignTokens.pianoWhiteKeyWrongGradient,
+    this.pianoBlackKeyWrong = DesignTokens.pianoBlackKeyWrongGradient,
+    this.pianoWhiteKeyDimmed = DesignTokens.pianoWhiteKeyDimmedGradient,
+    this.pianoBlackKeyDimmed = DesignTokens.pianoBlackKeyDimmedGradient,
   });
 
   final Color correct;
@@ -37,6 +45,17 @@ class TogescColors extends ThemeExtension<TogescColors> {
   final Color correctDeep;
   final Color incorrectDeep;
   final Color selectionDeep;
+
+  /// Gradientes del teclado v2 (iguales en claro, oscuro y sesión).
+  /// Reposo, correcta, errónea y atenuada, para teclas blancas y negras.
+  final LinearGradient pianoWhiteKey;
+  final LinearGradient pianoBlackKey;
+  final LinearGradient pianoWhiteKeyCorrect;
+  final LinearGradient pianoBlackKeyCorrect;
+  final LinearGradient pianoWhiteKeyWrong;
+  final LinearGradient pianoBlackKeyWrong;
+  final LinearGradient pianoWhiteKeyDimmed;
+  final LinearGradient pianoBlackKeyDimmed;
 
   static TogescColors of(BuildContext context) {
     // Fallback light para tests/widgets sin AppTheme; la app registra la extension.
@@ -74,6 +93,24 @@ class TogescColors extends ThemeExtension<TogescColors> {
     selectionDeep: Color(0xFF8A6A00),
   );
 
+  /// Sesión v2 oscura forzada (`AppTheme.session`). Feedback del spec:
+  /// éxito #81C784, error #EF9A9A y ámbar de fase #FFD54F, todos ≥8,7:1
+  /// sobre `#141018`.
+  static const session = TogescColors(
+    correct: DesignTokens.sessionSuccess,
+    incorrect: DesignTokens.sessionError,
+    selection: DesignTokens.sessionAmber,
+    speedAccent: Color(0xFFFF8A65),
+    speedContainer: Color(0xFF3D231C),
+    correctContainer: Color(0xFF1B3D24),
+    onCorrectContainer: Color(0xFFA5D6A7),
+    incorrectContainer: Color(0xFF4E1A1A),
+    onIncorrectContainer: Color(0xFFFFB4AB),
+    correctDeep: Color(0xFF1B5E20),
+    incorrectDeep: Color(0xFF7A1010),
+    selectionDeep: Color(0xFF8A6A00),
+  );
+
   @override
   TogescColors copyWith({
     Color? correct,
@@ -88,6 +125,14 @@ class TogescColors extends ThemeExtension<TogescColors> {
     Color? correctDeep,
     Color? incorrectDeep,
     Color? selectionDeep,
+    LinearGradient? pianoWhiteKey,
+    LinearGradient? pianoBlackKey,
+    LinearGradient? pianoWhiteKeyCorrect,
+    LinearGradient? pianoBlackKeyCorrect,
+    LinearGradient? pianoWhiteKeyWrong,
+    LinearGradient? pianoBlackKeyWrong,
+    LinearGradient? pianoWhiteKeyDimmed,
+    LinearGradient? pianoBlackKeyDimmed,
   }) {
     return TogescColors(
       correct: correct ?? this.correct,
@@ -102,6 +147,14 @@ class TogescColors extends ThemeExtension<TogescColors> {
       correctDeep: correctDeep ?? this.correctDeep,
       incorrectDeep: incorrectDeep ?? this.incorrectDeep,
       selectionDeep: selectionDeep ?? this.selectionDeep,
+      pianoWhiteKey: pianoWhiteKey ?? this.pianoWhiteKey,
+      pianoBlackKey: pianoBlackKey ?? this.pianoBlackKey,
+      pianoWhiteKeyCorrect: pianoWhiteKeyCorrect ?? this.pianoWhiteKeyCorrect,
+      pianoBlackKeyCorrect: pianoBlackKeyCorrect ?? this.pianoBlackKeyCorrect,
+      pianoWhiteKeyWrong: pianoWhiteKeyWrong ?? this.pianoWhiteKeyWrong,
+      pianoBlackKeyWrong: pianoBlackKeyWrong ?? this.pianoBlackKeyWrong,
+      pianoWhiteKeyDimmed: pianoWhiteKeyDimmed ?? this.pianoWhiteKeyDimmed,
+      pianoBlackKeyDimmed: pianoBlackKeyDimmed ?? this.pianoBlackKeyDimmed,
     );
   }
 
@@ -137,6 +190,14 @@ class TogescColors extends ThemeExtension<TogescColors> {
       correctDeep: Color.lerp(correctDeep, other.correctDeep, t)!,
       incorrectDeep: Color.lerp(incorrectDeep, other.incorrectDeep, t)!,
       selectionDeep: Color.lerp(selectionDeep, other.selectionDeep, t)!,
+      pianoWhiteKey: LinearGradient.lerp(pianoWhiteKey, other.pianoWhiteKey, t)!,
+      pianoBlackKey: LinearGradient.lerp(pianoBlackKey, other.pianoBlackKey, t)!,
+      pianoWhiteKeyCorrect: LinearGradient.lerp(pianoWhiteKeyCorrect, other.pianoWhiteKeyCorrect, t)!,
+      pianoBlackKeyCorrect: LinearGradient.lerp(pianoBlackKeyCorrect, other.pianoBlackKeyCorrect, t)!,
+      pianoWhiteKeyWrong: LinearGradient.lerp(pianoWhiteKeyWrong, other.pianoWhiteKeyWrong, t)!,
+      pianoBlackKeyWrong: LinearGradient.lerp(pianoBlackKeyWrong, other.pianoBlackKeyWrong, t)!,
+      pianoWhiteKeyDimmed: LinearGradient.lerp(pianoWhiteKeyDimmed, other.pianoWhiteKeyDimmed, t)!,
+      pianoBlackKeyDimmed: LinearGradient.lerp(pianoBlackKeyDimmed, other.pianoBlackKeyDimmed, t)!,
     );
   }
 }

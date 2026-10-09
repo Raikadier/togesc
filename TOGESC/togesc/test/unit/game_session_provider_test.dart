@@ -39,6 +39,8 @@ void main() {
         audioGeneratorProvider.overrideWithValue(
           AudioGenerator(random: Random(42)),
         ),
+        // Toda ronda con foco es ronda de foco (determinista).
+        practiceFocusRandomProvider.overrideWithValue(_FixedRandom(0.0)),
       ],
     );
 
@@ -242,6 +244,97 @@ void main() {
       expect(state.currentNotes.length, state.numNotes);
     });
 
+    test('RoundResult guarda las notas respondidas (fallo)', () async {
+      final notifier = container.read(gameSessionProvider.notifier);
+      await notifier.startRound();
+
+      final correct = container.read(gameSessionProvider).currentNotes.first;
+      final wrong = correct == 'C' ? 'D' : 'C';
+      await notifier.submitAnswer([wrong], 1.0);
+
+      final result = container.read(gameSessionProvider).lastResult!;
+      expect(result.isCorrect, isFalse);
+      expect(result.answerNotes, [wrong]);
+      expect(result.wrongNotes, {wrong});
+      expect(result.missedNotes, {correct});
+    });
+
+    test('RoundResult acierto no tiene notas erroneas', () async {
+      final notifier = container.read(gameSessionProvider.notifier);
+      await notifier.startRound();
+
+      final notes = container.read(gameSessionProvider).currentNotes;
+      await notifier.submitAnswer(notes, 1.0);
+
+      final result = container.read(gameSessionProvider).lastResult!;
+      expect(result.answerNotes, notes);
+      expect(result.wrongNotes, isEmpty);
+      expect(result.missedNotes, isEmpty);
+    });
+
+    test('racha de sesion sube con aciertos y vuelve a 0 con un fallo',
+        () async {
+      final notifier = container.read(gameSessionProvider.notifier);
+      expect(container.read(gameSessionProvider).currentStreak, 0);
+
+      for (var i = 0; i < 2; i++) {
+        await notifier.startRound();
+        final notes = container.read(gameSessionProvider).currentNotes;
+        await notifier.submitAnswer(notes, 1.0);
+      }
+      expect(container.read(gameSessionProvider).currentStreak, 2);
+      expect(container.read(gameSessionProvider).bestStreak, 2);
+      expect(
+        container.read(gameSessionProvider).sessionAccuracyPercent,
+        closeTo(100, 0.001),
+      );
+
+      await notifier.startRound();
+      final correct = container.read(gameSessionProvider).currentNotes.first;
+      await notifier.submitAnswer([correct == 'C' ? 'D' : 'C'], 1.0);
+
+      final state = container.read(gameSessionProvider);
+      expect(state.currentStreak, 0);
+      expect(state.bestStreak, 2);
+      expect(state.sessionAccuracyPercent, closeTo(66.666, 0.01));
+
+      notifier.setMode(GameMode.singleNote);
+      expect(container.read(gameSessionProvider).currentStreak, 0);
+      expect(container.read(gameSessionProvider).bestStreak, 0);
+      expect(
+        container.read(gameSessionProvider).sessionAccuracyPercent,
+        isNull,
+      );
+    });
+
+    test('notas de foco de la sesion de hoy se priorizan', () async {
+      container.read(practiceFocusNotesProvider.notifier).state =
+          const ['E', 'G', 'A'];
+      final notifier = container.read(gameSessionProvider.notifier);
+      await notifier.startRound();
+
+      final state = container.read(gameSessionProvider);
+      expect(state.currentNotes, hasLength(1));
+      expect(const ['E', 'G', 'A'], contains(state.currentNotes.first));
+    });
+
+    test('la nota unica tiene prioridad sobre la lista de foco', () async {
+      container.read(practiceFocusNotesProvider.notifier).state =
+          const ['E', 'G', 'A'];
+      container.read(practiceFocusNoteProvider.notifier).state = 'B';
+      final notifier = container.read(gameSessionProvider.notifier);
+      await notifier.startRound();
+
+      expect(container.read(gameSessionProvider).currentNotes, ['B']);
+    });
+
+    test('normalizePracticeFocusNotes limita a 3 notas validas', () {
+      expect(
+        normalizePracticeFocusNotes(['X', 'C', 'C', 'D', 'E', 'F']),
+        ['C', 'D', 'E'],
+      );
+    });
+
     test('submitAnswer con respuesta parcial es incorrecta en chord', () async {
       final notifier = container.read(gameSessionProvider.notifier);
       notifier.setMode(GameMode.chord);
@@ -276,4 +369,20 @@ class _FakeSRSNotifier extends AsyncNotifier<SRSSystem>
     await _srs.resetProgress();
     ref.invalidateSelf();
   }
+}
+
+/// Random con nextDouble fijo para decidir rondas de foco.
+class _FixedRandom implements Random {
+  _FixedRandom(this.value);
+
+  final double value;
+
+  @override
+  double nextDouble() => value;
+
+  @override
+  int nextInt(int max) => 0;
+
+  @override
+  bool nextBool() => false;
 }

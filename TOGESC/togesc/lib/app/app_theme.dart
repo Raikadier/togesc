@@ -50,7 +50,11 @@ abstract final class AppTheme {
       useMaterial3: true,
       textTheme: textTheme,
       extensions: const [TogescColors.light],
-      navigationBarTheme: _navigationBarTheme(scheme, textTheme),
+      navigationBarTheme: _navigationBarTheme(
+        scheme,
+        textTheme,
+        backgroundColor: DesignTokens.navBar,
+      ),
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: 0,
@@ -324,27 +328,240 @@ abstract final class AppTheme {
     );
   }
 
+  /// Tema oscuro **forzado** de la sesión v2 (1b/1d), independiente de la
+  /// preferencia del usuario. Se aplica con `Theme(data: AppTheme.session)`
+  /// en la ruta de sesión.
+  ///
+  /// Contraste (WCAG 2.x) sobre `sessionBackground` #141018: texto principal
+  /// 14,7:1, secundario (`onSurfaceVariant`) 6,2:1, etiquetas 11,1:1 y
+  /// acento 9,1:1. `outline`/`outlineVariant` son bordes (#3A2E42/#2E2433):
+  /// no usarlos como color de texto aquí; para etiquetas, `sessionTextLabel`.
+  static ThemeData get session {
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: DesignTokens.primaryContainer,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: DesignTokens.sessionAccent,
+          onPrimary: DesignTokens.sessionOnAccent,
+          primaryContainer: DesignTokens.hero,
+          onPrimaryContainer: DesignTokens.sessionAccent,
+          secondary: DesignTokens.sessionAmber,
+          onSecondary: DesignTokens.sessionOnAccent,
+          secondaryContainer: DesignTokens.sessionChip,
+          onSecondaryContainer: DesignTokens.sessionTextPrimary,
+          tertiary: DesignTokens.sessionSuccess,
+          onTertiary: DesignTokens.sessionOnAccent,
+          error: DesignTokens.sessionError,
+          onError: DesignTokens.sessionOnAccent,
+          errorContainer: const Color(0xFF4E1A1A),
+          onErrorContainer: const Color(0xFFFFB4AB),
+          surface: DesignTokens.sessionBackground,
+          onSurface: DesignTokens.sessionTextPrimary,
+          onSurfaceVariant: DesignTokens.sessionTextSecondary,
+          outline: DesignTokens.sessionBorder,
+          outlineVariant: DesignTokens.sessionBorderSubtle,
+          surfaceContainerLowest: DesignTokens.sessionSurface,
+          surfaceContainerLow: DesignTokens.sessionButton,
+          surfaceContainer: DesignTokens.sessionChip,
+          surfaceContainerHigh: DesignTokens.sessionBorderSubtle,
+          surfaceContainerHighest: DesignTokens.sessionBorder,
+        );
+
+    final textTheme = _textTheme(Brightness.dark, scheme);
+    final cardShape = RoundedRectangleBorder(
+      borderRadius: DesignTokens.borderRadiusCard,
+      side: const BorderSide(color: DesignTokens.sessionBorder),
+    );
+
+    return ThemeData(
+      colorScheme: scheme,
+      scaffoldBackgroundColor: DesignTokens.sessionBackground,
+      canvasColor: DesignTokens.sessionBackground,
+      useMaterial3: true,
+      textTheme: textTheme,
+      extensions: const [TogescColors.session],
+      navigationBarTheme: _navigationBarTheme(
+        scheme,
+        textTheme,
+        backgroundColor: DesignTokens.sessionBackground,
+      ),
+      navigationRailTheme: const NavigationRailThemeData(
+        backgroundColor: DesignTokens.sessionBackground,
+        minWidth: DesignTokens.railWidth,
+        indicatorColor: DesignTokens.hero,
+        selectedIconTheme: IconThemeData(color: DesignTokens.sessionAccent),
+        unselectedIconTheme: IconThemeData(
+          color: DesignTokens.sessionTextSecondary,
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        centerTitle: false,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        toolbarHeight: DesignTokens.appBarHeight,
+        backgroundColor: DesignTokens.sessionBackground,
+        foregroundColor: DesignTokens.sessionTextPrimary,
+        titleTextStyle: textTheme.titleLarge,
+        iconTheme: const IconThemeData(color: DesignTokens.sessionTextPrimary),
+      ),
+      iconTheme: const IconThemeData(color: DesignTokens.sessionTextPrimary),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: DesignTokens.sessionSurface,
+        margin: EdgeInsets.zero,
+        shape: cardShape,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: DesignTokens.sessionAccent,
+          foregroundColor: DesignTokens.sessionOnAccent,
+          minimumSize: const Size(
+            DesignTokens.touchTargetMin,
+            DesignTokens.touchTargetMin,
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spacingLg,
+            vertical: DesignTokens.spacingMd,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: DesignTokens.borderRadiusCta,
+          ),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          backgroundColor: DesignTokens.sessionButton,
+          foregroundColor: DesignTokens.sessionTextPrimary,
+          minimumSize: const Size(
+            DesignTokens.touchTargetMin,
+            DesignTokens.touchTargetMin,
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spacingLg,
+            vertical: DesignTokens.spacingMd,
+          ),
+          side: const BorderSide(color: DesignTokens.sessionBorder),
+          shape: RoundedRectangleBorder(
+            borderRadius: DesignTokens.borderRadiusMd,
+          ),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: DesignTokens.sessionTextLabel,
+          minimumSize: const Size(
+            DesignTokens.touchTargetMin,
+            DesignTokens.touchTargetMin,
+          ),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: DesignTokens.sessionTextPrimary,
+          minimumSize: const Size(
+            DesignTokens.touchTargetMin,
+            DesignTokens.touchTargetMin,
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: DesignTokens.sessionSurface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: DesignTokens.spacingLg,
+          vertical: DesignTokens.spacingMd,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: DesignTokens.borderRadiusMd,
+          borderSide: const BorderSide(color: DesignTokens.sessionBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: DesignTokens.borderRadiusMd,
+          borderSide: const BorderSide(color: DesignTokens.sessionBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: DesignTokens.borderRadiusMd,
+          borderSide: const BorderSide(
+            color: DesignTokens.sessionAccent,
+            width: 2,
+          ),
+        ),
+        labelStyle: textTheme.bodyMedium?.copyWith(
+          color: DesignTokens.sessionTextSecondary,
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: DesignTokens.sessionChip,
+        selectedColor: DesignTokens.hero,
+        labelStyle: textTheme.labelLarge?.copyWith(
+          color: DesignTokens.sessionTextPrimary,
+        ),
+        side: BorderSide.none,
+        shape: RoundedRectangleBorder(
+          borderRadius: DesignTokens.borderRadiusPill,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: DesignTokens.spacingSm,
+          vertical: DesignTokens.spacingXs,
+        ),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: DesignTokens.sessionAccent,
+        linearTrackColor: DesignTokens.sessionChip,
+        linearMinHeight: DesignTokens.sessionProgressBarHeight,
+      ),
+      dividerTheme: const DividerThemeData(
+        color: DesignTokens.sessionDivider,
+        thickness: 1,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: DesignTokens.sessionChip,
+        contentTextStyle: textTheme.bodyMedium,
+        shape: RoundedRectangleBorder(
+          borderRadius: DesignTokens.borderRadiusMd,
+        ),
+        elevation: 2,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: DesignTokens.sessionSurface,
+        shape: cardShape,
+        titleTextStyle: textTheme.titleLarge,
+        contentTextStyle: textTheme.bodyMedium,
+      ),
+    );
+  }
+
+  /// Barra de navegación v2: 76 de alto; el destino activo usa
+  /// `scheme.primary` (#4E0078 en claro, 13,0:1 sobre `navBar`) en negrita.
+  /// El icono relleno/contorno lo decide el widget (`selectedIcon`) y el
+  /// borde superior `divider` también, porque el tema no lo expone.
   static NavigationBarThemeData _navigationBarTheme(
     ColorScheme scheme,
-    TextTheme textTheme,
-  ) {
+    TextTheme textTheme, {
+    Color? backgroundColor,
+  }) {
     return NavigationBarThemeData(
-      backgroundColor: scheme.surfaceContainerLow,
+      backgroundColor: backgroundColor ?? scheme.surfaceContainerLow,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      height: 80,
+      height: DesignTokens.navBarHeight,
       indicatorColor: scheme.primaryContainer.withValues(alpha: 0.15),
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         final selected = states.contains(WidgetState.selected);
         return textTheme.labelMedium?.copyWith(
-          color: selected ? scheme.primaryContainer : scheme.onSurfaceVariant,
-          fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+          color: selected ? scheme.primary : scheme.onSurfaceVariant,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
         );
       }),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         final selected = states.contains(WidgetState.selected);
         return IconThemeData(
-          color: selected ? scheme.primaryContainer : scheme.onSurfaceVariant,
+          color: selected ? scheme.primary : scheme.onSurfaceVariant,
         );
       }),
     );
