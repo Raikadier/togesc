@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../models/practice_session_log.dart';
 import '../providers/clock_provider.dart';
 import '../providers/session_history_provider.dart';
@@ -62,7 +63,7 @@ class SessionHistoryCard extends ConsumerWidget {
               const SizedBox(height: DesignTokens.spacingXs),
               for (var i = 0; i < visible.length; i++) ...[
                 if (i > 0)
-                  const Divider(height: 1, color: DesignTokens.divider),
+                  Divider(height: 1, color: TogescColors.of(context).divider),
                 SessionLogRow(entry: visible[i], now: now),
               ],
             ],

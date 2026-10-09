@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../../app/togesc_colors.dart';
 import '../../constants/note_naming.dart';
 import '../../models/note_progress_summary.dart';
 import '../../utils/srs_level.dart';
@@ -140,12 +141,15 @@ class NoteMasteryCell extends StatelessWidget {
       summary,
       learningThreshold: learningThreshold,
     );
+    // Sin datos: superficie apagada del tema (#F3ECF1 / #241B2A) con texto
+    // principal. Las celdas con datos llevan su propio par AA.
+    final colors = TogescColors.of(context);
     final background = seen
         ? masteryColor(pct, srsLevel: level)
-        : DesignTokens.masteryEmpty;
+        : colors.muted;
     final foreground = seen
         ? masteryOnColor(pct, srsLevel: level)
-        : masteryOnColorFor(DesignTokens.masteryEmpty);
+        : colors.textPrimary;
     final label = formatNoteLabel(summary.note, namingMode);
 
     final content = SizedBox(
@@ -210,14 +214,15 @@ class MasteryLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = TogescColors.of(context);
     final style = Theme.of(context).textTheme.labelMedium?.copyWith(
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         );
-    const items = [
+    final items = [
       (DesignTokens.masteryRed, 'Crítica <50%'),
       (DesignTokens.masteryAmber, 'En curso 50–74%'),
       (DesignTokens.masteryGreenLight, 'Dominada ≥75%'),
-      (DesignTokens.masteryEmpty, 'Sin datos'),
+      (colors.muted, 'Sin datos'),
     ];
 
     return Wrap(
@@ -235,8 +240,8 @@ class MasteryLegend extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(3),
-                  border: color == DesignTokens.masteryEmpty
-                      ? Border.all(color: DesignTokens.outlineVariant)
+                  border: color == colors.muted
+                      ? Border.all(color: colors.cardBorder)
                       : null,
                 ),
               ),

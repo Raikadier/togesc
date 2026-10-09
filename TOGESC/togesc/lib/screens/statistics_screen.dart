@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../constants/note_naming.dart';
@@ -368,9 +369,9 @@ class _ProgressEmptyState extends StatelessWidget {
       key: const Key('progress-empty-state'),
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerLowest,
+        color: TogescColors.of(context).tile,
         borderRadius: DesignTokens.borderRadiusCard,
-        border: Border.all(color: DesignTokens.outlineVariant),
+        border: Border.all(color: TogescColors.of(context).cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

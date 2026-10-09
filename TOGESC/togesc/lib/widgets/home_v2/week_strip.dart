@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../../app/togesc_colors.dart';
 import '../../utils/calendar_week.dart';
 import '../../utils/relative_time.dart';
 
@@ -60,6 +61,10 @@ class _WeekDayCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = TogescColors.of(context);
+    // Los rellenos de estado (verde, ámbar y rojo claro) llevan su propio
+    // texto AA y valen en ambos temas. El día sin práctica usa la
+    // superficie apagada del tema: #F3ECF1 en claro y #241B2A en oscuro.
     final (Color bg, Color fg, IconData? icon) = switch (day.status) {
       WeekDayStatus.completed => (
           DesignTokens.masteryGreenLight,
@@ -77,8 +82,8 @@ class _WeekDayCell extends StatelessWidget {
           Icons.close_rounded,
         ),
       WeekDayStatus.none => (
-          DesignTokens.masteryEmpty,
-          DesignTokens.textSecondary,
+          colors.muted,
+          colors.textSecondary,
           null,
         ),
     };
@@ -93,7 +98,7 @@ class _WeekDayCell extends StatelessWidget {
           color: bg,
           borderRadius: DesignTokens.borderRadiusCell,
           border: day.isToday
-              ? Border.all(color: DesignTokens.primary, width: 2)
+              ? Border.all(color: colors.brand, width: 2)
               : null,
         ),
         child: Column(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../../app/togesc_colors.dart';
 import 'progress_metrics.dart';
 
 /// Fila de 3 KPI de Progreso v2: latencia media (aprox.), intentos y
@@ -88,7 +89,8 @@ class _KpiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final background = hero ? DesignTokens.hero : scheme.surfaceContainerLowest;
+    final colors = TogescColors.of(context);
+    final background = hero ? DesignTokens.hero : colors.tile;
     final labelColor =
         hero ? DesignTokens.onHeroAccent : scheme.onSurfaceVariant;
     final valueColor = hero ? DesignTokens.onHero : scheme.onSurface;
@@ -142,7 +144,7 @@ class _KpiCard extends StatelessWidget {
           borderRadius: DesignTokens.borderRadiusCard,
           side: hero
               ? BorderSide.none
-              : const BorderSide(color: DesignTokens.outlineVariant),
+              : BorderSide(color: colors.cardBorder),
         ),
         clipBehavior: Clip.antiAlias,
         child: onTap == null ? content : InkWell(onTap: onTap, child: content),

@@ -3,6 +3,7 @@ import 'dart:ui' show PathMetric;
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../../app/togesc_colors.dart';
 import '../../utils/relative_time.dart';
 import '../../utils/today_session.dart';
 
@@ -35,6 +36,7 @@ class ResumeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = TogescColors.of(context);
     final detail = resumeDetailText(info, now);
     final title = 'Retomar «${info.label}»';
 
@@ -50,7 +52,7 @@ class ResumeRow extends StatelessWidget {
           borderRadius: DesignTokens.borderRadiusCard,
           child: CustomPaint(
             painter: _DashedBorderPainter(
-              color: DesignTokens.outlineVariant,
+              color: colors.cardBorder,
               radius: DesignTokens.radiusCard,
             ),
             child: Padding(
@@ -64,13 +66,13 @@ class ResumeRow extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: DesignTokens.surfaceContainer,
+                      color: colors.muted,
                       borderRadius: DesignTokens.borderRadiusCell,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.history_rounded,
                       size: 20,
-                      color: DesignTokens.primary,
+                      color: colors.brand,
                     ),
                   ),
                   const SizedBox(width: DesignTokens.spacingMd),
@@ -91,23 +93,23 @@ class ResumeRow extends StatelessWidget {
                         Text(
                           detail,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: DesignTokens.textSecondary,
+                            color: colors.textSecondary,
                           ),
                         ),
                       ],
                     ),
                   ),
                   if (locked) ...[
-                    const Icon(
+                    Icon(
                       Icons.lock_rounded,
                       size: 18,
-                      color: DesignTokens.pro,
+                      color: colors.proAccent,
                     ),
                     const SizedBox(width: DesignTokens.spacingXs),
                   ],
-                  const Icon(
+                  Icon(
                     Icons.chevron_right_rounded,
-                    color: DesignTokens.textTertiary,
+                    color: colors.textTertiary,
                   ),
                 ],
               ),

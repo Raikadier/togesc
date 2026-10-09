@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import 'togesc_ui.dart';
 
 /// Sección Pro bloqueada de Progreso v2 (D7): el usuario gratis ve la
@@ -31,7 +32,10 @@ class StatsFreeProUpsellCard extends StatelessWidget {
                 color: DesignTokens.pro.withValues(alpha: 0.12),
                 borderRadius: DesignTokens.borderRadiusCell,
               ),
-              child: const Icon(Icons.lock_rounded, color: DesignTokens.pro),
+              child: Icon(
+                Icons.lock_rounded,
+                color: TogescColors.of(context).proAccent,
+              ),
             ),
             const SizedBox(width: DesignTokens.spacingMd),
             Expanded(

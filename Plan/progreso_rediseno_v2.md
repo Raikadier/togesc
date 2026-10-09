@@ -2,6 +2,34 @@
 
 Log en orden cronológico inverso.
 
+## 2026-10-09 · Tema oscuro de las pantallas v2 del shell · UI Designer
+- **Fallo:** con el sistema en `prefers-color-scheme: dark` (web release, 1280×800), la app usa `AppTheme.dark`, pero el rail, las tiles de «Práctica libre», las celdas de «Esta semana» y la rejilla de dominio tenían colores claros fijos. El logo «TOGESC» y «Ver todos» (#4E0078) daban unos 1,6:1 sobre #141018.
+- **Estado:** `flutter analyze` sin issues. `flutter test` completo: +515 ~1, 0 fallos (antes 504; se añaden 11 tests).
+- **`TogescColors` (lib/app/togesc_colors.dart):** 11 roles nuevos para las superficies del shell: `brand`, `page`, `navBar`, `divider`, `tile`, `muted`, `cardBorder`, `textPrimary`, `textSecondary`, `textTertiary` y `proAccent`.
+  - En claro valen exactamente los `DesignTokens` de antes, así que el claro no cambia y los tests sin `AppTheme` siguen usando el respaldo `light`.
+  - En oscuro toman la paleta de sesión: página #141018, nav y tile #1A121E, apagada #241B2A, borde y divisor #3A2E42, texto #ECE0E8/#9C8FA3, marca #DA9CFF y Pro #ED76FD.
+  - Contraste en oscuro: marca/página 9,1:1; #9C8FA3 sobre #241B2A 5,5:1 y sobre #1A121E 6,0:1.
+- **Esquema oscuro (`DesignTokens`/`AppTheme.dark`):**
+  - `darkSurfaceContainer` pasa a #241B2A, `darkOutlineVariant` a #3A2E42 y `darkOutline` a #9C8FA3.
+  - `error` pasa de #BA1A1A (2,9:1 sobre el fondo) a #FFB4AB, con `onError` #690005. «Eliminar cuenta» en Perfil usa ahora `colorScheme.error`.
+- **Widgets migrados a `TogescColors.of(context)`:**
+  - El shell: rail con `dark: false`, barra inferior y cabecera móvil, con su logo y avatar.
+  - Home: `home_app_bar`, que incluye el chip de racha, la overline y el avatar (#6A1B9A en claro, `brand` en oscuro). También `free_practice_tiles`, la hoja «Todos los modos», `week_strip`, `resume_row` y «Ver todos» en `home_screen`.
+  - Progreso: `note_mastery_grid` (celda sin datos y leyenda), `global_accuracy_header` (pista y delta con `correct`/`incorrect` del tema), `progress_kpi_row`, `recent_sessions_list`, el estado vacío de `statistics_screen`, `stats_free_dashboard` y `session_history_card`.
+- **Sin cambios a propósito:**
+  - El hero #2A0640 y sus translúcidos.
+  - Los rellenos de estado de la semana y del dominio (verde, ámbar y rojo): llevan su propio texto AA y valen en los dos temas.
+  - La insignia PRO (#9A25AE con blanco, 6,5:1) y `TogescNavRail(dark: true)` de la sesión.
+- **Tests:**
+  - Nuevo `test/widget/dark_theme_v2_test.dart` (6 tests) con el router real, `AppTheme.dark` y `ThemeMode.dark`.
+    - Móvil: barra inferior #1A121E, logo #DA9CFF con AA y etiquetas de la barra con AA.
+    - Home: tile #1A121E con borde #3A2E42, textos AA, «Ver todos» #DA9CFF y los 7 días en #241B2A con texto AA y borde de hoy en el acento.
+    - Progreso: celda sin datos en #241B2A con AA y ningún panel blanco ni #F3ECF1.
+    - Perfil: fondo oscuro.
+    - Escritorio 1280×800: rail #1A121E con borde #3A2E42, «TG» e icono inactivo con AA, y tiles oscuras.
+    - Regresión en claro: rail, tile, semana y «Ver todos» siguen con los tokens claros.
+  - `test/unit/app_theme_test.dart` (+5): pares AA de los roles en claro y oscuro, la extensión registrada en cada tema, `error` oscuro y logo en ambos temas.
+
 ## 2026-10-09 · Lote 3: tests funcionales v2 (VM y dispositivo) · Test Automation Engineer
 - **Estado:** `flutter analyze` sin issues. `flutter test` completo: +504, ~1 (el skip previo de `pro_route_guard_test` sin monetización), 0 fallos. `flutter test integration_test -d flutter-tester`: +2. Los archivos reescritos pasan 5 de 5 ejecuciones seguidas.
 - **`test/e2e/app_smoke_test.dart` (reescrito, 4 tests):** usa el router real (`createAppRouter`) en lugar de `buildTestRouter`, para tener las 4 pestañas. Cubre el Home v2 (hero, CTA, semana y nav), el recorrido Práctica → Progreso → Velocidad → Perfil → Práctica con las claves `nav-*`, Pro desde Perfil (`account-pro-entry` → `SubscriptionScreen`) y los 3 tiles de práctica libre (`free-tile-*`), que abren la sesión en listen.

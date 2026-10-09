@@ -189,8 +189,9 @@ abstract final class AppTheme {
           onTertiary: DesignTokens.tertiary,
           tertiaryContainer: DesignTokens.tertiaryContainer,
           onTertiaryContainer: DesignTokens.onTertiaryContainer,
-          error: DesignTokens.error,
-          onError: DesignTokens.onError,
+          // #BA1A1A daba 2,9:1 sobre #141018; #FFB4AB da 10,6:1.
+          error: const Color(0xFFFFB4AB),
+          onError: const Color(0xFF690005),
           errorContainer: DesignTokens.onErrorContainer,
           onErrorContainer: DesignTokens.errorContainer,
           surface: DesignTokens.darkSurface,

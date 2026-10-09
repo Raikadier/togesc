@@ -55,17 +55,18 @@ abstract final class DesignTokens {
   static const Color pianoWhite = Color(0xFFFFFFFF);
   static const Color pianoBlack = Color(0xFF212121);
 
-  // --- Tema oscuro Harmonic Precision ---
+  // --- Tema oscuro Harmonic Precision (base: paleta de sesión v2) ---
+  // Superficies #1A121E/#241B2A, bordes #3A2E42, texto #ECE0E8/#9C8FA3.
   static const Color darkBackground = Color(0xFF141018);
   static const Color darkOnBackground = Color(0xFFECE0E8);
   static const Color darkSurface = Color(0xFF141018);
   static const Color darkOnSurface = Color(0xFFECE0E8);
   static const Color darkOnSurfaceVariant = Color(0xFFCFC3CD);
   static const Color darkSurfaceContainerLow = Color(0xFF1E1622);
-  static const Color darkSurfaceContainer = Color(0xFF281F2C);
+  static const Color darkSurfaceContainer = Color(0xFF241B2A);
   static const Color darkSurfaceContainerLowest = Color(0xFF1A121E);
-  static const Color darkOutline = Color(0xFF988E98);
-  static const Color darkOutlineVariant = Color(0xFF4D4351);
+  static const Color darkOutline = Color(0xFF9C8FA3);
+  static const Color darkOutlineVariant = Color(0xFF3A2E42);
   static const Color darkPrimary = Color(0xFFDA9CFF);
   static const Color darkOnPrimary = Color(0xFF4E0078);
   static const Color darkPrimaryContainer = Color(0xFF6A1B9A);

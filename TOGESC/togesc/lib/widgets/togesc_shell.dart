@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../app/design_tokens.dart';
 import '../app/router.dart';
+import '../app/togesc_colors.dart';
 import '../constants/game_constants.dart';
 import '../constants/subscription_constants.dart';
 import '../providers/subscription_provider.dart';
@@ -157,12 +158,13 @@ class TogescBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colors = TogescColors.of(context);
 
     return Material(
-      color: DesignTokens.navBar,
+      color: colors.navBar,
       child: DecoratedBox(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: DesignTokens.divider)),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: colors.divider)),
         ),
         child: SafeArea(
           top: false,
@@ -203,7 +205,8 @@ class _BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? DesignTokens.primary : DesignTokens.textSecondary;
+    final colors = TogescColors.of(context);
+    final color = selected ? colors.brand : colors.textSecondary;
 
     return Semantics(
       container: true,
@@ -247,7 +250,9 @@ class _BottomNavItem extends StatelessWidget {
 
 /// Rail izquierdo de 76 (1d): «TG» y 4 destinos de 48 con icono.
 ///
-/// - [dark] `false` (pantallas claras): fondo `navBar`, borde `divider`.
+/// - [dark] `false` (pantallas del shell): sigue el tema activo con
+///   [TogescColors] (`navBar`, `divider`, `brand`): #FFFDFE en claro y
+///   #1A121E con borde #3A2E42 en oscuro.
 /// - [dark] `true` (sesión): fondo `sessionBackground`, borde `sessionChip`.
 ///
 /// En ambas variantes el activo lleva fondo `hero` (#2A0640) e icono
@@ -267,9 +272,10 @@ class TogescNavRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = dark ? DesignTokens.sessionBackground : DesignTokens.navBar;
-    final border = dark ? DesignTokens.sessionChip : DesignTokens.divider;
-    final logoColor = dark ? DesignTokens.sessionAccent : DesignTokens.primary;
+    final colors = TogescColors.of(context);
+    final background = dark ? DesignTokens.sessionBackground : colors.navBar;
+    final border = dark ? DesignTokens.sessionChip : colors.divider;
+    final logoColor = dark ? DesignTokens.sessionAccent : colors.brand;
 
     return Semantics(
       container: true,
@@ -329,10 +335,11 @@ class _RailItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = TogescColors.of(context);
     final iconColor = selected
         ? DesignTokens.onHeroAccent
-        : (dark ? DesignTokens.sessionTextSecondary : DesignTokens.textSecondary);
-    final focusColor = dark ? DesignTokens.sessionAccent : DesignTokens.primary;
+        : (dark ? DesignTokens.sessionTextSecondary : colors.textSecondary);
+    final focusColor = dark ? DesignTokens.sessionAccent : colors.brand;
     final radius = DesignTokens.borderRadiusCell;
 
     return Tooltip(
@@ -378,18 +385,19 @@ class _TogescShellHeader extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    final colors = TogescColors.of(context);
     return AppBar(
       toolbarHeight: DesignTokens.appBarHeight,
       centerTitle: false,
-      backgroundColor: DesignTokens.background,
+      backgroundColor: colors.page,
       surfaceTintColor: Colors.transparent,
-      foregroundColor: DesignTokens.textPrimary,
+      foregroundColor: colors.textPrimary,
       automaticallyImplyLeading: false,
       title: Semantics(
         header: true,
         child: Text(
           'TOGESC',
-          style: DesignTokens.logo.copyWith(color: DesignTokens.primary),
+          style: DesignTokens.logo.copyWith(color: colors.brand),
         ),
       ),
       actions: [
@@ -399,10 +407,10 @@ class _TogescShellHeader extends StatelessWidget
             backgroundColor: DesignTokens.primaryContainer.withValues(
               alpha: 0.15,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.person_rounded,
               size: 18,
-              color: DesignTokens.primary,
+              color: colors.brand,
             ),
           ),
           tooltip: 'Cuenta',

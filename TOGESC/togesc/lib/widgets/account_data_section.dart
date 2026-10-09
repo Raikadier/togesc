@@ -81,8 +81,8 @@ class AccountDataSection extends ConsumerWidget {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: DesignTokens.error,
-              foregroundColor: DesignTokens.onError,
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
             ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Eliminar cuenta'),
@@ -153,10 +153,13 @@ class AccountDataSection extends ConsumerWidget {
                         client,
                         ref.read(currentUserEmailProvider)!,
                       ),
-              icon: Icon(Icons.delete_forever_outlined, color: DesignTokens.error),
+              icon: Icon(
+                Icons.delete_forever_outlined,
+                color: Theme.of(context).colorScheme.error,
+              ),
               label: Text(
                 'Eliminar cuenta',
-                style: TextStyle(color: DesignTokens.error),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
           ],

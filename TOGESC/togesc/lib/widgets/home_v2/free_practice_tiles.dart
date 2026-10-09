@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../../app/togesc_colors.dart';
 import '../../constants/game_constants.dart';
 import '../../models/engagement_stats.dart';
 
@@ -88,6 +89,7 @@ class FreePracticeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = TogescColors.of(context);
     final acc = entry.accuracy;
 
     return Semantics(
@@ -95,10 +97,10 @@ class FreePracticeTile extends StatelessWidget {
       label: entry.semanticsLabel,
       excludeSemantics: true,
       child: Material(
-        color: DesignTokens.surfaceContainerLowest,
+        color: colors.tile,
         shape: RoundedRectangleBorder(
           borderRadius: DesignTokens.borderRadiusCard,
-          side: const BorderSide(color: DesignTokens.outlineVariant),
+          side: BorderSide(color: colors.cardBorder),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -111,7 +113,7 @@ class FreePracticeTile extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(entry.icon, size: 22, color: DesignTokens.primary),
+                    Icon(entry.icon, size: 22, color: colors.brand),
                     const Spacer(),
                     if (entry.isPro) ProBadge(locked: entry.locked),
                   ],
@@ -123,7 +125,7 @@ class FreePracticeTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: DesignTokens.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const Spacer(),
@@ -134,9 +136,9 @@ class FreePracticeTile extends StatelessWidget {
                     height: 4,
                     child: LinearProgressIndicator(
                       value: acc == null ? 0 : (acc / 100).clamp(0.0, 1.0),
-                      backgroundColor: DesignTokens.surfaceContainer,
+                      backgroundColor: colors.muted,
                       color: acc == null
-                          ? DesignTokens.outlineVariant
+                          ? colors.cardBorder
                           : masteryColor(acc),
                     ),
                   ),
@@ -145,7 +147,7 @@ class FreePracticeTile extends StatelessWidget {
                 Text(
                   entry.progressLabel,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: DesignTokens.textSecondary,
+                    color: colors.textSecondary,
                     fontWeight: FontWeight.w600,
                   ).merge(DesignTokens.tabularNumbers),
                 ),
@@ -241,7 +243,10 @@ Future<void> showAllModesSheet(
                   child: ListTile(
                     key: ValueKey('all-modes-${entry.mode.name}'),
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(entry.icon, color: DesignTokens.primary),
+                    leading: Icon(
+                      entry.icon,
+                      color: TogescColors.of(sheetContext).brand,
+                    ),
                     title: Text(entry.title),
                     subtitle: Text('${entry.subtitle} · ${entry.progressLabel}'),
                     trailing: entry.isPro

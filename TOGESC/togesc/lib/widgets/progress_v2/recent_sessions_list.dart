@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../../app/togesc_colors.dart';
 import '../../models/practice_session_log.dart';
 import '../../utils/relative_time.dart';
 
@@ -114,13 +115,14 @@ class RecentSessionsList extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final recent = entries.take(maxRows).toList();
+    final colors = TogescColors.of(context);
 
     return Container(
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerLowest,
+        color: colors.tile,
         borderRadius: DesignTokens.borderRadiusCard,
-        border: Border.all(color: DesignTokens.outlineVariant),
+        border: Border.all(color: colors.cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -171,7 +173,7 @@ class RecentSessionsList extends StatelessWidget {
           else
             for (var i = 0; i < recent.length; i++) ...[
               if (i > 0)
-                const Divider(height: 1, color: DesignTokens.divider),
+                Divider(height: 1, color: colors.divider),
               SessionLogRow(entry: recent[i], now: now),
             ],
         ],

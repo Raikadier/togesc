@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../../app/togesc_colors.dart';
 import '../../utils/calendar_week.dart';
 import 'progress_metrics.dart';
 
@@ -68,7 +69,7 @@ class GlobalAccuracyHeader extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: goalPct / 100,
                   minHeight: 8,
-                  backgroundColor: DesignTokens.masteryEmpty,
+                  backgroundColor: TogescColors.of(context).muted,
                   color: scheme.primary,
                 ),
               ),
@@ -98,10 +99,11 @@ class _DeltaLine extends StatelessWidget {
     final scheme = theme.colorScheme;
     final up = deltaPoints >= 0.05;
     final down = deltaPoints <= -0.05;
+    final feedback = TogescColors.of(context);
     final color = up
-        ? DesignTokens.correct
+        ? feedback.correct
         : down
-            ? DesignTokens.incorrect
+            ? feedback.incorrect
             : scheme.onSurfaceVariant;
     final icon = up
         ? Icons.trending_up_rounded

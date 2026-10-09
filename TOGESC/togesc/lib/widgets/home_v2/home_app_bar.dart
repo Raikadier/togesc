@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../../app/togesc_colors.dart';
 
 /// App bar del Home v2 (56): logo, chip de racha y avatar.
 class HomeAppBar extends StatelessWidget {
@@ -15,6 +16,8 @@ class HomeAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = TogescColors.of(context);
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       height: DesignTokens.appBarHeight,
       child: Row(
@@ -23,7 +26,7 @@ class HomeAppBar extends StatelessWidget {
             header: true,
             child: Text(
               'TOGESC',
-              style: DesignTokens.logo.copyWith(color: DesignTokens.primary),
+              style: DesignTokens.logo.copyWith(color: colors.brand),
             ),
           ),
           const Spacer(),
@@ -48,10 +51,14 @@ class HomeAppBar extends StatelessWidget {
                       color: Color(0x266A1B9A),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    // #6A1B9A en claro; en oscuro daría 1,9:1 y pasa a
+                    // `brand` (#DA9CFF).
+                    child: Icon(
                       Icons.person_rounded,
                       size: 20,
-                      color: DesignTokens.primaryContainer,
+                      color: dark
+                          ? colors.brand
+                          : DesignTokens.primaryContainer,
                     ),
                   ),
                 ),
@@ -81,7 +88,7 @@ class StreakChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: DesignTokens.surfaceContainer,
+          color: TogescColors.of(context).muted,
           borderRadius: DesignTokens.borderRadiusPill,
         ),
         child: Row(
@@ -120,7 +127,7 @@ class HomeOverline extends StatelessWidget {
       text.toUpperCase(),
       semanticsLabel: text,
       style: DesignTokens.overline.copyWith(
-        color: color ?? DesignTokens.textTertiary,
+        color: color ?? TogescColors.of(context).textTertiary,
       ),
     );
   }

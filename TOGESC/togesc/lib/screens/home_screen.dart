@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../constants/subscription_constants.dart';
@@ -198,7 +199,7 @@ class HomeScreen extends ConsumerWidget {
                         key: const ValueKey('home-see-all-modes'),
                         onPressed: () => showAllModesSheet(context, entries),
                         style: TextButton.styleFrom(
-                          foregroundColor: DesignTokens.primary,
+                          foregroundColor: TogescColors.of(context).brand,
                           minimumSize: const Size(
                             DesignTokens.touchTargetMin,
                             DesignTokens.touchTargetMin,
