@@ -21,3 +21,9 @@ flutter/
 
 # Stitch export descomprimido (el zip en raíz es la referencia)
 stitch_export/
+
+# ECC assets (vendor). Se versionan solo la config, el manifiesto y el override.
+.opencode/skills/*
+!.opencode/skills/systematic-bug-debugger/
+.opencode/commands/*
+.opencode/agents/*
