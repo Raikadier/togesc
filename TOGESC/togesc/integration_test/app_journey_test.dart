@@ -9,7 +9,6 @@
 //
 // Las capturas quedan en build/evidence/<plataforma>/.
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -199,39 +198,52 @@ void main() {
     expect(piano(tester).variant, PianoKeyboardVariant.sessionWide);
     await evidence.shot(tester, '09_desktop_answer');
 
-    // Letra (⇧ para sostenidos) responde sin tocar el piano.
-    await sendNoteShortcut(tester, first);
-    await pumpUntilFound(tester, find.text('CORRECTO'));
-    expect(piano(tester).correctNotes, {first});
-    await evidence.shot(tester, '10_desktop_result_correct');
+    await traced(binding, () async {
+      // Letra (⇧ para sostenidos) responde sin tocar el piano.
+      e2eStep(
+        binding,
+        'desktop: Letra (⇧ para sostenidos) responde sin tocar el piano.',
+      );
+      await sendNoteShortcut(tester, first);
+      await pumpUntilFound(tester, find.text('CORRECTO'));
+      expect(piano(tester).correctNotes, {first});
+      await evidence.shot(tester, '10_desktop_result_correct');
 
-    // Espacio salta la espera del resultado.
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pump();
-    expect(find.text('CORRECTO'), findsNothing);
-    final second = await reachAnswer(tester, app, 2);
+      // Espacio salta la espera del resultado.
+      e2eStep(binding, 'desktop: Espacio salta la espera del resultado.');
+      await sendShortcut(tester, ' ');
+      await tester.pump();
+      expect(find.text('CORRECTO'), findsNothing);
+      final second = await reachAnswer(tester, app, 2);
 
-    // R repite la misma ronda sin contarla.
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyR);
-    await pumpUntilFound(tester, find.text('ESCUCHANDO'));
-    await pumpUntilFound(tester, find.text('RESPONDE'));
-    expect(app.session.currentNotes, [second]);
-    expect(app.session.roundsCompleted, 1);
+      // R repite la misma ronda sin contarla.
+      e2eStep(binding, 'desktop: R repite la misma ronda sin contarla.');
+      await sendShortcut(tester, 'R');
+      await pumpUntilFound(tester, find.text('ESCUCHANDO'));
+      await pumpUntilFound(tester, find.text('RESPONDE'));
+      expect(app.session.currentNotes, [second]);
+      expect(app.session.roundsCompleted, 1);
 
-    // Fallo por teclado: correcta en verde y errónea en rojo.
-    final wrong = second == 'C' ? 'D' : 'C';
-    await sendNoteShortcut(tester, wrong);
-    await pumpUntilFound(tester, find.text('INCORRECTO'));
-    expect(piano(tester).incorrectNotes, {wrong});
-    await evidence.shot(tester, '11_desktop_result_wrong');
+      // Fallo por teclado: correcta en verde y errónea en rojo.
+      e2eStep(
+        binding,
+        'desktop: Fallo por teclado: correcta en verde y errónea en rojo.',
+      );
+      final wrong = second == 'C' ? 'D' : 'C';
+      await sendNoteShortcut(tester, wrong);
+      await pumpUntilFound(tester, find.text('INCORRECTO'));
+      expect(piano(tester).incorrectNotes, {wrong});
+      await evidence.shot(tester, '11_desktop_result_wrong');
 
-    // Salir y comprobar Progreso desde el rail.
-    await tester.tap(find.byTooltip('Volver'));
-    await tester.pumpAndSettle();
-    expect(find.byType(HomeScreen), findsOneWidget);
-    await tester.tap(rail(TogescNavDestination.progress));
-    await tester.pumpAndSettle();
-    expect(find.byType(StatisticsScreen), findsOneWidget);
+      // Salir y comprobar Progreso desde el rail.
+      e2eStep(binding, 'desktop: Salir y comprobar Progreso desde el rail.');
+      await tester.tap(find.byTooltip('Volver'));
+      await tester.pumpAndSettle();
+      expect(find.byType(HomeScreen), findsOneWidget);
+      await tester.tap(rail(TogescNavDestination.progress));
+      await tester.pumpAndSettle();
+      expect(find.byType(StatisticsScreen), findsOneWidget);
+    });
     await evidence.shot(tester, '12_desktop_progress');
     expect(tester.takeException(), isNull);
   });

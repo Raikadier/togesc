@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -172,26 +173,106 @@ Future<void> scrollAndTap(WidgetTester tester, Finder finder) async {
   await tester.tap(finder);
 }
 
-/// Envía la nota con el atajo físico de la sesión (A–G, ⇧ para sostenidos).
-Future<void> sendNoteShortcut(WidgetTester tester, String note) async {
-  const letters = {
-    'A': LogicalKeyboardKey.keyA,
-    'B': LogicalKeyboardKey.keyB,
-    'C': LogicalKeyboardKey.keyC,
-    'D': LogicalKeyboardKey.keyD,
-    'E': LogicalKeyboardKey.keyE,
-    'F': LogicalKeyboardKey.keyF,
-    'G': LogicalKeyboardKey.keyG,
-  };
-  final key = letters[note[0]]!;
-  if (note.endsWith('#')) {
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-    await tester.sendKeyEvent(key);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-  } else {
-    await tester.sendKeyEvent(key);
-  }
+/// Tecla física de un atajo y sus datos de evento web (`KeyboardEvent`).
+class _ShortcutKey {
+  const _ShortcutKey(this.logical, this.physical, this.code, this.key, this.keyCode);
+
+  final LogicalKeyboardKey logical;
+  final PhysicalKeyboardKey physical;
+  final String code;
+  final String key;
+  final int keyCode;
 }
+
+const _shortcutKeys = <String, _ShortcutKey>{
+  'A': _ShortcutKey(LogicalKeyboardKey.keyA, PhysicalKeyboardKey.keyA, 'KeyA', 'a', 65),
+  'B': _ShortcutKey(LogicalKeyboardKey.keyB, PhysicalKeyboardKey.keyB, 'KeyB', 'b', 66),
+  'C': _ShortcutKey(LogicalKeyboardKey.keyC, PhysicalKeyboardKey.keyC, 'KeyC', 'c', 67),
+  'D': _ShortcutKey(LogicalKeyboardKey.keyD, PhysicalKeyboardKey.keyD, 'KeyD', 'd', 68),
+  'E': _ShortcutKey(LogicalKeyboardKey.keyE, PhysicalKeyboardKey.keyE, 'KeyE', 'e', 69),
+  'F': _ShortcutKey(LogicalKeyboardKey.keyF, PhysicalKeyboardKey.keyF, 'KeyF', 'f', 70),
+  'G': _ShortcutKey(LogicalKeyboardKey.keyG, PhysicalKeyboardKey.keyG, 'KeyG', 'g', 71),
+  'R': _ShortcutKey(LogicalKeyboardKey.keyR, PhysicalKeyboardKey.keyR, 'KeyR', 'r', 82),
+  ' ': _ShortcutKey(LogicalKeyboardKey.space, PhysicalKeyboardKey.space, 'Space', ' ', 32),
+};
+
+const _shift = _ShortcutKey(
+  LogicalKeyboardKey.shiftLeft,
+  PhysicalKeyboardKey.shiftLeft,
+  'ShiftLeft',
+  'Shift',
+  16,
+);
+
+/// Modificador ⇧ en `metaState` del mensaje web (`RawKeyEventDataWeb`).
+const _webMetaShift = 0x01;
+
+/// Envía un evento de tecla como lo hace el motor web: primero `KeyData`
+/// y después el mensaje crudo de `flutter/keyevent` con keymap `web`.
+///
+/// Motivo: en web release `simulateKeyDownEvent` busca la tecla en los
+/// mapas de teclado de flutter_test, que dart2js elimina por tree-shaking,
+/// y falla con «Null check operator used on a null value» (limitación del
+/// arnés, no de la app: la tecla física funciona en la build release).
+Future<void> _sendWebKey(
+  _ShortcutKey k, {
+  required bool down,
+  bool shift = false,
+  String? character,
+}) async {
+  ServicesBinding.instance.keyEventManager.handleKeyData(
+    ui.KeyData(
+      type: down ? ui.KeyEventType.down : ui.KeyEventType.up,
+      physical: k.physical.usbHidUsage,
+      logical: k.logical.keyId,
+      timeStamp: Duration.zero,
+      character: down ? character : null,
+      synthesized: false,
+    ),
+  );
+  final message = <String, Object?>{
+    'type': down ? 'keydown' : 'keyup',
+    'keymap': 'web',
+    'code': k.code,
+    'key': character ?? k.key,
+    'location': k == _shift ? 1 : 0,
+    'metaState': shift ? _webMetaShift : 0,
+    'keyCode': k.keyCode,
+  };
+  await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(message),
+        (ByteData? _) {},
+      );
+}
+
+/// Pulsa y suelta un atajo (`'A'`–`'G'`, `'R'` o `' '`), con ⇧ si [shift].
+Future<void> sendShortcut(
+  WidgetTester tester,
+  String id, {
+  bool shift = false,
+  @visibleForTesting bool webPath = kIsWeb,
+}) async {
+  final k = _shortcutKeys[id];
+  if (k == null) throw ArgumentError.value(id, 'id', 'atajo no soportado');
+  if (!webPath) {
+    if (shift) await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(k.logical);
+    if (shift) await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    return;
+  }
+  final character = id == ' ' ? ' ' : (shift ? k.key.toUpperCase() : k.key);
+  if (shift) await _sendWebKey(_shift, down: true, shift: true);
+  await _sendWebKey(k, down: true, shift: shift, character: character);
+  await _sendWebKey(k, down: false, shift: shift, character: null);
+  if (shift) await _sendWebKey(_shift, down: false);
+  await tester.pump();
+}
+
+/// Envía la nota con el atajo físico de la sesión (A–G, ⇧ para sostenidos).
+Future<void> sendNoteShortcut(WidgetTester tester, String note) =>
+    sendShortcut(tester, note[0], shift: note.endsWith('#'));
 
 /// Capturas de evidencia por pantalla.
 ///
@@ -245,5 +326,29 @@ class Evidence {
     } on MissingPluginException {
       _unsupported = true;
     }
+  }
+}
+
+/// Migas de pan para depurar desde los artefactos: `flutter drive` en web
+/// release puede devolver `details` vacío, pero `reportData` siempre llega
+/// en la respuesta del driver (campo `data`).
+void e2eStep(IntegrationTestWidgetsFlutterBinding binding, String step) {
+  final data = binding.reportData ??= <String, dynamic>{};
+  (data['steps'] ??= <dynamic>[]) as List<dynamic>;
+  (data['steps'] as List<dynamic>).add(step);
+}
+
+/// Ejecuta [body] y, si falla, deja el tipo y el mensaje del error en
+/// `reportData['error']` antes de relanzarlo.
+Future<void> traced(
+  IntegrationTestWidgetsFlutterBinding binding,
+  Future<void> Function() body,
+) async {
+  try {
+    await body();
+  } catch (e, st) {
+    final data = binding.reportData ??= <String, dynamic>{};
+    data['error'] = '${e.runtimeType}: $e\n$st';
+    rethrow;
   }
 }

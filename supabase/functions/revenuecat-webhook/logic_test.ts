@@ -135,3 +135,58 @@ Deno.test("timingSafeEqual y isAuthorized", async () => {
   assert(!(await isAuthorized("s3cret", "s3cret")));
   assert(!(await isAuthorized(null, "s3cret")));
 });
+
+// --- Casos de ataque del pentest dinámico (2026-10, caso 18) ---
+
+Deno.test("ATAQUE: environment con otro casing/espacios no evade el filtro sandbox", () => {
+  for (const environment of ["sandbox", " SandBox ", "Sandbox"]) {
+    assertEquals(decideRevenueCatEvent(base({ environment }), cfg, NOW).kind, "skip");
+  }
+});
+
+Deno.test("ATAQUE: entitlement_id legacy ajeno tampoco concede Pro", () => {
+  const d = decideRevenueCatEvent(
+    base({ entitlement_ids: null, entitlement_id: "premium_falso" }),
+    cfg,
+    NOW,
+  );
+  assertEquals(d, { kind: "skip", reason: "entitlement no permitido" });
+});
+
+Deno.test("ATAQUE: product_id='pro' sin entitlement no concede Pro", () => {
+  const d = decideRevenueCatEvent(base({ entitlement_ids: [], product_id: "pro" }), cfg, NOW);
+  assertEquals(d.kind, "skip");
+});
+
+Deno.test("ATAQUE: app_user_id casi-uuid o con inyección se rechaza", () => {
+  for (
+    const app_user_id of [
+      `${UID} `,
+      "11111111-2222-4333-8444-55555555555",
+      "11111111-2222-4333-8444-5555555555556",
+      "'; DROP TABLE user_subscriptions;--",
+      `${UID}/../otro`,
+    ]
+  ) {
+    assertEquals(decideRevenueCatEvent(base({ app_user_id }), cfg, NOW).kind, "skip");
+  }
+});
+
+Deno.test("ATAQUE: GRANT con expiration_at_ms pasada no concede Pro", () => {
+  for (const type of ["INITIAL_PURCHASE", "RENEWAL", "UNCANCELLATION", "PRODUCT_CHANGE"]) {
+    const d = decideRevenueCatEvent(base({ type, expiration_at_ms: NOW - 1 }), cfg, NOW);
+    assert(d.kind === "upsert" && d.plan === "free");
+  }
+});
+
+Deno.test("ATAQUE: tipo con casing distinto no concede Pro", () => {
+  assertEquals(decideRevenueCatEvent(base({ type: "initial_purchase" }), cfg, NOW).kind, "skip");
+});
+
+Deno.test("ATAQUE: bearer de distinta longitud y sin prefijo se rechaza", async () => {
+  const s = "s3cret_local";
+  assert(await isAuthorized(`Bearer ${s}`, s));
+  assert(!(await isAuthorized(`Bearer ${s}x`, s)));
+  assert(!(await isAuthorized("Bearer ", s)));
+  assert(!(await isAuthorized("", s)));
+});

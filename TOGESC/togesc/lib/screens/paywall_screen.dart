@@ -31,7 +31,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(analyticsServiceProvider).paywallViewed(feature: widget.feature);
+      ref.read(analyticsServiceProvider).paywallViewed(
+            feature: SubscriptionConstants.paywallFeatureTitle(widget.feature),
+          );
     });
   }
 
@@ -116,7 +118,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final feature = widget.feature;
+    // PT-10: solo se muestran funciones Pro conocidas (allowlist).
+    final feature = SubscriptionConstants.paywallFeatureTitle(widget.feature);
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(

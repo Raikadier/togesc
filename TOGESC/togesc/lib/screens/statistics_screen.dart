@@ -9,6 +9,7 @@ import '../app/togesc_colors.dart';
 import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../constants/note_naming.dart';
+import '../constants/subscription_constants.dart';
 import '../models/note_progress_summary.dart';
 import '../models/practice_session_log.dart';
 import '../providers/app_preferences_provider.dart';
@@ -286,7 +287,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   }
 
   void _openPaywall(BuildContext context) {
-    context.push('${AppRoutes.paywall}?feature=historial');
+    context.push(
+      '${AppRoutes.paywall}?feature=${SubscriptionConstants.historyFeatureKey}',
+    );
   }
 
   void _openHistory(BuildContext context, bool proAccess) {

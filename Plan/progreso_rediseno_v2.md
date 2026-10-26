@@ -2,6 +2,21 @@
 
 Log en orden cronológico inverso.
 
+## 2026-10-26 · PT-06 y PT-10 corregidos en código · Senior SecOps
+- **PT-10 (BAJO, content spoofing en `/paywall?feature=`):**
+  - `SubscriptionConstants.paywallFeatureTitle()` aplica una allowlist: las etiquetas `modeProLabel` de los modos Pro y `historyFeatureKey` (`historial`).
+  - Cualquier otro valor muestra «Pasa a TOGESC Pro». `paywallViewed` registra el valor ya validado.
+  - `statistics_screen` usa la constante en lugar del literal.
+  - Se invierte `test/widget/paywall_feature_spoofing_test.dart`: el payload no se refleja. Se añade un test de la allowlist (5 tests).
+- **PT-06 (MEDIO, backup de Android):**
+  - `AndroidManifest.xml` declara `allowBackup="false"`, `fullBackupContent="@xml/backup_rules"` y `dataExtractionRules="@xml/data_extraction_rules"`.
+  - Los XML nuevos están en `res/xml/` y excluyen todos los dominios en cloud-backup y en device-transfer.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test` completo: `+520 ~1: All tests passed!`.
+  - **No se pudo validar el manifiesto con Gradle:** en esta máquina no hay Android SDK (`SDK location not found`). Solo se comprobó que el XML está bien formado. Pendiente: `flutter build apk --debug` en una máquina con SDK.
+- **Sin tocar:** PT-07 (firma release), que sigue siendo bloqueante antes de publicar en Play. Informes 12 y 13 actualizados (sección 4 del 13).
+
 ## 2026-10-09 · Tema oscuro de las pantallas v2 del shell · UI Designer
 - **Fallo:** con el sistema en `prefers-color-scheme: dark` (web release, 1280×800), la app usa `AppTheme.dark`, pero el rail, las tiles de «Práctica libre», las celdas de «Esta semana» y la rejilla de dominio tenían colores claros fijos. El logo «TOGESC» y «Ver todos» (#4E0078) daban unos 1,6:1 sobre #141018.
 - **Estado:** `flutter analyze` sin issues. `flutter test` completo: +515 ~1, 0 fallos (antes 504; se añaden 11 tests).
