@@ -175,7 +175,13 @@ Future<void> scrollAndTap(WidgetTester tester, Finder finder) async {
 
 /// Tecla física de un atajo y sus datos de evento web (`KeyboardEvent`).
 class _ShortcutKey {
-  const _ShortcutKey(this.logical, this.physical, this.code, this.key, this.keyCode);
+  const _ShortcutKey(
+    this.logical,
+    this.physical,
+    this.code,
+    this.key,
+    this.keyCode,
+  );
 
   final LogicalKeyboardKey logical;
   final PhysicalKeyboardKey physical;
@@ -185,15 +191,69 @@ class _ShortcutKey {
 }
 
 const _shortcutKeys = <String, _ShortcutKey>{
-  'A': _ShortcutKey(LogicalKeyboardKey.keyA, PhysicalKeyboardKey.keyA, 'KeyA', 'a', 65),
-  'B': _ShortcutKey(LogicalKeyboardKey.keyB, PhysicalKeyboardKey.keyB, 'KeyB', 'b', 66),
-  'C': _ShortcutKey(LogicalKeyboardKey.keyC, PhysicalKeyboardKey.keyC, 'KeyC', 'c', 67),
-  'D': _ShortcutKey(LogicalKeyboardKey.keyD, PhysicalKeyboardKey.keyD, 'KeyD', 'd', 68),
-  'E': _ShortcutKey(LogicalKeyboardKey.keyE, PhysicalKeyboardKey.keyE, 'KeyE', 'e', 69),
-  'F': _ShortcutKey(LogicalKeyboardKey.keyF, PhysicalKeyboardKey.keyF, 'KeyF', 'f', 70),
-  'G': _ShortcutKey(LogicalKeyboardKey.keyG, PhysicalKeyboardKey.keyG, 'KeyG', 'g', 71),
-  'R': _ShortcutKey(LogicalKeyboardKey.keyR, PhysicalKeyboardKey.keyR, 'KeyR', 'r', 82),
-  ' ': _ShortcutKey(LogicalKeyboardKey.space, PhysicalKeyboardKey.space, 'Space', ' ', 32),
+  'A': _ShortcutKey(
+    LogicalKeyboardKey.keyA,
+    PhysicalKeyboardKey.keyA,
+    'KeyA',
+    'a',
+    65,
+  ),
+  'B': _ShortcutKey(
+    LogicalKeyboardKey.keyB,
+    PhysicalKeyboardKey.keyB,
+    'KeyB',
+    'b',
+    66,
+  ),
+  'C': _ShortcutKey(
+    LogicalKeyboardKey.keyC,
+    PhysicalKeyboardKey.keyC,
+    'KeyC',
+    'c',
+    67,
+  ),
+  'D': _ShortcutKey(
+    LogicalKeyboardKey.keyD,
+    PhysicalKeyboardKey.keyD,
+    'KeyD',
+    'd',
+    68,
+  ),
+  'E': _ShortcutKey(
+    LogicalKeyboardKey.keyE,
+    PhysicalKeyboardKey.keyE,
+    'KeyE',
+    'e',
+    69,
+  ),
+  'F': _ShortcutKey(
+    LogicalKeyboardKey.keyF,
+    PhysicalKeyboardKey.keyF,
+    'KeyF',
+    'f',
+    70,
+  ),
+  'G': _ShortcutKey(
+    LogicalKeyboardKey.keyG,
+    PhysicalKeyboardKey.keyG,
+    'KeyG',
+    'g',
+    71,
+  ),
+  'R': _ShortcutKey(
+    LogicalKeyboardKey.keyR,
+    PhysicalKeyboardKey.keyR,
+    'KeyR',
+    'r',
+    82,
+  ),
+  ' ': _ShortcutKey(
+    LogicalKeyboardKey.space,
+    PhysicalKeyboardKey.space,
+    'Space',
+    ' ',
+    32,
+  ),
 };
 
 const _shift = _ShortcutKey(
@@ -220,6 +280,9 @@ Future<void> _sendWebKey(
   bool shift = false,
   String? character,
 }) async {
+  // Es la entrada que usa el propio motor (y flutter_test al simular);
+  // no hay API pública sustituta para inyectar eventos de hardware.
+  // ignore: deprecated_member_use
   ServicesBinding.instance.keyEventManager.handleKeyData(
     ui.KeyData(
       type: down ? ui.KeyEventType.down : ui.KeyEventType.up,
