@@ -141,7 +141,7 @@ class _SessionPhaseRingState extends State<SessionPhaseRing>
       case SessionPhase.paused:
         return Icon(Icons.pause_rounded, size: size * 0.32, color: color);
       case SessionPhase.idle:
-        return Icon(Icons.play_arrow_rounded, size: size * 0.36, color: color);
+        return Icon(Icons.headphones_rounded, size: size * 0.34, color: color);
     }
   }
 

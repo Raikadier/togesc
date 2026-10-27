@@ -162,9 +162,8 @@ void main() {
     PianoKeyboard piano(WidgetTester tester) =>
         tester.widget<PianoKeyboard>(find.byType(PianoKeyboard));
 
-    testWidgets('el CTA «Empezar sesión» entra directo en listen', (
-      tester,
-    ) async {
+    testWidgets('el CTA «Empezar sesión» abre «Preparado» y «Estoy listo» '
+        'arranca', (tester) async {
       await pumpApp(tester);
       expect(find.byType(HomeScreen), findsOneWidget);
 
@@ -172,15 +171,21 @@ void main() {
       await tester.ensureVisible(cta);
       await tester.pumpAndSettle();
       await tester.tap(cta);
-      await pumpUntilFound(tester, find.byType(GameScreen));
+      await pumpUntilFound(tester, find.byKey(const ValueKey('session-start')));
 
       expect(find.byType(GameScreen), findsOneWidget);
-      expect(find.text('Toca para empezar'), findsNothing);
+      expect(find.text('PREPARADO'), findsOneWidget);
+      expect(find.byType(PianoKeyboard), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('session-start')));
+      await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('ESCUCHANDO'), findsOneWidget);
       await waitForAnswer(tester, 1);
 
-      // Salir sin rondas: no se registra historial ni queda la sesión viva.
+      // Volver con la sesión en curso pausa; «Salir sin guardar» sale.
       await tester.tap(find.byTooltip('Volver'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('session-pause-sheet')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('session-pause-exit')));
       await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
     });
@@ -195,6 +200,11 @@ void main() {
         await tester.ensureVisible(cta);
         await tester.pumpAndSettle();
         await tester.tap(cta);
+        await pumpUntilFound(
+          tester,
+          find.byKey(const ValueKey('session-start')),
+        );
+        await tester.tap(find.byKey(const ValueKey('session-start')));
         await pumpUntilFound(tester, find.text('ESCUCHANDO'));
 
         // Ronda 1: acierto → la tecla tocada queda en verde.
@@ -229,15 +239,22 @@ void main() {
           }
         }
 
-        // Meta cumplida: no avanza solo y ofrece volver.
+        // Meta cumplida: tras el resultado llega el resumen.
         final session = container.read(gameSessionProvider);
         expect(session.goalReached, isTrue);
         expect(session.roundsCompleted, _targetRounds);
         expect(session.correctRounds, _targetRounds - 1);
-        await pumpFor(tester, const Duration(milliseconds: 2400));
         expect(find.textContaining('Objetivo cumplido'), findsOneWidget);
-        final back = find.text('Volver al inicio');
-        expect(back, findsOneWidget);
+        await pumpFor(tester, const Duration(milliseconds: 2400));
+        await pumpUntilFound(
+          tester,
+          find.byKey(const ValueKey('session-summary')),
+        );
+        expect(find.text('${_targetRounds - 1}/$_targetRounds'), findsOneWidget);
+        expect(session.responseTimes, hasLength(_targetRounds));
+        final back = find.byKey(const ValueKey('session-summary-home'));
+        await tester.ensureVisible(back);
+        await tester.pumpAndSettle();
         await tester.tap(back);
         await tester.pumpAndSettle();
         expect(find.byType(HomeScreen), findsOneWidget);

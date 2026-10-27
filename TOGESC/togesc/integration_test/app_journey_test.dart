@@ -99,11 +99,14 @@ void main() {
     expect(find.byType(TogescBottomNav), findsOneWidget);
     await evidence.shot(tester, '01_home');
 
-    // CTA → la sesión entra directa en listen (hubo gesto).
+    // CTA → «Preparado» (v2.1) → «Estoy listo» arranca la escucha.
     await scrollAndTap(tester, find.byKey(const ValueKey('today-start-cta')));
-    await pumpUntilFound(tester, find.text('ESCUCHANDO'));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('session-start')));
     expect(find.byType(GameScreen), findsOneWidget);
-    expect(find.text('Toca para empezar'), findsNothing);
+    expect(find.text('PREPARADO'), findsOneWidget);
+    await evidence.shot(tester, '02a_session_ready');
+    await tester.tap(find.byKey(const ValueKey('session-start')));
+    await pumpUntilFound(tester, find.text('ESCUCHANDO'));
     await evidence.shot(tester, '02_session_listen');
 
     // Ronda 1: acierto, la tecla queda en verde.
@@ -131,10 +134,19 @@ void main() {
       await tapPianoKey(tester, note);
       await pumpUntilFound(tester, find.text('CORRECTO'));
     }
-    await pumpUntilFound(tester, find.text('Volver al inicio'));
+    // Meta cumplida → resumen de la sesión.
+    await pumpUntilFound(tester, find.byKey(const ValueKey('session-summary')));
     expect(app.session.goalReached, isTrue);
     expect(app.session.correctRounds, e2eTargetRounds - 1);
-    await tester.tap(find.text('Volver al inicio'));
+    expect(
+      find.text('${e2eTargetRounds - 1}/$e2eTargetRounds'),
+      findsOneWidget,
+    );
+    await evidence.shot(tester, '13_session_summary');
+    await scrollAndTap(
+      tester,
+      find.byKey(const ValueKey('session-summary-home')),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(HomeScreen), findsOneWidget);
 
@@ -189,6 +201,8 @@ void main() {
     await evidence.shot(tester, '08_desktop_home');
 
     await scrollAndTap(tester, find.byKey(const ValueKey('today-start-cta')));
+    await pumpUntilFound(tester, find.byKey(const ValueKey('session-start')));
+    await tester.tap(find.byKey(const ValueKey('session-start')));
     final first = await reachAnswer(tester, app, 1);
     expect(find.byKey(const ValueKey('session-srs-panel')), findsOneWidget);
     expect(
@@ -235,9 +249,12 @@ void main() {
       expect(piano(tester).incorrectNotes, {wrong});
       await evidence.shot(tester, '11_desktop_result_wrong');
 
-      // Salir y comprobar Progreso desde el rail.
-      e2eStep(binding, 'desktop: Salir y comprobar Progreso desde el rail.');
-      await tester.tap(find.byTooltip('Volver'));
+      // Esc pausa; «Salir sin guardar» y Progreso desde el rail.
+      e2eStep(binding, 'desktop: Esc pausa y «Salir sin guardar» sale.');
+      await sendShortcut(tester, 'Escape');
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('session-pause-sheet')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('session-pause-exit')));
       await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
       await tester.tap(rail(TogescNavDestination.progress));

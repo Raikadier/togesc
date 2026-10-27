@@ -40,6 +40,17 @@ void main() {
       );
     });
 
+    test('Esc pausa (v2.1)', () {
+      expect(
+        sessionShortcutFor(LogicalKeyboardKey.escape),
+        const SessionShortcut.pause(),
+      );
+      expect(
+        const SessionShortcut.pause(),
+        isNot(const SessionShortcut.next()),
+      );
+    });
+
     test('con Ctrl/Alt/Meta no hay atajo (no pisa Ctrl+R)', () {
       expect(
         sessionShortcutFor(LogicalKeyboardKey.keyR, otherModifier: true),
@@ -78,7 +89,56 @@ void main() {
         ),
       );
       expect(copy.headline, 'Bien identificada');
-      expect(copy.subtitle, 'Objetivo cumplido: 12 rondas.');
+      expect(
+        copy.subtitle,
+        'Objetivo cumplido: 12 rondas. Preparando tu resumen…',
+      );
+    });
+
+    test('«Preparado»: rondas, notas y foco reales', () {
+      final copy = sessionPhaseCopy(
+        const SessionPhaseContext(
+          phase: SessionPhase.idle,
+          targetRounds: 12,
+          focusLabels: ['C#', 'F#', 'A#'],
+        ),
+      );
+      expect(copy.overline, 'Preparado');
+      expect(copy.headline, 'Ponte los auriculares');
+      expect(copy.subtitle, '12 rondas · 1 nota · foco en C#, F#, A#');
+
+      final unlimited = sessionPhaseCopy(
+        const SessionPhaseContext(
+          phase: SessionPhase.idle,
+          requiredNotes: 2,
+        ),
+      );
+      expect(unlimited.subtitle, 'Sin límite de rondas · 2 notas');
+    });
+
+    test('«¡N seguidas!» desde 3 aciertos seguidos', () {
+      String headline(int streak) => sessionPhaseCopy(
+            SessionPhaseContext(
+              phase: SessionPhase.result,
+              isCorrect: true,
+              streak: streak,
+            ),
+          ).headline;
+      expect(headline(1), 'Bien identificada');
+      expect(headline(2), 'Bien identificada');
+      expect(headline(3), '¡3 seguidas!');
+      expect(headline(7), '¡7 seguidas!');
+      // Un fallo nunca dice «seguidas».
+      final wrong = sessionPhaseCopy(
+        const SessionPhaseContext(
+          phase: SessionPhase.result,
+          isCorrect: false,
+          streak: 5,
+          correctLabels: ['C'],
+          answerLabels: ['D'],
+        ),
+      );
+      expect(wrong.headline, 'Era C, respondiste D');
     });
 
     test('listen usa solo el detalle real', () {

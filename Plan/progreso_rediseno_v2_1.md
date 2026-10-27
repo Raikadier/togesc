@@ -2,6 +2,60 @@
 
 Log en orden cronológico inverso. Hoja de ruta: `Plan/hoja_ruta_rediseno_v2_1.md`. Qué cambia: `docs/design_v2_1/SPEC_rediseno_v2_1.md`.
 
+## 2026-10-27 · Lote 4: sesión · Claude Code
+- **«Preparado» siempre al entrar** (`SessionPhase.idle`, `GameState.idle`):
+  - Overline «Preparado», icono `headphones`, «Ponte los auriculares» y un subtítulo con datos reales: «12 rondas · 1 nota · foco en D», o «Sin límite de rondas».
+  - CTA ámbar «Estoy listo» (`session-start`). Es el gesto que llama a `captureUserGesture` (D4) y también responde a Espacio.
+  - «Probar el sonido» (`session-test-sound`) toca un La 4 de 440 Hz con el timbre de la sesión y avisa con un SnackBar. Si falla, lo dice.
+  - El teclado y los controles no aparecen hasta empezar.
+  - Se quita la heurística de autoarranque («fuera de web o con ruta previa»). `GameScreen.autoStart` queda solo para tests.
+  - **«Estoy listo» no lleva `autofocus`.** Con él, el foco se quedaba en el scope de la ruta al desaparecer el botón y A–G dejaban de llegar a `SessionShortcuts`.
+- **Snapshot SRS y tiempos** (`game_session_provider`):
+  - `GameSessionState.srsSnapshot` guarda nivel, precisión y vistas de cada nota en la primera ronda con el SRS cargado (`snapshotSrs`, en `utils/session_summary.dart`).
+  - `responseTimes` (uno por ronda respondida), `sessionNotes` y el getter `meanResponseTimeSec`.
+  - `setMode` lo reinicia todo.
+  - **El tiempo de respuesta ya existía:** `RoundResult.responseTime`, medido por la pantalla desde el inicio de `answer` y sin las pausas. Solo se acumula.
+- **«¡N seguidas!»** con 3 o más aciertos seguidos: campo `streak` de `SessionPhaseContext`.
+- **Hoja «Instrumento de esta sesión»:** ya existía en todos los tamaños (`session_instrument_sheet.dart`).
+  - Nuevo título y cerrar, rejilla de timbres de 2 o 3 columnas, preescucha de un Do 4 al elegir uno fijo (la hoja sigue abierta) e icono `piano` en el botón (`session-instrument`).
+  - «Según preferencias» y «Aleatorio» siguen cerrando la hoja.
+- **Hoja «Sesión en pausa»** (`session_pause_sheet.dart`):
+  - Se abre con el botón de pausa (en `answer`, `result` o `paused`), con **Esc** (`SessionShortcut.pause`) o al volver con la sesión en curso: `PopScope` y la flecha «Volver».
+  - Muestra «Ronda X de N · Y aciertos», Continuar, Reiniciar la sesión y Salir sin guardar. En sesiones **sin límite** añade «Terminar y ver resumen», porque esas sesiones no llegan solas al resumen.
+  - Pausar en `answer` detiene el cronómetro. En `result` cancela el avance automático y Continuar lo reprograma. Si `listen` termina con la hoja abierta, el cronómetro arranca ya en pausa.
+  - **Copy distinto del prototipo:** el prototipo dice «Tu progreso SRS se guarda al terminar», pero aquí el SRS se guarda en cada ronda. Ahora pone: «El SRS ya guardó cada respuesta. “Salir sin guardar” no registra esta sesión en tu historial.» Es lo que hace: `_discardHistory` evita `sessionHistory.record`.
+  - Reiniciar vuelve a «Preparado» con los contadores y el snapshot a cero. Las respuestas ya dadas siguen en el SRS.
+- **Resumen al terminar** (`session_summary_view.dart`, clave `session-summary`):
+  - Aparece tras el resultado de la última ronda, con el mismo retardo de 2,2 s o el reducido. En modo manual aparece con «Ver resumen» (`session-show-summary`). Sustituye a «Volver al inicio» en el anillo.
+  - Medalla por precisión: ≥ 75 % `military_tech` «Gran oído hoy», ≥ 50 % `workspace_premium`, y si no `self_improvement`. Entra con spring.
+  - KPI:
+    - Precisión con `CountUpText`.
+    - Aciertos «X/N».
+    - Tiempo medio medido, con coma decimal, o «—» si no hay datos.
+  - «Cambios de nivel SRS» (`buildSessionLevelChanges`): una fila por nota que salió, con antes → después, puntos, flecha y Semantics («D: nivel 0 a 2 de 5, sube»). Las filas entran escalonadas cada 90 ms.
+  - Rueda compacta con los datos ya actualizados. Botones «Volver al inicio» (`session-summary-home`) y «Ver mi progreso» (`session-summary-progress`, que va a `/statistics`).
+  - El titular es una región viva: «Sesión completada. … X de N aciertos, P por ciento.».
+  - No se escribe «Racha de hoy asegurada» porque el historial se registra al salir.
+- **Panel SRS de escritorio:**
+  - Resalta la nota de la ronda **solo en `result`** (fondo #DA9CFF al 10 % y «nota de esta ronda» en Semantics), para no desvelar la respuesta. El prototipo hace lo mismo.
+  - La leyenda añade «· Esc pausar».
+- **Copy:** con la meta cumplida, «Objetivo cumplido: N rondas. Preparando tu resumen…».
+- **Tests (+19 netos):**
+  - `game_screen_test`: Preparado (auriculares, subtítulo, sin teclado), Espacio arranca, Probar el sonido, pausa y Continuar, Esc y Reiniciar, volver que pausa y «Salir sin guardar» sin historial, «¡3 seguidas!», resumen con medalla, KPI, latencia, cambio SRS de D, rueda y región viva, «Ver resumen» en modo manual, y leyenda con Esc.
+  - `session_v2_test`: copy de Preparado y de racha, y Esc.
+  - `session_summary_test` (nuevo): snapshot, antes/después y orden, igual o sin datos, tiempo medio, medallas y frase.
+  - Actualizados:
+    - `full_game_flow_test`: Preparado → Estoy listo; al final, `session-summary` y `session-summary-home`; salida por la pausa.
+    - `app_smoke_test`: cada tile abre «Preparado».
+    - `integration_test/app_journey_test`: capturas `02a_session_ready` y `13_session_summary`; Esc y «Salir sin guardar» en escritorio.
+    - `e2e_harness`: tecla `Escape`, sin carácter en web.
+- **No incluido (SPEC §2.2.3):** el pop del nombre de la nota en el anillo y la subida animada de la píldora SRS. No estaban en la lista del lote; quedan para un repaso de movimiento. La pantalla de velocidad no se toca.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test`: `+591 ~1: All tests passed!` (antes 572).
+  - `flutter test integration_test -d flutter-tester`: `+2: All tests passed!`.
+  - **No revisado a ojo en un navegador.**
+
 ## 2026-10-27 · Lote 3: Home · Claude Code
 - **Hero** (`today_session_hero.dart`):
   - `HeroLiveDot` junto a «Sesión de hoy»: escala 1 → 1,6 con fade, 1,8 s por pulso. **Late solo dos veces y se queda quieto** (3,6 s). El prototipo lo deja en bucle, pero eso superaría los 5 s de movimiento automático de WCAG 2.2.2 y colgaría los `pumpAndSettle` de los tests y del e2e. Con movimiento reducido, quieto.

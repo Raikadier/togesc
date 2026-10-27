@@ -11,6 +11,7 @@ import 'package:togesc/constants/game_constants.dart';
 import 'package:togesc/providers/audio_provider.dart';
 import 'package:togesc/providers/game_session_provider.dart';
 import 'package:togesc/providers/practice_focus_provider.dart';
+import 'package:togesc/providers/session_history_provider.dart';
 import 'package:togesc/providers/srs_provider.dart';
 import 'package:togesc/screens/game_screen.dart';
 import 'package:togesc/services/app_preferences.dart';
@@ -112,21 +113,28 @@ void main() {
   }
 
   group('GameScreen v2 · fases', () {
-    testWidgets('sin gesto previo muestra el idle mínimo (D4)', (tester) async {
+    testWidgets('«Preparado» siempre al entrar y «Estoy listo» arranca',
+        (tester) async {
       await setUpContainer();
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      await tester.pumpWidget(buildApp(autoStart: false));
+      await tester.pumpWidget(buildApp(autoStart: null));
       await tester.pump();
 
-      expect(find.text('Toca para empezar'), findsOneWidget);
-      expect(find.text('Empezar'), findsOneWidget);
+      expect(find.text('PREPARADO'), findsOneWidget);
+      expect(find.text('Ponte los auriculares'), findsOneWidget);
+      expect(find.text('12 rondas · 1 nota · foco en D'), findsOneWidget);
+      expect(find.byIcon(Icons.headphones_rounded), findsOneWidget);
+      expect(find.byKey(const ValueKey('session-test-sound')), findsOneWidget);
+      // Teclado y controles ocultos hasta empezar.
+      expect(find.byType(PianoKeyboard), findsNothing);
+      expect(find.text('Repetir'), findsNothing);
 
-      await tester.tap(find.text('Empezar'));
+      await tester.tap(find.byKey(const ValueKey('session-start')));
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('ESCUCHANDO'), findsOneWidget);
-      expect(find.text('Escucha con atención'), findsOneWidget);
+      expect(find.byType(PianoKeyboard), findsOneWidget);
 
       await pumpFor(tester, const Duration(milliseconds: 1800));
       expect(find.text('RESPONDE'), findsOneWidget);
@@ -137,22 +145,39 @@ void main() {
       );
     });
 
-    testWidgets('con gesto previo entra directo a listen, sin idle',
+    testWidgets('Espacio arranca desde «Preparado»', (tester) async {
+      await setUpContainer();
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(buildApp(autoStart: null));
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.text('ESCUCHANDO'), findsOneWidget);
+      await pumpFor(tester, const Duration(milliseconds: 1800));
+      expect(find.text('RESPONDE'), findsOneWidget);
+    });
+
+    testWidgets('«Probar el sonido» suena sin empezar la sesión',
         (tester) async {
       await setUpContainer();
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(buildApp(autoStart: null));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump();
 
-      expect(find.text('Toca para empezar'), findsNothing);
-      expect(find.text('ESCUCHANDO'), findsOneWidget);
-      // listen dura al menos 1,5 s.
-      await pumpFor(tester, const Duration(milliseconds: 1000));
-      expect(find.text('ESCUCHANDO'), findsOneWidget);
-      await pumpFor(tester, const Duration(milliseconds: 800));
-      expect(find.text('RESPONDE'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('session-test-sound')));
+      await pumpFor(tester, const Duration(milliseconds: 500));
+      expect(find.text('PREPARADO'), findsOneWidget);
+      expect(
+        find.textContaining(RegExp('La 4 \\(440 Hz\\)|No se pudo')),
+        findsOneWidget,
+      );
+      expect(container.read(gameSessionProvider).roundsCompleted, 0);
+      await pumpFor(tester, const Duration(seconds: 5));
     });
 
     testWidgets('barra superior: chips de ronda, precisión y racha',
@@ -388,6 +413,193 @@ void main() {
     });
   });
 
+  group('GameScreen v2.1 · pausa, racha y resumen', () {
+    Future<void> answerRound(WidgetTester tester, String note) async {
+      expect(find.text('RESPONDE'), findsOneWidget);
+      await tester.tap(find.text(note));
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    testWidgets('Pausar abre la hoja y «Continuar» reanuda', (tester) async {
+      await setUpContainer();
+      await pumpToAnswer(tester);
+
+      await tester.tap(find.byIcon(Icons.pause_rounded));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('session-pause-sheet')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('session-pause-sheet')),
+          matching: find.text('Sesión en pausa'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Ronda 1 de 12 · 0 aciertos'), findsOneWidget);
+      expect(container.read(gameSessionProvider).isPaused, isTrue);
+
+      await tester.tap(find.byKey(const ValueKey('session-pause-resume')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('session-pause-sheet')), findsNothing);
+      expect(container.read(gameSessionProvider).isPaused, isFalse);
+      expect(find.text('RESPONDE'), findsOneWidget);
+    });
+
+    testWidgets('Esc pausa y «Reiniciar» vuelve a «Preparado»', (tester) async {
+      await setUpContainer();
+      await pumpToAnswer(tester);
+      await answerRound(tester, 'D');
+      expect(container.read(gameSessionProvider).roundsCompleted, 1);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.text('Ronda 1 de 12 · 1 acierto'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('session-pause-restart')));
+      await tester.pumpAndSettle();
+      expect(find.text('PREPARADO'), findsOneWidget);
+      expect(find.byType(PianoKeyboard), findsNothing);
+      final session = container.read(gameSessionProvider);
+      expect(session.roundsCompleted, 0);
+      expect(session.srsSnapshot, isNull);
+    });
+
+    testWidgets('volver con la sesión en curso pausa; «Salir sin guardar» '
+        'sale sin registrar la sesión', (tester) async {
+      await setUpContainer();
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const GameScreen(
+                        mode: GameMode.singleNote,
+                        autoStart: true,
+                      ),
+                    ),
+                  ),
+                  child: const Text('ABRIR'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('ABRIR'));
+      await pumpFor(tester, const Duration(milliseconds: 2400));
+      await answerRound(tester, 'D');
+
+      // El gesto de volver no sale: abre la pausa.
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      await navigator.maybePop();
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('session-pause-sheet')), findsOneWidget);
+      expect(find.byType(GameScreen), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('session-pause-exit')));
+      await tester.pumpAndSettle();
+      expect(find.byType(GameScreen), findsNothing);
+      expect(find.text('ABRIR'), findsOneWidget);
+      await tester.pump();
+      final history =
+          await container.read(sessionHistoryProvider.future);
+      expect(history, isEmpty);
+    });
+
+    testWidgets('con 3 aciertos seguidos: «¡3 seguidas!»', (tester) async {
+      await setUpContainer();
+      await pumpToAnswer(tester);
+      for (var round = 1; round <= 3; round++) {
+        await answerRound(tester, 'D');
+        if (round < 3) {
+          expect(find.text('¡$round seguidas!'), findsNothing);
+          await pumpFor(tester, const Duration(milliseconds: 2400));
+          await pumpFor(tester, const Duration(milliseconds: 1800));
+        }
+      }
+      expect(find.text('¡3 seguidas!'), findsOneWidget);
+      await pumpFor(tester, const Duration(milliseconds: 2400));
+    });
+
+    testWidgets('meta cumplida: resumen con medalla, KPI y cambios SRS',
+        (tester) async {
+      await setUpContainer(prefs: {sessionRoundGoalV2Key: 5});
+      final handle = tester.ensureSemantics();
+      await pumpToAnswer(tester);
+      final before = container.read(gameSessionProvider).srsSnapshot;
+      expect(before, isNotNull);
+      expect(before!['D']!.timesSeen, 0);
+
+      for (var round = 1; round <= 5; round++) {
+        await answerRound(tester, 'D');
+        await pumpFor(tester, const Duration(milliseconds: 2400));
+        if (round < 5) await pumpFor(tester, const Duration(milliseconds: 1800));
+      }
+
+      expect(find.byKey(const ValueKey('session-summary')), findsOneWidget);
+      expect(find.text('SESIÓN COMPLETADA'), findsOneWidget);
+      expect(find.text('Gran oído hoy'), findsOneWidget);
+      await pumpFor(tester, const Duration(seconds: 1));
+      expect(find.text('100 %'), findsOneWidget);
+      expect(find.text('5/5'), findsOneWidget);
+      final session = container.read(gameSessionProvider);
+      expect(session.responseTimes, hasLength(5));
+      expect(session.meanResponseTimeSec, isNotNull);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('session-summary-latency')),
+          matching: find.text('—'),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('session-summary-change-D')),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp(r'^D: nivel 0 a [1-5] de 5, sube$')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('ear-map')), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp(r'^Sesión completada\. Gran oído hoy')),
+        findsOneWidget,
+      );
+      expect(find.text('Volver al inicio'), findsOneWidget);
+      expect(find.text('Ver mi progreso'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('modo manual: «Ver resumen» al cumplir la meta',
+        (tester) async {
+      await setUpContainer(prefs: {
+        sessionRoundGoalV2Key: 5,
+        autoAdvanceAfterResultV2Key: false,
+      });
+      await pumpToAnswer(tester);
+      for (var round = 1; round <= 5; round++) {
+        await answerRound(tester, 'D');
+        if (round < 5) {
+          await tester.tap(find.text('Siguiente ronda'));
+          await tester.pump(const Duration(milliseconds: 100));
+          await pumpFor(tester, const Duration(milliseconds: 1800));
+        }
+      }
+      await pumpFor(tester, const Duration(seconds: 4));
+      expect(find.byKey(const ValueKey('session-summary')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('session-show-summary')));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('session-summary')), findsOneWidget);
+      await pumpFor(tester, const Duration(seconds: 2));
+    });
+  });
+
   group('GameScreen v2 · escritorio (1d)', () {
     testWidgets('≥1024: anillo, panel «Enfoque SRS» y teclado ancho',
         (tester) async {
@@ -397,6 +609,7 @@ void main() {
       expect(find.text(GameMode.singleNote.displayName), findsOneWidget);
       expect(find.text('Ronda 1 / 12'), findsOneWidget);
       expect(find.text('Pausar'), findsOneWidget);
+      expect(find.textContaining('Esc pausar'), findsOneWidget);
       expect(find.byKey(const ValueKey('session-srs-panel')), findsOneWidget);
       expect(find.text('ENFOQUE SRS DE LA SESIÓN'), findsOneWidget);
       // La nota foco de la sesión, sin datos todavía.

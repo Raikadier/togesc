@@ -254,6 +254,13 @@ const _shortcutKeys = <String, _ShortcutKey>{
     ' ',
     32,
   ),
+  'Escape': _ShortcutKey(
+    LogicalKeyboardKey.escape,
+    PhysicalKeyboardKey.escape,
+    'Escape',
+    'Escape',
+    27,
+  ),
 };
 
 const _shift = _ShortcutKey(
@@ -325,7 +332,10 @@ Future<void> sendShortcut(
     if (shift) await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
     return;
   }
-  final character = id == ' ' ? ' ' : (shift ? k.key.toUpperCase() : k.key);
+  // Las teclas no imprimibles (Escape) no llevan carácter.
+  final character = id == ' '
+      ? ' '
+      : (k.key.length > 1 ? null : (shift ? k.key.toUpperCase() : k.key));
   if (shift) await _sendWebKey(_shift, down: true, shift: true);
   await _sendWebKey(k, down: true, shift: shift, character: character);
   await _sendWebKey(k, down: false, shift: shift, character: null);

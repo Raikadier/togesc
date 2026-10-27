@@ -4,9 +4,9 @@ import '../../app/design_tokens.dart';
 
 /// Fase visible de la sesión v2 (1b/1d).
 ///
-/// `listen` → `answer` → `result` → (`cluster`) → `listen`… `idle` solo
-/// aparece si la sesión arranca sin gesto previo (D4) y `paused` mientras la
-/// ronda está en pausa.
+/// `idle` («Preparado», v2.1: siempre al entrar; el gesto de «Estoy listo»
+/// desbloquea el audio, D4) → `listen` → `answer` → `result` →
+/// (`cluster`) → `listen`… `paused` mientras la ronda está en pausa.
 enum SessionPhase { idle, listen, answer, result, cluster, paused }
 
 /// Textos y color de una fase. Todo el copy sale de datos reales (D10).
@@ -58,6 +58,12 @@ class SessionPhaseContext {
   final bool goalReached;
   final int targetRounds;
 
+  /// Aciertos seguidos tras esta ronda («¡N seguidas!» desde 3).
+  final int streak;
+
+  /// Notas foco ya formateadas («F#, C#, A#») para «Preparado».
+  final List<String> focusLabels;
+
   const SessionPhaseContext({
     required this.phase,
     this.requiredNotes = 1,
@@ -70,6 +76,8 @@ class SessionPhaseContext {
     this.autoAdvance = true,
     this.goalReached = false,
     this.targetRounds = 0,
+    this.streak = 0,
+    this.focusLabels = const [],
   });
 }
 
@@ -85,10 +93,17 @@ SessionPhaseCopy sessionPhaseCopy(SessionPhaseContext c) {
   final many = c.requiredNotes > 1;
   switch (c.phase) {
     case SessionPhase.idle:
-      return const SessionPhaseCopy(
-        overline: 'Sesión',
-        headline: 'Toca para empezar',
-        subtitle: 'El audio necesita un toque para arrancar.',
+      final parts = <String>[
+        c.targetRounds > 0
+            ? '${c.targetRounds} rondas'
+            : 'Sin límite de rondas',
+        many ? '${c.requiredNotes} notas' : '1 nota',
+        if (c.focusLabels.isNotEmpty) 'foco en ${c.focusLabels.join(', ')}',
+      ];
+      return SessionPhaseCopy(
+        overline: 'Preparado',
+        headline: 'Ponte los auriculares',
+        subtitle: parts.join(' · '),
         color: DesignTokens.sessionAccent,
       );
     case SessionPhase.listen:
@@ -124,7 +139,8 @@ SessionPhaseCopy sessionPhaseCopy(SessionPhaseContext c) {
       final String? next;
       if (c.goalReached) {
         next = c.targetRounds > 0
-            ? 'Objetivo cumplido: ${c.targetRounds} rondas.'
+            ? 'Objetivo cumplido: ${c.targetRounds} rondas. Preparando tu '
+                'resumen…'
             : null;
       } else {
         next = c.autoAdvance
@@ -134,7 +150,9 @@ SessionPhaseCopy sessionPhaseCopy(SessionPhaseContext c) {
       if (c.isCorrect ?? false) {
         return SessionPhaseCopy(
           overline: 'Correcto',
-          headline: many ? 'Bien identificadas' : 'Bien identificada',
+          headline: c.streak >= 3
+              ? '¡${c.streak} seguidas!'
+              : (many ? 'Bien identificadas' : 'Bien identificada'),
           subtitle: next,
           color: DesignTokens.sessionSuccess,
         );

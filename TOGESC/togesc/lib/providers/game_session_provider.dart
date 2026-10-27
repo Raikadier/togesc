@@ -11,7 +11,9 @@ import 'audio_provider.dart';
 import 'last_practice_provider.dart';
 import 'practice_focus_provider.dart';
 import 'srs_provider.dart';
+import 'today_session_provider.dart';
 import '../utils/note_pool.dart';
+import '../utils/session_summary.dart';
 import 'app_preferences_provider.dart';
 import 'ui_preferences_provider.dart';
 
@@ -67,6 +69,17 @@ class GameSessionState {
   /// Mejor racha de aciertos consecutivos de la sesión actual.
   final int bestStreak;
 
+  /// Estado SRS de cada nota al empezar la sesión (resumen v2.1). `null`
+  /// hasta la primera ronda con el SRS cargado.
+  final Map<String, NoteSrsSnapshot>? srsSnapshot;
+
+  /// Tiempo de respuesta medido de cada ronda respondida, en segundos
+  /// (desde que empieza `answer` hasta el envío, sin pausas).
+  final List<double> responseTimes;
+
+  /// Notas que sonaron en las rondas respondidas.
+  final Set<String> sessionNotes;
+
   const GameSessionState({
     this.state = GameState.idle,
     this.mode = GameMode.singleNote,
@@ -81,7 +94,13 @@ class GameSessionState {
     this.goalReached = false,
     this.currentStreak = 0,
     this.bestStreak = 0,
+    this.srsSnapshot,
+    this.responseTimes = const [],
+    this.sessionNotes = const {},
   });
+
+  /// Tiempo medio de respuesta de la sesión; `null` sin respuestas medidas.
+  double? get meanResponseTimeSec => averageResponseTimeSec(responseTimes);
 
   /// Precisión de la sesión en % (rondas acertadas / jugadas); `null` sin
   /// rondas jugadas.
@@ -103,6 +122,10 @@ class GameSessionState {
     bool? goalReached,
     int? currentStreak,
     int? bestStreak,
+    Map<String, NoteSrsSnapshot>? srsSnapshot,
+    bool clearSrsSnapshot = false,
+    List<double>? responseTimes,
+    Set<String>? sessionNotes,
     bool clearLastResult = false,
   }) {
     return GameSessionState(
@@ -121,6 +144,10 @@ class GameSessionState {
       goalReached: goalReached ?? this.goalReached,
       currentStreak: currentStreak ?? this.currentStreak,
       bestStreak: bestStreak ?? this.bestStreak,
+      srsSnapshot:
+          clearSrsSnapshot ? null : (srsSnapshot ?? this.srsSnapshot),
+      responseTimes: responseTimes ?? this.responseTimes,
+      sessionNotes: sessionNotes ?? this.sessionNotes,
     );
   }
 }
@@ -147,6 +174,9 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
       currentStreak: 0,
       bestStreak: 0,
       clearLastResult: true,
+      clearSrsSnapshot: true,
+      responseTimes: const [],
+      sessionNotes: const {},
     );
     ref.read(lastPracticeSessionProvider.notifier).record(
           mode: mode,
@@ -177,6 +207,16 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
     final srsAsync = ref.read(srsSystemProvider);
     final srs = srsAsync.valueOrNull;
     if (srs == null) return;
+
+    // Instantánea SRS de la sesión (una vez, antes de la primera ronda).
+    if (state.srsSnapshot == null) {
+      state = state.copyWith(
+        srsSnapshot: snapshotSrs(
+          ref.read(noteProgressSummariesProvider),
+          learningThreshold: ref.read(srsLearningThresholdProvider),
+        ),
+      );
+    }
 
     final numNotes = _getNumNotes(state.mode);
     final focusNote = ref.read(practiceFocusNoteProvider);
@@ -286,6 +326,11 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
       goalReached: reachedGoal,
       currentStreak: nextStreak,
       bestStreak: nextBest,
+      responseTimes: List.unmodifiable([...state.responseTimes, responseTime]),
+      sessionNotes: Set.unmodifiable({
+        ...state.sessionNotes,
+        ...state.currentNotes,
+      }),
       lastResult: RoundResult(
         isCorrect: isCorrect,
         correctNotes: correctNotesSet,

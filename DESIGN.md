@@ -144,6 +144,14 @@ Aprobado el 2026-10-26 a partir del feedback del propietario sobre v2: se veía 
 - **Últimos 7 días:** hoy se rotula «HOY» y, si está pendiente, lleva borde discontinuo. Debajo, la frase de racha.
 - **Escritorio:** dos columnas (1,25 / 1). La derecha queda fija porque cada columna tiene su propio scroll.
 
+### Sesión v2.1 (lote 4)
+- **«Preparado» siempre al entrar:** auriculares, rondas, notas y foco reales, «Estoy listo» (también con Espacio) y «Probar el sonido». El teclado aparece al empezar. Sustituye al idle mínimo de v2 (D4): el gesto lo da siempre «Estoy listo».
+- **Resultado:** «¡N seguidas!» desde 3 aciertos seguidos.
+- **Pausa:** botón, Esc o volver abren «Sesión en pausa» (Continuar, Reiniciar la sesión, Salir sin guardar). El cronómetro se detiene.
+- **Instrumento:** hoja con la rejilla de timbres y una preescucha.
+- **Resumen** al cumplir la meta: medalla, precisión, aciertos, tiempo medio medido, cambios de nivel SRS frente a la instantánea del inicio y la rueda actualizada.
+- **Escritorio:** el panel SRS resalta la nota de la ronda solo en el resultado.
+
 ## Qué queda de Harmonic Precision
 
 | Elemento | Estado |

@@ -9,32 +9,47 @@ class SessionShortcut {
   final bool repeat;
   final bool next;
 
+  /// `Esc`: pausar (v2.1).
+  final bool pause;
+
   const SessionShortcut.note(String this.note)
       : repeat = false,
-        next = false;
+        next = false,
+        pause = false;
   const SessionShortcut.repeat()
       : note = null,
         repeat = true,
-        next = false;
+        next = false,
+        pause = false;
   const SessionShortcut.next()
       : note = null,
         repeat = false,
-        next = true;
+        next = true,
+        pause = false;
+  const SessionShortcut.pause()
+      : note = null,
+        repeat = false,
+        next = false,
+        pause = true;
 
   @override
   bool operator ==(Object other) =>
       other is SessionShortcut &&
       other.note == note &&
       other.repeat == repeat &&
-      other.next == next;
+      other.next == next &&
+      other.pause == pause;
 
   @override
-  int get hashCode => Object.hash(note, repeat, next);
+  int get hashCode => Object.hash(note, repeat, next, pause);
 
   @override
-  String toString() => note != null
-      ? 'SessionShortcut.note($note)'
-      : (repeat ? 'SessionShortcut.repeat()' : 'SessionShortcut.next()');
+  String toString() {
+    if (note != null) return 'SessionShortcut.note($note)';
+    if (repeat) return 'SessionShortcut.repeat()';
+    if (pause) return 'SessionShortcut.pause()';
+    return 'SessionShortcut.next()';
+  }
 }
 
 final _letterKeys = <LogicalKeyboardKey, String>{
@@ -52,7 +67,8 @@ const _noSharp = {'E', 'B'};
 
 /// Traduce una tecla física al atajo de la sesión (spec 1d):
 /// `A–G` nota natural, `⇧`+letra sostenido (⇧E y ⇧B se ignoran),
-/// `R` repetir y `Espacio` siguiente/saltar. Con Ctrl, Alt o Meta no hay
+/// `R` repetir, `Espacio` siguiente/saltar y `Esc` pausar. Con Ctrl, Alt o
+/// Meta no hay
 /// atajo (no se pisan los del navegador, como Ctrl+R). Función pura.
 SessionShortcut? sessionShortcutFor(
   LogicalKeyboardKey key, {
@@ -69,6 +85,7 @@ SessionShortcut? sessionShortcutFor(
   if (shift) return null;
   if (key == LogicalKeyboardKey.keyR) return const SessionShortcut.repeat();
   if (key == LogicalKeyboardKey.space) return const SessionShortcut.next();
+  if (key == LogicalKeyboardKey.escape) return const SessionShortcut.pause();
   return null;
 }
 
@@ -94,12 +111,16 @@ class SessionShortcuts extends StatefulWidget {
   final VoidCallback onRepeat;
   final VoidCallback onNext;
 
+  /// `Esc` (v2.1). Sin callback, `Esc` no hace nada aquí.
+  final VoidCallback? onPause;
+
   const SessionShortcuts({
     super.key,
     required this.child,
     required this.onNote,
     required this.onRepeat,
     required this.onNext,
+    this.onPause,
     this.enabled = true,
   });
 
@@ -138,6 +159,12 @@ class _SessionShortcutsState extends State<SessionShortcuts> {
     }
     if (shortcut.repeat) {
       widget.onRepeat();
+      return KeyEventResult.handled;
+    }
+    if (shortcut.pause) {
+      final onPause = widget.onPause;
+      if (onPause == null) return KeyEventResult.ignored;
+      onPause();
       return KeyEventResult.handled;
     }
     widget.onNote(shortcut.note!);

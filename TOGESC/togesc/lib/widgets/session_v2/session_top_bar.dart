@@ -236,11 +236,15 @@ class SessionInstrumentButton extends ConsumerWidget {
   final ValueChanged<String?> onOverrideChanged;
   final bool showLabel;
 
+  /// Preescucha al elegir un timbre fijo en la hoja.
+  final ValueChanged<String>? onPreview;
+
   const SessionInstrumentButton({
     super.key,
     required this.sessionInstrumentOverride,
     required this.onOverrideChanged,
     this.showLabel = false,
+    this.onPreview,
   });
 
   @override
@@ -256,6 +260,7 @@ class SessionInstrumentButton extends ConsumerWidget {
         context: context,
         sessionOverrideKey: sessionInstrumentOverride,
         onSelected: onOverrideChanged,
+        onPreview: onPreview,
       );
     }
 
@@ -266,17 +271,19 @@ class SessionInstrumentButton extends ConsumerWidget {
       return Tooltip(
         message: summary,
         child: OutlinedButton.icon(
+          key: const ValueKey('session-instrument'),
           onPressed: open,
-          icon: const Icon(Icons.music_note_rounded),
+          icon: const Icon(Icons.piano_rounded),
           label: Text(id == null ? 'Aleatorio' : instrumentLabel(id)),
           style: sessionSecondaryButtonStyle(),
         ),
       );
     }
     return IconButton(
+      key: const ValueKey('session-instrument'),
       tooltip: summary,
       onPressed: open,
-      icon: const Icon(Icons.music_note_rounded),
+      icon: const Icon(Icons.piano_rounded),
       color: DesignTokens.sessionTextPrimary,
     );
   }

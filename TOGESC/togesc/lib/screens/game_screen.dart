@@ -13,6 +13,7 @@ import '../constants/game_constants.dart';
 import '../constants/note_naming.dart';
 import '../models/audio_preferences.dart';
 import '../models/last_practice_session.dart';
+import '../models/practice_session_log.dart' show chromaticNotes;
 import '../models/practice_session_preferences.dart';
 import '../models/ui_preferences.dart';
 import '../providers/app_preferences_provider.dart';
@@ -27,33 +28,37 @@ import '../providers/today_session_provider.dart';
 import '../providers/ui_preferences_provider.dart';
 import '../services/microphone_pitch_service.dart';
 import '../utils/piano_note_selection.dart';
+import '../utils/session_summary.dart';
 import '../utils/srs_level.dart';
 import '../utils/today_session.dart';
 import '../widgets/microphone_answer_panel.dart';
 import '../widgets/note_input_field.dart';
 import '../widgets/piano_keyboard.dart';
 import '../widgets/session_v2/session_key_actions.dart';
+import '../widgets/session_v2/session_pause_sheet.dart';
 import '../widgets/session_v2/session_phase.dart';
 import '../widgets/session_v2/session_phase_ring.dart';
 import '../widgets/session_v2/session_shortcuts.dart';
 import '../widgets/session_v2/session_srs_panel.dart';
+import '../widgets/session_v2/session_summary_view.dart';
 import '../widgets/session_v2/session_top_bar.dart';
 import '../widgets/session_v2/srs_level_pill.dart';
 
 /// Sesión de juego v2 «La sesión como instrumento» (1b móvil, 1d escritorio).
 ///
-/// Máquina de estados: `listen` (≥1,5 s) → `answer` → (un toque) → `result`
-/// (2,2 s, o el retardo reducido) → siguiente ronda. El feedback se pinta
-/// sobre la misma tecla; no hay card de resultado ni segundo teclado.
+/// Máquina de estados (v2.1): «Preparado» (`idle`, siempre al entrar) →
+/// «Estoy listo» → `listen` (≥1,5 s) → `answer` → (un toque) → `result`
+/// (2,2 s, o el retardo reducido) → siguiente ronda… → resumen al cumplir la
+/// meta. El feedback se pinta sobre la misma tecla.
 ///
-/// Idle mínimo (D4): solo si la sesión arranca sin gesto previo (enlace
-/// directo o recarga en web). Desde el Home se entra directo a `listen`.
+/// «Estoy listo» es el gesto que desbloquea el audio (D4) en todas las
+/// plataformas. Pausa (botón, `Esc` o volver con la sesión en curso) abre la
+/// hoja «Sesión en pausa».
 class GameScreen extends ConsumerStatefulWidget {
   final GameMode mode;
 
-  /// Arrancar la primera ronda sin pasar por «Toca para empezar».
-  /// `null` = automático: fuera de web siempre; en web solo si se llegó
-  /// navegando dentro de la app (hubo gesto y hay ruta a la que volver).
+  /// Saltar «Preparado» y arrancar la primera ronda al montar. Solo para
+  /// tests y escenarios sin interacción; la app siempre muestra «Preparado».
   final bool? autoStart;
 
   const GameScreen({super.key, required this.mode, this.autoStart});
@@ -70,6 +75,19 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
   /// Se está preparando una ronda (entre el gesto y el primer audio).
   bool _starting = false;
+
+  /// Se pulsó «Estoy listo» (o hubo [GameScreen.autoStart]): ya no se
+  /// muestra «Preparado» y aparecen el teclado y los controles.
+  bool _started = false;
+
+  /// Resumen final visible (meta cumplida o «Terminar y ver resumen»).
+  bool _showSummary = false;
+
+  /// «Salir sin guardar»: no se registra la sesión en el historial.
+  bool _discardHistory = false;
+
+  /// La hoja «Sesión en pausa» está abierta.
+  bool _pauseOpen = false;
 
   /// El audio ya sonó pero la fase `listen` aún no cumplió su mínimo.
   bool _holdingListen = false;
@@ -139,9 +157,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             : List.of(ref.read(practiceFocusNotesProvider));
       });
       ref.read(gameSessionProvider.notifier).setMode(widget.mode);
-      final auto = widget.autoStart ??
-          (!kIsWeb || Navigator.of(context).canPop());
-      if (auto) _startRound();
+      if (widget.autoStart ?? false) _startRound();
     });
   }
 
@@ -149,7 +165,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   void deactivate() {
     MicrophonePitchService.stopListening();
     final session = ref.read(gameSessionProvider);
-    if (session.roundsCompleted > 0) {
+    if (session.roundsCompleted > 0 && !_discardHistory) {
       ref.read(sessionHistoryProvider.notifier).record(
             mode: session.mode,
             kind: PracticeKind.game,
@@ -210,6 +226,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     // En web debe ir de forma síncrona dentro del gesto, antes de cualquier await.
     audio.captureUserGesture();
     setState(() {
+      _started = true;
       _starting = true;
       _holdingListen = true;
       _replaying = false;
@@ -248,6 +265,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         _pauseStartedAt = null;
         _accumulatedPause = Duration.zero;
       });
+      // Con la hoja de pausa abierta, el cronómetro empieza ya parado.
+      if (_pauseOpen) _pauseRound();
     }
 
     if (remaining <= Duration.zero) {
@@ -370,10 +389,13 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     });
   }
 
-  /// Siguiente ronda tras `result` (automático o manual).
+  /// Siguiente ronda tras `result` (automático o manual); con la meta
+  /// cumplida, el resumen.
   Future<void> _advance() async {
     final session = ref.read(gameSessionProvider);
-    if (session.state != GameState.showingResult || session.goalReached) {
+    if (session.state != GameState.showingResult) return;
+    if (session.goalReached) {
+      _showSessionSummary();
       return;
     }
     _cancelTimers();
@@ -400,7 +422,18 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     ref.read(gameSessionProvider.notifier).resumeRound();
   }
 
+  /// La sesión está en curso: volver abre la pausa en lugar de salir.
+  bool get _inSession => _started && !_showSummary;
+
   void _onBack() {
+    if (_inSession) {
+      _openPause();
+      return;
+    }
+    _leave();
+  }
+
+  void _leave() {
     final navigator = Navigator.of(context);
     if (navigator.canPop()) {
       navigator.pop();
@@ -409,17 +442,143 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     GoRouter.maybeOf(context)?.go(AppRoutes.home);
   }
 
+  void _openProgress() {
+    final router = GoRouter.maybeOf(context);
+    if (router == null) {
+      _leave();
+      return;
+    }
+    router.go(AppRoutes.statistics);
+  }
+
   void _onResultShown(GameSessionState session) {
     final result = session.lastResult;
     if (result == null) return;
     _announceResult(session);
-    final autoAdvance = _sessionPrefs().autoAdvanceAfterResult;
-    if (!autoAdvance || session.goalReached) return;
+    _scheduleAfterResult(session);
+  }
+
+  /// Avance automático tras `result`: siguiente ronda o, con la meta
+  /// cumplida, el resumen. En modo manual se espera al botón.
+  void _scheduleAfterResult(GameSessionState session) {
+    if (!_sessionPrefs().autoAdvanceAfterResult) return;
     _advanceTimer?.cancel();
     _advanceTimer = Timer(_autoAdvanceDelay(), () {
       if (!mounted) return;
       _advance();
     });
+  }
+
+  void _showSessionSummary() {
+    _cancelTimers();
+    _roundToken++;
+    setState(() => _showSummary = true);
+  }
+
+  // --- Pausa ----------------------------------------------------------------
+
+  Future<void> _openPause() async {
+    if (!_inSession || _pauseOpen) return;
+    final session = ref.read(gameSessionProvider);
+    final phase = _phase(session);
+    final wasResult = phase == SessionPhase.result;
+    if (phase == SessionPhase.answer) _pauseRound();
+    if (wasResult) {
+      _advanceTimer?.cancel();
+      _advanceTimer = null;
+    }
+    setState(() => _pauseOpen = true);
+    final targetRounds = _sessionPrefs().targetRounds;
+    final action = await showSessionPauseSheet(
+      context: context,
+      round: _displayRound(session),
+      targetRounds: targetRounds,
+      correctRounds: session.correctRounds,
+      canFinish: targetRounds <= 0 && session.roundsCompleted > 0,
+    );
+    if (!mounted) return;
+    setState(() => _pauseOpen = false);
+    switch (action) {
+      case SessionPauseAction.resume:
+        final now = ref.read(gameSessionProvider);
+        if (now.isPaused) _resumeRound();
+        if (wasResult && now.state == GameState.showingResult) {
+          _scheduleAfterResult(now);
+        }
+      case SessionPauseAction.restart:
+        _restartSession();
+      case SessionPauseAction.exit:
+        _discardHistory = true;
+        _leave();
+      case SessionPauseAction.finish:
+        _showSessionSummary();
+    }
+  }
+
+  /// «Reiniciar la sesión»: contadores a cero y vuelta a «Preparado». Las
+  /// respuestas ya dadas siguen en el SRS (se guardan en cada ronda).
+  void _restartSession() {
+    _cancelTimers();
+    _roundToken++;
+    ref.read(gameSessionProvider.notifier).setMode(widget.mode);
+    setState(() {
+      _started = false;
+      _showSummary = false;
+      _starting = false;
+      _holdingListen = false;
+      _replaying = false;
+      _selectedNotes.clear();
+      _roundStartTime = null;
+      _pauseStartedAt = null;
+      _accumulatedPause = Duration.zero;
+    });
+  }
+
+  // --- Audio de prueba ------------------------------------------------------
+
+  /// «Probar el sonido»: un La 4 (440 Hz) con el timbre de la sesión.
+  Future<void> _testSound() async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final ok = await _playPreview(
+      440.0,
+      instrumentOverride: ref.read(gameSessionProvider).sessionInstrumentOverride,
+    );
+    messenger?.hideCurrentSnackBar();
+    messenger?.showSnackBar(
+      SnackBar(
+        content: Text(
+          ok ? 'Sonó un La 4 (440 Hz)' : 'No se pudo reproducir el sonido',
+        ),
+      ),
+    );
+  }
+
+  /// Preescucha de un timbre de la hoja «Instrumento»: un Do 4.
+  void _previewInstrument(String id) {
+    _playPreview(261.63, instrumentOverride: id);
+  }
+
+  Future<bool> _playPreview(
+    double frequency, {
+    String? instrumentOverride,
+  }) async {
+    final audio = ref.read(audioPlayerServiceProvider);
+    audio.captureUserGesture();
+    try {
+      await audio.waitUntilReady();
+      final prefs = await ref.read(audioPreferencesProvider.future);
+      audio.setMasterVolume(prefs.masterVolume);
+      await audio.playTones(
+        [frequency],
+        duration: prefs.toneDurationSec,
+        instrument: prefs.playbackInstrument(
+          sessionOverrideKey: instrumentOverride,
+        ),
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// La región viva del anillo cubre web y Android; iOS y escritorio no
@@ -492,6 +651,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       autoAdvance: _sessionPrefs().autoAdvanceAfterResult,
       goalReached: session.goalReached,
       targetRounds: _sessionPrefs().targetRounds,
+      streak: session.currentStreak,
+      focusLabels: phase == SessionPhase.idle
+          ? _sortedLabels(_sessionFocusNotes ?? const [])
+          : const [],
     );
   }
 
@@ -516,7 +679,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       case SessionPhase.paused:
         return 'Sesión en pausa';
       case SessionPhase.idle:
-        return 'Pulsa «Empezar» para oír la primera nota';
+        return 'Pulsa «Estoy listo» para oír la primera nota';
     }
   }
 
@@ -562,30 +725,39 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       if (becameResult) _onResultShown(next);
     });
 
-    return Theme(
-      data: AppTheme.session,
-      child: Builder(
-        builder: (context) {
-          return Scaffold(
-            backgroundColor: DesignTokens.sessionBackground,
-            body: SafeArea(
-              child: SessionShortcuts(
-                onNote: _onShortcutNote,
-                onRepeat: _replay,
-                onNext: _onShortcutNext,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    if (constraints.maxWidth >=
-                        DesignTokens.desktopBreakpoint) {
-                      return _buildDesktop(context, session);
-                    }
-                    return _buildMobile(context, session, constraints);
-                  },
+    return PopScope(
+      canPop: !_inSession,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _openPause();
+      },
+      child: Theme(
+        data: AppTheme.session,
+        child: Builder(
+          builder: (context) {
+            return Scaffold(
+              backgroundColor: DesignTokens.sessionBackground,
+              body: SafeArea(
+                child: SessionShortcuts(
+                  enabled: !_showSummary && !_pauseOpen,
+                  onNote: _onShortcutNote,
+                  onRepeat: _replay,
+                  onNext: _onShortcutNext,
+                  onPause: _openPause,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (_showSummary) return _buildSummary(session);
+                      if (constraints.maxWidth >=
+                          DesignTokens.desktopBreakpoint) {
+                        return _buildDesktop(context, session);
+                      }
+                      return _buildMobile(context, session, constraints);
+                    },
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -601,9 +773,11 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final phase = _phase(session);
     return SessionPauseButton(
       isPaused: session.isPaused,
-      enabled: phase == SessionPhase.answer || phase == SessionPhase.paused,
-      onPause: _pauseRound,
-      onResume: _resumeRound,
+      enabled: phase == SessionPhase.answer ||
+          phase == SessionPhase.result ||
+          phase == SessionPhase.paused,
+      onPause: _openPause,
+      onResume: _openPause,
       showLabel: showLabel,
     );
   }
@@ -612,6 +786,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     return SessionInstrumentButton(
       sessionInstrumentOverride: session.sessionInstrumentOverride,
       showLabel: showLabel,
+      onPreview: _previewInstrument,
       onOverrideChanged: (key) =>
           ref.read(gameSessionProvider.notifier).setSessionInstrumentOverride(
                 key,
@@ -631,15 +806,35 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
     switch (phase) {
       case SessionPhase.idle:
-        return FilledButton.icon(
-          onPressed: _startRound,
-          style: amber.copyWith(
-            minimumSize: const WidgetStatePropertyAll(
-              Size(200, DesignTokens.ctaHeight),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FilledButton.icon(
+              key: const ValueKey('session-start'),
+              onPressed: _startRound,
+              style: amber.copyWith(
+                minimumSize: const WidgetStatePropertyAll(
+                  Size(220, DesignTokens.ctaHeight),
+                ),
+              ),
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: const Text('Estoy listo'),
             ),
-          ),
-          icon: const Icon(Icons.play_arrow_rounded),
-          label: const Text('Empezar'),
+            const SizedBox(height: DesignTokens.spacingSm),
+            TextButton.icon(
+              key: const ValueKey('session-test-sound'),
+              onPressed: _testSound,
+              style: TextButton.styleFrom(
+                foregroundColor: DesignTokens.sessionTextPrimary,
+                minimumSize: const Size(
+                  DesignTokens.touchTargetMin,
+                  DesignTokens.touchTargetMin,
+                ),
+              ),
+              icon: const Icon(Icons.volume_up_rounded),
+              label: const Text('Probar el sonido'),
+            ),
+          ],
         );
       case SessionPhase.paused:
         return FilledButton.icon(
@@ -663,13 +858,17 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       case SessionPhase.result:
         final pills = _srsPills(session);
         final Widget? action;
-        if (session.goalReached) {
+        if (session.goalReached &&
+            !_sessionPrefs().autoAdvanceAfterResult) {
           action = FilledButton.icon(
-            onPressed: _onBack,
+            key: const ValueKey('session-show-summary'),
+            onPressed: _showSessionSummary,
             style: amber,
-            icon: const Icon(Icons.home_rounded),
-            label: const Text('Volver al inicio'),
+            icon: const Icon(Icons.flag_rounded),
+            label: const Text('Ver resumen'),
           );
+        } else if (session.goalReached) {
+          action = null;
         } else if (!_sessionPrefs().autoAdvanceAfterResult) {
           action = FilledButton.icon(
             onPressed: _advance,
@@ -873,6 +1072,21 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       ),
     );
 
+    if (!_started) {
+      return Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: Column(
+            children: [
+              topBar,
+              progress,
+              Expanded(child: _scrollCenter(ring)),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (compactLandscape) {
       return Column(
         children: [
@@ -970,26 +1184,90 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                       entries: entries,
                       formatNote: _label,
                       solfegeNames: _namingMode() == NoteNamingMode.solfege,
+                      highlightNotes: _phase(session) == SessionPhase.result
+                          ? session.currentNotes.toSet()
+                          : const {},
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 960),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+          if (_started)
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 960),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _keyActions(session),
+                  const SizedBox(height: DesignTokens.spacingSm),
+                  _answerInput(
+                    session,
+                    variant: PianoKeyboardVariant.sessionWide,
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Resumen final (clave `session-summary`) con la diferencia SRS entre la
+  /// instantánea del inicio y el estado actual.
+  Widget _buildSummary(GameSessionState session) {
+    final summaries = ref.watch(noteProgressSummariesProvider);
+    final threshold = ref.watch(srsLearningThresholdProvider);
+    final changes = buildSessionLevelChanges(
+      before: session.srsSnapshot ?? const {},
+      after: summaries,
+      sessionNotes: session.sessionNotes,
+      chromaticOrder: chromaticNotes,
+      learningThreshold: threshold,
+    );
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spacingSm,
+          ),
+          child: SizedBox(
+            height: DesignTokens.appBarHeight,
+            child: Row(
               children: [
-                _keyActions(session),
-                const SizedBox(height: DesignTokens.spacingSm),
-                _answerInput(session, variant: PianoKeyboardVariant.sessionWide),
+                IconButton(
+                  tooltip: 'Volver',
+                  onPressed: _leave,
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  color: DesignTokens.sessionTextPrimary,
+                ),
+                const SizedBox(width: DesignTokens.spacingXs),
+                Text(
+                  widget.mode.displayName,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: DesignTokens.sessionTextPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+        Expanded(
+          child: SessionSummaryView(
+            rounds: session.roundsCompleted,
+            correctRounds: session.correctRounds,
+            meanResponseTimeSec: session.meanResponseTimeSec,
+            changes: changes,
+            summaries: summaries,
+            namingMode: _namingMode(),
+            learningThreshold: threshold,
+            onHome: _leave,
+            onProgress: _openProgress,
+          ),
+        ),
+      ],
     );
   }
 }

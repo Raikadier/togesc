@@ -88,11 +88,16 @@ class SessionSrsPanel extends StatelessWidget {
   /// Las letras de los atajos son inglesas aunque se nombre en solfeo.
   final bool solfegeNames;
 
+  /// Notas de la ronda actual, resaltadas (solo en `result`, para no
+  /// desvelar la respuesta).
+  final Set<String> highlightNotes;
+
   const SessionSrsPanel({
     super.key,
     required this.entries,
     required this.formatNote,
     this.solfegeNames = false,
+    this.highlightNotes = const {},
   });
 
   @override
@@ -131,7 +136,13 @@ class SessionSrsPanel extends StatelessWidget {
               ),
             )
           else
-            ...entries.map((e) => _FocusRow(entry: e, formatNote: formatNote)),
+            ...entries.map(
+              (e) => _FocusRow(
+                entry: e,
+                formatNote: formatNote,
+                highlighted: highlightNotes.contains(e.note),
+              ),
+            ),
           const SizedBox(height: DesignTokens.spacingMd),
           const Divider(color: DesignTokens.sessionDivider, height: 1),
           const SizedBox(height: DesignTokens.spacingMd),
@@ -140,8 +151,9 @@ class SessionSrsPanel extends StatelessWidget {
           Text(
             solfegeNames
                 ? 'A–G notas (letras inglesas: C = Do) · ⇧ sostenido · '
-                    'R repetir · espacio siguiente'
-                : 'A–G notas · ⇧ sostenido · R repetir · espacio siguiente',
+                    'R repetir · espacio siguiente · Esc pausar'
+                : 'A–G notas · ⇧ sostenido · R repetir · espacio siguiente · '
+                    'Esc pausar',
             key: const ValueKey('session-shortcuts-legend'),
             style: theme.textTheme.bodySmall?.copyWith(
               color: DesignTokens.sessionTextSecondary,
@@ -156,8 +168,13 @@ class SessionSrsPanel extends StatelessWidget {
 class _FocusRow extends StatelessWidget {
   final SessionFocusEntry entry;
   final String Function(String note) formatNote;
+  final bool highlighted;
 
-  const _FocusRow({required this.entry, required this.formatNote});
+  const _FocusRow({
+    required this.entry,
+    required this.formatNote,
+    this.highlighted = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -172,10 +189,23 @@ class _FocusRow extends StatelessWidget {
     return Semantics(
       container: true,
       label: '$name, ${entry.status.label}, $pctSemantics, nivel SRS '
-          '${entry.srsLevel} de $srsMaxLevel',
+          '${entry.srsLevel} de $srsMaxLevel'
+          '${highlighted ? ', nota de esta ronda' : ''}',
       child: ExcludeSemantics(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: DesignTokens.spacingSm),
+        child: AnimatedContainer(
+          key: ValueKey('session-srs-row-${entry.note}'),
+          duration: motionDuration(context, DesignTokens.durationMedium),
+          curve: DesignTokens.easeOut,
+          decoration: BoxDecoration(
+            color: highlighted
+                ? DesignTokens.sessionAccent.withValues(alpha: 0.10)
+                : DesignTokens.sessionAccent.withValues(alpha: 0),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          padding: const EdgeInsets.symmetric(
+            vertical: DesignTokens.spacingSm,
+            horizontal: DesignTokens.spacingSm,
+          ),
           child: Row(
             children: [
               SizedBox(

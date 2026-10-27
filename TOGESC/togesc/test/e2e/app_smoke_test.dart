@@ -181,7 +181,13 @@ void main() {
           await tester.pump(const Duration(milliseconds: 100));
         }
         expect(find.byType(GameScreen), findsOneWidget, reason: mode);
-        expect(find.text('ESCUCHANDO'), findsOneWidget, reason: mode);
+        // v2.1: «Preparado» siempre al entrar; sin empezar, volver sale.
+        expect(find.text('PREPARADO'), findsOneWidget, reason: mode);
+        expect(
+          find.byKey(const ValueKey('session-start')),
+          findsOneWidget,
+          reason: mode,
+        );
 
         await tester.tap(find.byTooltip('Volver'));
         await tester.pumpAndSettle();
