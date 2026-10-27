@@ -131,6 +131,13 @@ Aprobado el 2026-10-26 a partir del feedback del propietario sobre v2: se veía 
   - Pista: `TogescColors.earMapTrack` (#F3ECF1 en claro, #241B2A en oscuro y sesión) y `earMapTrackOnHero` (blanco al 8 %).
 - **Texto más grande:** `UiPreferences.largeText` aplica ×1,125 encima del escalado del sistema (`applyLargeText`, en `lib/app/large_text_scaler.dart`).
 
+### Componentes compartidos v2.1 (lote 2)
+- **`EarMapWheel`** (`lib/widgets/ear_map/`): mapa del oído del SPEC §1.1. Tab va en orden cromático, Enter o Espacio activan, y cada segmento tiene `Semantics`. Variantes `onDark` y `compact`.
+- **`CountUpText`** y **`StaggeredEntrance`**: el conteo de números grandes y la entrada escalonada de bloques.
+- **`PianoKeyboard` de sesión:** hundimiento de 2 px, onda #DA9CFF, pop y shake en el resultado, icono ✓/✗ con spring y `large` («Piano más grande»: 270/44×160 en móvil, 250/58×150 en escritorio).
+- **`SessionPhaseRing`:** arco de `listen` de 1,5 s y halo de `result` de 1,2 s.
+- Todos respetan `motionDuration`.
+
 ## Qué queda de Harmonic Precision
 
 | Elemento | Estado |

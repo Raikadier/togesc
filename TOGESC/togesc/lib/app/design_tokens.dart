@@ -322,6 +322,16 @@ abstract final class DesignTokens {
   static const Size pianoSessionBlackKeySize = Size(38, 140);
   static const Size pianoSessionWideBlackKeySize = Size(52, 126);
 
+  /// «Piano más grande» (SPEC v2.1 §1.3).
+  static const double pianoSessionLargeHeight = 270;
+  static const double pianoSessionWideLargeHeight = 250;
+  static const Size pianoSessionLargeBlackKeySize = Size(44, 160);
+  static const Size pianoSessionWideLargeBlackKeySize = Size(58, 150);
+
+  /// Pop de tecla correcta y shake de tecla errónea.
+  static const Duration pianoKeyPopDuration = Duration(milliseconds: 450);
+  static const Duration pianoKeyShakeDuration = Duration(milliseconds: 400);
+
   // --- v2 · Forma ---
   static const double radiusHero = 20;
   static const double radiusCard = 14;

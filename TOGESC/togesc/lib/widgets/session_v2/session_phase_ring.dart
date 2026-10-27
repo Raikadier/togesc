@@ -10,7 +10,14 @@ import 'session_phase.dart';
 ///
 /// El bloque de texto es una región viva: el lector de pantalla anuncia cada
 /// cambio de fase («Incorrecto. Era Re, respondiste Mi…»).
-class SessionPhaseRing extends StatelessWidget {
+///
+/// Movimiento v2.1:
+/// - En `listen`, un arco de progreso se llena de forma lineal durante
+///   [listenDuration] con el color de la fase.
+/// - Al entrar en `result`, el anillo emite un halo de 1,2 s con el color
+///   del resultado.
+/// Con movimiento reducido no hay arco ni halo.
+class SessionPhaseRing extends StatefulWidget {
   final SessionPhase phase;
   final SessionPhaseCopy copy;
 
@@ -26,6 +33,12 @@ class SessionPhaseRing extends StatelessWidget {
   /// Acción opcional bajo el subtítulo (empezar, reanudar, siguiente…).
   final Widget? footer;
 
+  /// Duración del arco de `listen` (la de la fase en la sesión).
+  final Duration listenDuration;
+
+  /// Duración del halo de `result`.
+  static const Duration glowDuration = Duration(milliseconds: 1200);
+
   const SessionPhaseRing({
     super.key,
     required this.phase,
@@ -34,17 +47,81 @@ class SessionPhaseRing extends StatelessWidget {
     this.size = DesignTokens.sessionRingSize,
     this.reduceMotion = false,
     this.footer,
+    this.listenDuration = DesignTokens.sessionListenDuration,
   });
+
+  @override
+  State<SessionPhaseRing> createState() => _SessionPhaseRingState();
+}
+
+class _SessionPhaseRingState extends State<SessionPhaseRing>
+    with TickerProviderStateMixin {
+  late final AnimationController _arc = AnimationController(vsync: this);
+  late final AnimationController _glow = AnimationController(
+    vsync: this,
+    duration: SessionPhaseRing.glowDuration,
+  );
+  bool _started = false;
+
+  SessionPhase get phase => widget.phase;
+  SessionPhaseCopy get copy => widget.copy;
+  double get size => widget.size;
+
+  bool get _reduced =>
+      widget.reduceMotion ||
+      motionDuration(context, widget.listenDuration) == Duration.zero;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    _onPhase(null);
+  }
+
+  @override
+  void didUpdateWidget(covariant SessionPhaseRing oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.phase != widget.phase) _onPhase(oldWidget.phase);
+  }
+
+  void _onPhase(SessionPhase? previous) {
+    if (_reduced) {
+      _arc.value = 0;
+      _glow.value = 0;
+      return;
+    }
+    if (phase == SessionPhase.listen) {
+      _arc.duration = widget.listenDuration;
+      _arc.forward(from: 0);
+    } else {
+      _arc.stop();
+      _arc.value = 0;
+    }
+    if (phase == SessionPhase.result && previous != SessionPhase.result) {
+      _glow.forward(from: 0);
+    } else if (phase != SessionPhase.result) {
+      _glow.stop();
+      _glow.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _arc.dispose();
+    _glow.dispose();
+    super.dispose();
+  }
 
   Widget _center() {
     final color = copy.color;
     switch (phase) {
       case SessionPhase.listen:
-        return SessionListeningBars(color: color, animate: !reduceMotion);
+        return SessionListeningBars(color: color, animate: !_reduced);
       case SessionPhase.answer:
         return Icon(Icons.hearing_rounded, size: size * 0.32, color: color);
       case SessionPhase.result:
-        final label = noteLabel ?? '';
+        final label = widget.noteLabel ?? '';
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: FittedBox(
@@ -71,7 +148,8 @@ class SessionPhaseRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final duration = reduceMotion ? Duration.zero : DesignTokens.motionMedium;
+    final duration =
+        _reduced ? Duration.zero : DesignTokens.durationMedium;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -90,19 +168,46 @@ class SessionPhaseRing extends StatelessWidget {
                   style: DesignTokens.overlineLarge.copyWith(color: copy.color),
                 ),
                 const SizedBox(height: DesignTokens.spacingMd),
-                AnimatedContainer(
-                  duration: duration,
-                  width: size,
-                  height: size,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: copy.color.withValues(alpha: 0.08),
-                    border: Border.all(
-                      color: copy.color.withValues(alpha: 0.55),
-                      width: 3,
-                    ),
-                  ),
-                  alignment: Alignment.center,
+                AnimatedBuilder(
+                  animation: Listenable.merge([_arc, _glow]),
+                  builder: (context, child) {
+                    final g = _glow.value;
+                    // Halo: sale de 0 a 26 px y se desvanece (ease-out).
+                    final eased = Curves.easeOut.transform(g);
+                    final glowing = g > 0 && g < 1;
+                    return CustomPaint(
+                      key: const ValueKey('session-ring-arc'),
+                      foregroundPainter: _ArcPainter(
+                        progress: phase == SessionPhase.listen ? _arc.value : 0,
+                        color: copy.color,
+                      ),
+                      child: AnimatedContainer(
+                        duration: duration,
+                        width: size,
+                        height: size,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: copy.color.withValues(alpha: 0.08),
+                          border: Border.all(
+                            color: copy.color.withValues(alpha: 0.55),
+                            width: 3,
+                          ),
+                          boxShadow: glowing
+                              ? [
+                                  BoxShadow(
+                                    color: copy.color.withValues(
+                                      alpha: 0.55 * (1 - eased),
+                                    ),
+                                    spreadRadius: 26 * eased,
+                                  ),
+                                ]
+                              : const [],
+                        ),
+                        alignment: Alignment.center,
+                        child: child,
+                      ),
+                    );
+                  },
                   child: _center(),
                 ),
                 const SizedBox(height: DesignTokens.spacingLg),
@@ -129,13 +234,44 @@ class SessionPhaseRing extends StatelessWidget {
             ),
           ),
         ),
-        if (footer != null) ...[
+        if (widget.footer != null) ...[
           const SizedBox(height: DesignTokens.spacingLg),
-          footer!,
+          widget.footer!,
         ],
       ],
     );
   }
+}
+
+/// Arco de progreso sobre el borde del anillo, desde arriba y en sentido
+/// horario.
+class _ArcPainter extends CustomPainter {
+  const _ArcPainter({required this.progress, required this.color});
+
+  final double progress;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progress <= 0) return;
+    const stroke = 3.0;
+    final rect = (Offset.zero & size).deflate(stroke / 2);
+    canvas.drawArc(
+      rect,
+      -math.pi / 2,
+      2 * math.pi * progress.clamp(0.0, 1.0),
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke
+        ..strokeCap = StrokeCap.round
+        ..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ArcPainter old) =>
+      old.progress != progress || old.color != color;
 }
 
 /// Cinco barras de ecualizador (keyframe scaleY .3 → 1, 1 s, desfase .15 s).

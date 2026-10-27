@@ -783,6 +783,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             onNoteTapped: (note) => _toggleNote(note, required),
             noteNamingMode: namingMode,
             hideLabels: ui.hidePianoLabels,
+            large: ui.largePiano,
           ),
         ),
       );

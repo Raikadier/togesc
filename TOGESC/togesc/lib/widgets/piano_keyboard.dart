@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -12,6 +14,11 @@ import '../constants/note_naming.dart';
 ///   contenedor `#1A121E` con radio 16 y negras de 38×140.
 /// - [sessionWide]: teclado ancho de escritorio (1d): 210 de alto y negras
 ///   de 52×126.
+///
+/// En las variantes de sesión, [PianoKeyboard.large] aplica «Piano más
+/// grande» (v2.1): 270 de alto y negras de 44×160 (escritorio: 250 y 58×150).
+/// Movimiento v2.1: hundimiento de 2 px, onda #DA9CFF, pop en la correcta,
+/// shake en la errónea e icono ✓/✗ con escala spring.
 enum PianoKeyboardVariant { classic, session, sessionWide }
 
 /// Teclado de piano interactivo.
@@ -170,6 +177,12 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
 
   bool get _isSession => widget.variant != PianoKeyboardVariant.classic;
 
+  _KeyFeedback _feedbackOf(String note) {
+    if (widget.correctNotes.contains(note)) return _KeyFeedback.correct;
+    if (widget.incorrectNotes.contains(note)) return _KeyFeedback.wrong;
+    return _KeyFeedback.none;
+  }
+
   Widget? _statusBadge(
     String note, {
     required bool onDarkKey,
@@ -241,7 +254,23 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     required bool onDarkKey,
     required TogescColors colors,
   }) {
-    final badge = _statusBadge(note, onDarkKey: onDarkKey, colors: colors);
+    final rawBadge = _statusBadge(note, onDarkKey: onDarkKey, colors: colors);
+    final badge = rawBadge == null || !_isSession
+        ? rawBadge
+        : TweenAnimationBuilder<double>(
+            key: ValueKey(
+              'piano-badge-$note-${widget.correctNotes.contains(note)}',
+            ),
+            tween: Tween(begin: 0.4, end: 1),
+            duration: motionDuration(context, DesignTokens.durationMedium),
+            curve: DesignTokens.easeSpring,
+            builder: (context, scale, child) =>
+                Transform.scale(scale: scale, child: child),
+            child: rawBadge,
+          );
+    final splash = _isSession
+        ? DesignTokens.sessionAccent.withValues(alpha: 0.5)
+        : colors.selection.withValues(alpha: 0.15);
     return Semantics(
       button: true,
       enabled: !widget.disabled,
@@ -257,12 +286,18 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
             onTap: widget.disabled ? null : () => _tap(note),
             focusColor: colors.selection.withValues(alpha: 0.2),
             hoverColor: colors.selection.withValues(alpha: 0.1),
-            splashColor: colors.selection.withValues(alpha: 0.15),
+            splashColor: splash,
             child: Stack(
               alignment:
                   _isSession ? Alignment.bottomCenter : Alignment.topCenter,
               children: [
-                visual,
+                if (_isSession)
+                  _KeyFeedbackMotion(
+                    feedback: _feedbackOf(note),
+                    child: visual,
+                  )
+                else
+                  visual,
                 if (badge != null)
                   Padding(
                     // En sesión el badge va sobre la etiqueta, en la parte
@@ -526,15 +561,21 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
 
   Widget _buildSession(BuildContext context) {
     final colors = TogescColors.of(context);
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final animDuration = reduceMotion ? Duration.zero : DesignTokens.motionFast;
+    final animDuration = motionDuration(context, DesignTokens.durationKey);
     final wide = widget.variant == PianoKeyboardVariant.sessionWide;
-    final containerHeight = wide
-        ? DesignTokens.pianoSessionWideHeight
-        : DesignTokens.pianoSessionHeight;
-    final blackSize = wide
-        ? DesignTokens.pianoSessionWideBlackKeySize
-        : DesignTokens.pianoSessionBlackKeySize;
+    final large = widget.large;
+    final containerHeight = switch ((wide, large)) {
+      (true, true) => DesignTokens.pianoSessionWideLargeHeight,
+      (true, false) => DesignTokens.pianoSessionWideHeight,
+      (false, true) => DesignTokens.pianoSessionLargeHeight,
+      (false, false) => DesignTokens.pianoSessionHeight,
+    };
+    final blackSize = switch ((wide, large)) {
+      (true, true) => DesignTokens.pianoSessionWideLargeBlackKeySize,
+      (true, false) => DesignTokens.pianoSessionWideBlackKeySize,
+      (false, true) => DesignTokens.pianoSessionLargeBlackKeySize,
+      (false, false) => DesignTokens.pianoSessionBlackKeySize,
+    };
     const padding = 8.0;
     // Zona táctil de las negras: nunca menos de 48 (WCAG 2.5.8), aunque
     // visualmente midan 38.
@@ -586,7 +627,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                           duration: animDuration,
                           transform: pressed
                               ? (Matrix4.identity()
-                                ..translateByDouble(0.0, 3.0, 0.0, 1.0))
+                                ..translateByDouble(0.0, 2.0, 0.0, 1.0))
                               : Matrix4.identity(),
                           margin: const EdgeInsets.symmetric(horizontal: 1.5),
                           decoration: BoxDecoration(
@@ -637,7 +678,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                           height: blackHeight,
                           transform: pressed
                               ? (Matrix4.identity()
-                                ..translateByDouble(0.0, 3.0, 0.0, 1.0))
+                                ..translateByDouble(0.0, 2.0, 0.0, 1.0))
                               : Matrix4.identity(),
                           decoration: BoxDecoration(
                             gradient: _sessionGradient(
@@ -671,6 +712,92 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
             ),
           ),
         );
+      },
+    );
+  }
+}
+
+enum _KeyFeedback { none, correct, wrong }
+
+/// Pop (subida de 4 px y escala 1,03) al pasar a correcta y shake (±4 px)
+/// al pasar a errónea. Sin animación con movimiento reducido.
+class _KeyFeedbackMotion extends StatefulWidget {
+  const _KeyFeedbackMotion({required this.feedback, required this.child});
+
+  final _KeyFeedback feedback;
+  final Widget child;
+
+  @override
+  State<_KeyFeedbackMotion> createState() => _KeyFeedbackMotionState();
+}
+
+class _KeyFeedbackMotionState extends State<_KeyFeedbackMotion>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+  );
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    _play();
+  }
+
+  @override
+  void didUpdateWidget(covariant _KeyFeedbackMotion oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.feedback != widget.feedback) _play();
+  }
+
+  void _play() {
+    final base = switch (widget.feedback) {
+      _KeyFeedback.correct => DesignTokens.pianoKeyPopDuration,
+      _KeyFeedback.wrong => DesignTokens.pianoKeyShakeDuration,
+      _KeyFeedback.none => Duration.zero,
+    };
+    final duration = motionDuration(context, base);
+    if (duration == Duration.zero) {
+      _controller.value = 0;
+      return;
+    }
+    _controller.duration = duration;
+    _controller.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      child: widget.child,
+      builder: (context, child) {
+        final t = _controller.value;
+        if (t <= 0 || t >= 1) return child!;
+        switch (widget.feedback) {
+          case _KeyFeedback.correct:
+            // Pico al 40 %, con la curva spring en la subida.
+            final k = t < 0.4
+                ? DesignTokens.easeSpring.transform(t / 0.4)
+                : DesignTokens.easeOut.transform((1 - t) / 0.6);
+            return Transform.translate(
+              offset: Offset(0, -4 * k),
+              child: Transform.scale(scale: 1 + 0.03 * k, child: child),
+            );
+          case _KeyFeedback.wrong:
+            // −4, +4, −4, +4 (20/40/60/80 %) y vuelta a 0.
+            final dx = -4 * math.sin(5 * math.pi * t) * (1 - t * 0.5);
+            return Transform.translate(offset: Offset(dx, 0), child: child);
+          case _KeyFeedback.none:
+            return child!;
+        }
       },
     );
   }
