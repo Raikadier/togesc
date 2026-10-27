@@ -27,3 +27,8 @@ stitch_export/
 !.opencode/skills/systematic-bug-debugger/
 .opencode/commands/*
 .opencode/agents/*
+
+# Catálogo de skills de agentes (vendor) y export temporal de Stitch
+.agents/
+skills-lock.json
+.tmp_stitch/
