@@ -120,6 +120,17 @@ Aprobado el 2026-10-26 a partir del feedback del propietario sobre v2: se veía 
 - **Plan de implementación por lotes:** `Plan/hoja_ruta_rediseno_v2_1.md`. Progreso: `Plan/progreso_rediseno_v2_1.md`.
 - Cuando un lote implementa un cambio del SPEC, la sección correspondiente de este archivo se actualiza en ese mismo lote.
 
+### Movimiento y accesibilidad v2.1 (lote 1)
+- **Tokens en `DesignTokens`:**
+  - Curvas: `easeOut` `Cubic(.22, 1, .36, 1)` y `easeSpring` `Cubic(.34, 1.56, .64, 1)`.
+  - Duraciones: `durationKey` 90 ms, `durationFast` 120 ms y `durationMedium` 280 ms (alias de los `motion*` de v2).
+  - Escalonado: `staggerStep` 60 ms y `staggerWheel` 45 ms.
+- **`motionDuration(context, d)`:** cualquier animación nueva pasa su duración por aquí. Devuelve `Duration.zero` si `MediaQuery.disableAnimations` está activo, y `TogescApp` ya vuelca ahí `reduceAnimations`.
+- **Mapa del oído:**
+  - Medidas: `earMapInner` 64 y `earMapOuter` 126 (compacta: 70 y 132), sobre un viewBox de 320.
+  - Pista: `TogescColors.earMapTrack` (#F3ECF1 en claro, #241B2A en oscuro y sesión) y `earMapTrackOnHero` (blanco al 8 %).
+- **Texto más grande:** `UiPreferences.largeText` aplica ×1,125 encima del escalado del sistema (`applyLargeText`, en `lib/app/large_text_scaler.dart`).
+
 ## Qué queda de Harmonic Precision
 
 | Elemento | Estado |

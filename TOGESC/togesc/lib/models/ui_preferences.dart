@@ -54,6 +54,9 @@ class UiPreferences {
   final bool hidePianoLabels;
   final bool largePiano;
   final bool reduceAnimations;
+
+  /// Texto más grande (v2.1): `TextScaler.linear(1.125)` sobre el del sistema.
+  final bool largeText;
   final AppThemePreference themePreference;
 
   const UiPreferences({
@@ -62,6 +65,7 @@ class UiPreferences {
     this.hidePianoLabels = false,
     this.largePiano = false,
     this.reduceAnimations = false,
+    this.largeText = false,
     this.themePreference = AppThemePreference.system,
   });
 
@@ -71,6 +75,7 @@ class UiPreferences {
     bool? hidePianoLabels,
     bool? largePiano,
     bool? reduceAnimations,
+    bool? largeText,
     AppThemePreference? themePreference,
   }) {
     return UiPreferences(
@@ -79,6 +84,7 @@ class UiPreferences {
       hidePianoLabels: hidePianoLabels ?? this.hidePianoLabels,
       largePiano: largePiano ?? this.largePiano,
       reduceAnimations: reduceAnimations ?? this.reduceAnimations,
+      largeText: largeText ?? this.largeText,
       themePreference: themePreference ?? this.themePreference,
     );
   }

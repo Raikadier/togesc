@@ -12,6 +12,7 @@ abstract final class DesignTokens {
   static const Color surfaceContainer = Color(0xFFF3ECF1);
   static const Color surfaceContainerHigh = Color(0xFFEEE6EB);
   static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
+
   /// Contorno y texto terciario/etiquetas.
   ///
   /// v2 especifica `#7F7383`, pero sobre `background` da 4,26:1 y sobre
@@ -88,6 +89,42 @@ abstract final class DesignTokens {
   static const Duration motionFast = Duration(milliseconds: 120);
   static const Duration motionMedium = Duration(milliseconds: 280);
   static const Duration motionKeyPress = Duration(milliseconds: 90);
+
+  // --- v2.1 · Movimiento (SPEC v2.1 §1.2) ---
+  // Pasar siempre por [motionDuration] para respetar el movimiento reducido.
+
+  /// Entradas y barras.
+  static const Curve easeOut = Cubic(0.22, 1, 0.36, 1);
+
+  /// Pop de tecla, segmentos e interruptores (rebasa 1 un poco).
+  static const Curve easeSpring = Cubic(0.34, 1.56, 0.64, 1);
+
+  /// Hundimiento de tecla.
+  static const Duration durationKey = motionKeyPress;
+
+  /// Hover y cambios de estado.
+  static const Duration durationFast = motionFast;
+
+  /// Transiciones de fase.
+  static const Duration durationMedium = motionMedium;
+
+  /// Desfase entre elementos de una lista que entra escalonada.
+  static const Duration staggerStep = Duration(milliseconds: 60);
+
+  /// Desfase entre segmentos del mapa del oído.
+  static const Duration staggerWheel = Duration(milliseconds: 45);
+
+  // --- v2.1 · Mapa del oído (viewBox de 320) ---
+  static const double earMapViewBox = 320;
+  static const double earMapInner = 64;
+  static const double earMapOuter = 126;
+
+  /// Pista del mapa del oído sobre `hero`: blanco al 8 %.
+  static const Color earMapTrackOnHero = Color(0x14FFFFFF);
+
+  /// Variante compacta.
+  static const double earMapInnerCompact = 70;
+  static const double earMapOuterCompact = 132;
 
   static BorderRadius get borderRadiusMd => BorderRadius.circular(radiusMd);
 
@@ -426,6 +463,16 @@ Color masteryBarColorOnDark(double pct) {
     return DesignTokens.warningBarOnDark;
   }
   return DesignTokens.sessionSuccess;
+}
+
+/// Duración [d] o `Duration.zero` si el movimiento está reducido.
+///
+/// `TogescApp` ya vuelca `UiPreferences.reduceAnimations` en
+/// `MediaQuery.disableAnimations`, así que basta con leer este.
+/// Sin `MediaQuery` arriba (tests aislados) se usa [d].
+Duration motionDuration(BuildContext context, Duration d) {
+  final reduced = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+  return reduced ? Duration.zero : d;
 }
 
 /// Ratio de contraste WCAG 2.x entre dos colores opacos (1–21).

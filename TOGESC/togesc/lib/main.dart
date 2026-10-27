@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app_theme.dart';
+import 'app/large_text_scaler.dart';
 import 'config/observability_config.dart';
 import 'config/supabase_config.dart';
 import 'l10n/app_localizations.dart';
@@ -68,8 +69,9 @@ class TogescApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
     final themeMode = ref.watch(appThemeModeProvider);
-    final reduceAnimations =
-        ref.watch(uiPreferencesProvider).valueOrNull?.reduceAnimations ?? false;
+    final uiPrefs = ref.watch(uiPreferencesProvider).valueOrNull;
+    final reduceAnimations = uiPrefs?.reduceAnimations ?? false;
+    final largeText = uiPrefs?.largeText ?? false;
 
     return MaterialApp.router(
       title: 'TOGESC',
@@ -91,6 +93,7 @@ class TogescApp extends ConsumerWidget {
         return MediaQuery(
           data: media.copyWith(
             disableAnimations: media.disableAnimations || reduceAnimations,
+            textScaler: applyLargeText(media.textScaler, largeText: largeText),
           ),
           child: TickerMode(
             enabled: !reduceAnimations,

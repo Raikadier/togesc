@@ -68,6 +68,7 @@ T migrateLegacyPreference<T>({
 const String hidePianoLabelsKey = 'togesc_hide_piano_labels';
 const String largePianoKey = 'togesc_large_piano';
 const String reduceAnimationsKey = 'togesc_reduce_animations';
+const String largeTextKey = 'togesc_large_text';
 const String themePreferenceKey = 'togesc_theme_preference';
 const String octaveVariationKey = 'togesc_octave_variation';
 const String toneDurationKey = 'togesc_tone_duration_sec';
@@ -256,6 +257,7 @@ class AppPreferences {
       hidePianoLabels: _prefs.getBool(hidePianoLabelsKey) ?? false,
       largePiano: _prefs.getBool(largePianoKey) ?? false,
       reduceAnimations: _prefs.getBool(reduceAnimationsKey) ?? false,
+      largeText: _prefs.getBool(largeTextKey) ?? false,
       themePreference:
           AppThemePreference.fromId(_prefs.getString(themePreferenceKey)),
     );
@@ -267,6 +269,7 @@ class AppPreferences {
     await _prefs.setBool(hidePianoLabelsKey, value.hidePianoLabels);
     await _prefs.setBool(largePianoKey, value.largePiano);
     await _prefs.setBool(reduceAnimationsKey, value.reduceAnimations);
+    await _prefs.setBool(largeTextKey, value.largeText);
     await _prefs.setString(themePreferenceKey, value.themePreference.name);
   }
 

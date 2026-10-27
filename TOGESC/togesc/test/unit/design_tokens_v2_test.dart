@@ -263,6 +263,121 @@ void main() {
     });
   });
 
+  group('Tokens v2.1', () {
+    test('movimiento: valores del SPEC §1.2', () {
+      expect(DesignTokens.easeOut, const Cubic(0.22, 1, 0.36, 1));
+      expect(DesignTokens.easeSpring, const Cubic(0.34, 1.56, 0.64, 1));
+      expect(DesignTokens.durationKey, const Duration(milliseconds: 90));
+      expect(DesignTokens.durationFast, const Duration(milliseconds: 120));
+      expect(DesignTokens.durationMedium, const Duration(milliseconds: 280));
+      expect(DesignTokens.staggerStep, const Duration(milliseconds: 60));
+      expect(DesignTokens.staggerWheel, const Duration(milliseconds: 45));
+    });
+
+    test('easeSpring rebasa 1 y easeOut no', () {
+      final peakSpring = List.generate(
+        101,
+        (i) => DesignTokens.easeSpring.transform(i / 100),
+      ).reduce(math.max);
+      final peakOut = List.generate(
+        101,
+        (i) => DesignTokens.easeOut.transform(i / 100),
+      ).reduce(math.max);
+      expect(peakSpring, greaterThan(1));
+      expect(peakOut, lessThanOrEqualTo(1));
+    });
+
+    test('medidas del mapa del oído', () {
+      expect(DesignTokens.earMapViewBox, 320);
+      expect(DesignTokens.earMapInner, 64);
+      expect(DesignTokens.earMapOuter, 126);
+      expect(DesignTokens.earMapInnerCompact, 70);
+      expect(DesignTokens.earMapOuterCompact, 132);
+    });
+
+    test('pista del mapa del oído por tema', () {
+      expect(TogescColors.light.earMapTrack, const Color(0xFFF3ECF1));
+      expect(TogescColors.dark.earMapTrack, const Color(0xFF241B2A));
+      expect(TogescColors.session.earMapTrack, const Color(0xFF241B2A));
+      for (final c in [
+        TogescColors.light,
+        TogescColors.dark,
+        TogescColors.session,
+      ]) {
+        expect(c.earMapTrackOnHero.a, closeTo(0.08, 0.005));
+        expect(c.earMapTrackOnHero.withValues(alpha: 1), _white);
+      }
+    });
+
+    test('la celda vacía en oscuro es #241B2A', () {
+      expect(TogescColors.dark.muted, const Color(0xFF241B2A));
+      expect(TogescColors.session.muted, const Color(0xFF241B2A));
+    });
+
+    test('texto sobre la pista del mapa del oído ≥ 4.5:1', () {
+      final onHeroTrack = Color.alphaBlend(
+        DesignTokens.earMapTrackOnHero,
+        DesignTokens.hero,
+      );
+      final cases = <(String, Color, Color)>[
+        (
+          'claro',
+          TogescColors.light.textPrimary,
+          TogescColors.light.earMapTrack,
+        ),
+        (
+          'oscuro',
+          TogescColors.dark.textPrimary,
+          TogescColors.dark.earMapTrack,
+        ),
+        (
+          'sesión',
+          TogescColors.session.textPrimary,
+          TogescColors.session.earMapTrack,
+        ),
+        ('hero', DesignTokens.onHero, onHeroTrack),
+        ('hero acento', DesignTokens.onHeroAccent, onHeroTrack),
+      ];
+      for (final (label, text, track) in cases) {
+        final ratio = _wcagRatio(text, track);
+        expect(ratio, greaterThanOrEqualTo(4.5), reason: label);
+        expect(contrastRatio(text, track), closeTo(ratio, 0.01), reason: label);
+      }
+    });
+  });
+
+  group('motionDuration', () {
+    Future<Duration> resolve(
+      WidgetTester tester, {
+      required bool reduced,
+    }) async {
+      late Duration result;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData(disableAnimations: reduced),
+          child: Builder(
+            builder: (context) {
+              result = motionDuration(context, DesignTokens.durationMedium);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      return result;
+    }
+
+    testWidgets('devuelve la duración con movimiento normal', (tester) async {
+      expect(
+        await resolve(tester, reduced: false),
+        DesignTokens.durationMedium,
+      );
+    });
+
+    testWidgets('devuelve cero con movimiento reducido', (tester) async {
+      expect(await resolve(tester, reduced: true), Duration.zero);
+    });
+  });
+
   group('AppTheme.session', () {
     testWidgets('es oscuro y usa los tokens de sesión', (tester) async {
       final theme = AppTheme.session;

@@ -52,6 +52,12 @@ class UiPreferencesNotifier extends AsyncNotifier<UiPreferences> {
     ));
   }
 
+  Future<void> setLargeText(bool value) async {
+    await save((state.valueOrNull ?? const UiPreferences()).copyWith(
+      largeText: value,
+    ));
+  }
+
   Future<void> setThemePreference(AppThemePreference preference) async {
     await save((state.valueOrNull ?? const UiPreferences()).copyWith(
       themePreference: preference,

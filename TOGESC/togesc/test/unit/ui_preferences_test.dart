@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:togesc/app/design_tokens.dart';
+import 'package:togesc/app/large_text_scaler.dart';
 import 'package:togesc/models/ui_preferences.dart';
 import 'package:togesc/services/app_preferences.dart';
 
@@ -13,6 +14,17 @@ void main() {
       expect(prefs.inputMode, GameInputMode.pianoOnly);
       expect(prefs.confirmBeforeSubmit, isFalse);
       expect(prefs.themePreference, AppThemePreference.system);
+      expect(prefs.largeText, isFalse);
+    });
+
+    test('copyWith cambia largeText y conserva el resto', () {
+      const base = UiPreferences(largePiano: true, reduceAnimations: true);
+      final changed = base.copyWith(largeText: true);
+      expect(changed.largeText, isTrue);
+      expect(changed.largePiano, isTrue);
+      expect(changed.reduceAnimations, isTrue);
+      expect(changed.copyWith().largeText, isTrue);
+      expect(changed.copyWith(largeText: false).largeText, isFalse);
     });
 
     test('GameInputMode.fromId desconocido cae en solo piano', () {
@@ -28,6 +40,7 @@ void main() {
       final loaded = prefs.uiPreferences;
       expect(loaded.inputMode, GameInputMode.pianoOnly);
       expect(loaded.confirmBeforeSubmit, isFalse);
+      expect(loaded.largeText, isFalse);
     });
 
     test('migracion: legacy igual al default antiguo recibe el default v2',
@@ -89,6 +102,7 @@ void main() {
           hidePianoLabels: true,
           largePiano: true,
           reduceAnimations: true,
+          largeText: true,
           themePreference: AppThemePreference.dark,
         ),
       );
@@ -99,7 +113,35 @@ void main() {
       expect(loaded.hidePianoLabels, isTrue);
       expect(loaded.largePiano, isTrue);
       expect(loaded.reduceAnimations, isTrue);
+      expect(loaded.largeText, isTrue);
+      expect(store.getBool(largeTextKey), isTrue);
       expect(loaded.themePreference, AppThemePreference.dark);
+    });
+  });
+
+  group('applyLargeText', () {
+    test('desactivado devuelve el escalado del sistema tal cual', () {
+      const system = TextScaler.linear(1.3);
+      expect(applyLargeText(system, largeText: false), same(system));
+    });
+
+    test('activado multiplica por 1,125 encima del sistema', () {
+      expect(
+        applyLargeText(TextScaler.noScaling, largeText: true).scale(16),
+        closeTo(18, 1e-9),
+      );
+      expect(
+        applyLargeText(const TextScaler.linear(1.3), largeText: true).scale(16),
+        closeTo(16 * 1.3 * largeTextScaleFactor, 1e-9),
+      );
+    });
+
+    test('respeta un escalado del sistema no lineal', () {
+      final clamped = const TextScaler.linear(3).clamp(maxScaleFactor: 2);
+      expect(
+        applyLargeText(clamped, largeText: true).scale(10),
+        closeTo(10 * 2 * largeTextScaleFactor, 1e-9),
+      );
     });
   });
 

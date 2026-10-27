@@ -33,6 +33,8 @@ class TogescColors extends ThemeExtension<TogescColors> {
     this.textSecondary = DesignTokens.textSecondary,
     this.textTertiary = DesignTokens.textTertiary,
     this.proAccent = DesignTokens.pro,
+    this.earMapTrack = DesignTokens.surfaceContainer,
+    this.earMapTrackOnHero = DesignTokens.earMapTrackOnHero,
     this.pianoWhiteKey = DesignTokens.pianoWhiteKeyGradient,
     this.pianoBlackKey = DesignTokens.pianoBlackKeyGradient,
     this.pianoWhiteKeyCorrect = DesignTokens.pianoWhiteKeyCorrectGradient,
@@ -96,6 +98,12 @@ class TogescColors extends ThemeExtension<TogescColors> {
   /// Icono Pro sobre superficie (candados). El relleno de la insignia PRO sigue siendo `DesignTokens.pro`.
   final Color proAccent;
 
+  /// Pista (sector vacío) del mapa del oído. Claro #F3ECF1; oscuro y sesión #241B2A.
+  final Color earMapTrack;
+
+  /// Pista del mapa del oído sobre la card `hero` (blanco al 8 %, igual en todos los temas).
+  final Color earMapTrackOnHero;
+
   /// Gradientes del teclado v2 (iguales en claro, oscuro y sesión).
   /// Reposo, correcta, errónea y atenuada, para teclas blancas y negras.
   final LinearGradient pianoWhiteKey;
@@ -140,6 +148,7 @@ class TogescColors extends ThemeExtension<TogescColors> {
     textSecondary: DesignTokens.sessionTextSecondary,
     textTertiary: DesignTokens.sessionTextSecondary,
     proAccent: DesignTokens.secondaryContainer,
+    earMapTrack: DesignTokens.sessionChip,
     correct: Color(0xFF81C784),
     incorrect: Color(0xFFEF9A9A),
     selection: Color(0xFFFFD54F),
@@ -170,6 +179,7 @@ class TogescColors extends ThemeExtension<TogescColors> {
     textSecondary: DesignTokens.sessionTextSecondary,
     textTertiary: DesignTokens.sessionTextSecondary,
     proAccent: DesignTokens.secondaryContainer,
+    earMapTrack: DesignTokens.sessionChip,
     correct: DesignTokens.sessionSuccess,
     incorrect: DesignTokens.sessionError,
     selection: DesignTokens.sessionAmber,
@@ -211,6 +221,8 @@ class TogescColors extends ThemeExtension<TogescColors> {
     Color? textSecondary,
     Color? textTertiary,
     Color? proAccent,
+    Color? earMapTrack,
+    Color? earMapTrackOnHero,
     LinearGradient? pianoWhiteKey,
     LinearGradient? pianoBlackKey,
     LinearGradient? pianoWhiteKeyCorrect,
@@ -245,6 +257,8 @@ class TogescColors extends ThemeExtension<TogescColors> {
       textSecondary: textSecondary ?? this.textSecondary,
       textTertiary: textTertiary ?? this.textTertiary,
       proAccent: proAccent ?? this.proAccent,
+      earMapTrack: earMapTrack ?? this.earMapTrack,
+      earMapTrackOnHero: earMapTrackOnHero ?? this.earMapTrackOnHero,
       pianoWhiteKey: pianoWhiteKey ?? this.pianoWhiteKey,
       pianoBlackKey: pianoBlackKey ?? this.pianoBlackKey,
       pianoWhiteKeyCorrect: pianoWhiteKeyCorrect ?? this.pianoWhiteKeyCorrect,
@@ -300,6 +314,12 @@ class TogescColors extends ThemeExtension<TogescColors> {
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       textTertiary: Color.lerp(textTertiary, other.textTertiary, t)!,
       proAccent: Color.lerp(proAccent, other.proAccent, t)!,
+      earMapTrack: Color.lerp(earMapTrack, other.earMapTrack, t)!,
+      earMapTrackOnHero: Color.lerp(
+        earMapTrackOnHero,
+        other.earMapTrackOnHero,
+        t,
+      )!,
       pianoWhiteKey: LinearGradient.lerp(
         pianoWhiteKey,
         other.pianoWhiteKey,
