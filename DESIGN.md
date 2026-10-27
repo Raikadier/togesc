@@ -1,9 +1,10 @@
 ---
 name: TOGESC v2 «La sesión como instrumento»
 description: Design system de TOGESC. Es la evolución v2 de Harmonic Precision para entrenar el oído absoluto, con Material 3 y un tono académico.
-version: 2
-updated: 2026-10-09
+version: 2.1
+updated: 2026-10-26
 source: docs/design_v2/SPEC_rediseno_v2.md
+source_v2_1: docs/design_v2_1/SPEC_rediseno_v2_1.md
 colors:
   # Claro (pantallas del shell)
   background: '#FFF7FC'
@@ -110,6 +111,14 @@ motion:
 - `app_theme.dart`: temas `light`, `dark` y `session`.
 - `togesc_colors.dart`: `ThemeExtension` con el feedback musical, la velocidad y los gradientes del piano.
 - Los ratios de contraste los verifica `test/unit/design_tokens_v2_test.dart`. Ningún widget usa hex sueltos: se usan `DesignTokens`, `ColorScheme` o `TogescColors.of(context)`.
+
+## v2.1: pulido
+
+Aprobado el 2026-10-26 a partir del feedback del propietario sobre v2: se veía genérica y le faltaban movimiento, accesibilidad e intuición. **Lo que cambia está en `docs/design_v2_1/SPEC_rediseno_v2_1.md`**. Todo lo que el SPEC no menciona sigue como se describe en este archivo. La referencia visual es `docs/design_v2_1/prototype/`: sirve de referencia, no es código a portar.
+- **Novedades:** el mapa del oído (`EarMapWheel`) y los tokens de movimiento, entre otras.
+- **Restricciones que se mantienen:** Hanken Grotesk, la paleta v2, el tono académico, sin XP en el Home, un CTA dominante por pantalla y la sesión en oscuro.
+- **Plan de implementación por lotes:** `Plan/hoja_ruta_rediseno_v2_1.md`. Progreso: `Plan/progreso_rediseno_v2_1.md`.
+- Cuando un lote implementa un cambio del SPEC, la sección correspondiente de este archivo se actualiza en ese mismo lote.
 
 ## Qué queda de Harmonic Precision
 
