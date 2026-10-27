@@ -60,9 +60,11 @@ class CalendarWeekDay {
   double get accuracyPercent => rounds > 0 ? (correct / rounds) * 100 : 0;
 }
 
-/// Semana natural lunes–domingo que contiene «hoy».
+/// Siete días seguidos con su estado: la semana natural L–D que contiene
+/// «hoy» ([buildCalendarWeek]) o los últimos 7 días, de hace 6 días a hoy
+/// ([buildRecentDays], Home v2.1).
 class CalendarWeek {
-  /// Siempre 7 días, de lunes a domingo.
+  /// Siempre 7 días, en orden cronológico.
   final List<CalendarWeekDay> days;
   final int dailyGoalRounds;
 
@@ -99,7 +101,31 @@ CalendarWeek buildCalendarWeek(
   // anterior) y evita los saltos de DST de `subtract(Duration(days: n))`.
   final monday =
       DateTime(today.year, today.month, today.day - (today.weekday - 1));
+  return _buildDays(history, start: monday, today: today, goal: goal);
+}
 
+/// Últimos 7 días: de hace 6 días a hoy (hoy es el último). Mismas reglas
+/// de estado que [buildCalendarWeek].
+CalendarWeek buildRecentDays(
+  List<PracticeSessionLog> history, {
+  required DateTime now,
+  int? dailyGoalRounds,
+}) {
+  final goal = (dailyGoalRounds == null || dailyGoalRounds <= 0)
+      ? defaultDailyGoalRounds
+      : dailyGoalRounds;
+  final today = _dateOnly(now);
+  final start = DateTime(today.year, today.month, today.day - 6);
+  return _buildDays(history, start: start, today: today, goal: goal);
+}
+
+CalendarWeek _buildDays(
+  List<PracticeSessionLog> history, {
+  required DateTime start,
+  required DateTime today,
+  required int goal,
+}) {
+  final monday = start;
   final sessions = List<int>.filled(7, 0);
   final rounds = List<int>.filled(7, 0);
   final correct = List<int>.filled(7, 0);

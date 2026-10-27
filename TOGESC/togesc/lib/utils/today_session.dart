@@ -129,6 +129,28 @@ TodayFocusNote _toFocusNote(
   );
 }
 
+/// Notas foco elegidas a mano (hoja «Ajustar enfoque y duración»), con sus
+/// datos reales del SRS y en el orden elegido. Se ignoran las notas sin
+/// resumen.
+List<TodayFocusNote> buildChosenFocusNotes({
+  required List<String> notes,
+  required List<NoteProgressSummary> summaries,
+  List<(String, int)> criticalNotes = const [],
+  int learningThreshold = learningPhaseThreshold,
+}) {
+  final byNote = {for (final s in summaries) s.note: s};
+  final critical = {for (final (note, _) in criticalNotes) note};
+  return [
+    for (final note in notes)
+      if (byNote[note] case final summary?)
+        _toFocusNote(
+          summary,
+          isCritical: critical.contains(note),
+          learningThreshold: learningThreshold,
+        ),
+  ];
+}
+
 /// Lee `critical_notes` del mapa de recomendaciones del SRS de forma segura.
 List<(String, int)> criticalNotesFromRecommendations(
   Map<String, dynamic> recommendations,

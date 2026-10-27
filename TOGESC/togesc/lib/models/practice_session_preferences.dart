@@ -2,6 +2,7 @@
 enum SessionRoundGoal {
   unlimited(0, 'Sin límite'),
   five(5, '5 rondas'),
+  six(6, '6 rondas'),
   ten(10, '10 rondas'),
   twelve(12, '12 rondas'),
   twenty(20, '20 rondas');

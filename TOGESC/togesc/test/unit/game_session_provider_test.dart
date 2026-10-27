@@ -328,10 +328,10 @@ void main() {
       expect(container.read(gameSessionProvider).currentNotes, ['B']);
     });
 
-    test('normalizePracticeFocusNotes limita a 3 notas validas', () {
+    test('normalizePracticeFocusNotes limita a 4 notas validas (v2.1)', () {
       expect(
-        normalizePracticeFocusNotes(['X', 'C', 'C', 'D', 'E', 'F']),
-        ['C', 'D', 'E'],
+        normalizePracticeFocusNotes(['X', 'C', 'C', 'D', 'E', 'F', 'G']),
+        ['C', 'D', 'E', 'F'],
       );
     });
 

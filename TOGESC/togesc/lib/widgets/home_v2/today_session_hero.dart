@@ -11,7 +11,13 @@ import '../../utils/today_session.dart';
 /// - Menos de 3 vistas: se dice cuántas tienen datos.
 /// - Todas vistas: el motivo real de la selección (atrasadas, en
 ///   aprendizaje o menor precisión).
-String todayHeroCopy(List<TodayFocusNote> focus) {
+/// - [custom]: el usuario eligió las notas foco en «Ajustar enfoque».
+String todayHeroCopy(List<TodayFocusNote> focus, {bool custom = false}) {
+  if (custom && focus.isNotEmpty) {
+    final n = focus.length;
+    final notas = n == 1 ? 'una nota foco' : '${_countWord(n)} notas foco';
+    return 'Elegiste $notas para hoy; el resto sigue el repaso SRS normal.';
+  }
   if (focus.isEmpty) {
     return 'Tu primera sesión le dará al SRS los datos para elegir tu foco.';
   }
@@ -25,14 +31,33 @@ String todayHeroCopy(List<TodayFocusNote> focus) {
     return 'El SRS solo tiene datos de $notas; el resto del foco son notas '
         'nuevas.';
   }
-  final count = focus.length == 3 ? 'las tres notas' : 'las notas';
+  final one = focus.length == 1;
+  final count = one ? 'la nota' : 'las ${_countWord(focus.length)} notas';
   if (focus.any((f) => f.isCritical || f.isOverdue)) {
-    return 'El SRS priorizó $count atrasadas o con menor precisión.';
+    return one
+        ? 'El SRS priorizó $count atrasada o con menor precisión.'
+        : 'El SRS priorizó $count atrasadas o con menor precisión.';
   }
   if (focus.any((f) => f.isLearning)) {
     return 'El SRS priorizó $count en aprendizaje o con menor precisión.';
   }
   return 'El SRS priorizó $count con menor precisión.';
+}
+
+String _countWord(int n) => switch (n) {
+      2 => 'dos',
+      3 => 'tres',
+      4 => 'cuatro',
+      _ => '$n',
+    };
+
+/// Estado escrito de una nota foco (el color nunca es la única señal).
+String focusNoteStateLabel(TodayFocusNote note) {
+  final pct = note.accuracyPercent;
+  if (pct == null) return 'Nueva';
+  if (pct < DesignTokens.masteryAmberThreshold) return 'Crítica';
+  if (pct < DesignTokens.masteryGreenThreshold) return 'En curso';
+  return 'Consolidada';
 }
 
 /// Card hero «Sesión de hoy» (#2A0640) del Home v2.
@@ -88,12 +113,20 @@ class TodaySessionHero extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'SESIÓN DE HOY',
-                  semanticsLabel: 'Sesión de hoy',
-                  style: DesignTokens.overline.copyWith(
-                    color: DesignTokens.onHeroAccent,
-                  ),
+                Row(
+                  children: [
+                    const HeroLiveDot(),
+                    const SizedBox(width: DesignTokens.spacingSm),
+                    Flexible(
+                      child: Text(
+                        'SESIÓN DE HOY',
+                        semanticsLabel: 'Sesión de hoy',
+                        style: DesignTokens.overline.copyWith(
+                          color: DesignTokens.onHeroAccent,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: DesignTokens.spacingSm),
                 Semantics(
@@ -103,7 +136,7 @@ class TodaySessionHero extends StatelessWidget {
                 ),
                 const SizedBox(height: DesignTokens.spacingMd),
                 Text(
-                  todayHeroCopy(plan.focusNotes),
+                  todayHeroCopy(plan.focusNotes, custom: plan.isCustomFocus),
                   key: const ValueKey('today-hero-copy'),
                   style: textTheme.bodyMedium?.copyWith(
                     color: DesignTokens.onHero.withValues(alpha: 0.86),
@@ -123,7 +156,9 @@ class TodaySessionHero extends StatelessWidget {
                     ],
                   ),
                 ],
-                const SizedBox(height: 20),
+                const SizedBox(height: DesignTokens.spacingLg),
+                const HeroSteps(),
+                const SizedBox(height: DesignTokens.spacingLg),
                 SizedBox(
                   height: DesignTokens.ctaHeight,
                   child: FilledButton.icon(
@@ -157,10 +192,7 @@ class TodaySessionHero extends StatelessWidget {
                     ),
                     child: const Text(
                       'Ajustar enfoque y duración',
-                      style: TextStyle(
-                        decoration: TextDecoration.underline,
-                        decorationColor: DesignTokens.onHeroAccent,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -220,9 +252,17 @@ class FocusNoteMiniCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final pct = note.accuracyPercent;
     final textTheme = Theme.of(context).textTheme;
+    final state = focusNoteStateLabel(note);
     final semantics = pct == null
         ? 'Nota ${note.note}: nueva, sin datos de precisión'
-        : 'Nota ${note.note}: ${pct.round()} % de precisión';
+        : 'Nota ${note.note}: ${pct.round()} % de precisión, '
+            '${state.toLowerCase()}';
+    final labelStyle = textTheme.labelMedium
+        ?.copyWith(
+          color: DesignTokens.onHero.withValues(alpha: 0.86),
+          fontWeight: FontWeight.w700,
+        )
+        .merge(DesignTokens.tabularNumbers);
 
     return Semantics(
       label: semantics,
@@ -260,15 +300,133 @@ class FocusNoteMiniCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Text(
-              pct == null ? 'Nueva' : '${pct.round()}%',
-              style: textTheme.labelMedium?.copyWith(
-                color: DesignTokens.onHero.withValues(alpha: 0.86),
-                fontWeight: FontWeight.w700,
-              ).merge(DesignTokens.tabularNumbers),
-            ),
+            if (pct == null)
+              Text('Nueva', style: labelStyle)
+            else
+              Wrap(
+                spacing: DesignTokens.spacingXs,
+                alignment: WrapAlignment.spaceBetween,
+                children: [
+                  Text('${pct.round()}%', style: labelStyle),
+                  Text(state, style: labelStyle),
+                ],
+              ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Punto que late junto a «Sesión de hoy» (escala 1 → 1,6 y opacidad
+/// 1 → .35, 1,8 s por pulso). Late [pulses] veces y se queda quieto: así no
+/// pasa de 5 s de movimiento automático (WCAG 2.2.2) y no distrae. Fijo con
+/// movimiento reducido.
+class HeroLiveDot extends StatefulWidget {
+  const HeroLiveDot({super.key});
+
+  static const Duration period = Duration(milliseconds: 1800);
+  static const int pulses = 2;
+
+  @override
+  State<HeroLiveDot> createState() => _HeroLiveDotState();
+}
+
+class _HeroLiveDotState extends State<HeroLiveDot>
+    with SingleTickerProviderStateMixin {
+  // Cada pulso es ida y vuelta: medio periodo en cada sentido.
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: HeroLiveDot.period ~/ 2,
+  );
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduced = motionDuration(context, HeroLiveDot.period) == Duration.zero;
+    if (reduced) {
+      _controller
+        ..stop()
+        ..value = 0;
+    } else if (!_started) {
+      _started = true;
+      _controller
+          .repeat(reverse: true, count: HeroLiveDot.pulses * 2)
+          .whenComplete(() {
+        if (mounted) _controller.value = 0;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: AnimatedBuilder(
+        key: const ValueKey('today-live-dot'),
+        animation: _controller,
+        builder: (context, child) {
+          final t = Curves.easeInOut.transform(_controller.value);
+          return Opacity(
+            opacity: 1 - 0.65 * t,
+            child: Transform.scale(scale: 1 + 0.6 * t, child: child),
+          );
+        },
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: const BoxDecoration(
+            color: DesignTokens.onHeroAccent,
+            shape: BoxShape.circle,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// «1 · Escucha», «2 · Toca la tecla», «3 · El SRS ajusta tu repaso».
+class HeroSteps extends StatelessWidget {
+  const HeroSteps({super.key});
+
+  static const steps = [
+    (Icons.hearing_rounded, '1 · Escucha'),
+    (Icons.piano_rounded, '2 · Toca la tecla'),
+    (Icons.trending_up_rounded, '3 · El SRS ajusta tu repaso'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: DesignTokens.onHero.withValues(alpha: 0.86),
+          fontSize: 13,
+        );
+    return Semantics(
+      key: const ValueKey('today-steps'),
+      container: true,
+      label: 'Cómo funciona: escucha, toca la tecla y el SRS ajusta tu '
+          'repaso',
+      excludeSemantics: true,
+      child: Wrap(
+        spacing: 14,
+        runSpacing: 6,
+        children: [
+          for (final (icon, label) in steps)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 18, color: DesignTokens.onHeroAccent),
+                const SizedBox(width: 6),
+                Flexible(child: Text(label, style: style)),
+              ],
+            ),
+        ],
       ),
     );
   }

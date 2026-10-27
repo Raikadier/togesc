@@ -138,6 +138,12 @@ Aprobado el 2026-10-26 a partir del feedback del propietario sobre v2: se veía 
 - **`SessionPhaseRing`:** arco de `listen` de 1,5 s y halo de `result` de 1,2 s.
 - Todos respetan `motionDuration`.
 
+### Home v2.1 (lote 3)
+- **Hero:** punto pulsante (dos pulsos y quieto, por WCAG 2.2.2), estado en texto en las mini-cards y los 3 pasos «Escucha / Toca la tecla / El SRS ajusta tu repaso». «Ajustar enfoque y duración» abre una hoja: 6, 12 o 20 rondas y de 1 a 4 notas foco, solo para hoy.
+- **Mapa del oído:** precisión global en el centro, leyenda, meta de octava (N de 12 con ≥ 75 %) y fila de detalle con «Practicar».
+- **Últimos 7 días:** hoy se rotula «HOY» y, si está pendiente, lleva borde discontinuo. Debajo, la frase de racha.
+- **Escritorio:** dos columnas (1,25 / 1). La derecha queda fija porque cada columna tiene su propio scroll.
+
 ## Qué queda de Harmonic Precision
 
 | Elemento | Estado |

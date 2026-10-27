@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/notes.dart';
 
-/// Máximo de notas de foco de una sesión (rediseño v2, D11).
-const int maxPracticeFocusNotes = 3;
+/// Máximo de notas de foco de una sesión. v2 (D11) eran 3; v2.1 deja
+/// elegir hasta 4 en «Ajustar enfoque y duración». El plan automático
+/// sigue proponiendo 3 (`selectTodayFocusNotes`).
+const int maxPracticeFocusNotes = 4;
 
 /// Nota única «practicar esta nota» (flujo anterior a v2: detalle de nota,
 /// pendientes). Si está fijada, la sesión usa SOLO esa nota como pool.

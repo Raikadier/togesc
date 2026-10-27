@@ -9,11 +9,14 @@ import 'package:togesc/constants/game_constants.dart';
 import 'package:togesc/constants/subscription_constants.dart';
 import 'package:togesc/models/engagement_stats.dart';
 import 'package:togesc/models/last_practice_session.dart';
+import 'package:togesc/models/note_progress_summary.dart';
 import 'package:togesc/models/practice_session_log.dart';
 import 'package:togesc/models/practice_session_preferences.dart';
 import 'package:togesc/providers/clock_provider.dart';
 import 'package:togesc/providers/engagement_stats_provider.dart';
 import 'package:togesc/providers/practice_focus_provider.dart';
+import 'package:togesc/providers/practice_session_preferences_provider.dart';
+import 'package:togesc/providers/srs_provider.dart';
 import 'package:togesc/providers/today_session_provider.dart';
 import 'package:togesc/screens/home_screen.dart';
 import 'package:togesc/services/app_preferences.dart';
@@ -63,7 +66,7 @@ final _resume = ResumeSessionInfo(
   at: _now.subtract(const Duration(hours: 2)),
 );
 
-CalendarWeek _week() => buildCalendarWeek(
+CalendarWeek _week() => buildRecentDays(
       [
         PracticeSessionLog(
           modeId: 1,
@@ -91,6 +94,29 @@ CalendarWeek _week() => buildCalendarWeek(
       dailyGoalRounds: 12,
     );
 
+NoteProgressSummary _summary(String note, int seen, int correct) =>
+    NoteProgressSummary(
+      note: note,
+      isLearning: true,
+      consecutiveCorrect: 2,
+      timesSeen: seen,
+      timesCorrect: correct,
+      weight: 1,
+      isOverdue: false,
+    );
+
+/// 12 notas: C 8/10 y D 9/10 consolidadas (≥ 75 %), C# 4/10 crítica y
+/// el resto sin datos. Global: 21/30 = 70 %.
+final _summaries = [
+  for (final n in chromaticNotes)
+    switch (n) {
+      'C' => _summary(n, 10, 8),
+      'D' => _summary(n, 10, 9),
+      'C#' => _summary(n, 10, 4),
+      _ => _summary(n, 0, 0),
+    },
+];
+
 const _engagement = EngagementStats(
   currentStreakDays: 5,
   totalXp: 0,
@@ -114,6 +140,10 @@ GoRouter _router() {
         path: '${AppRoutes.game}/:modeId',
         builder: (_, state) =>
             Scaffold(body: Text('GAME ${state.pathParameters['modeId']}')),
+      ),
+      GoRoute(
+        path: AppRoutes.statistics,
+        builder: (_, _) => const Scaffold(body: Text('PROGRESS')),
       ),
       GoRoute(
         path: AppRoutes.settings,
@@ -141,6 +171,8 @@ Widget _app({
   List<TodayFocusNote> focus = _focus,
   ResumeSessionInfo? resume,
   bool proLocked = false,
+  HomeStreakStatus streak =
+      const HomeStreakStatus(practicedToday: false, days: 2),
 }) {
   return ProviderScope(
     overrides: [
@@ -149,7 +181,9 @@ Widget _app({
         TodaySessionPlan(focusNotes: focus, roundGoal: SessionRoundGoal.twelve),
       ),
       resumeSessionProvider.overrideWithValue(resume),
-      calendarWeekProvider.overrideWithValue(_week()),
+      recentDaysProvider.overrideWithValue(_week()),
+      homeStreakStatusProvider.overrideWithValue(streak),
+      noteProgressSummariesProvider.overrideWithValue(_summaries),
       engagementStatsProvider.overrideWithValue(_engagement),
       homeModeAccessProvider.overrideWithValue(
         proLocked ? SubscriptionConstants.isModeFree : (_) => true,
@@ -282,14 +316,119 @@ void main() {
       expect(container.read(practiceFocusNoteProvider), isNull);
     });
 
-    testWidgets('Ajustar enfoque lleva a la configuración', (tester) async {
+    testWidgets('Ajustar abre la hoja y guarda duración y foco',
+        (tester) async {
       _phone(tester);
       await tester.pumpWidget(_app());
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const ValueKey('today-adjust-link')));
       await tester.pumpAndSettle();
-      expect(find.text('SETTINGS'), findsOneWidget);
+      expect(find.byKey(const ValueKey('today-adjust-sheet')), findsOneWidget);
+      expect(find.text('Ajustar la sesión de hoy'), findsOneWidget);
+      expect(find.text('6 rondas · 3 min'), findsOneWidget);
+      expect(find.text('12 · 6 min'), findsOneWidget);
+      expect(find.text('20 · 10 min'), findsOneWidget);
+
+      // Foco inicial: el del plan (C, F#, A). Se añade D (4) y se intenta E.
+      await tester.tap(find.text('20 · 10 min'));
+      await tester.tap(find.byKey(const ValueKey('today-adjust-note-D')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('today-adjust-note-E')));
+      await tester.pump();
+      expect(find.textContaining('Máximo 4 notas foco'), findsOneWidget);
+
+      // Se quita C y se guarda.
+      await tester.tap(find.byKey(const ValueKey('today-adjust-note-C')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('today-adjust-save')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('today-adjust-sheet')), findsNothing);
+      expect(find.text('Sesión de hoy actualizada'), findsOneWidget);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(HomeScreen)),
+      );
+      final override = container.read(todayFocusOverrideProvider)!;
+      expect(override.notes, ['F#', 'A', 'D']);
+      expect(override.appliesTo(_now), isTrue);
+      expect(
+        container.read(practiceSessionPreferencesProvider).valueOrNull
+            ?.roundGoal,
+        SessionRoundGoal.twenty,
+      );
+    });
+
+    testWidgets('Cancelar cierra la hoja sin cambiar nada', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('today-adjust-link')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('today-adjust-note-D')));
+      await tester.tap(find.byKey(const ValueKey('today-adjust-cancel')));
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(HomeScreen)),
+      );
+      expect(container.read(todayFocusOverrideProvider), isNull);
+    });
+
+    testWidgets('hero: punto pulsante, estado en texto y 3 pasos',
+        (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app());
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('today-live-dot')), findsOneWidget);
+      expect(find.text('Crítica'), findsOneWidget);
+      expect(find.text('En curso'), findsNWidgets(2));
+      expect(find.text('1 · Escucha'), findsOneWidget);
+      expect(find.text('2 · Toca la tecla'), findsOneWidget);
+      expect(find.text('3 · El SRS ajusta tu repaso'), findsOneWidget);
+    });
+
+    testWidgets('mapa del oído: precisión global, meta de octava y Practicar',
+        (tester) async {
+      _phone(tester);
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(_app());
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('ear-map')), findsOneWidget);
+      expect(find.text('Mapa del oído'), findsOneWidget);
+      expect(find.text('70 %'), findsOneWidget);
+      expect(find.text('precisión global'), findsOneWidget);
+      expect(find.byKey(const ValueKey('octave-goal')), findsOneWidget);
+      expect(find.text('2 de 12 notas consolidadas'), findsOneWidget);
+      expect(
+        find.text('Te faltan 10 para dominar la octava completa'),
+        findsOneWidget,
+      );
+
+      final segment = find.byKey(const ValueKey('ear-map-segment-C#'));
+      await tester.ensureVisible(segment);
+      await tester.pumpAndSettle();
+      tester.semantics.tap(find.semantics.byLabel(
+        'C sostenido, 40 %, crítica, nivel 1 de 5',
+      ));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('ear-map-detail')), findsOneWidget);
+      expect(find.text('C sostenido · Crítica'), findsOneWidget);
+      expect(find.text('40 % · 10 intentos · nivel 1 de 5'), findsOneWidget);
+
+      await tester.ensureVisible(find.byKey(const ValueKey('ear-map-practice')));
+      await tester.tap(find.byKey(const ValueKey('ear-map-practice')));
+      await tester.pumpAndSettle();
+      expect(find.text('GAME ${GameMode.singleNote.id}'), findsOneWidget);
+      final container = ProviderScope.containerOf(
+        tester.element(find.text('GAME ${GameMode.singleNote.id}')),
+      );
+      expect(container.read(practiceFocusNoteProvider), 'C#');
+      expect(container.read(practiceFocusNotesProvider), isEmpty);
+      handle.dispose();
     });
 
     testWidgets('práctica libre: progreso real y candado Pro al paywall',
@@ -351,13 +490,21 @@ void main() {
       expect(find.text('PAYWALL Modo aleatorio'), findsOneWidget);
     });
 
-    testWidgets('semana L–D con Semantics por día', (tester) async {
+    testWidgets('últimos 7 días con Semantics por día y racha',
+        (tester) async {
       _phone(tester);
       final handle = tester.ensureSemantics();
       await tester.pumpWidget(_app());
       await tester.pumpAndSettle();
 
-      expect(find.text('Esta semana · 3 de 7 días'), findsOneWidget);
+      expect(find.text('Últimos 7 días'), findsOneWidget);
+      expect(find.text('3 de 7 días'), findsOneWidget);
+      expect(find.text('HOY'), findsOneWidget);
+      expect(find.byKey(const ValueKey('week-today-pending')), findsOneWidget);
+      expect(
+        find.text('Completa la sesión de hoy para llevar la racha a 2 días.'),
+        findsOneWidget,
+      );
       expect(
         find.bySemanticsLabel('Lunes: meta cumplida, 12 de 12 rondas'),
         findsOneWidget,
@@ -369,23 +516,62 @@ void main() {
       expect(find.bySemanticsLabel('Miércoles: sin practicar'), findsOneWidget);
       expect(find.bySemanticsLabel('Viernes, hoy: sin práctica'),
           findsOneWidget);
-      expect(find.bySemanticsLabel('Domingo: día futuro'), findsOneWidget);
+      // Sábado 3 y domingo 4: anteriores a la primera práctica.
+      expect(find.bySemanticsLabel('Domingo: sin práctica'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('día futuro')), findsNothing);
       handle.dispose();
     });
 
-    testWidgets('web ancho: contenido centrado con ancho máximo y app bar',
+    testWidgets('racha: hoy ya practicado', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(
+        _app(
+          streak: const HomeStreakStatus(practicedToday: true, days: 4),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Hoy ya practicaste. Llevas 4 días seguidos.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('escritorio: dos columnas (1,25 / 1) y app bar propia',
         (tester) async {
-      tester.view.physicalSize = const Size(1280, 1400);
+      tester.view.physicalSize = const Size(1280, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(_app(resume: _resume));
       await tester.pumpAndSettle();
 
-      final hero = find.byKey(const ValueKey('today-session-hero'));
-      final rect = tester.getRect(hero);
-      expect(rect.width, lessThanOrEqualTo(homeContentMaxWidth));
-      expect(rect.center.dx, closeTo(640, 1));
+      final columns = tester.getRect(
+        find.byKey(const ValueKey('home-desktop-columns')),
+      );
+      expect(columns.width, lessThanOrEqualTo(homeDesktopMaxWidth));
+      expect(columns.center.dx, closeTo(640, 1));
+
+      final hero = tester.getRect(
+        find.byKey(const ValueKey('today-session-hero')),
+      );
+      final map = tester.getRect(
+        find.byKey(const ValueKey('home-ear-map-card')),
+      );
+      // Mapa a la derecha del hero, arriba de todo y más estrecho.
+      expect(map.left, greaterThan(hero.right));
+      expect(map.top, closeTo(hero.top, 1));
+      expect(hero.width / map.width, closeTo(1.25, 0.02));
+
+      // Columna derecha fija: no se mueve al desplazar la izquierda.
+      await tester.drag(
+        find.byKey(const ValueKey('today-session-hero')),
+        const Offset(0, -300),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.getRect(find.byKey(const ValueKey('home-ear-map-card'))).top,
+        closeTo(map.top, 1),
+      );
       expect(find.byType(HomeAppBar), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('home-avatar')));

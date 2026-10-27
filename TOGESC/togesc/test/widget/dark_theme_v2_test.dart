@@ -146,10 +146,14 @@ void main() {
       expect(seeAllColor, accent);
       expect(contrastRatio(seeAllColor, page), greaterThanOrEqualTo(4.5));
 
-      // Sin práctica: los 7 días son «sin práctica» sobre #241B2A.
+      // Sin práctica: los 6 días anteriores son «sin práctica» sobre
+      // #241B2A; hoy (miércoles, pendiente) va sobre la superficie de tile
+      // con borde discontinuo de acento (v2.1).
       for (var weekday = 1; weekday <= 7; weekday++) {
         final cell = weekCell(tester, weekday);
-        expect(cell.color, muted, reason: 'día $weekday');
+        final today = weekday == 3;
+        final bg = today ? surface : muted;
+        expect(cell.color, bg, reason: 'día $weekday');
         final label = tester.widget<Text>(
           find
               .descendant(
@@ -159,13 +163,21 @@ void main() {
               .first,
         );
         expect(
-          contrastRatio(label.style!.color!, muted),
+          contrastRatio(label.style!.color!, bg),
           greaterThanOrEqualTo(4.5),
           reason: 'día $weekday',
         );
       }
-      // Hoy (miércoles) lleva el borde de acento.
-      expect((weekCell(tester, 3).border! as Border).top.color, accent);
+      // Hoy (miércoles) pendiente: borde discontinuo de acento.
+      final dashed = find.byKey(const ValueKey('week-today-pending'));
+      expect(dashed, findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('week-day-3')),
+          matching: dashed,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Progreso: celdas sin datos y paneles oscuros con AA', (

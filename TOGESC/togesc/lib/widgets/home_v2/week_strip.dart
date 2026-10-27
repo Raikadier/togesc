@@ -1,7 +1,10 @@
+import 'dart:ui' show PathMetric;
+
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
 import '../../app/togesc_colors.dart';
+import '../../providers/today_session_provider.dart';
 import '../../utils/calendar_week.dart';
 import '../../utils/relative_time.dart';
 
@@ -28,7 +31,20 @@ String weekDaySemanticsLabel(CalendarWeekDay day, int goal) {
   return buffer.toString();
 }
 
-/// Sección «Esta semana · N de 7 días» con 7 celdas L–D de 44 de alto.
+/// Frase de racha bajo la tira de días (SPEC v2.1 §2.1.4).
+String weekStreakCopy(HomeStreakStatus status) {
+  final days = status.days == 1 ? '1 día' : '${status.days} días';
+  if (status.practicedToday) {
+    return status.days == 1
+        ? 'Hoy ya practicaste. Llevas 1 día.'
+        : 'Hoy ya practicaste. Llevas $days seguidos.';
+  }
+  return 'Completa la sesión de hoy para llevar la racha a $days.';
+}
+
+/// Tira de 7 celdas de 44 de alto: «Últimos 7 días» (hoy es la última) en el
+/// Home v2.1. Hoy se rotula «HOY» y, si la meta está pendiente, lleva un
+/// borde discontinuo.
 class WeekStrip extends StatelessWidget {
   final CalendarWeek week;
 
@@ -62,6 +78,8 @@ class _WeekDayCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = TogescColors.of(context);
+    final pendingToday =
+        day.isToday && day.status != WeekDayStatus.completed;
     // Los rellenos de estado (verde, ámbar y rojo claro) llevan su propio
     // texto AA y valen en ambos temas. El día sin práctica usa la
     // superficie apagada del tema: #F3ECF1 en claro y #241B2A en oscuro.
@@ -88,38 +106,84 @@ class _WeekDayCell extends StatelessWidget {
         ),
     };
 
+    final cell = Container(
+      height: 44,
+      decoration: BoxDecoration(
+        // Hoy pendiente: superficie de tile con borde discontinuo.
+        color: pendingToday && day.status == WeekDayStatus.none
+            ? colors.tile
+            : bg,
+        borderRadius: DesignTokens.borderRadiusCell,
+        border: day.isToday && !pendingToday
+            ? Border.all(color: colors.brand, width: 2)
+            : null,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            day.isToday ? 'HOY' : day.shortLabel,
+            style: TextStyle(
+              fontSize: day.isToday ? 11 : 12,
+              fontWeight: FontWeight.w700,
+              color: pendingToday && day.status == WeekDayStatus.none
+                  ? colors.brand
+                  : fg,
+              height: 1.1,
+            ),
+          ),
+          if (icon != null)
+            Icon(icon, size: 14, color: fg)
+          else
+            const SizedBox(height: 14),
+        ],
+      ),
+    );
+
     return Semantics(
       key: ValueKey('week-day-${day.day.weekday}'),
       label: weekDaySemanticsLabel(day, goal),
       excludeSemantics: true,
-      child: Container(
-        height: 44,
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: DesignTokens.borderRadiusCell,
-          border: day.isToday
-              ? Border.all(color: colors.brand, width: 2)
-              : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              day.shortLabel,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: fg,
-                height: 1.1,
-              ),
-            ),
-            if (icon != null)
-              Icon(icon, size: 14, color: fg)
-            else
-              const SizedBox(height: 14),
-          ],
-        ),
-      ),
+      child: pendingToday
+          ? CustomPaint(
+              key: const ValueKey('week-today-pending'),
+              foregroundPainter: _DashedRRectPainter(color: colors.brand),
+              child: cell,
+            )
+          : cell,
     );
   }
+}
+
+/// Borde discontinuo de 2 px con el radio de celda.
+class _DashedRRectPainter extends CustomPainter {
+  const _DashedRRectPainter({required this.color});
+
+  final Color color;
+
+  static const double _stroke = 2;
+  static const double _dash = 5;
+  static const double _gap = 4;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rrect = DesignTokens.borderRadiusCell.toRRect(
+      (Offset.zero & size).deflate(_stroke / 2),
+    );
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _stroke
+      ..color = color;
+    for (final PathMetric metric in (Path()..addRRect(rrect)).computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        final end = (distance + _dash).clamp(0.0, metric.length);
+        canvas.drawPath(metric.extractPath(distance, end), paint);
+        distance += _dash + _gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedRRectPainter old) => old.color != color;
 }

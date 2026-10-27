@@ -2,6 +2,47 @@
 
 Log en orden cronológico inverso. Hoja de ruta: `Plan/hoja_ruta_rediseno_v2_1.md`. Qué cambia: `docs/design_v2_1/SPEC_rediseno_v2_1.md`.
 
+## 2026-10-27 · Lote 3: Home · Claude Code
+- **Hero** (`today_session_hero.dart`):
+  - `HeroLiveDot` junto a «Sesión de hoy»: escala 1 → 1,6 con fade, 1,8 s por pulso. **Late solo dos veces y se queda quieto** (3,6 s). El prototipo lo deja en bucle, pero eso superaría los 5 s de movimiento automático de WCAG 2.2.2 y colgaría los `pumpAndSettle` de los tests y del e2e. Con movimiento reducido, quieto.
+  - Las mini-cards muestran el % y el estado en texto (`focusNoteStateLabel`: Nueva, Crítica, En curso o Consolidada, según los umbrales de dominio). El estado también va en Semantics.
+  - `HeroSteps`: «1 · Escucha», «2 · Toca la tecla» y «3 · El SRS ajusta tu repaso», con los iconos `hearing`, `piano` y `trending_up` en #DA9CFF.
+  - Copy según el número de notas (la nota, dos, tres o cuatro, con concordancia en singular) y copy propio cuando el foco se elige a mano («Elegiste N notas foco para hoy; el resto sigue el repaso SRS normal.»).
+  - **Se mantiene el copy actual frente al del prototipo** (regla 6 y D10). «Que perdieron precisión esta semana» es una afirmación que los datos no respaldan.
+- **Hoja «Ajustar la sesión de hoy»** (`today_adjust_sheet.dart`, clave `today-adjust-sheet`). El enlace `today-adjust-link` la abre en lugar de ir a Ajustes.
+  - Duración segmentada: 6 · 3 min, 12 · 6 min y 20 · 10 min.
+  - Chips de las 12 notas con muestra de dominio y Semantics «C sostenido, 42 %».
+  - De 1 a 4 notas foco. La quinta muestra un aviso en una región viva y no se deja quitar la última.
+  - Guardar y Cancelar, y un SnackBar «Sesión de hoy actualizada».
+  - **Al guardar:**
+    - La duración va a `practiceSessionPreferences.roundGoal`, persistida. Es la misma meta que en Ajustes y se añade `SessionRoundGoal.six`.
+    - Las notas van a `todayFocusOverrideProvider`. Es un estado nuevo en `today_session_provider`, **en memoria y solo para ese día**: se pierde al reiniciar y al cambiar de día vuelve la propuesta del SRS. Si se quiere persistido, haría falta una clave en `AppPreferences`; queda anotado.
+  - `maxPracticeFocusNotes` pasa de 3 a 4 (v2 D11 → SPEC v2.1). El plan automático sigue proponiendo 3.
+- **Card «Mapa del oído»** (`ear_map_card.dart`):
+  - `EarMapWheel` con la precisión global en el centro. Se calcula con `globalAccuracyFromSummaries`, con la misma fórmula que `accuracy_percentage` del SRS, y muestra «—» sin datos.
+  - Leyenda con los rangos escritos y enlace «Ver progreso».
+  - **Meta de octava** (`octave-goal`): anillo y «N de 12 notas consolidadas», con N = notas vistas con ≥ 75 %, y «Te faltan M…» o «Dominas la octava completa».
+  - Al tocar un segmento aparece una fila de detalle (`ear-map-detail`, región viva) con celda, estado, «% · intentos · nivel» y **Practicar** (`ear-map-practice`). Practicar abre `/game/1` con `practiceFocusNoteProvider` = nota y el foco de hoy vacío.
+- **Últimos 7 días** (`week_strip.dart`):
+  - `buildRecentDays` (de hace 6 días a hoy) y `recentDaysProvider`. `calendarWeekProvider` (L–D) se queda: lo usa `today_session_provider_test`.
+  - La celda de hoy se rotula «HOY». Si la meta está pendiente, lleva superficie de tile y borde discontinuo de acento (`week-today-pending`).
+  - **Frase de racha** (`week-streak-copy`) con `homeStreakStatusProvider`. Como `computeStreakDays` da 0 si hoy no se ha practicado, «llevar la racha a N» usa la racha hasta ayer + 1.
+- **Escritorio (≥ 1024):** dos columnas, 1,25 fr / 1 fr, con un máximo de 1120 (`homeDesktopMaxWidth`).
+  - Izquierda: hero, Retomar y Práctica libre. Derecha: mapa y días.
+  - El efecto *sticky* se consigue con un scroll independiente en cada columna: la derecha no se mueve al desplazar la izquierda. Lo cubre un test.
+  - En móvil, el orden es el del prototipo.
+- **Entrada escalonada:** `StaggeredEntrance` en cada bloque.
+- **Tests:**
+  - `home_screen_test`: hoja (guardar, límite de 4, cancelar), hero (punto, estados, pasos), mapa (70 %, meta 2 de 12, Semantics del segmento, detalle y Practicar), últimos 7 días con racha pendiente y cumplida, y escritorio en dos columnas con la derecha fija.
+  - `home_v2_widgets_test`: copy por número de notas y a mano, estado de la mini-card, «HOY» y borde discontinuo, `buildRecentDays`, `weekStreakCopy` y `HomeStreakStatus.fromHistory`.
+  - Ajustados: `dark_theme_v2_test` (hoy pendiente va sobre tile con borde discontinuo) y `game_session_provider_test` (límite de foco de 4).
+- **No incluido:** `CountUpText` en el centro de la rueda, porque `EarMapWheel` recibe el valor como texto. Habría que aceptar un widget en el centro; queda para el lote de Progreso.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test`: `+572 ~1: All tests passed!` (antes 558).
+  - `flutter test integration_test -d flutter-tester`: `+2: All tests passed!`.
+  - **No revisado a ojo en un navegador.**
+
 ## 2026-10-27 · Lote 2: componentes compartidos · Claude Code
 - **`lib/widgets/ear_map/ear_map_wheel.dart` (`EarMapWheel`, clave `ear-map`):**
   - Entrada: `List<NoteProgressSummary>`, colocados por nota. Las que faltan cuentan como «sin datos».
