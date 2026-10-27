@@ -107,8 +107,19 @@ class SRSNotifier extends AsyncNotifier<SRSSystem> {
   }
 }
 
+/// Revisión del estado del SRS. [SRSSystem] es mutable y
+/// `updateAfterResponse` lo cambia en el sitio sin emitir un estado nuevo en
+/// [srsSystemProvider], así que los derivados (resúmenes por nota,
+/// recomendaciones, estadísticas) no se recalculaban hasta reconstruir el
+/// SRS. Quien lo muta llama a [markSrsChanged] y los derivados lo vigilan.
+final srsRevisionProvider = StateProvider<int>((ref) => 0);
+
+/// Avisa de que el [SRSSystem] cambió en el sitio (tras cada respuesta).
+void markSrsChanged(Ref ref) => ref.read(srsRevisionProvider.notifier).state++;
+
 /// Provider para estadisticas (derivado del SRS).
 final srsStatisticsProvider = Provider<Map<String, dynamic>>((ref) {
+  ref.watch(srsRevisionProvider);
   final srsAsync = ref.watch(srsSystemProvider);
   return srsAsync.when(
     data: (srs) => srs.getStatistics(),
@@ -119,6 +130,7 @@ final srsStatisticsProvider = Provider<Map<String, dynamic>>((ref) {
 
 /// Provider para recomendaciones de practica.
 final practiceRecommendationsProvider = Provider<Map<String, dynamic>>((ref) {
+  ref.watch(srsRevisionProvider);
   final srsAsync = ref.watch(srsSystemProvider);
   return srsAsync.when(
     data: (srs) => srs.getPracticeRecommendations(),
@@ -129,6 +141,7 @@ final practiceRecommendationsProvider = Provider<Map<String, dynamic>>((ref) {
 
 /// Resumen SRS por nota (12 clases de altura).
 final noteProgressSummariesProvider = Provider<List<NoteProgressSummary>>((ref) {
+  ref.watch(srsRevisionProvider);
   final srsAsync = ref.watch(srsSystemProvider);
   return srsAsync.when(
     data: (srs) => buildNoteProgressSummaries(srs),

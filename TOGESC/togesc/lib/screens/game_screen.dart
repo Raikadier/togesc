@@ -83,6 +83,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   /// Foco de la sesión capturado al entrar (ver [_focusNotes]).
   List<String>? _sessionFocusNotes;
 
+  /// Propuesta del SRS congelada si la sesión se abrió sin foco.
+  List<String>? _fallbackFocusNotes;
+
   Timer? _listenTimer;
   Timer? _advanceTimer;
 
@@ -913,7 +916,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   List<String> _focusNotes() {
     final captured = _sessionFocusNotes;
     if (captured != null && captured.isNotEmpty) return captured;
-    return ref.watch(todayFocusNotesProvider).map((f) => f.note).toList();
+    // El SRS se actualiza en vivo tras cada ronda: se congela la primera
+    // propuesta no vacía para que las filas no cambien a mitad de sesión.
+    final frozen = _fallbackFocusNotes;
+    if (frozen != null) return frozen;
+    final proposed =
+        ref.watch(todayFocusNotesProvider).map((f) => f.note).toList();
+    if (proposed.isNotEmpty) _fallbackFocusNotes = proposed;
+    return proposed;
   }
 
   Widget _buildDesktop(BuildContext context, GameSessionState session) {

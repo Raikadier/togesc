@@ -257,6 +257,8 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
       wrongNotes: wrongNotes,
       responseTime: responseTime,
     );
+    // El panel «Enfoque SRS» (1d) refleja la ronda al momento.
+    markSrsChanged(ref);
 
     // Auto-save
     await ref.read(srsSystemProvider.notifier).saveProgress();

@@ -209,6 +209,7 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
             wrongNotes: state.currentNotes.toSet(),
             responseTime: state.currentTimeLimit,
           );
+          markSrsChanged(ref);
           unawaited(ref.read(srsSystemProvider.notifier).saveProgress());
         }
         state = state.copyWith(
@@ -247,6 +248,7 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
         wrongNotes: wrongNotes,
         responseTime: responseTime,
       );
+      markSrsChanged(ref);
       unawaited(ref.read(srsSystemProvider.notifier).saveProgress());
     }
 

@@ -2,6 +2,20 @@
 
 Log en orden cronológico inverso.
 
+## 2026-10-26 · Panel «Enfoque SRS» de escritorio (1d) congelado durante la sesión · Senior Developer (Flutter)
+- **Síntoma (e2e de Chrome, `11_desktop_result_wrong.png`):** tras responder rondas, el panel seguía mostrando «Sin datos», «—» y 0 puntos.
+- **Diagnóstico:** el fallo es de la app, no un artefacto del arnés. Se reproduce en un test de widget con el `SRSNotifier` real y un `InMemoryProgressRepository`, sin overrides del SRS.
+  - El panel lee `noteProgressSummariesProvider` (más `practiceRecommendationsProvider`), que deriva de `srsSystemProvider`.
+  - `SRSSystem` es mutable: `updateAfterResponse` lo cambia en el sitio y `saveProgress` no emite un estado nuevo. Por eso los derivados no se recalculaban hasta reconstruir el SRS (al salir y volver a entrar).
+- **Arreglo (mínimo):**
+  - `srs_provider.dart`: se añade `srsRevisionProvider` (`StateProvider<int>`) y `markSrsChanged(ref)`. `srsStatisticsProvider`, `practiceRecommendationsProvider` y `noteProgressSummariesProvider` lo vigilan.
+  - `game_session_provider.submitAnswer` y los dos `updateAfterResponse` de `speed_session_provider` llaman a `markSrsChanged`. Está fuera del notifier, así que también funciona con los notifiers falsos del arnés e2e.
+  - `game_screen._focusNotes`: si la sesión no tiene foco, se congela la primera propuesta de `todayFocusNotesProvider`. Así, ahora que hay refresco en vivo, las filas no cambian de nota a mitad de sesión.
+- **Píldora «SRS 0/5 → 0/5»:** es correcta según `srsLevelFromValues`. Con umbral 5, `floor(3·cc/5)` da 0 en un fallo (cc = 0) y también en el **primer** acierto (cc = 1). El nivel sube a 1 en el segundo acierto seguido. Lo cubre un test unitario nuevo en `srs_level_test.dart`.
+- **No incluido:** el texto «+N esta sesión» del diseño 1d (delta de nivel en la sesión). Habría que guardar el nivel al empezar la sesión y queda como mejora aparte.
+- **Tests:** `game_screen_test.dart` incluye «el panel se actualiza en vivo tras cada ronda (SRSNotifier real)». Comprueba la secuencia Sin datos → En curso 100 % nivel 0 → nivel 1 → 67 % nivel 0. Falla sin el arreglo. También se añade el test unitario de la píldora.
+- **Verificación:** `flutter analyze`: «No issues found!». `flutter test` completo: `+523 ~1: All tests passed!`.
+
 ## 2026-10-26 · PT-06 y PT-10 corregidos en código · Senior SecOps
 - **PT-10 (BAJO, content spoofing en `/paywall?feature=`):**
   - `SubscriptionConstants.paywallFeatureTitle()` aplica una allowlist: las etiquetas `modeProLabel` de los modos Pro y `historyFeatureKey` (`historial`).

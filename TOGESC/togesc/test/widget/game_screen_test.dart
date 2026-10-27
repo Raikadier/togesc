@@ -418,6 +418,60 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('el panel «Enfoque SRS» se actualiza en vivo tras cada ronda '
+        '(SRSNotifier real)', (tester) async {
+      // Sin override de srsSystemProvider: el notifier real carga el SRS
+      // desde un repositorio en memoria y la sesión lo muta en el sitio.
+      SharedPreferences.setMockInitialValues({clusterEnabledKey: false});
+      container = ProviderContainer(
+        overrides: [
+          progressRepositoryProvider
+              .overrideWithValue(InMemoryProgressRepository()),
+          audioPlayerServiceProvider.overrideWithValue(
+            AudioPlayerService(generator: AudioGenerator(random: Random(42))),
+          ),
+          audioGeneratorProvider
+              .overrideWithValue(AudioGenerator(random: Random(42))),
+        ],
+      );
+      await container.read(srsSystemProvider.future);
+      container.read(practiceFocusNoteProvider.notifier).state = 'D';
+      final handle = tester.ensureSemantics();
+      await pumpToAnswer(tester, size: const Size(1280, 800));
+
+      Finder row(String label) =>
+          find.bySemanticsLabel(RegExp('^${RegExp.escape(label)}'));
+      expect(row('D, Sin datos, sin datos de precisión, nivel SRS 0 de 5'),
+          findsOneWidget);
+
+      // Ronda 1: acierto → En curso, 100 %, nivel 0 (1 acierto de 5).
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyD);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.text('CORRECTO'), findsOneWidget);
+      expect(find.text('Sin datos'), findsNothing);
+      expect(row('D, En curso, 100 por ciento, nivel SRS 0 de 5'),
+          findsOneWidget);
+
+      // Ronda 2: segundo acierto seguido → nivel 1.
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await pumpFor(tester, const Duration(milliseconds: 1900));
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyD);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(row('D, En curso, 100 por ciento, nivel SRS 1 de 5'),
+          findsOneWidget);
+
+      // Ronda 3: fallo → 67 %, la racha vuelve a 0.
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await pumpFor(tester, const Duration(milliseconds: 1900));
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyE);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.text('INCORRECTO'), findsOneWidget);
+      expect(row('D, En curso, 67 por ciento, nivel SRS 0 de 5'),
+          findsOneWidget);
+      await pumpFor(tester, const Duration(milliseconds: 2400));
+      handle.dispose();
+    });
+
     testWidgets('<1024 usa el layout móvil sin panel', (tester) async {
       await setUpContainer();
       await pumpToAnswer(tester, size: const Size(800, 900));

@@ -137,6 +137,25 @@ void main() {
       expect(change.dropped, isTrue);
     });
 
+    test('nota nueva: fallo 0→0, primer acierto 0→0, segundo 0→1', () async {
+      final srs = SRSSystem(clock: () => DateTime(2026, 1, 1));
+      await srs.loadProgress();
+      SrsLevelChange round({required bool hit}) => srsLevelChangeFromSrsChange(
+            srs.updateAfterResponse(
+              notes: ['C'],
+              correctNotes: hit ? ['C'] : [],
+            )['C'],
+          )!;
+      final miss = round(hit: false);
+      expect((miss.before, miss.after), (0, 0));
+      // floor(3·1/5) = 0: el primer acierto no sube un punto (umbral 5).
+      final first = round(hit: true);
+      expect((first.before, first.after), (0, 0));
+      final second = round(hit: true);
+      expect((second.before, second.after), (0, 1));
+      expect(second.improved, isTrue);
+    });
+
     test('mapas invalidos devuelven null', () {
       expect(srsLevelChangeFromSrsChange(null), isNull);
       expect(srsLevelChangeFromSrsChange({'old': 1, 'new': 2}), isNull);
