@@ -44,6 +44,15 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 final _next = find.byKey(const ValueKey('onboarding-next'));
+
+/// Detector de la tecla: el `RenderTransform` del feedback no siempre está en
+/// la ruta de hit test (Flutter 3.41 del CI), pero el toque llega al detector.
+Finder _key(String note) => find
+    .ancestor(
+      of: find.byKey(ValueKey('piano-key-$note')),
+      matching: find.byType(GestureDetector),
+    )
+    .first;
 final _start = find.widgetWithText(FilledButton, 'Entendido, empezar');
 
 Future<_SilentAudio> _pump(
@@ -119,7 +128,7 @@ void main() {
     );
     expect(audio.plays, 1);
 
-    await _tapVisible(tester, find.byKey(const ValueKey('piano-key-A')));
+    await _tapVisible(tester, _key('A'));
     final status = find.byKey(const ValueKey('onboarding-try-status'));
     expect(
       find.descendant(of: status, matching: find.text('Correcto')),
@@ -135,7 +144,7 @@ void main() {
     await _tapVisible(tester, _next);
     await _tapVisible(tester, _next);
 
-    await _tapVisible(tester, find.byKey(const ValueKey('piano-key-C')));
+    await _tapVisible(tester, _key('C'));
     expect(find.text('Era La'), findsNothing);
     expect(find.text('Era A'), findsOneWidget);
     expect(find.byIcon(Icons.cancel_rounded), findsOneWidget);
