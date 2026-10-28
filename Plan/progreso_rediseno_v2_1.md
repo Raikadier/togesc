@@ -2,6 +2,44 @@
 
 Log en orden cronológico inverso. Hoja de ruta: `Plan/hoja_ruta_rediseno_v2_1.md`. Qué cambia: `docs/design_v2_1/SPEC_rediseno_v2_1.md`.
 
+## 2026-10-27 · Lote 6: Velocidad · Claude Code
+- **Reglas de juego sin cambios** (SPEC §2.4.4): `speed_session_provider` no se toca. Sigue restando 1 s por acierto con un mínimo de 3 s, y un fallo o un tiempo agotado cierran la ráfaga. El prototipo dice −10 % con mínimo de 1,5 s, pero solo se ajusta el copy. «Cómo funciona» genera sus 3 pasos a partir de `speedCorrectDecrease` y `speedMinTime`.
+- **Selección** (`speed_mode_select_views.dart`):
+  - Fácil, Pro y Elite son tarjetas radio (`speed-diff-{easy|pro|elite}`).
+    - Cada una tiene un cuadro de segundos de 64 px, nombre, descripción, «Mejor racha» (`speed-best-*`, «—» sin datos) y un check.
+    - Semantics `inMutuallyExclusiveGroup` + `checked`. La selección no depende solo del color: lleva borde, fondo, cuadro relleno e icono.
+  - Orden nuevo: cabecera, dificultad, «Elige el modo para empezar», modos y «Cómo funciona» (3 pasos numerados). A partir de 600 px de ancho de contenido (`shellBreakpoint`, el mismo del bento), dificultad y «Cómo funciona» van lado a lado.
+  - **«Teclas negras»:** se mantiene como card `hero` de modo (`sharpsOnly`) con el icono `piano`, no como el interruptor del prototipo. Un interruptor cambiaría el pool de notas de los 5 modos, que es una regla de juego; queda para que lo decida el propietario.
+- **Mejor racha** (`speed_best_streak_provider.dart`, nuevo):
+  - Se guarda por dificultad en `togesc_speed_best_streak_{easy|pro|elite}`, sin distinguir el modo.
+  - `submit` solo guarda si la racha es mayor que 0 y supera la anterior, y devuelve si es récord.
+  - La pantalla de juego lo llama al pasar a `incorrect` o `timeout`, con la dificultad con la que se abrió.
+- **Juego** (`speed_game_screen.dart`):
+  - Cuenta atrás 3-2-1 al pulsar «Comenzar» y «Reintentar»: pop con `easeSpring`, `liveRegion` y un clic sutil (523 Hz y 1046 Hz en el 1, 80 ms a 0,3 de ganancia). Cada paso dura 800 ms, o 500 ms con movimiento reducido.
+  - `CountdownTimerWidget` se rehace como anillo de 168 px en `speedAccent` (#FF8A65 en la sesión). Con menos de 2 s o menos del 30 % del límite, anillo y cifra pasan a `incorrect` (#EF9A9A), la etiqueta cambia a «¡Rápido!» y la cifra late (sin latido con movimiento reducido). Semantics «Tiempo restante: N segundos».
+  - Destello de fondo verde o rojo (14 %, 500 ms) en cada acierto, fallo o tiempo agotado. No hay destello con movimiento reducido.
+  - «Piano más grande» llega por fin al teclado de velocidad (pendiente del lote 4).
+- **Resumen** (`SpeedSessionResultView`):
+  - «Fin de sesión», motivo («Incorrecto» o «Tiempo agotado» con «Las notas eran: …», el texto actual) y la píldora «Nuevo récord personal» (`speed-new-record`).
+  - 4 KPI en rejilla 2×2 (`speed-kpi-*`): Racha final, Mejor tiempo, Promedio y Respuestas (aciertos/rondas). Tiempos con coma y 2 decimales, «—» sin datos.
+  - Desaparece el KPI «Tiempo límite» de la card naranja antigua.
+  - «Reintentar» va en `speedAccent` con texto `onSpeedAccent` (#2A0640 en la sesión). «Menú» es un botón contorneado.
+- **Tests:** `speed_screens_test.dart` pasa de 6 a 16.
+  - Se sustituye el test de la card antigua del resumen.
+  - Selección: tarjetas, mejor racha guardada o «—», estado `checked`, pasos de «Cómo funciona» y `formatSpeedSeconds`.
+  - Juego: cuenta atrás, destello, récord persistido, KPI, «Reintentar» que vuelve a la cuenta atrás, sin récord no hay píldora, y movimiento reducido.
+  - Anillo: tamaño, estado bajo, latido y que el latido se para.
+  - Resumen y botones.
+  - El test usa un `_SilentAudio`, porque el audio real no termina en el entorno de test.
+- **Anotado (no se arregla):**
+  - `startRound` vuelve sin hacer nada si el SRS aún no ha cargado (`valueOrNull == null`). En la app ya está cargado al llegar aquí, pero la ráfaga podría no arrancar en silencio. Ya pasaba antes del lote.
+  - La dificultad elegida no se persiste entre sesiones de la app (el prototipo sí la guarda).
+  - `responseTimes` incluye las respuestas falladas, así que «Mejor tiempo» puede ser el de un fallo. Es el dato del provider, que no se toca.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test` completo: `+618 ~1: All tests passed!` (antes 608).
+  - `flutter test integration_test -d flutter-tester`: `+2`.
+
 ## 2026-10-27 · Lote 5: Progreso · Claude Code
 - **Pestañas «Resumen | Historial»** (`progress_tabs.dart`): `Semantics` con `SemanticsRole.tabBar`, `tab` (con `selected`) y `tabPanel` (`progress-panel-{summary|history}`). Las flechas ← → cambian de pestaña y mueven el foco. Al tocar una pestaña se le da el foco. Anillo de foco de 3 px.
 - **Cabecera** (`global_accuracy_header.dart`):

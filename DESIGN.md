@@ -162,6 +162,17 @@ Aprobado el 2026-10-26 a partir del feedback del propietario sobre v2: se veía 
 - **Detalle de nota:** hoja con celda de 88 px, precisión, intentos, latencia, nivel 1–5, una frase por estado, «Escuchar» y «Practicar esta nota».
 - **Historial (Pro):** barras rellenas de precisión por sesión (verde a partir del 75 %) con texto alternativo, evolución por periodo, exportación y lista completa.
 
+### Velocidad v2.1 (lote 6)
+- **Selección:**
+  - Las dificultades Fácil, Pro y Elite son tarjetas radio con un cuadro de segundos de 64 px y la mejor racha guardada («—» si no hay).
+  - Después vienen los modos («Teclas negras» sigue como card `hero`) y «Cómo funciona», con 3 pasos que salen de las constantes de juego.
+- **Juego (oscuro):**
+  - Cuenta atrás 3-2-1 con pop y un clic sutil.
+  - Anillo de 168 px en #FF8A65 que pasa a #EF9A9A, con «¡Rápido!» y latido, cuando queda menos de 2 s o menos del 30 % del límite.
+  - Destello verde o rojo en cada respuesta.
+  - Sin latido ni destello con movimiento reducido.
+- **Resumen:** píldora «Nuevo récord personal», KPI 2×2 (Racha final, Mejor tiempo, Promedio y Respuestas) y los botones «Reintentar» (#FF8A65 con texto #2A0640) y «Menú».
+
 ## Qué queda de Harmonic Precision
 
 | Elemento | Estado |

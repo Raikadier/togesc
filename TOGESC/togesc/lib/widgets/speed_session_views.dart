@@ -92,68 +92,60 @@ class SpeedSessionFeedbackView extends StatelessWidget {
   }
 }
 
-/// Resumen de sesión al terminar (game over).
-class SpeedSessionSummaryCard extends StatelessWidget {
-  final int responses;
-  final int streak;
-  final double averageTime;
-  final double bestTime;
-  final double timeLimit;
+/// Cuenta atrás 3-2-1 antes de la primera ráfaga (SPEC §2.4.2). Cada cifra
+/// entra con un pop (escala con rebote); con movimiento reducido aparece
+/// sin animar.
+class SpeedCountdownView extends StatelessWidget {
+  final int value;
+  final String difficultyLabel;
 
-  const SpeedSessionSummaryCard({
+  const SpeedCountdownView({
     super.key,
-    required this.responses,
-    required this.streak,
-    required this.averageTime,
-    required this.bestTime,
-    required this.timeLimit,
+    required this.value,
+    required this.difficultyLabel,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = TogescColors.of(context);
-    final speed = colors.speedAccent;
-    final onSpeed = colors.onSpeedAccent;
+    final duration = motionDuration(context, const Duration(milliseconds: 600));
 
-    return Container(
-      padding: const EdgeInsets.all(DesignTokens.spacingLg),
-      decoration: BoxDecoration(
-        color: speed,
-        borderRadius: DesignTokens.borderRadiusCard,
-      ),
+    return Center(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Fin de sesión'.toUpperCase(),
-            style: DesignTokens.overline.copyWith(color: onSpeed),
+            'Listo para el desafío'.toUpperCase(),
+            style: DesignTokens.overline.copyWith(color: colors.speedAccent),
           ),
-          Text(
-            'Resumen de velocidad',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: onSpeed,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.4,
+          const SizedBox(height: DesignTokens.spacingMd),
+          Semantics(
+            liveRegion: true,
+            label: '$value',
+            excludeSemantics: true,
+            child: _Pop(
+              key: ValueKey('speed-countdown-$value'),
+              duration: duration,
+              child: Text(
+                '$value',
+                key: const ValueKey('speed-countdown'),
+                style: theme.textTheme.displayLarge
+                    ?.copyWith(
+                      fontSize: 96,
+                      fontWeight: FontWeight.w800,
+                      color: colors.speedAccent,
+                    )
+                    .merge(DesignTokens.tabularNumbers),
+              ),
             ),
           ),
-          const SizedBox(height: DesignTokens.spacingLg),
-          _StatRow(label: 'Respuestas', value: '$responses', color: onSpeed),
-          _StatRow(label: 'Racha final', value: '$streak', color: onSpeed),
-          _StatRow(
-            label: 'Promedio',
-            value: '${averageTime.toStringAsFixed(2)}s',
-            color: onSpeed,
-          ),
-          _StatRow(
-            label: 'Mejor tiempo',
-            value: '${bestTime.toStringAsFixed(2)}s',
-            color: onSpeed,
-          ),
-          _StatRow(
-            label: 'Tiempo límite',
-            value: '${timeLimit.toStringAsFixed(1)}s',
-            color: onSpeed,
+          const SizedBox(height: DesignTokens.spacingMd),
+          Text(
+            'Empieza ahora · $difficultyLabel',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -161,39 +153,255 @@ class SpeedSessionSummaryCard extends StatelessWidget {
   }
 }
 
-class _StatRow extends StatelessWidget {
+/// Entrada con pop: escala de 0,4 a 1 con rebote y fundido.
+class _Pop extends StatelessWidget {
+  final Duration duration;
+  final Widget child;
+
+  const _Pop({super.key, required this.duration, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: duration == Duration.zero ? 1 : 0, end: 1),
+      duration: duration,
+      curve: DesignTokens.easeSpring,
+      builder: (context, t, child) => Opacity(
+        opacity: t.clamp(0.0, 1.0),
+        child: Transform.scale(scale: 0.4 + 0.6 * t, child: child),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Píldora «Nuevo récord personal» del resumen (SPEC §2.4.3).
+class SpeedRecordPill extends StatelessWidget {
+  const SpeedRecordPill({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = TogescColors.of(context);
+
+    return _Pop(
+      duration: motionDuration(context, const Duration(milliseconds: 500)),
+      child: Container(
+        key: const ValueKey('speed-new-record'),
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spacingMd),
+        decoration: BoxDecoration(
+          color: colors.speedAccent,
+          borderRadius: DesignTokens.borderRadiusPill,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.emoji_events_rounded,
+              size: 18,
+              color: colors.onSpeedAccent,
+            ),
+            const SizedBox(width: DesignTokens.spacingXs + 2),
+            Text(
+              'Nuevo récord personal',
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: colors.onSpeedAccent,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// KPI del resumen de velocidad (SPEC §2.4.3): Racha final, Mejor tiempo,
+/// Promedio y Respuestas (aciertos / rondas). Sin respuestas, los tiempos
+/// muestran «—».
+class SpeedSessionSummaryCard extends StatelessWidget {
+  final int streak;
+  final double bestTime;
+  final double averageTime;
+  final int correctRounds;
+  final int roundsPlayed;
+
+  const SpeedSessionSummaryCard({
+    super.key,
+    required this.streak,
+    required this.bestTime,
+    required this.averageTime,
+    required this.correctRounds,
+    required this.roundsPlayed,
+  });
+
+  static String _time(double s) =>
+      s > 0 ? '${s.toStringAsFixed(2).replaceAll('.', ',')} s' : '—';
+
+  @override
+  Widget build(BuildContext context) {
+    final kpis = [
+      ('streak', 'Racha final', '$streak'),
+      ('best', 'Mejor tiempo', _time(bestTime)),
+      ('average', 'Promedio', _time(averageTime)),
+      ('answers', 'Respuestas', '$correctRounds/$roundsPlayed'),
+    ];
+    return LayoutBuilder(
+      key: const ValueKey('speed-result-kpis'),
+      builder: (context, constraints) {
+        const gap = DesignTokens.spacingSm;
+        final width = (constraints.maxWidth - gap) / 2;
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final (id, label, value) in kpis)
+              SizedBox(
+                width: width,
+                child: _Kpi(id: id, label: label, value: value),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _Kpi extends StatelessWidget {
+  final String id;
   final String label;
   final String value;
-  final Color color;
 
-  const _StatRow({
-    required this.label,
-    required this.value,
-    required this.color,
+  const _Kpi({required this.id, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Semantics(
+      label: '$label: $value',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.all(DesignTokens.spacingMd),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLow,
+          borderRadius: DesignTokens.borderRadiusCard,
+          border: Border.all(color: scheme.outlineVariant),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                key: ValueKey('speed-kpi-$id'),
+                style: theme.textTheme.headlineMedium
+                    ?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: scheme.onSurface,
+                    )
+                    .merge(DesignTokens.tabularNumbers),
+              ),
+            ),
+            Text(
+              label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Resumen al cerrar la ráfaga (fallo o tiempo agotado): motivo, píldora de
+/// récord, KPI y acciones.
+class SpeedSessionResultView extends StatelessWidget {
+  final IconData icon;
+  final Color accentColor;
+  final String title;
+  final String subtitle;
+  final bool newRecord;
+  final Widget summary;
+  final VoidCallback onRetry;
+  final VoidCallback onMenu;
+
+  const SpeedSessionResultView({
+    super.key,
+    required this.icon,
+    required this.accentColor,
+    required this.title,
+    required this.subtitle,
+    required this.newRecord,
+    required this.summary,
+    required this.onRetry,
+    required this.onMenu,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(color: color)),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: color,
-            ).merge(DesignTokens.tabularNumbers),
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return SingleChildScrollView(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Fin de sesión'.toUpperCase(),
+                textAlign: TextAlign.center,
+                style: DesignTokens.overline.copyWith(
+                  color: TogescColors.of(context).speedAccent,
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spacingMd),
+              Icon(icon, size: 48, color: accentColor),
+              const SizedBox(height: DesignTokens.spacingSm),
+              Semantics(
+                header: true,
+                liveRegion: true,
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spacingXs),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              if (newRecord) ...[
+                const SizedBox(height: DesignTokens.spacingMd),
+                const Center(child: SpeedRecordPill()),
+              ],
+              const SizedBox(height: DesignTokens.spacingLg),
+              summary,
+              const SizedBox(height: DesignTokens.spacingLg),
+              SpeedSessionRetryActions(onRetry: onRetry, onMenu: onMenu),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-/// Botones reintentar / volver al menú.
+/// Botones «Reintentar» (relleno de acento de velocidad, #FF8A65 con texto
+/// #2A0640 en la sesión) y «Menú».
 class SpeedSessionRetryActions extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback onMenu;
@@ -206,22 +414,34 @@ class SpeedSessionRetryActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final colors = TogescColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.replay_rounded),
-            label: const Text('Reintentar'),
+        FilledButton.icon(
+          key: const ValueKey('speed-retry'),
+          onPressed: onRetry,
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
+            backgroundColor: colors.speedAccent,
+            foregroundColor: colors.onSpeedAccent,
+            textStyle: const TextStyle(fontWeight: FontWeight.w800),
+            shape: RoundedRectangleBorder(
+              borderRadius: DesignTokens.borderRadiusCta,
+            ),
           ),
+          icon: const Icon(Icons.replay_rounded),
+          label: const Text('Reintentar'),
         ),
-        const SizedBox(width: DesignTokens.spacingMd),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onMenu,
-            icon: const Icon(Icons.home_rounded),
-            label: const Text('Menú'),
+        const SizedBox(height: DesignTokens.spacingSm),
+        OutlinedButton.icon(
+          key: const ValueKey('speed-menu'),
+          onPressed: onMenu,
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
           ),
+          icon: const Icon(Icons.home_rounded),
+          label: const Text('Menú'),
         ),
       ],
     );
@@ -401,9 +621,7 @@ class SpeedSessionAnswerHeader extends StatelessWidget {
               const SizedBox(width: DesignTokens.spacingXs),
               Text(
                 'Modo velocidad'.toUpperCase(),
-                style: DesignTokens.overline.copyWith(
-                  color: speed.speedAccent,
-                ),
+                style: DesignTokens.overline.copyWith(color: speed.speedAccent),
               ),
             ],
           ),
