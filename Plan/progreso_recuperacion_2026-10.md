@@ -5,6 +5,53 @@ Cada entrada indica qué se hizo, quién lo hizo (usuario, Claude o el agente co
 
 ---
 
+## 2026-10-28 — Rescate del backup y reactivación de la monitorización
+
+Hecho por Claude Code a petición del propietario.
+
+**Backup**
+- Se descargó el artefacto `supabase-backup` de la ejecución 37195161960 (2026-10-04), que caducaba el 2026-11-03.
+- Copia en `D:\Github repos\togesc-backups\2026-10-04\togesc-20261004.sql`, fuera del repo. Pesa 19.755 bytes y su sha256 es `6b93d992…a9fb`.
+- **El backup solo contiene el esquema.** Tiene las 4 tablas, las funciones y RLS, pero ni una fila de datos. `supabase db dump` sin `--data-only` no vuelca datos, así que **ningún backup de GitHub ha guardado nunca datos de usuarios**.
+- **No se ha cambiado el workflow para volcar datos.** El repo es público y cualquier usuario con sesión iniciada en GitHub podría descargar el artefacto. Volcar datos exige cifrado (por ejemplo, gpg simétrico con el secret `BACKUP_PASSPHRASE`) o usar las copias del propio Supabase. Está pendiente de que decida el propietario.
+
+**Workflows**
+- `gh workflow enable` reactivó `Supabase Backup` y `Web Uptime Check`, que estaban en `disabled_inactivity`.
+- Uptime se lanzó a mano (run 40714307128) y terminó en `success`: togesc.vercel.app responde 200.
+- El backup seguirá fallando cada domingo hasta que vuelva Supabase. Así, al menos, avisa.
+
+**Hueco detectado**
+- El uptime solo comprueba Vercel, no Supabase, y por eso no habría detectado esta caída aunque hubiera estado activo.
+- GitHub vuelve a desactivar los cron de un repo público tras 60 días sin actividad.
+
+**Pendiente del propietario:** restaurar el proyecto Supabase desde el panel.
+
+**Uptime de Supabase (cambio sin commitear)**
+- Hay un paso nuevo en `.github/workflows/uptime-check.yml`: hace un GET a `$SUPABASE_URL/auth/v1/health` con `apikey` (secrets que ya existen) y exige un 200.
+- Se ejecuta aunque falle la comprobación de la web (`!cancelled()`).
+- El YAML parsea bien. No se ha probado en Actions, porque los cron solo leen el workflow de la rama por defecto: entra en vigor al llegar a `main`.
+- Mientras Supabase siga caído, fallará cada hora (por diseño: es la alerta).
+
+---
+
+## 2026-10-28 — Evaluación completa del estado (equipo de 7 roles)
+
+Hecho por Claude Code como líder con 7 agentes en solo lectura. Informe: `Plan/evaluacion_estado_2026-10-28.md`.
+
+**Verificado por Claude:**
+- `flutter analyze` sin problemas y `flutter test` 680 OK / 1 omitido / 0 fallos (3.47.7).
+- Supabase vuelve a dar NXDOMAIN.
+- Los workflows Backup y Uptime están en `disabled_inactivity`.
+- El único backup (4 KB) caduca el 2026-11-03.
+- Hay un bug de doble penalización en el SRS (`srs_system.dart:207,273`).
+- SEC-006 y SEC-008 siguen abiertos.
+- La release de Android se firma con debug.
+- El paywall no muestra precio ni términos.
+
+**Veredicto:** NO LISTO para el mercado. Lo urgente es reactivar Supabase y rescatar el backup.
+
+---
+
 ## 2026-10-20 — R2 verificado en local; premisa de CI corregida
 
 Hecho por OpenCode (agente) contra el árbol de trabajo; no se ha pusheado nada.
