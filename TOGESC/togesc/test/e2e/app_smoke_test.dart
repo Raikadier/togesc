@@ -157,7 +157,7 @@ void main() {
       await tester.ensureVisible(entry);
       await tester.pumpAndSettle();
       expect(
-        find.descendant(of: entry, matching: find.text('TOGESC Pro')),
+        find.descendant(of: entry, matching: find.textContaining('TOGESC Pro')),
         findsOneWidget,
       );
       await tester.tap(entry);

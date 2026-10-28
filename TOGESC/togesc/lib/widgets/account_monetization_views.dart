@@ -1,25 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
-import '../app/togesc_colors.dart';
-import 'game_session_views.dart';
 import 'togesc_ui.dart';
-
-/// Supabase no configurado — modo offline.
-class AccountOfflineView extends StatelessWidget {
-  const AccountOfflineView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return GameSessionPhaseLayout(
-      icon: Icons.cloud_off_rounded,
-      title: 'Sincronizacion no disponible',
-      subtitle:
-          'Este despliegue no tiene Supabase configurado. Puedes entrenar '
-          'con normalidad: el progreso se guarda solo en tu dispositivo.',
-    );
-  }
-}
 
 /// Titulo de seccion en formularios de cuenta.
 class AccountSectionTitle extends StatelessWidget {
@@ -89,52 +71,6 @@ class AccountInfoBanner extends StatelessWidget {
           ),
           if (actionLabel != null && onAction != null)
             TextButton(onPressed: onAction, child: Text(actionLabel!)),
-        ],
-      ),
-    );
-  }
-}
-
-/// Fila de beneficio Pro en paywall.
-class ProFeatureRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const ProFeatureRow({
-    super.key,
-    required this.icon,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: DesignTokens.spacingSm),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: scheme.primary.withValues(alpha: 0.12),
-              borderRadius: DesignTokens.borderRadiusMd,
-            ),
-            child: Icon(icon, color: scheme.primary, size: 20),
-          ),
-          const SizedBox(width: DesignTokens.spacingMd),
-          Expanded(
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ),
-          Icon(
-            Icons.check_circle_rounded,
-            color: TogescColors.of(context).correct,
-            size: 20,
-          ),
         ],
       ),
     );
@@ -251,93 +187,3 @@ class SubscriptionPlanCard extends StatelessWidget {
     return TogescCard(child: content);
   }
 }
-
-/// Hero del paywall Pro.
-class PaywallHero extends StatelessWidget {
-  final String title;
-  final String subtitle;
-
-  const PaywallHero({
-    super.key,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            vertical: DesignTokens.spacingLg * 2,
-            horizontal: DesignTokens.spacingLg,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: DesignTokens.borderRadiusHero,
-            color: scheme.surfaceContainerLow,
-            border: Border.all(color: scheme.outlineVariant),
-          ),
-          child: Column(
-            children: [
-              // Marca PRO v2 (#9A25AE, blanco encima 6,5:1) en píldora.
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: DesignTokens.spacingMd,
-                  vertical: DesignTokens.spacingXs,
-                ),
-                decoration: BoxDecoration(
-                  color: DesignTokens.pro,
-                  borderRadius: DesignTokens.borderRadiusPill,
-                ),
-                child: Text(
-                  'TOGESC Pro'.toUpperCase(),
-                  style: DesignTokens.overline.copyWith(
-                    color: DesignTokens.onPrimary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: DesignTokens.spacingLg),
-              Container(
-                width: 88,
-                height: 88,
-                decoration: const BoxDecoration(
-                  color: DesignTokens.hero,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.workspace_premium_rounded,
-                  size: 44,
-                  color: DesignTokens.onHeroAccent,
-                ),
-              ),
-              const SizedBox(height: DesignTokens.spacingLg),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                  color: scheme.primary,
-                ),
-              ),
-              const SizedBox(height: DesignTokens.spacingMd),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-

@@ -11,6 +11,9 @@ import '../models/srs_intensity_profile.dart';
 import '../models/ui_preferences.dart';
 
 const String onboardingCompleteKey = 'togesc_onboarding_complete';
+
+/// Paso actual del onboarding v2.1 (0–3), para retomarlo al volver.
+const String onboardingStepKey = 'togesc_onboarding_step';
 const String sessionCountKey = 'togesc_session_count';
 const String csatLastSubmittedKey = 'togesc_csat_last_submitted';
 const String csatLastDismissedKey = 'togesc_csat_last_dismissed';
@@ -88,6 +91,12 @@ class AppPreferences {
 
   Future<void> setOnboardingComplete(bool value) async {
     await _prefs.setBool(onboardingCompleteKey, value);
+  }
+
+  int get onboardingStep => _prefs.getInt(onboardingStepKey) ?? 0;
+
+  Future<void> setOnboardingStep(int step) async {
+    await _prefs.setInt(onboardingStepKey, step);
   }
 
   int get sessionCount => _prefs.getInt(sessionCountKey) ?? 0;

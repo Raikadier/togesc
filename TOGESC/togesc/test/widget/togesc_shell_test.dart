@@ -21,7 +21,8 @@ void main() {
     SharedPreferences.setMockInitialValues({onboardingCompleteKey: true});
   });
 
-  Finder navItem(TogescNavDestination d) => find.byKey(ValueKey('nav-${d.name}'));
+  Finder navItem(TogescNavDestination d) =>
+      find.byKey(ValueKey('nav-${d.name}'));
   Finder railItem(TogescNavDestination d) =>
       find.byKey(ValueKey('rail-${d.name}'));
 
@@ -105,9 +106,7 @@ void main() {
       expectActive(tester, TogescNavDestination.progress);
     });
 
-    testWidgets('tab Velocidad abre la selección de velocidad', (
-      tester,
-    ) async {
+    testWidgets('tab Velocidad abre la selección de velocidad', (tester) async {
       await pumpShell(tester);
 
       await tester.tap(navItem(TogescNavDestination.speed));
@@ -184,7 +183,7 @@ void main() {
       final entry = find.byKey(const ValueKey('account-pro-entry'));
       expect(entry, findsOneWidget);
       expect(
-        find.descendant(of: entry, matching: find.text('TOGESC Pro')),
+        find.descendant(of: entry, matching: find.textContaining('TOGESC Pro')),
         findsOneWidget,
       );
 

@@ -2,6 +2,63 @@
 
 Log en orden cronológico inverso. Hoja de ruta: `Plan/hoja_ruta_rediseno_v2_1.md`. Qué cambia: `docs/design_v2_1/SPEC_rediseno_v2_1.md`.
 
+## 2026-10-27 · Lote 7: Perfil, paywall, onboarding y ajustes · Claude Code
+- **Perfil** (`account_screen.dart` y `profile_views.dart`, nuevo):
+  - `ProfileIdentityHeader` con avatar de 64 px. Sin cuenta: «Entrenando sin cuenta · Tu progreso vive en este dispositivo» y «Entrar o crear cuenta» (`profile-sign-in`), solo si hay backend. Con cuenta: el email y si está verificado.
+  - `ProfileEarStats`, «Tu oído en cifras»:
+    - Días de racha (`engagementStatsProvider`).
+    - Notas consolidadas N/12 (`consolidatedNoteCount`).
+    - Sesiones (longitud del historial).
+    - Cada cifra es un nodo semántico propio. Solo datos reales (D10).
+  - `ProfilePlanCard` `hero`: «Plan actual», «Gratis» o «TOGESC Pro», los 3 `paywallBenefits` y un botón blanco con la key `account-pro-entry`. El texto es «Ver TOGESC Pro» o «Gestionar TOGESC Pro». Lleva a paywall o a suscripción, como antes.
+  - `ProfileSyncStatus` con icono y texto, en 4 estados: solo dispositivo, sin sincronizar, pendiente y sincronizado. Reutiliza la tinta AA de `account_sync_views` (`accountSyncStatusInk`, antes privada).
+  - Notación y recordatorios en línea con `AccountPracticePreferencesCard`, ahora visible también sin cuenta. Se pasa de `Container` a `Material` para que los `SwitchListTile` no lancen la aserción de splash.
+  - Con cuenta siguen el aviso de verificación, los cambios pendientes, el diagnóstico y los botones de sincronizar y cerrar sesión.
+  - **Hoja de acceso** (`account_auth_sheet.dart`, nuevo):
+    - Selector Entrar / Crear cuenta y recuperación de contraseña.
+    - Errores en línea con icono y región viva («Error: …»).
+    - La lógica `_submitAuth` y `_sendPasswordReset` se mueve de la pantalla a la hoja con los mismos textos. Al entrar, la hoja se cierra y el Perfil muestra el mensaje.
+    - La nueva contraseña tras el enlace de recuperación sigue en la pantalla.
+  - **Datos:**
+    - «Exportar mi progreso (JSON)» (`account-export`).
+    - Borrar la cuenta se confirma en una hoja (`account-delete-sheet`, `account-delete-confirm`) en lugar de un `AlertDialog`.
+    - «Política de privacidad» con tilde.
+  - Se eliminan `AccountProfileHeader`, `AccountSyncProBanner` y `AccountOfflineView`, que ya no se usaban.
+- **Paywall** (`paywall_screen.dart` y `paywall_views.dart`, nuevo):
+  - Fondo `hero`, cabecera con logo y cerrar.
+  - `PaywallPitch` con la píldora «Desbloquea …» (`paywall-unlock`), solo con funciones de la allowlist PT-10, y 3 beneficios.
+  - Panel «Gratis o Pro» (`paywall-panel`) con `PaywallCompareTable` (`paywall-compare`): 6 filas, check o guion, y Semantics «X: Gratis, sí/no; Pro, sí/no».
+  - Lado a lado desde 900 px.
+  - Lógica de compra, prueba y restauración sin cambios. Sin precios: «El precio se muestra en la tienda antes de confirmar.»
+  - Token nuevo `onHeroMuted` #E9DDF0 (13,4:1). Se quitan `ProFeatureRow` y `PaywallHero`.
+- **Onboarding** (`onboarding_screen.dart` y `onboarding_views.dart`):
+  - 4 pasos con `OnboardingStepDots` («Paso N de 4»), «Saltar» (`onboarding-skip`), «Atrás» y «Siguiente» (`onboarding-next`).
+  - En el paso 3, sin responder, el botón es «Seguir sin probar» (contorneado). En el último, «Entendido, empezar» (`onboarding-start`).
+  - **Paso 1:** `OnboardingWelcomeArt`, ecualizador de 9 barras con 3 ciclos de 1,2 s, sin movimiento si se reduce, y el copy actual.
+  - **Paso 2:** «Cómo funciona» con el bento.
+  - **Paso 3:** «Escuchar la nota» (La 4 a 440 Hz), piano de sesión con correcto o incorrecto, estado `liveRegion` y «Probar otra vez».
+  - **Paso 4:** notación segmentada con vista previa, «Reducir animaciones» y «Texto más grande» (`uiPreferencesProvider`).
+  - El paso se guarda en `togesc_onboarding_step` y `_complete` lo vuelve a 0.
+- **Ajustes** (`settings_screen.dart` y `settings_groups.dart`, nuevo):
+  - 5 grupos: Práctica y accesibilidad (con la vista previa del piano en vivo), Sesión, Sonido (rejilla de timbres con preescucha y volumen con %), Apariencia y Más (tutorial y «Restablecer ajustes» en hoja).
+  - 2 columnas desde 900 px.
+  - `InstrumentTimbreGrid` se extrae de la hoja de instrumento de la sesión y se comparte.
+  - Se borran las 7 `*_settings_section.dart` antiguas.
+- **Tests:** 618 → 640.
+  - `paywall_screen_test`: 5 tests.
+  - `onboarding_screen_test`: 9 tests, con pasos, ronda de prueba, preferencias, «Saltar», paso guardado y ecualizador limitado o quieto.
+  - `settings_screen_test` (nuevo): 7 tests.
+  - `profile_screen_test` (nuevo): 5 tests.
+  - `router_onboarding_test` se adapta a los 4 pasos.
+  - En shell y smoke, la entrada a Pro se busca con `textContaining('TOGESC Pro')`.
+- **Anotado (no se arregla):**
+  - En el build sin monetización `hasProAccess` es verdadero, así que el Perfil muestra «Plan actual: TOGESC Pro» y «Gestionar TOGESC Pro». Es coherente con que todos los modos estén abiertos, pero el propietario puede preferir otro texto para ese caso.
+  - El registro con confirmación por email deja la hoja abierta con el aviso «Cuenta creada…». No hay prueba con Supabase real.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test` completo: `+640 ~1: All tests passed!`.
+  - `flutter test integration_test -d flutter-tester`: `+2`.
+
 ## 2026-10-27 · Lote 6: Velocidad · Claude Code
 - **Reglas de juego sin cambios** (SPEC §2.4.4): `speed_session_provider` no se toca. Sigue restando 1 s por acierto con un mínimo de 3 s, y un fallo o un tiempo agotado cierran la ráfaga. El prototipo dice −10 % con mínimo de 1,5 s, pero solo se ajusta el copy. «Cómo funciona» genera sus 3 pasos a partir de `speedCorrectDecrease` y `speedMinTime`.
 - **Selección** (`speed_mode_select_views.dart`):

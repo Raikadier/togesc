@@ -154,6 +154,9 @@ abstract final class DesignTokens {
   static const Color onHero = Color(0xFFFFFFFF);
   static const Color onHeroAccent = Color(0xFFDA9CFF);
 
+  /// Texto secundario sobre `hero` (paywall v2.1): 13,4:1.
+  static const Color onHeroMuted = Color(0xFFE9DDF0);
+
   /// CTA ámbar de Home. Texto `onCtaAmber` (#2A0640): 9,8:1.
   /// Nunca texto blanco encima (1,8:1).
   static const Color ctaAmber = Color(0xFFFFB300);

@@ -173,6 +173,32 @@ Aprobado el 2026-10-26 a partir del feedback del propietario sobre v2: se veía 
   - Sin latido ni destello con movimiento reducido.
 - **Resumen:** píldora «Nuevo récord personal», KPI 2×2 (Racha final, Mejor tiempo, Promedio y Respuestas) y los botones «Reintentar» (#FF8A65 con texto #2A0640) y «Menú».
 
+### Perfil, paywall, onboarding y ajustes v2.1 (lote 7)
+- **Perfil:**
+  - Cabecera con avatar de 64 px. Sin cuenta: «Entrenando sin cuenta · Tu progreso vive en este dispositivo» y «Entrar o crear cuenta». Con cuenta: el email.
+  - «Tu oído en cifras»: racha, notas consolidadas N/12 y sesiones. Solo datos reales.
+  - Card `hero` del plan con «Plan actual», los 3 beneficios y un botón blanco (#FFFFFF sobre #2A0640).
+  - Estado de sincronización con icono y texto. El ámbar pendiente usa `selectionDeep` en claro.
+  - Notación y recordatorios como interruptores en línea, y «Exportar mi progreso (JSON)».
+  - El acceso es una hoja con selector Entrar / Crear cuenta y errores en línea (icono + región viva). Borrar la cuenta también se confirma en una hoja.
+- **Paywall:**
+  - Fondo `hero` a pantalla completa: pitch con los 3 beneficios a la izquierda y panel claro «Gratis o Pro» a la derecha (debajo en móvil).
+  - Tabla con check o guion por celda y una frase accesible por fila.
+  - CTA ámbar de prueba. Sin precios: el precio lo muestra la tienda.
+  - Texto secundario sobre `hero`: `onHeroMuted` #E9DDF0 (13,4:1).
+- **Onboarding:**
+  - 4 pasos con indicador de puntos («Paso N de 4») y «Saltar».
+  - Paso 1: ecualizador de 3 ciclos, quieto con movimiento reducido.
+  - Paso 2: el bento «Cómo funciona».
+  - Paso 3: ronda de prueba con La 440 Hz y piano oscuro.
+  - Paso 4: notación, «Reducir animaciones» y «Texto más grande».
+  - El paso actual se guarda.
+- **Ajustes:**
+  - 5 grupos en cards: accesibilidad primero, luego sesión, sonido, apariencia y «Más». En escritorio van en 2 columnas.
+  - La vista previa del piano refleja al momento piano grande, etiquetas y notación.
+  - Rejilla de timbres con preescucha y volumen con su valor en %.
+  - «Restablecer ajustes» se confirma en una hoja.
+
 ## Qué queda de Harmonic Precision
 
 | Elemento | Estado |

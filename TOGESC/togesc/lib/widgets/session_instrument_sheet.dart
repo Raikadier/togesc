@@ -101,29 +101,7 @@ class _InstrumentSheetState extends State<_InstrumentSheet> {
           const Divider(height: 24),
           Text('Timbre fijo', style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final columns = constraints.maxWidth >= 480 ? 3 : 2;
-              const gap = 8.0;
-              final width =
-                  (constraints.maxWidth - gap * (columns - 1)) / columns;
-              return Wrap(
-                spacing: gap,
-                runSpacing: gap,
-                children: [
-                  for (final id in instrumentPresets.keys)
-                    SizedBox(
-                      width: width,
-                      child: _TimbreButton(
-                        id: id,
-                        selected: _current == id,
-                        onTap: () => _pickFixed(id),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
+          InstrumentTimbreGrid(selected: _current, onPick: _pickFixed),
           const SizedBox(height: 14),
           Text(
             'Solo cambia esta sesión. Al elegir un timbre suena una '
@@ -138,14 +116,61 @@ class _InstrumentSheetState extends State<_InstrumentSheet> {
   }
 }
 
+/// Rejilla de timbres fijos (2 columnas, 3 a partir de 480 px). La usan la
+/// hoja de instrumento de la sesión y Ajustes (SPEC v2.1 §2.8).
+class InstrumentTimbreGrid extends StatelessWidget {
+  const InstrumentTimbreGrid({
+    super.key,
+    required this.selected,
+    required this.onPick,
+    this.keyPrefix = 'session-timbre',
+  });
+
+  /// Timbre elegido, o null si no hay ninguno fijo.
+  final String? selected;
+  final ValueChanged<String> onPick;
+
+  /// Prefijo de la `ValueKey` de cada botón: `{keyPrefix}-{id}`.
+  final String keyPrefix;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 480 ? 3 : 2;
+        const gap = 8.0;
+        final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final id in instrumentPresets.keys)
+              SizedBox(
+                width: width,
+                child: _TimbreButton(
+                  id: id,
+                  keyPrefix: keyPrefix,
+                  selected: selected == id,
+                  onTap: () => onPick(id),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class _TimbreButton extends StatelessWidget {
   const _TimbreButton({
     required this.id,
+    required this.keyPrefix,
     required this.selected,
     required this.onTap,
   });
 
   final String id;
+  final String keyPrefix;
   final bool selected;
   final VoidCallback onTap;
 
@@ -159,12 +184,13 @@ class _TimbreButton extends StatelessWidget {
       label: selected ? '$label, elegido' : label,
       excludeSemantics: true,
       child: OutlinedButton(
-        key: ValueKey('session-timbre-$id'),
+        key: ValueKey('$keyPrefix-$id'),
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(48),
-          backgroundColor:
-              selected ? scheme.primary.withValues(alpha: 0.14) : null,
+          backgroundColor: selected
+              ? scheme.primary.withValues(alpha: 0.14)
+              : null,
           side: BorderSide(
             color: selected ? scheme.primary : scheme.outlineVariant,
             width: selected ? 2 : 1,
