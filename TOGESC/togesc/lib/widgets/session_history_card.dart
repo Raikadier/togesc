@@ -4,48 +4,41 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app/design_tokens.dart';
 import '../app/togesc_colors.dart';
 import '../models/practice_session_log.dart';
+import '../providers/clock_provider.dart';
 import '../providers/session_history_provider.dart';
+import 'progress_v2/recent_sessions_list.dart';
 import 'togesc_ui.dart';
 
-/// Ultimas sesiones de practica guardadas localmente (Fase 7C-2).
+/// Historial de sesiones de práctica guardadas localmente (Pro en v2).
+///
+/// Usa las mismas filas que «Últimas sesiones» de Progreso.
 class SessionHistoryCard extends ConsumerWidget {
   /// Si se pasa, usa esta lista en lugar del historial completo.
   final List<PracticeSessionLog>? entries;
 
-  const SessionHistoryCard({super.key, this.entries});
+  /// Máximo de filas; `null` muestra todas.
+  final int? limit;
 
-  String _formatWhen(DateTime when) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final day = DateTime(when.year, when.month, when.day);
-    final hh = when.hour.toString().padLeft(2, '0');
-    final mm = when.minute.toString().padLeft(2, '0');
-    final time = '$hh:$mm';
-
-    if (day == today) return 'Hoy · $time';
-    if (day == today.subtract(const Duration(days: 1))) {
-      return 'Ayer · $time';
-    }
-    return '${when.day}/${when.month} · $time';
-  }
-
-  Color _accuracyColor(double accuracy, TogescColors colors) {
-    if (accuracy >= 80) return colors.correct;
-    if (accuracy >= 50) return colors.selection;
-    return colors.incorrect;
-  }
+  const SessionHistoryCard({super.key, this.entries, this.limit});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historyAsync = ref.watch(sessionHistoryProvider);
-    final colors = TogescColors.of(context);
+    final now = ref.watch(clockProvider)();
 
     return historyAsync.when(
       data: (history) {
         final source = entries ?? history;
-        if (source.isEmpty) return const SizedBox.shrink();
+        if (source.isEmpty) {
+          return TogescCard(
+            child: Text(
+              'Aún no hay sesiones guardadas.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          );
+        }
 
-        final recent = source.take(8).toList();
+        final visible = limit == null ? source : source.take(limit!).toList();
 
         return TogescCard(
           child: Column(
@@ -55,8 +48,8 @@ class SessionHistoryCard extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Historial reciente',
-                      style: Theme.of(context).textTheme.titleLarge,
+                      '${source.length} sesiones',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
                   TextButton(
@@ -67,59 +60,12 @@ class SessionHistoryCard extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: DesignTokens.spacingSm),
-              ...recent.map((entry) {
-                final accuracy = entry.accuracyPercent.round();
-                return Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: DesignTokens.spacingSm,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              entry.modeLabel,
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                            Text(
-                              '${entry.roundsCompleted} rondas · '
-                              '${entry.correctRounds} aciertos',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '$accuracy%',
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  color: _accuracyColor(
-                                    accuracy.toDouble(),
-                                    colors,
-                                  ),
-                                ),
-                          ),
-                          Text(
-                            _formatWhen(entry.endedAt),
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }),
+              const SizedBox(height: DesignTokens.spacingXs),
+              for (var i = 0; i < visible.length; i++) ...[
+                if (i > 0)
+                  Divider(height: 1, color: TogescColors.of(context).divider),
+                SessionLogRow(entry: visible[i], now: now),
+              ],
             ],
           ),
         );

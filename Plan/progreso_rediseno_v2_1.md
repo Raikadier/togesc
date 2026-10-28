@@ -1,0 +1,318 @@
+# Progreso — rediseño v2.1
+
+Log en orden cronológico inverso. Hoja de ruta: `Plan/hoja_ruta_rediseno_v2_1.md`. Qué cambia: `docs/design_v2_1/SPEC_rediseno_v2_1.md`.
+
+## 2026-10-28 · Lote 8: cierre · Claude Code
+- **Contraste del tema oscuro** (`dark_theme_v2_test.dart`):
+  - Nuevo `auditContrast` (`test/helpers/contrast_audit.dart`). Recorre cada texto e icono pintado y lo compara con el fondo opaco real que tiene detrás (Material, ColoredBox, DecoratedBox o Ink, mezclando los translúcidos).
+    - Texto: 4,5:1, o 3:1 si es grande. Iconos: 3:1.
+    - Exentos: controles desactivados e iconos decorativos dentro de `ExcludeSemantics`.
+    - Un test comprueba que detecta un texto gris claro sobre blanco.
+  - Auditadas Home, Progreso, Perfil, Ajustes, Paywall, Velocidad, Suscripción, Acerca de y Privacidad, en claro y oscuro y en móvil y escritorio (36 casos). También los 4 pasos del onboarding y la hoja «Restablecer ajustes».
+- **Fallos que encontró y quedan corregidos:**
+  - Fuego de la racha del Home: #FFB300 sobre el chip claro daba 1,55:1. En claro pasa a `selectionDeep`; en oscuro sigue ámbar.
+  - «Disponible en Android e iOS.» (recordatorios en Perfil y Ajustes) salía con el gris de deshabilitado: 2,7:1 en claro y 3,6:1 en oscuro. Ahora lleva `onSurfaceVariant` explícito, porque explica por qué el interruptor está desactivado.
+  - El pie del onboarding desbordaba 28 px a 400 px de ancho (Atrás + «Seguir sin probar» / «Entendido, empezar»). El botón principal va ahora en `Expanded` + `Align` y cede en vez de desbordar.
+- **`integration_test`:** en esta máquina no hay emulador Android, chromedriver ni Visual Studio (Windows desktop). Pasa en `flutter-tester` (+2). Las capturas frente al prototipo en Android y Chrome siguen pendientes; los comandos están en la cabecera de `app_journey_test.dart`.
+- **`docs/qa_checklist.md`:** nueva sección «Rediseño v2.1: cierre», que separa lo automático (pasado) de lo manual con TalkBack o VoiceOver, NVDA y movimiento reducido del sistema (pendiente, necesita un dispositivo y una persona).
+- **`DESIGN.md`:** tabla «Qué cambió de v2 a v2.1» con **Vigente** o **Sustituido** en cada punto. «Pantallas fuera de v2» queda marcada como sustituida y la accesibilidad documenta el auditor.
+- **Anotado, sin tocar:** el icono marca de agua del hero del Home usa `Color(0x14FFFFFF)` suelto (es decorativo y está en `ExcludeSemantics`, pero incumple la regla de no usar hex sueltos).
+- **Verificación:** `flutter analyze` sin avisos, `flutter test` +680 ~1 e `integration_test` en `flutter-tester` +2.
+- **Pendiente del lote:** el paso manual con lectores de pantalla, las capturas en Android y Chrome, y el PR final con la preview de Vercel (necesita push, a la espera del visto bueno del propietario).
+
+## 2026-10-27 · Lote 7: Perfil, paywall, onboarding y ajustes · Claude Code
+- **Perfil** (`account_screen.dart` y `profile_views.dart`, nuevo):
+  - `ProfileIdentityHeader` con avatar de 64 px. Sin cuenta: «Entrenando sin cuenta · Tu progreso vive en este dispositivo» y «Entrar o crear cuenta» (`profile-sign-in`), solo si hay backend. Con cuenta: el email y si está verificado.
+  - `ProfileEarStats`, «Tu oído en cifras»:
+    - Días de racha (`engagementStatsProvider`).
+    - Notas consolidadas N/12 (`consolidatedNoteCount`).
+    - Sesiones (longitud del historial).
+    - Cada cifra es un nodo semántico propio. Solo datos reales (D10).
+  - `ProfilePlanCard` `hero`: «Plan actual», «Gratis» o «TOGESC Pro», los 3 `paywallBenefits` y un botón blanco con la key `account-pro-entry`. El texto es «Ver TOGESC Pro» o «Gestionar TOGESC Pro». Lleva a paywall o a suscripción, como antes.
+  - `ProfileSyncStatus` con icono y texto, en 4 estados: solo dispositivo, sin sincronizar, pendiente y sincronizado. Reutiliza la tinta AA de `account_sync_views` (`accountSyncStatusInk`, antes privada).
+  - Notación y recordatorios en línea con `AccountPracticePreferencesCard`, ahora visible también sin cuenta. Se pasa de `Container` a `Material` para que los `SwitchListTile` no lancen la aserción de splash.
+  - Con cuenta siguen el aviso de verificación, los cambios pendientes, el diagnóstico y los botones de sincronizar y cerrar sesión.
+  - **Hoja de acceso** (`account_auth_sheet.dart`, nuevo):
+    - Selector Entrar / Crear cuenta y recuperación de contraseña.
+    - Errores en línea con icono y región viva («Error: …»).
+    - La lógica `_submitAuth` y `_sendPasswordReset` se mueve de la pantalla a la hoja con los mismos textos. Al entrar, la hoja se cierra y el Perfil muestra el mensaje.
+    - La nueva contraseña tras el enlace de recuperación sigue en la pantalla.
+  - **Datos:**
+    - «Exportar mi progreso (JSON)» (`account-export`).
+    - Borrar la cuenta se confirma en una hoja (`account-delete-sheet`, `account-delete-confirm`) en lugar de un `AlertDialog`.
+    - «Política de privacidad» con tilde.
+  - Se eliminan `AccountProfileHeader`, `AccountSyncProBanner` y `AccountOfflineView`, que ya no se usaban.
+- **Paywall** (`paywall_screen.dart` y `paywall_views.dart`, nuevo):
+  - Fondo `hero`, cabecera con logo y cerrar.
+  - `PaywallPitch` con la píldora «Desbloquea …» (`paywall-unlock`), solo con funciones de la allowlist PT-10, y 3 beneficios.
+  - Panel «Gratis o Pro» (`paywall-panel`) con `PaywallCompareTable` (`paywall-compare`): 6 filas, check o guion, y Semantics «X: Gratis, sí/no; Pro, sí/no».
+  - Lado a lado desde 900 px.
+  - Lógica de compra, prueba y restauración sin cambios. Sin precios: «El precio se muestra en la tienda antes de confirmar.»
+  - Token nuevo `onHeroMuted` #E9DDF0 (13,4:1). Se quitan `ProFeatureRow` y `PaywallHero`.
+- **Onboarding** (`onboarding_screen.dart` y `onboarding_views.dart`):
+  - 4 pasos con `OnboardingStepDots` («Paso N de 4»), «Saltar» (`onboarding-skip`), «Atrás» y «Siguiente» (`onboarding-next`).
+  - En el paso 3, sin responder, el botón es «Seguir sin probar» (contorneado). En el último, «Entendido, empezar» (`onboarding-start`).
+  - **Paso 1:** `OnboardingWelcomeArt`, ecualizador de 9 barras con 3 ciclos de 1,2 s, sin movimiento si se reduce, y el copy actual.
+  - **Paso 2:** «Cómo funciona» con el bento.
+  - **Paso 3:** «Escuchar la nota» (La 4 a 440 Hz), piano de sesión con correcto o incorrecto, estado `liveRegion` y «Probar otra vez».
+  - **Paso 4:** notación segmentada con vista previa, «Reducir animaciones» y «Texto más grande» (`uiPreferencesProvider`).
+  - El paso se guarda en `togesc_onboarding_step` y `_complete` lo vuelve a 0.
+- **Ajustes** (`settings_screen.dart` y `settings_groups.dart`, nuevo):
+  - 5 grupos: Práctica y accesibilidad (con la vista previa del piano en vivo), Sesión, Sonido (rejilla de timbres con preescucha y volumen con %), Apariencia y Más (tutorial y «Restablecer ajustes» en hoja).
+  - 2 columnas desde 900 px.
+  - `InstrumentTimbreGrid` se extrae de la hoja de instrumento de la sesión y se comparte.
+  - Se borran las 7 `*_settings_section.dart` antiguas.
+- **Tests:** 618 → 640.
+  - `paywall_screen_test`: 5 tests.
+  - `onboarding_screen_test`: 9 tests, con pasos, ronda de prueba, preferencias, «Saltar», paso guardado y ecualizador limitado o quieto.
+  - `settings_screen_test` (nuevo): 7 tests.
+  - `profile_screen_test` (nuevo): 5 tests.
+  - `router_onboarding_test` se adapta a los 4 pasos.
+  - En shell y smoke, la entrada a Pro se busca con `textContaining('TOGESC Pro')`.
+- **Anotado (no se arregla):**
+  - En el build sin monetización `hasProAccess` es verdadero, así que el Perfil muestra «Plan actual: TOGESC Pro» y «Gestionar TOGESC Pro». Es coherente con que todos los modos estén abiertos, pero el propietario puede preferir otro texto para ese caso.
+  - El registro con confirmación por email deja la hoja abierta con el aviso «Cuenta creada…». No hay prueba con Supabase real.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test` completo: `+640 ~1: All tests passed!`.
+  - `flutter test integration_test -d flutter-tester`: `+2`.
+
+## 2026-10-27 · Lote 6: Velocidad · Claude Code
+- **Reglas de juego sin cambios** (SPEC §2.4.4): `speed_session_provider` no se toca. Sigue restando 1 s por acierto con un mínimo de 3 s, y un fallo o un tiempo agotado cierran la ráfaga. El prototipo dice −10 % con mínimo de 1,5 s, pero solo se ajusta el copy. «Cómo funciona» genera sus 3 pasos a partir de `speedCorrectDecrease` y `speedMinTime`.
+- **Selección** (`speed_mode_select_views.dart`):
+  - Fácil, Pro y Elite son tarjetas radio (`speed-diff-{easy|pro|elite}`).
+    - Cada una tiene un cuadro de segundos de 64 px, nombre, descripción, «Mejor racha» (`speed-best-*`, «—» sin datos) y un check.
+    - Semantics `inMutuallyExclusiveGroup` + `checked`. La selección no depende solo del color: lleva borde, fondo, cuadro relleno e icono.
+  - Orden nuevo: cabecera, dificultad, «Elige el modo para empezar», modos y «Cómo funciona» (3 pasos numerados). A partir de 600 px de ancho de contenido (`shellBreakpoint`, el mismo del bento), dificultad y «Cómo funciona» van lado a lado.
+  - **«Teclas negras»:** se mantiene como card `hero` de modo (`sharpsOnly`) con el icono `piano`, no como el interruptor del prototipo. Un interruptor cambiaría el pool de notas de los 5 modos, que es una regla de juego; queda para que lo decida el propietario.
+- **Mejor racha** (`speed_best_streak_provider.dart`, nuevo):
+  - Se guarda por dificultad en `togesc_speed_best_streak_{easy|pro|elite}`, sin distinguir el modo.
+  - `submit` solo guarda si la racha es mayor que 0 y supera la anterior, y devuelve si es récord.
+  - La pantalla de juego lo llama al pasar a `incorrect` o `timeout`, con la dificultad con la que se abrió.
+- **Juego** (`speed_game_screen.dart`):
+  - Cuenta atrás 3-2-1 al pulsar «Comenzar» y «Reintentar»: pop con `easeSpring`, `liveRegion` y un clic sutil (523 Hz y 1046 Hz en el 1, 80 ms a 0,3 de ganancia). Cada paso dura 800 ms, o 500 ms con movimiento reducido.
+  - `CountdownTimerWidget` se rehace como anillo de 168 px en `speedAccent` (#FF8A65 en la sesión). Con menos de 2 s o menos del 30 % del límite, anillo y cifra pasan a `incorrect` (#EF9A9A), la etiqueta cambia a «¡Rápido!» y la cifra late (sin latido con movimiento reducido). Semantics «Tiempo restante: N segundos».
+  - Destello de fondo verde o rojo (14 %, 500 ms) en cada acierto, fallo o tiempo agotado. No hay destello con movimiento reducido.
+  - «Piano más grande» llega por fin al teclado de velocidad (pendiente del lote 4).
+- **Resumen** (`SpeedSessionResultView`):
+  - «Fin de sesión», motivo («Incorrecto» o «Tiempo agotado» con «Las notas eran: …», el texto actual) y la píldora «Nuevo récord personal» (`speed-new-record`).
+  - 4 KPI en rejilla 2×2 (`speed-kpi-*`): Racha final, Mejor tiempo, Promedio y Respuestas (aciertos/rondas). Tiempos con coma y 2 decimales, «—» sin datos.
+  - Desaparece el KPI «Tiempo límite» de la card naranja antigua.
+  - «Reintentar» va en `speedAccent` con texto `onSpeedAccent` (#2A0640 en la sesión). «Menú» es un botón contorneado.
+- **Tests:** `speed_screens_test.dart` pasa de 6 a 16.
+  - Se sustituye el test de la card antigua del resumen.
+  - Selección: tarjetas, mejor racha guardada o «—», estado `checked`, pasos de «Cómo funciona» y `formatSpeedSeconds`.
+  - Juego: cuenta atrás, destello, récord persistido, KPI, «Reintentar» que vuelve a la cuenta atrás, sin récord no hay píldora, y movimiento reducido.
+  - Anillo: tamaño, estado bajo, latido y que el latido se para.
+  - Resumen y botones.
+  - El test usa un `_SilentAudio`, porque el audio real no termina en el entorno de test.
+- **Anotado (no se arregla):**
+  - `startRound` vuelve sin hacer nada si el SRS aún no ha cargado (`valueOrNull == null`). En la app ya está cargado al llegar aquí, pero la ráfaga podría no arrancar en silencio. Ya pasaba antes del lote.
+  - La dificultad elegida no se persiste entre sesiones de la app (el prototipo sí la guarda).
+  - `responseTimes` incluye las respuestas falladas, así que «Mejor tiempo» puede ser el de un fallo. Es el dato del provider, que no se toca.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test` completo: `+618 ~1: All tests passed!` (antes 608).
+  - `flutter test integration_test -d flutter-tester`: `+2`.
+
+## 2026-10-27 · Lote 5: Progreso · Claude Code
+- **Pestañas «Resumen | Historial»** (`progress_tabs.dart`): `Semantics` con `SemanticsRole.tabBar`, `tab` (con `selected`) y `tabPanel` (`progress-panel-{summary|history}`). Las flechas ← → cambian de pestaña y mueven el foco. Al tocar una pestaña se le da el foco. Anillo de foco de 3 px.
+- **Cabecera** (`global_accuracy_header.dart`):
+  - La precisión global usa `CountUpText`: misma clave y mismo Semantics, que lee el valor final.
+  - Meta con degradado `primaryContainer → primary` que crece en 900 ms.
+  - El delta semanal existente se reutiliza.
+  - **Se mantiene el texto actual** «78% de la meta (90%)» (regla 6) frente a «X % de la meta / Meta 90 %».
+- **KPI «Pendientes»:** ahora **siempre** es pulsable (`progress-kpi-pending`, con el icono `event_repeat`). Abre la sesión de hoy con el foco del plan (`setPracticeFocusNotes`). Antes era una sesión de nota única y solo con pendientes > 0.
+- **Dominio por nota** (`mastery_overview.dart`):
+  - Por debajo de 720 de ancho, el selector «Rueda | Rejilla» abre en la rueda. A partir de 720, las dos lado a lado y sin selector.
+  - `StatisticsScreen.maxContentWidth` pasa de 720 a 960 para que quepan.
+  - Centro de la rueda: «N/12 consolidadas», con N = notas con ≥ 75 %, como la meta de octava del Home. El subtítulo sigue con los consolidados del SRS, como en v2.
+  - `NoteMasteryGrid`:
+    - Celdas con entrada escalonada de 35 ms.
+    - Icono `schedule` (`mastery-due-{nota}`) en las vencidas vistas.
+    - «, pendiente de repaso» en Semantics, que la rueda hereda.
+    - Leyenda con «Pendiente de repaso».
+    - `showHeader` para incrustarla en la card.
+- **Hoja de detalle de nota** (`note_detail_sheet.dart`, `note-detail-sheet`). Sustituye a `NoteSrsDetailCard` en Progreso; `NoteProgressScreen` sigue usando la antigua.
+  - Celda de 88 px y estado (más «· pendiente de repaso»).
+  - Precisión, intentos y latencia media (`avgResponseTimeSec`, «—» sin datos).
+  - Pista de nivel 1–5 y una frase por estado (`noteDetailAdvice`).
+  - «Escuchar» (la nota en octava 4 con el timbre de preferencias) y «Practicar esta nota».
+  - **Cambio de gating:** la hoja antigua mostraba precisión e intentos solo con Pro y el botón decía «Practicar (Pro)» aunque dejaba practicar. Ahora se muestra a todos, porque la rejilla gratuita (D7) ya enseña el % y el modo de una nota es gratis. El «Peso SRS» (avanzado) ya no aparece.
+- **«Tus extremos»** (`note_extremes.dart`, Pro con `progressProAccessProvider`):
+  - Las 3 notas vistas con menor y mayor precisión, sin solaparse. Con menos de 6 notas vistas reparte la mitad; con menos de 2, un mensaje.
+  - Las filas son pulsables y abren el detalle.
+  - Sin Pro, una card con candado que lleva al paywall.
+- **Historial** (Pro, D7):
+  - `SessionAccuracyBars` se añade a `session_evolution_chart.dart`: barras rellenas de las últimas 8 sesiones, de la más antigua a la más reciente. Son verdes a partir del 75 % y crecen escalonadas.
+  - El Semantics de imagen lee cada sesión («Una sola nota, 9/10, 80 %; …»).
+  - Debajo: evolución por periodo y exportación CSV, movidas desde Resumen, y la lista completa (`SessionHistoryCard`).
+  - Sin Pro, la invitación de siempre («Evolución e historial · Pro»).
+  - «Historial» en Últimas sesiones cambia de pestaña en lugar de abrir otra página. `SessionHistoryPage` queda sin uso desde Progreso.
+- **Entrada escalonada** de los bloques del Resumen.
+- **Tests (+17):**
+  - `statistics_screen_test`:
+    - El helper cambia a «Rejilla».
+    - Tests nuevos de pestañas (Semantics `selected`, flechas y panel), rueda o rejilla en móvil, las dos en escritorio, icono de vencidas, Pendientes que abre la sesión, extremos Pro y gratuitos, y el detalle nuevo.
+    - Ajustes: la invitación Pro se ve en Historial y «Historial» cambia de pestaña.
+  - `note_detail_sheet_test` (nuevo): la hoja completa, sin datos, 320 px sin desbordar, `noteExtremes` y `SessionAccuracyBars` (orden, texto alternativo y movimiento reducido).
+  - `dark_theme_v2_test` cambia a la rejilla.
+  - `note_progress_screen_test`: sin cambios, en verde.
+- **Hallazgo en los tests:** el SRS da por vencida cualquier nota sin `nextReview`. El `seed` de `statistics_screen_test` ahora fija una revisión futura, para que el icono de vencida no salga en todas.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test`: `+608 ~1: All tests passed!` (antes 591).
+  - `flutter test integration_test -d flutter-tester`: `+2: All tests passed!`.
+  - **No revisado a ojo en un navegador.**
+
+## 2026-10-27 · Lote 4: sesión · Claude Code
+- **«Preparado» siempre al entrar** (`SessionPhase.idle`, `GameState.idle`):
+  - Overline «Preparado», icono `headphones`, «Ponte los auriculares» y un subtítulo con datos reales: «12 rondas · 1 nota · foco en D», o «Sin límite de rondas».
+  - CTA ámbar «Estoy listo» (`session-start`). Es el gesto que llama a `captureUserGesture` (D4) y también responde a Espacio.
+  - «Probar el sonido» (`session-test-sound`) toca un La 4 de 440 Hz con el timbre de la sesión y avisa con un SnackBar. Si falla, lo dice.
+  - El teclado y los controles no aparecen hasta empezar.
+  - Se quita la heurística de autoarranque («fuera de web o con ruta previa»). `GameScreen.autoStart` queda solo para tests.
+  - **«Estoy listo» no lleva `autofocus`.** Con él, el foco se quedaba en el scope de la ruta al desaparecer el botón y A–G dejaban de llegar a `SessionShortcuts`.
+- **Snapshot SRS y tiempos** (`game_session_provider`):
+  - `GameSessionState.srsSnapshot` guarda nivel, precisión y vistas de cada nota en la primera ronda con el SRS cargado (`snapshotSrs`, en `utils/session_summary.dart`).
+  - `responseTimes` (uno por ronda respondida), `sessionNotes` y el getter `meanResponseTimeSec`.
+  - `setMode` lo reinicia todo.
+  - **El tiempo de respuesta ya existía:** `RoundResult.responseTime`, medido por la pantalla desde el inicio de `answer` y sin las pausas. Solo se acumula.
+- **«¡N seguidas!»** con 3 o más aciertos seguidos: campo `streak` de `SessionPhaseContext`.
+- **Hoja «Instrumento de esta sesión»:** ya existía en todos los tamaños (`session_instrument_sheet.dart`).
+  - Nuevo título y cerrar, rejilla de timbres de 2 o 3 columnas, preescucha de un Do 4 al elegir uno fijo (la hoja sigue abierta) e icono `piano` en el botón (`session-instrument`).
+  - «Según preferencias» y «Aleatorio» siguen cerrando la hoja.
+- **Hoja «Sesión en pausa»** (`session_pause_sheet.dart`):
+  - Se abre con el botón de pausa (en `answer`, `result` o `paused`), con **Esc** (`SessionShortcut.pause`) o al volver con la sesión en curso: `PopScope` y la flecha «Volver».
+  - Muestra «Ronda X de N · Y aciertos», Continuar, Reiniciar la sesión y Salir sin guardar. En sesiones **sin límite** añade «Terminar y ver resumen», porque esas sesiones no llegan solas al resumen.
+  - Pausar en `answer` detiene el cronómetro. En `result` cancela el avance automático y Continuar lo reprograma. Si `listen` termina con la hoja abierta, el cronómetro arranca ya en pausa.
+  - **Copy distinto del prototipo:** el prototipo dice «Tu progreso SRS se guarda al terminar», pero aquí el SRS se guarda en cada ronda. Ahora pone: «El SRS ya guardó cada respuesta. “Salir sin guardar” no registra esta sesión en tu historial.» Es lo que hace: `_discardHistory` evita `sessionHistory.record`.
+  - Reiniciar vuelve a «Preparado» con los contadores y el snapshot a cero. Las respuestas ya dadas siguen en el SRS.
+- **Resumen al terminar** (`session_summary_view.dart`, clave `session-summary`):
+  - Aparece tras el resultado de la última ronda, con el mismo retardo de 2,2 s o el reducido. En modo manual aparece con «Ver resumen» (`session-show-summary`). Sustituye a «Volver al inicio» en el anillo.
+  - Medalla por precisión: ≥ 75 % `military_tech` «Gran oído hoy», ≥ 50 % `workspace_premium`, y si no `self_improvement`. Entra con spring.
+  - KPI:
+    - Precisión con `CountUpText`.
+    - Aciertos «X/N».
+    - Tiempo medio medido, con coma decimal, o «—» si no hay datos.
+  - «Cambios de nivel SRS» (`buildSessionLevelChanges`): una fila por nota que salió, con antes → después, puntos, flecha y Semantics («D: nivel 0 a 2 de 5, sube»). Las filas entran escalonadas cada 90 ms.
+  - Rueda compacta con los datos ya actualizados. Botones «Volver al inicio» (`session-summary-home`) y «Ver mi progreso» (`session-summary-progress`, que va a `/statistics`).
+  - El titular es una región viva: «Sesión completada. … X de N aciertos, P por ciento.».
+  - No se escribe «Racha de hoy asegurada» porque el historial se registra al salir.
+- **Panel SRS de escritorio:**
+  - Resalta la nota de la ronda **solo en `result`** (fondo #DA9CFF al 10 % y «nota de esta ronda» en Semantics), para no desvelar la respuesta. El prototipo hace lo mismo.
+  - La leyenda añade «· Esc pausar».
+- **Copy:** con la meta cumplida, «Objetivo cumplido: N rondas. Preparando tu resumen…».
+- **Tests (+19 netos):**
+  - `game_screen_test`: Preparado (auriculares, subtítulo, sin teclado), Espacio arranca, Probar el sonido, pausa y Continuar, Esc y Reiniciar, volver que pausa y «Salir sin guardar» sin historial, «¡3 seguidas!», resumen con medalla, KPI, latencia, cambio SRS de D, rueda y región viva, «Ver resumen» en modo manual, y leyenda con Esc.
+  - `session_v2_test`: copy de Preparado y de racha, y Esc.
+  - `session_summary_test` (nuevo): snapshot, antes/después y orden, igual o sin datos, tiempo medio, medallas y frase.
+  - Actualizados:
+    - `full_game_flow_test`: Preparado → Estoy listo; al final, `session-summary` y `session-summary-home`; salida por la pausa.
+    - `app_smoke_test`: cada tile abre «Preparado».
+    - `integration_test/app_journey_test`: capturas `02a_session_ready` y `13_session_summary`; Esc y «Salir sin guardar» en escritorio.
+    - `e2e_harness`: tecla `Escape`, sin carácter en web.
+- **No incluido (SPEC §2.2.3):** el pop del nombre de la nota en el anillo y la subida animada de la píldora SRS. No estaban en la lista del lote; quedan para un repaso de movimiento. La pantalla de velocidad no se toca.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test`: `+591 ~1: All tests passed!` (antes 572).
+  - `flutter test integration_test -d flutter-tester`: `+2: All tests passed!`.
+  - **No revisado a ojo en un navegador.**
+
+## 2026-10-27 · Lote 3: Home · Claude Code
+- **Hero** (`today_session_hero.dart`):
+  - `HeroLiveDot` junto a «Sesión de hoy»: escala 1 → 1,6 con fade, 1,8 s por pulso. **Late solo dos veces y se queda quieto** (3,6 s). El prototipo lo deja en bucle, pero eso superaría los 5 s de movimiento automático de WCAG 2.2.2 y colgaría los `pumpAndSettle` de los tests y del e2e. Con movimiento reducido, quieto.
+  - Las mini-cards muestran el % y el estado en texto (`focusNoteStateLabel`: Nueva, Crítica, En curso o Consolidada, según los umbrales de dominio). El estado también va en Semantics.
+  - `HeroSteps`: «1 · Escucha», «2 · Toca la tecla» y «3 · El SRS ajusta tu repaso», con los iconos `hearing`, `piano` y `trending_up` en #DA9CFF.
+  - Copy según el número de notas (la nota, dos, tres o cuatro, con concordancia en singular) y copy propio cuando el foco se elige a mano («Elegiste N notas foco para hoy; el resto sigue el repaso SRS normal.»).
+  - **Se mantiene el copy actual frente al del prototipo** (regla 6 y D10). «Que perdieron precisión esta semana» es una afirmación que los datos no respaldan.
+- **Hoja «Ajustar la sesión de hoy»** (`today_adjust_sheet.dart`, clave `today-adjust-sheet`). El enlace `today-adjust-link` la abre en lugar de ir a Ajustes.
+  - Duración segmentada: 6 · 3 min, 12 · 6 min y 20 · 10 min.
+  - Chips de las 12 notas con muestra de dominio y Semantics «C sostenido, 42 %».
+  - De 1 a 4 notas foco. La quinta muestra un aviso en una región viva y no se deja quitar la última.
+  - Guardar y Cancelar, y un SnackBar «Sesión de hoy actualizada».
+  - **Al guardar:**
+    - La duración va a `practiceSessionPreferences.roundGoal`, persistida. Es la misma meta que en Ajustes y se añade `SessionRoundGoal.six`.
+    - Las notas van a `todayFocusOverrideProvider`. Es un estado nuevo en `today_session_provider`, **en memoria y solo para ese día**: se pierde al reiniciar y al cambiar de día vuelve la propuesta del SRS. Si se quiere persistido, haría falta una clave en `AppPreferences`; queda anotado.
+  - `maxPracticeFocusNotes` pasa de 3 a 4 (v2 D11 → SPEC v2.1). El plan automático sigue proponiendo 3.
+- **Card «Mapa del oído»** (`ear_map_card.dart`):
+  - `EarMapWheel` con la precisión global en el centro. Se calcula con `globalAccuracyFromSummaries`, con la misma fórmula que `accuracy_percentage` del SRS, y muestra «—» sin datos.
+  - Leyenda con los rangos escritos y enlace «Ver progreso».
+  - **Meta de octava** (`octave-goal`): anillo y «N de 12 notas consolidadas», con N = notas vistas con ≥ 75 %, y «Te faltan M…» o «Dominas la octava completa».
+  - Al tocar un segmento aparece una fila de detalle (`ear-map-detail`, región viva) con celda, estado, «% · intentos · nivel» y **Practicar** (`ear-map-practice`). Practicar abre `/game/1` con `practiceFocusNoteProvider` = nota y el foco de hoy vacío.
+- **Últimos 7 días** (`week_strip.dart`):
+  - `buildRecentDays` (de hace 6 días a hoy) y `recentDaysProvider`. `calendarWeekProvider` (L–D) se queda: lo usa `today_session_provider_test`.
+  - La celda de hoy se rotula «HOY». Si la meta está pendiente, lleva superficie de tile y borde discontinuo de acento (`week-today-pending`).
+  - **Frase de racha** (`week-streak-copy`) con `homeStreakStatusProvider`. Como `computeStreakDays` da 0 si hoy no se ha practicado, «llevar la racha a N» usa la racha hasta ayer + 1.
+- **Escritorio (≥ 1024):** dos columnas, 1,25 fr / 1 fr, con un máximo de 1120 (`homeDesktopMaxWidth`).
+  - Izquierda: hero, Retomar y Práctica libre. Derecha: mapa y días.
+  - El efecto *sticky* se consigue con un scroll independiente en cada columna: la derecha no se mueve al desplazar la izquierda. Lo cubre un test.
+  - En móvil, el orden es el del prototipo.
+- **Entrada escalonada:** `StaggeredEntrance` en cada bloque.
+- **Tests:**
+  - `home_screen_test`: hoja (guardar, límite de 4, cancelar), hero (punto, estados, pasos), mapa (70 %, meta 2 de 12, Semantics del segmento, detalle y Practicar), últimos 7 días con racha pendiente y cumplida, y escritorio en dos columnas con la derecha fija.
+  - `home_v2_widgets_test`: copy por número de notas y a mano, estado de la mini-card, «HOY» y borde discontinuo, `buildRecentDays`, `weekStreakCopy` y `HomeStreakStatus.fromHistory`.
+  - Ajustados: `dark_theme_v2_test` (hoy pendiente va sobre tile con borde discontinuo) y `game_session_provider_test` (límite de foco de 4).
+- **No incluido:** `CountUpText` en el centro de la rueda, porque `EarMapWheel` recibe el valor como texto. Habría que aceptar un widget en el centro; queda para el lote de Progreso.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test`: `+572 ~1: All tests passed!` (antes 558).
+  - `flutter test integration_test -d flutter-tester`: `+2: All tests passed!`.
+  - **No revisado a ojo en un navegador.**
+
+## 2026-10-27 · Lote 2: componentes compartidos · Claude Code
+- **`lib/widgets/ear_map/ear_map_wheel.dart` (`EarMapWheel`, clave `ear-map`):**
+  - Entrada: `List<NoteProgressSummary>`, colocados por nota. Las que faltan cuentan como «sin datos».
+  - Un `CustomPainter` dibuja pista, relleno (`masteryColor` y mínimo 6 %), resaltado al pasar el ratón o con foco (primario al 14 %), anillo de foco de 3 px y contorno de la nota seleccionada (`selectedNote`).
+  - Etiquetas a r = 146 (148 en la compacta) con la notación activa. Centro: `centerValue` y `centerCaption`, o «{nota} · nivel X/5» con su % al pasar el ratón o con foco.
+  - Cada segmento tiene `Semantics` propio (`ear-map-segment-{nota}`, con la etiqueta de `NoteMasteryCell.semanticsLabelFor`) y es un `Focus` con Enter, Espacio, toque y clic. Las zonas táctiles se recortan con `ClipPath` al sector, que se amplía hasta la etiqueta para superar los 48 px.
+  - Tab va en orden cromático gracias a `WidgetOrderTraversalPolicy`. Sin ella, el orden era geométrico y empezaba por A#; lo detectó el test.
+  - Callbacks `onSelect` y `onHover`. Variantes `onDark` (pista blanca al 8 % y texto claro) y `compact`.
+  - Entrada escalonada: escala .55 → 1 con `easeSpring` y fade, 900 ms por segmento, 45 ms de desfase y 120 ms iniciales. Con movimiento reducido no hay animación.
+- **`CountUpText`** (`lib/widgets/count_up_text.dart`): cuenta de 0 al valor en 900 ms con `easeOutCubic`. Con movimiento reducido muestra el valor final. El lector lee solo el valor final o `semanticsLabel`.
+- **`StaggeredEntrance`** (`lib/widgets/staggered_entrance.dart`): sube 12 px con fade en 600 ms con `easeOut`, con un retardo de `index × staggerStep`. Con movimiento reducido no anima.
+- **`PianoKeyboard` (variantes de sesión), sin cambios en la API pública:**
+  - Hundimiento de 2 px (antes 3) en `durationKey`, y onda #DA9CFF al 50 %.
+  - `_KeyFeedbackMotion`: pop (−4 px y ×1,03, 450 ms) al pasar a correcta y shake (±4 px, 400 ms) al pasar a errónea.
+  - Icono ✓/✗ con escala .4 → 1 y `easeSpring`.
+  - `large` aplica «Piano más grande»: 270 y negras de 44×160 en móvil, 250 y 58×150 en escritorio (tokens nuevos `pianoSessionLarge*` y `pianoSessionWideLarge*`).
+  - Se mantienen `piano-key-*` y `piano-session-container`.
+- **Fuera del componente (mínimo):** `game_screen` pasa `large: ui.largePiano` al teclado. Antes la preferencia «Piano más grande» no hacía nada en la sesión v2. La pantalla de velocidad sigue sin pasarla; queda para su lote.
+- **`SessionPhaseRing`:** pasa a `StatefulWidget` con la misma API, más `listenDuration` (1,5 s por defecto).
+  - Un arco de progreso lineal se pinta sobre el borde en `listen`.
+  - Halo de 1,2 s al entrar en `result`: `BoxShadow` de 0 a 26 px que se desvanece.
+  - Sin arco ni halo con movimiento reducido.
+- **Tests (+23):**
+  - `ear_map_wheel_test.dart` (10): Semantics de los 12 segmentos, «sin datos», notación Do/Re/Mi, Tab en orden cromático más Enter y Espacio, centro con foco, toque, sin `onSelect` no hay botones, un solo frame con movimiento reducido, la entrada termina, y las variantes oscura y compacta.
+  - `motion_widgets_test.dart` (13): `CountUpText`, `StaggeredEntrance`, medidas del piano grande, pop, shake y reposo, sin animación con movimiento reducido, y halo y arco del anillo.
+- **No incluido:**
+  - El golden opcional de la rueda. Las fuentes en Windows y en el CI de Linux difieren y daría falsos fallos; mejor hacerlo cuando haya un entorno de goldens fijo.
+  - El borde de 1 px del relleno para el contraste (ver lote 1). Queda pendiente para cuando la rueda se monte en Home y Progreso.
+- **Bug ajeno anotado (no se arregla):** fuera de `TogescApp`, con `disableAnimations` y `PianoKeyboard` de sesión, al llegar el resultado queda una animación implícita de unos 200 ms que no es nuestra (ya pasaba en HEAD; parece de `Material`). En la app no se nota porque `TickerMode` está desactivado con «Reducir animaciones». Solo afecta a `disableAnimations` del sistema.
+- **Verificación:** `flutter analyze`: «No issues found!». `flutter test` completo: `+558 ~1: All tests passed!` (antes 535).
+
+## 2026-10-27 · Lote 1: tokens y preferencias · Claude Code
+- **`design_tokens.dart`:**
+  - Tokens nuevos: `easeOut`, `easeSpring`, `durationKey`, `durationFast`, `durationMedium` (alias de `motionKeyPress`, `motionFast` y `motionMedium` para no tocar los widgets v2), `staggerStep`, `staggerWheel`, `earMapViewBox`, `earMapInner`, `earMapOuter`, `earMapInnerCompact`, `earMapOuterCompact` y `earMapTrackOnHero` (#14FFFFFF).
+  - Helper `motionDuration(context, d)`: devuelve `Duration.zero` si `MediaQuery.disableAnimations` está activo. Basta con leer `MediaQuery`, porque `TogescApp` ya combina ahí `reduceAnimations`. Sin `MediaQuery` arriba, devuelve `d`.
+- **`TogescColors`:** roles `earMapTrack` (claro #F3ECF1, oscuro y sesión #241B2A) y `earMapTrackOnHero`, con `copyWith` y `lerp`. Se comprueba que la celda vacía (`muted`) en oscuro es #241B2A, y lo es.
+- **`UiPreferences.largeText`:**
+  - Bool, `false` por defecto. Se persiste con la clave `togesc_large_text` y tiene `copyWith`, `setLargeText` en el notifier y salida en el export JSON (`ui.large_text`).
+  - Aún no tiene interruptor en Ajustes (lote de Ajustes/Onboarding).
+- **`main.dart`:** `TogescApp` aplica `applyLargeText(media.textScaler, largeText:)`, de `lib/app/large_text_scaler.dart`.
+  - Envuelve el escalado del sistema y multiplica ×1,125 en `scale()`, en lugar de usar `TextScaler.linear(factor·1,125)`, para no perder un escalado del sistema no lineal (Android 14).
+- **Tests (+12):**
+  - `design_tokens_v2_test.dart`: valores de movimiento, que `easeSpring` rebasa 1, medidas de la rueda, pista por tema, celda vacía en oscuro, contraste del texto sobre la pista ≥ 4,5:1 en claro, oscuro, sesión y hero (con `_wcagRatio` y `contrastRatio`), y `motionDuration` con y sin movimiento reducido.
+  - `ui_preferences_test.dart`: default, `copyWith`, persistencia de `largeText` y `applyLargeText` (sin activar, lineal y no lineal).
+- **Para el lote de `EarMapWheel` (sin arreglar aquí):** el contraste de los rellenos sobre la pista no llega a 3:1 en todos los casos. Ámbar sobre la pista clara da 1,55:1, rojo sobre la pista oscura 2,95:1 y sobre hero 2,58:1. No bloquea, porque cada segmento lleva etiqueta y % (el color no es la única señal), pero conviene valorar un borde de 1 px en el relleno.
+- **Incidencia:** `dart format` reformateaba archivos que no siguen su estilo. Se deshizo y solo se dejaron las líneas nuevas.
+- **Verificación:** `flutter analyze`: «No issues found!». `flutter test` completo: `+535 ~1: All tests passed!` (antes 523).
+
+## 2026-10-26 · Lote 0: preparación · Claude Code
+- **Cambios sin commitear de v2:** cuando empezó el lote ya no había ninguno. El propietario los había commiteado en `feat/rediseno-v2` (`48a3441` panel «Enfoque SRS» en vivo, `6386970` docs v2.1 y `f5a48db` .gitignore). No hubo que tocar nada.
+- **Rama:** `feat/rediseno-v2.1`, creada desde `feat/rediseno-v2` (`f5a48db`) con el árbol limpio.
+- **Docs:**
+  - `DESIGN.md`: `version` pasa a 2.1, cambia `updated` a 2026-10-26 y se añade la sección «v2.1», que remite al SPEC.
+  - `PRODUCT.md`: en «Notas» se registra la decisión del 2026-10-26. Se mantiene sin XP en el Home.
+- **Código:** sin cambios.
+- **Verificación:** `flutter analyze`: «No issues found!». `flutter test` completo: `+523 ~1: All tests passed!`.

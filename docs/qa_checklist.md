@@ -13,6 +13,26 @@ Debe pasar: `flutter analyze`, `flutter test` (285+).
 
 ---
 
+## Rediseño v2.1: cierre (lote 8, 2026-10-28)
+
+Las secciones 0–8 son de v1.0 y algunas ya no describen la app (XP en el Home, rejilla bento de modos, pestaña Pro). Esta sección las sustituye para v2.1. Leyenda: **[auto]** lo cubre un test automático (se indica cuál) y **[manual]** pide un dispositivo real y un lector de pantalla.
+
+### Automático (pasado el 2026-10-28)
+- [x] [auto] `flutter analyze` sin avisos y `flutter test` completo.
+- [x] [auto] `integration_test` en `flutter-tester`: viaje completo en móvil y en escritorio (rail, panel SRS y atajos).
+- [x] [auto] Contraste AA de cada texto e icono en Home, Progreso, Perfil, Ajustes, Paywall, Velocidad, Suscripción, Acerca de y Privacidad, en claro y oscuro, móvil y escritorio, más los 4 pasos del onboarding y la hoja de restablecer (`dark_theme_v2_test.dart`).
+- [x] [auto] Movimiento reducido con `disableAnimations`: ecualizador del onboarding, latido y destello de velocidad, mapa del oído, hoja de detalle de nota y componentes compartidos (`motion_widgets_test.dart`).
+- [x] [auto] Objetivos de 48 px en la barra y el rail, el piano, la velocidad y la entrada a Pro del Perfil. Regiones vivas en la prueba del onboarding.
+
+### Manual con lector de pantalla (pendiente)
+- [ ] [manual] **TalkBack (Android)** o **VoiceOver (iOS):** onboarding completo, una sesión de 6 rondas (se anuncia cada resultado y el resumen), detalle de nota en Progreso y Perfil.
+- [ ] [manual] **NVDA + Chrome (web):** el mismo recorrido con teclado. Tab recorre el mapa del oído en orden cromático, las pestañas de Progreso cambian con ← →, Esc abre la pausa y A–G responden.
+- [ ] [manual] **Movimiento reducido del sistema** (Android «Quitar animaciones», iOS «Reducir movimiento» y `prefers-reduced-motion` en web): nada pulsa ni se desliza.
+- [ ] [manual] **Texto más grande** (×1,125) junto al 200 % del sistema: sin cortes en Home, sesión y Ajustes.
+- [ ] [manual] **Capturas frente al prototipo** (`docs/design_v2_1/prototype/`) en Android y Chrome con `flutter drive` (ver la cabecera de `integration_test/app_journey_test.dart`).
+
+---
+
 ## 0. Navegacion shell (Stitch)
 
 - [x] Header **TOGESC** visible en Home, Stats, Pro y Perfil

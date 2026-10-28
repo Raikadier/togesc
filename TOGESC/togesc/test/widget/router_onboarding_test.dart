@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:togesc/app/router.dart';
 import 'package:togesc/providers/router_provider.dart';
+import 'package:togesc/screens/home_screen.dart';
+import 'package:togesc/screens/onboarding_screen.dart';
 import 'package:togesc/services/app_preferences.dart';
 
 void main() {
@@ -24,13 +26,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // v2.1: onboarding en 4 pasos; abre en la bienvenida.
+    expect(find.byType(OnboardingScreen), findsOneWidget);
+    expect(find.bySemanticsLabel('Paso 1 de 4'), findsOneWidget);
+    expect(find.text('Entrenador de oído absoluto'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('onboarding-next')));
+    await tester.pumpAndSettle();
     expect(find.text('Cómo funciona'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Entendido, empezar'),
-      100,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Entendido, empezar'), findsOneWidget);
   });
 
   testWidgets('usuario existente abre home sin onboarding', (tester) async {
@@ -45,7 +47,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Modos de entrenamiento'), findsOneWidget);
+    // Independiente del copy de Home (rediseño v2, lote 1A).
+    expect(find.byType(HomeScreen), findsOneWidget);
     expect(find.text('Entendido, empezar'), findsNothing);
   });
 
@@ -69,8 +72,7 @@ void main() {
       routes: [
         GoRoute(
           path: AppRoutes.onboarding,
-          builder: (_, _) =>
-              const Scaffold(body: Text('OnboardingScreen')),
+          builder: (_, _) => const Scaffold(body: Text('OnboardingScreen')),
         ),
         GoRoute(
           path: AppRoutes.about,

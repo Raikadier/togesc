@@ -1,117 +1,201 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
 import 'pedagogy_section_card.dart';
-import 'togesc_ui.dart';
 
-/// Hero de bienvenida en onboarding (Stitch welcome, tono pedagógico).
-class OnboardingWelcomeHeader extends StatelessWidget {
-  const OnboardingWelcomeHeader({super.key});
+/// Indicador de pasos del onboarding: el paso actual es una pastilla
+/// alargada y los ya vistos van rellenos (SPEC v2.1 §2.7).
+class OnboardingStepDots extends StatelessWidget {
+  const OnboardingStepDots({
+    super.key,
+    required this.current,
+    required this.count,
+  });
+
+  final int current;
+  final int count;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          'TOGESC',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.displaySmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: scheme.primary,
-            letterSpacing: -0.8,
-            height: 1.05,
-          ),
-        ),
-        const SizedBox(height: DesignTokens.spacingSm),
-        Text(
-          'Entrenador de oído absoluto',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: scheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: DesignTokens.spacingMd),
-        Text(
-          'Método con repetición espaciada, variación de estímulos y '
-          'limpieza tonal. Tres ideas clave antes de empezar:',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: scheme.onSurfaceVariant,
-            height: 1.45,
-          ),
-        ),
-      ],
+    final scheme = Theme.of(context).colorScheme;
+    final duration = motionDuration(context, DesignTokens.motionMedium);
+    return Semantics(
+      key: const ValueKey('onboarding-dots'),
+      label: 'Paso ${current + 1} de $count',
+      excludeSemantics: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < count; i++) ...[
+            if (i > 0) const SizedBox(width: 6),
+            AnimatedContainer(
+              duration: duration,
+              curve: DesignTokens.easeOut,
+              width: i == current ? 24 : 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: i <= current ? scheme.primary : scheme.outlineVariant,
+                borderRadius: DesignTokens.borderRadiusPill,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
 
-/// Panel visual atmosférico (sin imagen remota; ancla de producto).
-class OnboardingVisualHero extends StatelessWidget {
-  const OnboardingVisualHero({super.key});
+/// Arte `hero` de bienvenida: ecualizador de 9 barras y la etiqueta
+/// «SRS · variación · limpieza tonal». Las barras se mueven 3 ciclos
+/// (menos de 5 s, WCAG 2.2.2) y quedan quietas con movimiento reducido.
+class OnboardingWelcomeArt extends StatefulWidget {
+  const OnboardingWelcomeArt({super.key});
+
+  static const int bars = 9;
+  static const int cycles = 3;
+
+  @override
+  State<OnboardingWelcomeArt> createState() => _OnboardingWelcomeArtState();
+}
+
+class _OnboardingWelcomeArtState extends State<OnboardingWelcomeArt>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _eq = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    final reduced = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (!reduced) {
+      _eq.repeat(count: OnboardingWelcomeArt.cycles);
+    }
+  }
+
+  @override
+  void dispose() {
+    _eq.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
-
-    return Semantics(
-      label: 'Motor pedagógico TOGESC',
+    return ExcludeSemantics(
       child: Container(
-        height: 160,
+        key: const ValueKey('onboarding-welcome-art'),
+        height: 180,
+        padding: const EdgeInsets.all(DesignTokens.spacingLg),
         decoration: BoxDecoration(
-          borderRadius: DesignTokens.borderRadiusMd,
-          color: scheme.surfaceContainer,
-          border: Border.all(color: scheme.outlineVariant),
+          color: DesignTokens.hero,
+          borderRadius: DesignTokens.borderRadiusHero,
         ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          fit: StackFit.expand,
+        child: Column(
           children: [
-            Positioned(
-              right: -20,
-              bottom: -24,
-              child: Icon(
-                Icons.piano_rounded,
-                size: reduceMotion ? 110 : 128,
-                color: scheme.primary.withValues(alpha: 0.12),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.all(DesignTokens.spacingLg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            Expanded(
+              child: AnimatedBuilder(
+                animation: _eq,
+                builder: (context, _) => Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      'Motor pedagógico',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: scheme.primary,
-                        letterSpacing: -0.3,
+                    for (var k = 0; k < OnboardingWelcomeArt.bars; k++) ...[
+                      if (k > 0) const SizedBox(width: 6),
+                      FractionallySizedBox(
+                        heightFactor: _barHeight(k, _eq.value),
+                        child: Container(
+                          width: 10,
+                          decoration: BoxDecoration(
+                            color: DesignTokens.onHeroAccent.withValues(
+                              alpha: 0.55 + 0.05 * (k % 3),
+                            ),
+                            borderRadius: DesignTokens.borderRadiusPill,
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: DesignTokens.spacingXs),
-                    Text(
-                      'SRS · variación · limpieza tonal',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
+                    ],
                   ],
                 ),
+              ),
+            ),
+            const SizedBox(height: DesignTokens.spacingMd),
+            Text(
+              'SRS · variación · limpieza tonal',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: DesignTokens.onHero,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  /// Altura relativa de la barra [k]: un perfil de campana que oscila.
+  static double _barHeight(int k, double t) {
+    const n = OnboardingWelcomeArt.bars;
+    final center = 1 - ((k - (n - 1) / 2).abs() / n);
+    final wave = 0.5 + 0.5 * math.sin(2 * math.pi * (t + k / n));
+    return (0.25 + 0.6 * center * (0.6 + 0.4 * wave)).clamp(0.15, 1.0);
+  }
+}
+
+/// Cabecera de un paso: overline, titular (anunciado al cambiar) y texto.
+class OnboardingStepHeader extends StatelessWidget {
+  const OnboardingStepHeader({
+    super.key,
+    required this.overline,
+    required this.title,
+    this.lead,
+  });
+
+  final String overline;
+  final String title;
+  final String? lead;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          overline.toUpperCase(),
+          style: DesignTokens.overline.copyWith(color: scheme.primary),
+        ),
+        const SizedBox(height: DesignTokens.spacingSm),
+        Semantics(
+          header: true,
+          liveRegion: true,
+          child: Text(
+            title,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.6,
+              color: scheme.onSurface,
+            ),
+          ),
+        ),
+        if (lead != null) ...[
+          const SizedBox(height: DesignTokens.spacingSm),
+          Text(
+            lead!,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: scheme.onSurfaceVariant,
+              height: 1.45,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -184,113 +268,67 @@ class OnboardingPedagogyBento extends StatelessWidget {
   }
 }
 
-/// CTA final del onboarding.
-class OnboardingStartCta extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const OnboardingStartCta({super.key, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: onPressed,
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(56),
-              shape: RoundedRectangleBorder(
-                borderRadius: DesignTokens.borderRadiusMd,
-              ),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Entendido, empezar'),
-                SizedBox(width: DesignTokens.spacingSm),
-                Icon(Icons.arrow_forward_rounded, size: 20),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: DesignTokens.spacingMd),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.verified_rounded,
-              size: 16,
-              color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
-            ),
-            const SizedBox(width: DesignTokens.spacingXs),
-            Text(
-              'Progreso SRS local incluido desde el primer día',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
-                  ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Preferencias rápidas en onboarding (notación + audio).
-class OnboardingSetupCard extends StatelessWidget {
-  final bool useSolfege;
-  final ValueChanged<bool> onSolfegeChanged;
-  final Widget audioTest;
-
-  const OnboardingSetupCard({
+/// Tarjeta de estado de la ronda de prueba (icono, título y detalle).
+class OnboardingTryStatus extends StatelessWidget {
+  const OnboardingTryStatus({
     super.key,
-    required this.useSolfege,
-    required this.onSolfegeChanged,
-    required this.audioTest,
+    required this.icon,
+    required this.title,
+    required this.detail,
+    this.accent,
   });
+
+  final IconData icon;
+  final String title;
+  final String detail;
+
+  /// Color del icono y del borde (correcto o incorrecto); null en neutro.
+  final Color? accent;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-
-    return TogescCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Antes de empezar',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
+    final color = accent ?? scheme.primary;
+    return Semantics(
+      key: const ValueKey('onboarding-try-status'),
+      liveRegion: true,
+      container: true,
+      child: Container(
+        padding: const EdgeInsets.all(DesignTokens.spacingMd),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLow,
+          borderRadius: DesignTokens.borderRadiusCard,
+          border: Border.all(
+            color: accent == null ? scheme.outlineVariant : color,
+            width: accent == null ? 1 : 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            ExcludeSemantics(child: Icon(icon, color: color)),
+            const SizedBox(width: DesignTokens.spacingMd),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    detail,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: DesignTokens.spacingSm),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Notación Do/Re/Mi'),
-            subtitle: const Text('Puedes cambiarlo después en Ajustes.'),
-            value: useSolfege,
-            onChanged: onSolfegeChanged,
-          ),
-          Text('Vista previa', style: theme.textTheme.labelLarge),
-          const SizedBox(height: DesignTokens.spacingSm),
-          Wrap(
-            spacing: DesignTokens.spacingSm,
-            runSpacing: DesignTokens.spacingSm,
-            children: (useSolfege
-                    ? const ['Do', 'Re', 'Mi', 'Fa', 'Sol']
-                    : const ['C', 'D', 'E', 'F', 'G'])
-                .map((note) => Chip(label: Text(note)))
-                .toList(),
-          ),
-          const SizedBox(height: DesignTokens.spacingMd),
-          Divider(color: scheme.outlineVariant.withValues(alpha: 0.5)),
-          const SizedBox(height: DesignTokens.spacingMd),
-          audioTest,
-        ],
+          ],
+        ),
       ),
     );
   }

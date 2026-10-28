@@ -67,15 +67,11 @@ jobs:
         run: |
           mkdir -p .vercel/output/static
           cp -r TOGESC/togesc/build/web/* .vercel/output/static/
-          cat > .vercel/output/config.json <<'EOF'
-          {
-            "version": 3,
-            "routes": [
-              { "handle": "filesystem" },
-              { "src": "/promo", "dest": "/landing.html" }
-            ]
-          }
-          EOF
+          # En modo --prebuilt Vercel ignora vercel.json: las cabeceras de seguridad
+          # (CSP, HSTS, XFO, etc.) y la ruta /promo salen de scripts/web-security-headers.mjs (PT-02).
+          node scripts/generate-vercel-output-config.mjs --out .vercel/output/config.json
+          # Puerta: no se despliega si faltan cabeceras o vercel.json diverge.
+          node scripts/check-security-headers.mjs --config .vercel/output/config.json --vercel-json vercel.json
 
       - name: Install Vercel CLI
         run: npm install -g vercel@latest

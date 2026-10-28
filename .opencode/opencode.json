@@ -1,0 +1,36 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permissions": [
+    { "action": "skill", "resource": "*", "effect": "deny" },
+    { "action": "skill", "resource": "dart-flutter-patterns", "effect": "allow" },
+    { "action": "skill", "resource": "flutter-dart-code-review", "effect": "allow" },
+    { "action": "skill", "resource": "systematic-bug-debugger", "effect": "allow" },
+    { "action": "skill", "resource": "verification-before-completion", "effect": "allow" },
+    { "action": "skill", "resource": "incremental-change-surgeon", "effect": "allow" },
+    { "action": "skill", "resource": "tdd-workflow", "effect": "allow" },
+    { "action": "skill", "resource": "ai-regression-testing", "effect": "allow" },
+    { "action": "skill", "resource": "code-review", "effect": "allow" },
+    { "action": "skill", "resource": "architecture-decision-records", "effect": "allow" },
+    { "action": "skill", "resource": "github-ops", "effect": "allow" },
+    { "action": "skill", "resource": "ci-cd-pipeline-validator", "effect": "allow" },
+    { "action": "skill", "resource": "supabase", "effect": "allow" },
+    { "action": "skill", "resource": "supabase-postgres-best-practices", "effect": "allow" },
+    { "action": "skill", "resource": "database-migrations", "effect": "allow" },
+    { "action": "skill", "resource": "security-review", "effect": "allow" },
+    { "action": "skill", "resource": "security-first", "effect": "allow" },
+    { "action": "skill", "resource": "stripe-billing-scaffold", "effect": "allow" },
+    { "action": "skill", "resource": "accessibility", "effect": "allow" },
+    { "action": "skill", "resource": "impeccable", "effect": "allow" },
+    { "action": "skill", "resource": "opencode", "effect": "allow" }
+  ],
+  "mcp": {
+    "supabase-togesc": {
+      "type": "remote",
+      "url": "https://mcp.supabase.com/mcp?project_ref=puetlvcsrntwweuxinee",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:SUPABASE_ACCESS_TOKEN}"
+      }
+    }
+  }
+}

@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sesión · TOGESC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block">
+<link rel="stylesheet" href="assets/togesc.css">
+<style>
+  body { overflow-x: hidden; }
+  .s { min-height: 100dvh; display: flex; flex-direction: column; max-width: 1180px; margin: 0 auto; }
+  .s-top { height: 60px; display: flex; align-items: center; gap: 8px; padding: 0 8px; }
+  .s-top .title { font-weight: 700; display: none; }
+  .s-top .chips { display: flex; gap: 6px; flex: 1; justify-content: center; flex-wrap: wrap; }
+  .s-top .chip .ms { font-size: 16px; }
+  .chip.ok .ms { color: var(--s-success); } .chip.st .ms { color: var(--s-amber); }
+  .icon-btn.sbtn { background: var(--btn); border: 1px solid var(--border); border-radius: var(--r-cell); }
+  .icon-btn.sbtn:hover { background: var(--chip); }
+  .s-prog { height: 3px; background: var(--chip); margin: 0 16px; border-radius: 3px; overflow: hidden; }
+  .s-prog i { display: block; height: 100%; background: var(--accent); transition: width var(--t-med) var(--ease-out); }
+
+  .s-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 0 16px; }
+  .s-main { display: flex; flex-direction: column; min-height: 0; }
+  .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 18px 0 12px; gap: 10px; }
+  .phase { color: var(--c, var(--accent)); transition: color var(--t-med); }
+  .ring { position: relative; width: 150px; height: 150px; margin: 6px 0 8px; }
+  .ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .ring .trk { stroke: var(--chip); }
+  .ring .arc { stroke: var(--c, var(--accent)); transition: stroke var(--t-med); }
+  .ring .in { position: absolute; inset: 14px; border-radius: 50%; background: radial-gradient(circle at 50% 35%, color-mix(in oklch, var(--c, #DA9CFF) 18%, var(--panel)), var(--panel) 70%); display: grid; place-items: center; transition: background var(--t-med); }
+  .ring.glow .in { box-shadow: 0 0 0 0 color-mix(in oklch, var(--c) 50%, transparent); animation: glow 1.2s ease-out; }
+  @keyframes glow { from { box-shadow: 0 0 0 0 color-mix(in oklch, var(--c) 55%, transparent); } to { box-shadow: 0 0 0 26px transparent; } }
+  .bars { display: flex; gap: 6px; align-items: center; height: 54px; }
+  .bars i { width: 7px; height: 54px; border-radius: 4px; background: var(--accent); animation: eq 1s ease-in-out infinite; animation-delay: calc(var(--k) * .15s); transform-origin: center; }
+  @keyframes eq { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+  html.rm .bars i { transform: scaleY(.65); }
+  .ring .big { font-size: 46px; font-weight: 800; letter-spacing: -1px; color: var(--c); animation: pop .45s var(--ease-spring); }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } }
+  .ring .ms.lg { font-size: 52px; color: var(--c); }
+  .stage h1 { font-size: calc(24px * var(--fs)); font-weight: 700; }
+  .stage .sub { color: var(--fg-2); font-size: calc(15px * var(--fs)); max-width: 34ch; }
+  .srs-pill { display: inline-flex; align-items: center; gap: 10px; height: 36px; padding: 0 14px; border-radius: var(--r-pill); background: var(--chip); border: 1px solid var(--border); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; animation: rise .4s var(--ease-out) both; }
+  .srs-pill .dots { color: var(--c); }
+  .srs-pill[hidden] { display: none; }
+
+  .controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; }
+  .controls .hint { color: var(--fg-3); font-size: calc(13px * var(--fs)); text-align: center; flex: 1; }
+  .sbtn-txt { min-height: 44px; padding: 0 14px; border-radius: var(--r-pill); background: var(--btn); border: 1px solid var(--border); color: var(--fg); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+  .sbtn-txt:hover { background: var(--chip); border-color: var(--fg-2); }
+  .sbtn-txt[disabled] { opacity: .45; cursor: not-allowed; }
+  .kbd { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 5px; border: 1px solid var(--border); color: var(--fg-2); display: none; }
+  .piano-wrap { padding: 0 0 calc(16px + env(safe-area-inset-bottom)); }
+  .next-row { display: flex; justify-content: center; gap: 10px; min-height: 0; }
+  .next-row[hidden] { display: none; }
+
+  .ready-actions { display: flex; flex-direction: column; gap: 6px; width: min(100%, 340px); margin-top: 10px; }
+  .ghost-dark { min-height: 48px; background: none; border: 0; color: var(--accent); font-weight: 700; border-radius: var(--r-cell); }
+  .ghost-dark:hover { background: rgb(255 255 255 / .06); }
+  .ready-meta { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+  /* Panel SRS (escritorio) */
+  .srs-panel { display: none; }
+  .srs-panel h2 { font-size: 13px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--fg-3); font-weight: 700; margin-bottom: 12px; }
+  .srs-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border-subtle); transition: background var(--t-med); }
+  .srs-item:first-of-type { border-top: 0; }
+  .srs-item.is-now { background: color-mix(in oklch, var(--accent) 10%, transparent); border-radius: 10px; padding-inline: 8px; margin-inline: -8px; }
+  .srs-item .n { width: 40px; height: 40px; border-radius: 10px; background: var(--chip); display: grid; place-items: center; font-weight: 800; }
+  .srs-item .st { font-size: 12px; font-weight: 700; }
+  .shortcuts { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-subtle); display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 13px; color: var(--fg-2); align-items: center; }
+  .shortcuts .kbd { display: inline-block; justify-self: start; color: var(--fg-3); }
+
+  /* Resumen */
+  .summary { flex: 1; display: none; flex-direction: column; align-items: center; padding: 12px 16px 32px; gap: 18px; max-width: 760px; margin: 0 auto; width: 100%; }
+  .summary.show { display: flex; }
+  .sum-head { text-align: center; display: grid; gap: 6px; justify-items: center; }
+  .sum-head .medal { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in oklch, var(--s-amber) 16%, var(--panel)); color: var(--s-amber); animation: pop .6s var(--ease-spring); }
+  .sum-head .medal .ms { font-size: 40px; }
+  .sum-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+  .kpi { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-card); padding: 14px 12px; text-align: center; }
+  .kpi .v { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+  .kpi .l { font-size: 12px; color: var(--fg-2); font-weight: 600; }
+  .sum-cols { display: grid; gap: 16px; width: 100%; }
+  .changes { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-card); padding: 6px 16px; }
+  .chg { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border-subtle); animation: rise .5s var(--ease-out) both; animation-delay: calc(var(--i) * 90ms + 300ms); }
+  .chg:first-child { border-top: 0; }
+  .chg .n { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; }
+  .chg .arrow { color: var(--fg-2); }
+  .chg .up { color: var(--s-success); } .chg .down { color: var(--s-error); }
+  .sum-wheel { position: relative; width: min(100%, 300px); margin: 0 auto; }
+  .sum-actions { display: grid; gap: 8px; width: min(100%, 380px); }
+  .btn-dark2 { background: var(--btn); border: 1px solid var(--border); color: var(--fg); }
+  .btn-dark2:hover { background: var(--chip); }
+
+  dialog .sheet { background: var(--panel); color: var(--fg); }
+  .timbres { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .timbres button { min-height: 52px; border-radius: var(--r-cell); background: var(--btn); border: 1.5px solid var(--border); font-weight: 700; display: flex; align-items: center; gap: 8px; padding: 0 14px; }
+  .timbres button:hover { border-color: var(--fg-2); }
+  .timbres button[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in oklch, var(--accent) 14%, var(--btn)); }
+
+  @media (min-width: 1024px) {
+    .s-top { height: 72px; padding: 0 24px; }
+    .s-top .title { display: block; }
+    .s-top .chips { justify-content: flex-start; flex: 1; margin-left: 12px; }
+    .s-prog { margin: 0 24px; }
+    .s-body { grid-template-columns: minmax(0, 1fr) 300px; padding: 0 24px 24px; }
+    .ring { width: 170px; height: 170px; }
+    .srs-panel { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-card); padding: 18px; margin-top: 20px; }
+    .piano { --h: 210px; --bw: 52px; --bh: 126px; }
+    html.lg-piano .piano { --h: 250px; --bw: 58px; --bh: 150px; }
+    .kbd { display: inline-block; }
+    .sum-cols { grid-template-columns: 1fr 1fr; align-items: start; }
+    .summary { padding-top: 32px; }
+  }
+</style>
+</head>
+<body class="theme-session">
+<div class="s" data-od-id="session">
+  <header class="s-top" data-od-id="session-top-bar">
+    <a class="icon-btn" href="home.html" id="back" aria-label="Salir de la sesión"><span class="ms">arrow_back</span></a>
+    <span class="title" id="mode-title"></span>
+    <div class="chips">
+      <span class="chip" id="c-round" aria-label=""><span class="tnum" id="c-round-t">1 / 12</span></span>
+      <span class="chip ok" id="c-acc"><span class="ms" aria-hidden="true">check</span><span id="c-acc-t">— %</span></span>
+      <span class="chip st" id="c-streak"><span class="ms" aria-hidden="true">bolt</span><span id="c-streak-t">0</span></span>
+    </div>
+    <button class="icon-btn sbtn" id="instrument" aria-label="Instrumento" data-od-id="session-instrument"><span class="ms" aria-hidden="true">piano</span></button>
+    <button class="icon-btn sbtn" id="pause" aria-label="Pausar" data-od-id="session-pause"><span class="ms" aria-hidden="true">pause</span></button>
+  </header>
+  <div class="s-prog" role="progressbar" aria-label="Progreso de la sesión" aria-valuemin="0" id="prog"><i id="prog-i" style="width:0"></i></div>
+
+  <div class="s-body" id="s-body">
+    <div class="s-main">
+      <section class="stage" id="stage" data-od-id="session-stage" aria-live="polite">
+        <p class="overline-lg phase" id="phase">Preparado</p>
+        <div class="ring" id="ring">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="trk" cx="50" cy="50" r="46" fill="none" stroke-width="4"/><circle class="arc" id="arc" cx="50" cy="50" r="46" fill="none" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg>
+          <div class="in" id="ring-in"><span class="ms lg" aria-hidden="true">headphones</span></div>
+        </div>
+        <span class="srs-pill" id="srs-pill" hidden></span>
+        <h1 id="s-title">Ponte los auriculares</h1>
+        <p class="sub" id="s-sub"></p>
+        <div class="ready-actions" id="ready">
+          <button class="btn btn-cta" id="start" data-od-id="session-start"><span class="ms" aria-hidden="true">play_arrow</span>Estoy listo</button>
+          <button class="ghost-dark" id="test-sound">Probar el sonido</button>
+        </div>
+        <div class="next-row" id="next-row" hidden><button class="btn btn-cta" id="next-btn" style="min-width:220px">Siguiente ronda</button></div>
+      </section>
+      <div class="controls" id="controls" hidden>
+        <button class="sbtn-txt" id="repeat" data-od-id="session-repeat"><span class="ms sm" aria-hidden="true">replay</span>Repetir <span class="kbd">R</span></button>
+        <span class="hint" id="hint">Toca la tecla que escuchaste</span>
+        <button class="sbtn-txt" id="skip" data-od-id="session-skip">Saltar <span class="ms sm" aria-hidden="true">skip_next</span><span class="kbd">Espacio</span></button>
+      </div>
+      <div class="piano-wrap" id="piano-wrap" hidden><div id="piano" data-od-id="session-piano"></div></div>
+    </div>
+    <aside class="srs-panel" aria-labelledby="srs-h" data-od-id="session-srs-panel">
+      <h2 id="srs-h">Enfoque SRS de la sesión</h2>
+      <div id="srs-list"></div>
+      <div class="shortcuts" aria-label="Atajos de teclado">
+        <span class="kbd">A–G</span><span>Responder esa nota</span>
+        <span class="kbd">⇧ + letra</span><span>Sostenido</span>
+        <span class="kbd">R</span><span>Repetir el sonido</span>
+        <span class="kbd">Espacio</span><span>Siguiente o saltar</span>
+        <span class="kbd">Esc</span><span>Pausar</span>
+      </div>
+    </aside>
+  </div>
+
+  <section class="summary" id="summary" aria-labelledby="sum-h" data-od-id="session-summary"></section>
+</div>
+
+<dialog id="pause-dlg" aria-labelledby="pause-h">
+  <form class="sheet" method="dialog">
+    <div class="sheet-head"><h2 class="t-lg" id="pause-h">Sesión en pausa</h2></div>
+    <p class="muted" id="pause-sub" style="margin-bottom:20px"></p>
+    <div style="display:grid; gap:8px">
+      <button class="btn btn-cta" value="resume">Continuar</button>
+      <button class="btn btn-dark2" value="restart">Reiniciar la sesión</button>
+      <button class="btn btn-dark2" value="exit">Salir sin guardar</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="inst-dlg" aria-labelledby="inst-h">
+  <form class="sheet" method="dialog">
+    <div class="sheet-head"><h2 class="t-lg" id="inst-h">Instrumento de esta sesión</h2><button class="icon-btn" value="close" aria-label="Cerrar"><span class="ms">close</span></button></div>
+    <div class="timbres" id="timbres" role="group" aria-label="Timbre"></div>
+    <p class="label-md muted" style="margin-top:14px">Solo cambia esta sesión. El timbre por defecto está en Ajustes.</p>
+  </form>
+</dialog>
+
+<script src="assets/togesc.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  const MODE = q.get('mode') || 'today';
+  const NOTE = q.has('note') ? +q.get('note') : null;
+  const MODES = { today: 'Sesión de hoy', single: 'Una sola nota', interval: 'Intervalo', sharps: 'Solo sostenidos' };
+  const today = Object.assign({ rounds: 12, focus: TG.focusNotes(3).map(n => n.i) }, TG.store.get('today', {}));
+  const TOTAL = MODE === 'today' ? today.rounds : NOTE != null ? 8 : TG.prefs.roundGoal || 12;
+  const FOCUS = NOTE != null ? [NOTE] : MODE === 'today' ? today.focus : TG.focusNotes(3).map(n => n.i);
+  const POOL = MODE === 'sharps' ? [1, 3, 6, 8, 10] : [...Array(12).keys()];
+  const NEED = MODE === 'interval' ? 2 : 1;
+  let timbre = TG.prefs.timbre;
+  const RM = TG.reduced();
+  const T_LISTEN = 1500, T_RESULT = RM ? 400 : 2200;
+
+  const $ = id => document.getElementById(id);
+  $('mode-title').textContent = NOTE != null ? `Práctica de ${TG.name(NOTE)}` : MODES[MODE];
+  document.title = `${$('mode-title').textContent} · TOGESC`;
+  $('s-sub').textContent = `${TOTAL} rondas · ${MODE === 'interval' ? '2 notas a la vez' : '1 nota'} · foco en ${FOCUS.map(TG.name).join(', ')}`;
+  $('prog').setAttribute('aria-valuemax', TOTAL);
+
+  // Estado
+  let phase = 'ready', round = 0, hits = 0, streak = 0, best = 0, target = [], picked = [], octave = 4, t0 = 0, timers = [], lat = [];
+  const before = TG.NOTES.map(n => ({ lvl: n.lvl, pct: n.pct }));
+  const touched = new Set();
+  const clearT = () => { timers.forEach(clearTimeout); timers = []; };
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+
+  const kb = TG.piano($('piano'), { onPress: (i) => answer(i) });
+  if (MODE === 'sharps') { [0, 2, 4, 5, 7, 9, 11].forEach(i => { kb.keys[i].disabled = true; kb.keys[i].classList.add('is-dim'); }); }
+
+  // SRS panel
+  function renderPanel(now = []) {
+    const list = [...new Set(FOCUS.concat(target))].slice(0, 6);
+    $('srs-list').innerHTML = list.map(i => { const n = TG.NOTES[i], s = TG.state(n.pct); const col = s === 'critical' ? 'var(--s-error)' : s === 'progress' ? 'var(--s-warning)' : 'var(--s-success)'; return `<div class="srs-item ${now.includes(i) ? 'is-now' : ''}"><span class="n">${TG.name(i)}</span><span style="flex:1"><span class="st" style="color:${col};display:block">${s === 'solid' ? 'Consolidando' : TG.STATE_LABEL[s]}</span><span class="label-md muted tnum">${n.pct} %</span></span><span style="color:${col}" aria-label="Nivel ${n.lvl} de 5">${TG.dotsHTML(n.lvl)}</span></div>`; }).join('');
+  }
+  renderPanel();
+
+  function chips() {
+    $('c-round-t').textContent = `${Math.min(round, TOTAL)} / ${TOTAL}`;
+    $('c-round').setAttribute('aria-label', `Ronda ${Math.min(round, TOTAL)} de ${TOTAL}`);
+    const answered = round - (phase === 'result' || phase === 'done' ? 0 : 1);
+    $('c-acc-t').textContent = answered > 0 ? Math.round(hits / answered * 100) + ' %' : '— %';
+    $('c-acc').setAttribute('aria-label', 'Precisión de la sesión ' + $('c-acc-t').textContent);
+    $('c-streak-t').textContent = streak;
+    $('c-streak').setAttribute('aria-label', `Racha de ${streak} aciertos`);
+    $('prog-i').style.width = (Math.max(0, answered) / TOTAL * 100) + '%';
+    $('prog').setAttribute('aria-valuenow', Math.max(0, answered));
+  }
+
+  function setStage({ c, phaseTxt, inner, title, sub }) {
+    const st = $('stage'); st.style.setProperty('--c', c); $('ring').style.setProperty('--c', c);
+    $('phase').textContent = phaseTxt; $('ring-in').innerHTML = inner; $('s-title').textContent = title; $('s-sub').textContent = sub;
+  }
+  function arc(ms) {
+    const a = $('arc'); a.style.transition = 'none'; a.style.strokeDashoffset = 100; a.getBoundingClientRect();
+    if (ms) { a.style.transition = `stroke-dashoffset ${ms}ms linear`; a.style.strokeDashoffset = 0; }
+  }
+
+  function pick() {
+    const w = POOL.map(i => (100 - TG.NOTES[i].pct + 10) * (FOCUS.includes(i) ? 3 : 1));
+    const r = () => { let s = Math.random() * w.reduce((a, b) => a + b, 0); for (let k = 0; k < POOL.length; k++) { s -= w[k]; if (s <= 0) return POOL[k]; } return POOL[0]; };
+    const out = []; let guard = 0;
+    while (out.length < NEED && guard++ < 50) { const n = r(); if (!out.includes(n) && !(NEED === 1 && target[0] === n)) out.push(n); }
+    return out.sort((a, b) => a - b);
+  }
+  function sound() { target.forEach((n, k) => TG.playNote(TG.midiFor(n, octave), { timbre, dur: 1.2, gain: NEED > 1 ? .6 : .9 })); }
+
+  function listen(again) {
+    clearT(); phase = 'listen';
+    if (!again) { round++; target = pick(); octave = TG.prefs.octaveVar ? 3 + Math.floor(Math.random() * 3) : 4; picked = []; }
+    kb.reset(); if (MODE === 'sharps') [0, 2, 4, 5, 7, 9, 11].forEach(i => { kb.keys[i].disabled = true; kb.keys[i].classList.add('is-dim'); });
+    kb.disable(true); $('srs-pill').hidden = true; $('next-row').hidden = true; $('repeat').disabled = true;
+    $('hint').textContent = 'Escucha…';
+    setStage({ c: '#DA9CFF', phaseTxt: 'Escuchando', inner: `<div class="bars" aria-hidden="true">${[0, 1, 2, 3, 4].map(k => `<i style="--k:${k}"></i>`).join('')}</div>`, title: 'Escucha con atención', sub: `${TG.TIMBRES[timbre].label} · octava ${octave} · ${NEED} nota${NEED > 1 ? 's' : ''}` });
+    arc(T_LISTEN); chips(); renderPanel([]);
+    sound();
+    later(answerPhase, T_LISTEN);
+  }
+  function answerPhase() {
+    phase = 'answer'; kb.disable(false);
+    if (MODE === 'sharps') [0, 2, 4, 5, 7, 9, 11].forEach(i => { kb.keys[i].disabled = true; });
+    $('repeat').disabled = false;
+    $('hint').textContent = NEED > 1 ? `Toca ${NEED} teclas` : 'Toca la tecla que escuchaste';
+    setStage({ c: '#FFD54F', phaseTxt: 'Responde', inner: `<span class="ms lg" aria-hidden="true">hearing</span>`, title: NEED > 1 ? '¿Qué dos notas escuchaste?' : '¿Qué nota escuchaste?', sub: TG.prefs.confirm ? 'Elige y pulsa Confirmar.' : 'Toca la tecla: se envía al instante, sin confirmar.' });
+    arc(0); t0 = performance.now();
+    TG.announce(NEED > 1 ? 'Responde: elige dos notas' : 'Responde: ¿qué nota escuchaste?');
+  }
+  function answer(i) {
+    if (phase !== 'answer') return;
+    TG.playNote(TG.midiFor(i, octave), { timbre, dur: .5, gain: .35 });
+    if (NEED > 1 || TG.prefs.confirm) {
+      if (picked.includes(i)) { picked = picked.filter(x => x !== i); kb.keys[i].classList.remove('is-selected'); }
+      else if (picked.length < NEED) { picked.push(i); kb.keys[i].classList.add('is-selected'); }
+      $('hint').textContent = `${picked.length} de ${NEED} seleccionada${NEED > 1 ? 's' : ''}`;
+      if (TG.prefs.confirm) { $('next-row').hidden = picked.length !== NEED; $('next-btn').textContent = 'Confirmar'; return; }
+      if (picked.length < NEED) return;
+    } else picked = [i];
+    resolve();
+  }
+  function resolve() {
+    clearT(); phase = 'result'; kb.disable(true); $('next-row').hidden = true;
+    lat.push((performance.now() - t0) / 1000);
+    const ok = picked.length === target.length && picked.every(p => target.includes(p));
+    kb.reset();
+    target.forEach(t => kb.set(t, 'is-correct', 'check'));
+    picked.filter(p => !target.includes(p)).forEach(p => kb.set(p, 'is-wrong', 'close'));
+    kb.dimExcept(target.concat(picked));
+    if (ok) { hits++; streak++; best = Math.max(best, streak); } else streak = 0;
+    // SRS
+    const lines = target.map(t => { const n = TG.NOTES[t], from = n.lvl; const good = picked.includes(t) && ok; n.lvl = good ? Math.min(5, n.lvl + 1) : 1; n.att++; n.pct = Math.round((n.pct * (n.att - 1) + (good ? 100 : 0)) / n.att); touched.add(t); return { t, from, to: n.lvl }; });
+    const L = lines[0], nm = target.map(TG.name).join(' + '), you = picked.map(TG.name).join(' + ');
+    $('srs-pill').hidden = false;
+    $('srs-pill').innerHTML = `${TG.name(L.t)} · SRS ${L.from}/5 → ${L.to}/5 ${TG.dotsHTML(L.to)}`;
+    setStage(ok
+      ? { c: '#81C784', phaseTxt: 'Correcto', inner: `<span class="big" style="font-size:${NEED > 1 ? 30 : 46}px">${nm}</span>`, title: streak >= 3 ? `¡${streak} seguidas!` : 'Bien identificada', sub: TG.prefs.autoAdvance ? 'Siguiente ronda en un momento…' : 'Pulsa Siguiente cuando quieras.' }
+      : { c: '#EF9A9A', phaseTxt: 'Incorrecto', inner: `<span class="big" style="font-size:${NEED > 1 ? 30 : 46}px">${nm}</span>`, title: `Era ${nm}, respondiste ${you}`, sub: 'La tecla correcta queda marcada en verde.' });
+    $('ring').classList.remove('glow'); void $('ring').offsetWidth; $('ring').classList.add('glow');
+    TG.announce(ok ? `Correcto, ${target.map(TG.spoken).join(' y ')}` : `Incorrecto. Era ${target.map(TG.spoken).join(' y ')}, respondiste ${picked.map(TG.spoken).join(' y ')}`, true);
+    $('hint').textContent = ok ? '¡Bien!' : 'Repasa la tecla verde';
+    chips(); renderPanel(target);
+    if (round >= TOTAL) return later(done, T_RESULT);
+    if (TG.prefs.autoAdvance) later(next, T_RESULT); else { $('next-row').hidden = false; $('next-btn').textContent = 'Siguiente ronda'; }
+  }
+  function next() { clearT(); if (TG.prefs.cluster) { TG.playCluster(); later(() => listen(), 450); } else listen(); }
+  function skip() { if (phase === 'answer' || phase === 'listen') { streak = 0; lat.push(0); TG.announce('Ronda saltada'); round >= TOTAL ? done() : next(); } else if (phase === 'result') { if (round >= TOTAL) done(); else next(); } }
+
+  function done() {
+    clearT(); phase = 'done'; chips(); TG.saveNotes();
+    TG.store.set('doneOn', new Date().toDateString());
+    TG.logSession({ mode: $('mode-title').textContent, icon: 'today', rounds: TOTAL, hits, when: 'Ahora' });
+    const acc = Math.round(hits / TOTAL * 100), L = lat.filter(Boolean), avg = L.length ? L.reduce((a, b) => a + b, 0) / L.length : 0;
+    $('s-body').hidden = true; document.querySelector('.s-prog').hidden = true; $('controls').hidden = true;
+    const list = [...touched].map(i => ({ i, from: before[i].lvl, to: TG.NOTES[i].lvl })).sort((a, b) => (b.to - b.from) - (a.to - a.from));
+    const up = list.filter(x => x.to > x.from).length;
+    const s = $('summary'); s.classList.add('show');
+    s.innerHTML = `
+      <div class="sum-head">
+        <span class="medal" aria-hidden="true"><span class="ms">${acc >= 75 ? 'military_tech' : acc >= 50 ? 'workspace_premium' : 'self_improvement'}</span></span>
+        <p class="overline-lg" style="color:var(--accent)">Sesión completada</p>
+        <h1 class="h-lg" id="sum-h">${acc >= 75 ? 'Gran oído hoy' : acc >= 50 ? 'Vas por buen camino' : 'Cada fallo afina el repaso'}</h1>
+        <p class="muted">${up ? `${up} nota${up > 1 ? 's' : ''} subi${up > 1 ? 'eron' : 'ó'} de nivel SRS.` : 'El SRS repetirá antes las notas que fallaste.'} ${TG.store.get('doneOn') ? 'Racha de hoy asegurada.' : ''}</p>
+      </div>
+      <div class="sum-kpis">
+        <div class="kpi"><div class="v" id="k-acc">0 %</div><div class="l">Precisión</div></div>
+        <div class="kpi"><div class="v tnum">${hits}<span class="muted" style="font-size:18px">/${TOTAL}</span></div><div class="l">Aciertos</div></div>
+        <div class="kpi"><div class="v tnum">${avg ? avg.toLocaleString('es-ES', { maximumFractionDigits: 1 }) + ' s' : '—'}</div><div class="l">Tiempo medio</div></div>
+      </div>
+      <div class="sum-cols">
+        <div><p class="overline" style="margin-bottom:10px;color:var(--fg-3)">Cambios de nivel SRS</p>
+          <div class="changes">${list.map((x, k) => `<div class="chg" style="--i:${k}"><span class="n ${TG.mClass(TG.NOTES[x.i].pct, x.to)}">${TG.name(x.i)}</span><span style="flex:1"><span style="display:block;font-weight:700">${TG.spoken(x.i)}</span><span class="label-md muted tnum">Nivel ${x.from} → ${x.to}</span></span><span class="${x.to > x.from ? 'up' : x.to < x.from ? 'down' : 'muted'}" aria-label="Nivel ${x.to} de 5">${TG.dotsHTML(x.to)}</span><span class="ms sm ${x.to > x.from ? 'up' : x.to < x.from ? 'down' : 'muted'}" aria-hidden="true">${x.to > x.from ? 'arrow_upward' : x.to < x.from ? 'arrow_downward' : 'remove'}</span></div>`).join('')}</div>
+        </div>
+        <div><p class="overline" style="margin-bottom:10px;color:var(--fg-3)">Tu mapa del oído</p><div class="sum-wheel" id="sum-wheel"></div></div>
+      </div>
+      <div class="sum-actions">
+        <a class="btn btn-cta" href="home.html" data-od-id="summary-home">Volver al inicio</a>
+        <a class="btn btn-dark2" href="progress.html">Ver mi progreso</a>
+      </div>`;
+    TG.wheel($('sum-wheel'), { dark: true });
+    TG.countUp($('k-acc'), acc, 0, ' %');
+    TG.announce(`Sesión completada. ${hits} de ${TOTAL} aciertos, ${acc} por ciento.`, true);
+  }
+
+  // Inicio
+  function start() {
+    TG.ac(); phase = 'go'; $('ready').hidden = true; $('controls').hidden = false; $('piano-wrap').hidden = false;
+    listen();
+  }
+  $('start').onclick = start;
+  $('test-sound').onclick = () => { TG.ac(); TG.playNote(69, { timbre }); TG.toast('Sonó un La 4 (440 Hz)', 'volume_up'); };
+  $('repeat').onclick = () => { if (phase === 'answer') { sound(); arc(0); TG.announce('Repetido'); } };
+  $('skip').onclick = skip;
+  $('next-btn').onclick = () => { if (phase === 'answer' && TG.prefs.confirm) resolve(); else if (phase === 'result') round >= TOTAL ? done() : next(); };
+
+  // Pausa
+  const pd = $('pause-dlg');
+  let pausedPhase;
+  function pause() {
+    if (phase === 'ready' || phase === 'done') return;
+    pausedPhase = phase; clearT(); $('pause-sub').textContent = `Ronda ${round} de ${TOTAL} · ${hits} aciertos. Tu progreso SRS de esta sesión se guarda al terminar.`; pd.showModal();
+  }
+  $('pause').onclick = pause;
+  pd.addEventListener('close', () => {
+    const v = pd.returnValue;
+    if (v === 'exit') location.href = 'home.html';
+    else if (v === 'restart') location.reload();
+    else { if (pausedPhase === 'listen') listen(true); else if (pausedPhase === 'result') { round >= TOTAL ? done() : next(); } else answerPhase(); }
+  });
+  $('back').addEventListener('click', e => { if (phase !== 'ready' && phase !== 'done') { e.preventDefault(); pause(); } });
+
+  // Instrumento
+  const id = $('inst-dlg');
+  function renderT() { $('timbres').innerHTML = Object.entries(TG.TIMBRES).map(([k, v]) => `<button type="button" data-k="${k}" aria-pressed="${k === timbre}">${v.label}</button>`).join(''); }
+  $('instrument').onclick = () => { renderT(); id.showModal(); };
+  $('timbres').onclick = e => { const b = e.target.closest('button'); if (!b) return; timbre = b.dataset.k; renderT(); TG.ac(); TG.playNote(60, { timbre, dur: .8 }); };
+
+  // Atajos
+  document.addEventListener('keydown', e => {
+    if (document.querySelector('dialog[open]')) return;
+    if (e.key === 'Escape') { pause(); return; }
+    const n = TG.keyToNote(e);
+    if (n != null && phase === 'answer') { e.preventDefault(); kb.press(n, true); return; }
+    if ((e.key === 'r' || e.key === 'R') && !e.ctrlKey && !e.metaKey) { $('repeat').click(); return; }
+    if (e.key === ' ' && (document.activeElement === document.body || !document.activeElement)) { e.preventDefault(); if (phase === 'ready') start(); else skip(); }
+  });
+  chips();
+</script>
+</body>
+</html>

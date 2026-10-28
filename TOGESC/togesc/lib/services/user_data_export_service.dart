@@ -47,6 +47,7 @@ abstract final class UserDataExportService {
           'hide_piano_labels': ui.hidePianoLabels,
           'large_piano': ui.largePiano,
           'reduce_animations': ui.reduceAnimations,
+          'large_text': ui.largeText,
           'theme_preference': ui.themePreference.name,
         },
         'practice_session': {

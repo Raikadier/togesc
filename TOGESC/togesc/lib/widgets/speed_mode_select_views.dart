@@ -5,7 +5,16 @@ import '../app/togesc_colors.dart';
 import '../constants/game_constants.dart';
 import 'togesc_ui.dart';
 
-/// Hero del selector de modo velocidad (Stitch).
+/// Segundos con coma decimal y sin ceros sobrantes: «3 s», «1,5 s».
+String formatSpeedSeconds(double seconds, {int decimals = 1}) {
+  final fixed = seconds.toStringAsFixed(decimals);
+  final trimmed = fixed.contains('.')
+      ? fixed.replaceFirst(RegExp(r'\.?0+$'), '')
+      : fixed;
+  return '${trimmed.replaceAll('.', ',')} s';
+}
+
+/// Cabecera del selector de velocidad (v2.1, SPEC §2.4.1).
 class SpeedModeSelectHero extends StatelessWidget {
   const SpeedModeSelectHero({super.key});
 
@@ -18,12 +27,23 @@ class SpeedModeSelectHero extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Modo velocidad',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.5,
-            color: scheme.primary,
+        Semantics(
+          header: true,
+          child: Row(
+            children: [
+              Icon(Icons.bolt_rounded, size: 32, color: speed.speedAccent),
+              const SizedBox(width: DesignTokens.spacingSm),
+              Expanded(
+                child: Text(
+                  'Modo velocidad',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.5,
+                    color: scheme.primary,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: DesignTokens.spacingSm),
@@ -33,142 +53,78 @@ class SpeedModeSelectHero extends StatelessWidget {
             color: scheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: DesignTokens.spacingLg),
-        TogescCard(
-          color: scheme.surfaceContainerLowest,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: speed.speedContainer,
-                  borderRadius: DesignTokens.borderRadiusMd,
-                  border: Border.all(
-                    color: speed.speedAccent.withValues(alpha: 0.25),
-                  ),
-                ),
-                child: Icon(
-                  Icons.timer_outlined,
-                  color: speed.speedAccent,
-                ),
-              ),
-              const SizedBox(width: DesignTokens.spacingMd),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Cómo funciona',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: speed.speedAccent,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: DesignTokens.spacingXs),
-                    Text(
-                      'El tiempo límite disminuye con cada respuesta correcta. '
-                      'Mantén la concentración.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        height: 1.4,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
 }
 
-/// Selector Fácil / Pro / Elite (tiempo inicial).
+/// Descripción corta de cada dificultad (tarjetas radio).
+String speedDifficultyDescription(SpeedDifficulty d) => switch (d) {
+  SpeedDifficulty.easy => 'Para calentar el oído',
+  SpeedDifficulty.pro => 'Ritmo de práctica habitual',
+  SpeedDifficulty.elite => 'Reconocimiento inmediato',
+};
+
+/// Tarjetas radio Fácil / Pro / Elite con su tiempo inicial y la mejor
+/// racha guardada (SPEC §2.4.1). Una dificultad sin ráfagas muestra «—».
 class SpeedDifficultySelector extends StatelessWidget {
   final SpeedDifficulty selected;
   final ValueChanged<SpeedDifficulty> onChanged;
+  final Map<SpeedDifficulty, int> bestStreaks;
 
   const SpeedDifficultySelector({
     super.key,
     required this.selected,
     required this.onChanged,
+    this.bestStreaks = const {},
   });
-
-  IconData _iconFor(SpeedDifficulty d) => switch (d) {
-    SpeedDifficulty.easy => Icons.timer_outlined,
-    SpeedDifficulty.pro => Icons.timer_10_outlined,
-    SpeedDifficulty.elite => Icons.bolt_rounded,
-  };
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final speed = TogescColors.of(context);
+    final scheme = Theme.of(context).colorScheme;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          height: 1,
-          margin: const EdgeInsets.symmetric(horizontal: 48),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                scheme.outlineVariant.withValues(alpha: 0),
-                scheme.outlineVariant,
-                scheme.outlineVariant.withValues(alpha: 0),
-              ],
+        Semantics(
+          header: true,
+          child: Text(
+            'Tiempo inicial'.toUpperCase(),
+            style: DesignTokens.overline.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
           ),
         ),
-        const SizedBox(height: DesignTokens.spacingLg),
-        Text(
-          'Tiempo inicial',
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: scheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
         const SizedBox(height: DesignTokens.spacingMd),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            for (final level in SpeedDifficulty.values) ...[
-              if (level != SpeedDifficulty.values.first)
-                const SizedBox(width: DesignTokens.spacingLg),
-              _DifficultyChip(
-                label: level.label,
-                subtitle: '${level.initialTime.toStringAsFixed(0)}s',
-                icon: _iconFor(level),
-                selected: selected == level,
-                accent: speed.speedAccent,
-                onTap: () => onChanged(level),
-              ),
-            ],
-          ],
-        ),
+        for (final level in SpeedDifficulty.values) ...[
+          if (level != SpeedDifficulty.values.first)
+            const SizedBox(height: DesignTokens.spacingSm + 2),
+          SpeedDifficultyCard(
+            difficulty: level,
+            best: bestStreaks[level],
+            selected: selected == level,
+            onTap: () => onChanged(level),
+          ),
+        ],
       ],
     );
   }
 }
 
-class _DifficultyChip extends StatelessWidget {
-  final String label;
-  final String subtitle;
-  final IconData icon;
+/// Tarjeta radio de una dificultad: cuadro de segundos, nombre, descripción
+/// y mejor racha. La selección se marca con borde, fondo, cuadro relleno e
+/// icono de check (el color nunca es la única señal).
+class SpeedDifficultyCard extends StatelessWidget {
+  final SpeedDifficulty difficulty;
+  final int? best;
   final bool selected;
-  final Color accent;
   final VoidCallback onTap;
 
-  const _DifficultyChip({
-    required this.label,
-    required this.subtitle,
-    required this.icon,
+  const SpeedDifficultyCard({
+    super.key,
+    required this.difficulty,
+    required this.best,
     required this.selected,
-    required this.accent,
     required this.onTap,
   });
 
@@ -176,55 +132,199 @@ class _DifficultyChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final speed = TogescColors.of(context);
+    final seconds = difficulty.initialTime.toStringAsFixed(0);
+    final bestText = best == null ? '—' : '$best';
+    final duration = motionDuration(context, DesignTokens.motionFast);
 
     return Semantics(
-      button: true,
-      selected: selected,
-      label: '$label, $subtitle',
+      key: ValueKey('speed-diff-${difficulty.name}'),
+      inMutuallyExclusiveGroup: true,
+      checked: selected,
+      label:
+          '${difficulty.label}, $seconds segundos. '
+          '${speedDifficultyDescription(difficulty)}. '
+          'Mejor racha: ${best == null ? 'sin datos' : '$best'}',
+      onTap: onTap,
+      excludeSemantics: true,
       child: Material(
-        color: selected
-            ? accent.withValues(alpha: 0.12)
-            : scheme.surfaceContainerLowest,
-        borderRadius: DesignTokens.borderRadiusXl,
+        type: MaterialType.transparency,
         child: InkWell(
           onTap: onTap,
-          borderRadius: DesignTokens.borderRadiusXl,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: DesignTokens.touchTargetMin,
-              minHeight: DesignTokens.touchTargetMin,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: DesignTokens.spacingMd,
-                vertical: DesignTokens.spacingSm,
+          borderRadius: DesignTokens.borderRadiusCard,
+          child: AnimatedContainer(
+            duration: duration,
+            padding: const EdgeInsets.all(DesignTokens.spacingMd),
+            decoration: BoxDecoration(
+              color: selected
+                  ? speed.speedContainer
+                  : scheme.surfaceContainerLowest,
+              borderRadius: DesignTokens.borderRadiusCard,
+              border: Border.all(
+                color: selected ? speed.speedAccent : scheme.outlineVariant,
+                width: 1.5,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    icon,
-                    color: selected ? accent : scheme.onSurfaceVariant,
+            ),
+            child: Row(
+              children: [
+                AnimatedContainer(
+                  duration: duration,
+                  width: 64,
+                  height: 64,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? speed.speedAccent
+                        : scheme.surfaceContainerHigh,
+                    borderRadius: DesignTokens.borderRadiusMd,
                   ),
-                  const SizedBox(height: DesignTokens.spacingXs),
-                  Text(
-                    label,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                      color: selected ? accent : scheme.onSurface,
+                  child: Text(
+                    '${seconds}s',
+                    style: theme.textTheme.titleLarge
+                        ?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: selected
+                              ? speed.onSpeedAccent
+                              : speed.speedAccent,
+                        )
+                        .merge(DesignTokens.tabularNumbers),
+                  ),
+                ),
+                const SizedBox(width: DesignTokens.spacingMd),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        difficulty.label,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: scheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        speedDifficultyDescription(difficulty),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: DesignTokens.spacingSm),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Mejor racha',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      bestText,
+                      key: ValueKey('speed-best-${difficulty.name}'),
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: scheme.onSurface,
+                          )
+                          .merge(DesignTokens.tabularNumbers),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: DesignTokens.spacingSm),
+                Icon(
+                  selected
+                      ? Icons.check_circle_rounded
+                      : Icons.radio_button_unchecked_rounded,
+                  color: selected ? speed.speedAccent : scheme.outline,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Card «Cómo funciona» con 3 pasos numerados (SPEC §2.4.1). El copy
+/// describe las reglas ACTUALES de `speed_session_provider` (§2.4.4).
+class SpeedHowItWorksCard extends StatelessWidget {
+  const SpeedHowItWorksCard({super.key});
+
+  static List<String> get steps => [
+    'Suena una ráfaga. Respóndela en el piano o escribiendo las notas '
+        'antes de que se acabe el tiempo.',
+    'Cada acierto reduce el tiempo límite '
+        '${formatSpeedSeconds(speedCorrectDecrease)}, hasta un mínimo de '
+        '${formatSpeedSeconds(speedMinTime)}.',
+    'Un fallo o un tiempo agotado cierra la ráfaga. '
+        'Mantén la concentración.',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final speed = TogescColors.of(context);
+
+    return TogescCard(
+      key: const ValueKey('speed-how'),
+      color: scheme.surfaceContainerLowest,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              'Cómo funciona'.toUpperCase(),
+              style: DesignTokens.overline.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spacingMd),
+          for (final (i, step) in steps.indexed) ...[
+            if (i > 0) const SizedBox(height: DesignTokens.spacingMd),
+            Semantics(
+              label: 'Paso ${i + 1}: $step',
+              excludeSemantics: true,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: speed.speedContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '${i + 1}',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: speed.speedAccent,
+                      ),
                     ),
                   ),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                  const SizedBox(width: DesignTokens.spacingMd),
+                  Expanded(
+                    child: Text(
+                      step,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        height: 1.4,
+                        color: scheme.onSurface,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ),
+          ],
+        ],
       ),
     );
   }

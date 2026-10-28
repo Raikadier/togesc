@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TOGESC v2.1 · Pantallas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block">
+<link rel="stylesheet" href="assets/togesc.css">
+<style>
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 64px; }
+  .top { display: grid; gap: 10px; margin-bottom: 28px; }
+  .top h1 { font-size: 36px; font-weight: 800; letter-spacing: -.6px; line-height: 1.1; }
+  .top p { color: var(--fg-2); max-width: 64ch; }
+  .changes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin: 8px 0 32px; }
+  .chg { padding: 16px; border-radius: var(--r-card); background: var(--panel); border: 1px solid var(--border); display: grid; gap: 6px; }
+  .chg .ms { color: var(--primary-2); }
+  .chg b { font-size: 15px; }
+  .chg span.s { font-size: 13px; color: var(--fg-2); }
+  .screens { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+  .scr { display: grid; gap: 10px; text-decoration: none; border-radius: var(--r-hero); padding: 10px; transition: background var(--t-fast); }
+  .scr:hover { background: var(--panel); }
+  .frame { position: relative; aspect-ratio: 412 / 800; border-radius: 18px; overflow: hidden; border: 1px solid var(--border); background: var(--chip); transition: transform var(--t-med) var(--ease-out), box-shadow var(--t-med); }
+  .scr:hover .frame { transform: translateY(-3px); box-shadow: 0 18px 34px -20px rgb(42 6 64 / .6); }
+  .frame iframe { position: absolute; top: 0; left: 0; width: 412px; height: 800px; border: 0; transform-origin: 0 0; pointer-events: none; }
+  .meta { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 0 4px; }
+  .meta b { display: block; font-size: 16px; }
+  .meta span.s { font-size: 13px; color: var(--fg-2); }
+  .tag { font-size: 11px; font-weight: 800; letter-spacing: 1px; padding: 3px 8px; border-radius: 999px; background: var(--chip); color: var(--fg-2); white-space: nowrap; }
+  .tag.dark { background: var(--hero); color: var(--on-hero-accent); }
+  .note { margin-top: 36px; font-size: 13px; color: var(--fg-2); display: flex; gap: 8px; align-items: flex-start; }
+</style>
+</head>
+<body>
+<main class="wrap" data-od-id="launcher">
+  <header class="top">
+    <span class="logo">TOGESC</span>
+    <h1>Rediseño v2.1 · «La sesión como instrumento», pulido</h1>
+    <p>Prototipo navegable de las 8 pantallas, en móvil (412 px) y escritorio (≥ 1024 px con rail lateral). El audio es real, generado en el navegador, y todas las preferencias se guardan y se aplican en todas las pantallas.</p>
+  </header>
+
+  <section class="changes" aria-label="Qué cambia">
+    <div class="chg"><span class="ms" aria-hidden="true">donut_large</span><b>Mapa del oído</b><span class="s">Una rueda de 12 notas con barras radiales por dominio. Es la firma visual del progreso: en el Home, en Progreso y en el resumen de cada sesión.</span></div>
+    <div class="chg"><span class="ms" aria-hidden="true">animation</span><b>Movimiento con propósito</b><span class="s">Ecualizador mientras escuchas, temporizador en anillo, teclas con rebote y onda, números que cuentan y subidas de nivel SRS. Se desactiva todo con «Reducir animaciones».</span></div>
+    <div class="chg"><span class="ms" aria-hidden="true">accessibility_new</span><b>Accesibilidad</b><span class="s">Foco visible, salto al contenido, anuncios para lector de pantalla, atajos A–G, texto y piano más grandes, y nunca el color como única señal.</span></div>
+    <div class="chg"><span class="ms" aria-hidden="true">lightbulb</span><b>Más intuitivo</b><span class="s">El Home explica los 3 pasos, el onboarding incluye una ronda de prueba y la sesión termina con un resumen de lo que mejoró.</span></div>
+  </section>
+
+  <section class="screens" id="screens" aria-label="Pantallas"></section>
+  <p class="note"><span class="ms sm" aria-hidden="true">info</span>Precisiones, intentos e historial son datos de demostración coherentes con el spec v2. Las sesiones que juegues los actualizan en este navegador.</p>
+</main>
+<script>
+  const S = [
+    ['home.html', 'Práctica (Home)', 'Una decisión: la sesión de hoy', ''],
+    ['session.html?mode=today', 'Sesión de práctica', 'Teclado protagonista, feedback sobre la tecla', 'dark'],
+    ['progress.html', 'Progreso', 'Mapa del oído, rejilla y detalle por nota', ''],
+    ['speed.html', 'Modo velocidad', 'Ráfagas contra reloj', ''],
+    ['profile.html', 'Perfil', 'Cuenta, sincronización y plan', ''],
+    ['paywall.html', 'TOGESC Pro', 'Paywall rediseñado', 'dark'],
+    ['onboarding.html', 'Onboarding', '4 pasos con ronda de prueba', ''],
+    ['settings.html', 'Ajustes', 'Sonido, sesión, apariencia y accesibilidad', ''],
+  ];
+  const host = document.getElementById('screens');
+  host.innerHTML = S.map(([h, t, s, d], k) => `<a class="scr" href="${h}" data-od-id="screen-${h.split('.')[0]}"><div class="frame"><iframe src="${h}" title="Vista previa: ${t}" loading="lazy" tabindex="-1" aria-hidden="true"></iframe></div><div class="meta"><span><b>${t}</b><span class="s">${s}</span></span>${d ? '<span class="tag dark">OSCURO</span>' : ''}</div></a>`).join('');
+  const fit = () => document.querySelectorAll('.frame').forEach(f => { f.querySelector('iframe').style.transform = `scale(${f.clientWidth / 412})`; });
+  addEventListener('resize', fit); fit();
+</script>
+</body>
+</html>

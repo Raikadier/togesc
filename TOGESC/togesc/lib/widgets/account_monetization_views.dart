@@ -1,25 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
-import '../app/togesc_colors.dart';
-import 'game_session_views.dart';
 import 'togesc_ui.dart';
-
-/// Supabase no configurado — modo offline.
-class AccountOfflineView extends StatelessWidget {
-  const AccountOfflineView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return GameSessionPhaseLayout(
-      icon: Icons.cloud_off_rounded,
-      title: 'Sincronizacion no disponible',
-      subtitle:
-          'Este despliegue no tiene Supabase configurado. Puedes entrenar '
-          'con normalidad: el progreso se guarda solo en tu dispositivo.',
-    );
-  }
-}
 
 /// Titulo de seccion en formularios de cuenta.
 class AccountSectionTitle extends StatelessWidget {
@@ -79,7 +61,7 @@ class AccountInfoBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: scheme.primaryContainer),
+          Icon(icon, color: scheme.primary),
           const SizedBox(width: DesignTokens.spacingMd),
           Expanded(
             child: Text(
@@ -89,52 +71,6 @@ class AccountInfoBanner extends StatelessWidget {
           ),
           if (actionLabel != null && onAction != null)
             TextButton(onPressed: onAction, child: Text(actionLabel!)),
-        ],
-      ),
-    );
-  }
-}
-
-/// Fila de beneficio Pro en paywall.
-class ProFeatureRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const ProFeatureRow({
-    super.key,
-    required this.icon,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: DesignTokens.spacingSm),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: scheme.primaryContainer.withValues(alpha: 0.12),
-              borderRadius: DesignTokens.borderRadiusMd,
-            ),
-            child: Icon(icon, color: scheme.primaryContainer, size: 20),
-          ),
-          const SizedBox(width: DesignTokens.spacingMd),
-          Expanded(
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ),
-          Icon(
-            Icons.check_circle_rounded,
-            color: TogescColors.of(context).correct,
-            size: 20,
-          ),
         ],
       ),
     );
@@ -172,90 +108,6 @@ class ProLockedFeatureCard extends StatelessWidget {
   }
 }
 
-/// Metrica en dashboard de estadisticas.
-class StatsMetricRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
-  const StatsMetricRow({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: DesignTokens.spacingMd),
-          Expanded(child: Text(label)),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontSize: 16,
-                  color: color,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Seccion de notas (dificiles / faciles).
-class StatsNotesSection extends StatelessWidget {
-  final String title;
-  final List<String> notes;
-  final Color color;
-  final IconData icon;
-
-  const StatsNotesSection({
-    super.key,
-    required this.title,
-    required this.notes,
-    required this.color,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TogescCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: DesignTokens.spacingSm),
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-            ],
-          ),
-          const SizedBox(height: DesignTokens.spacingSm),
-          Wrap(
-            spacing: DesignTokens.spacingSm,
-            children: notes
-                .map(
-                  (note) => Chip(
-                    label: Text(note, style: TextStyle(color: color)),
-                    backgroundColor: color.withValues(alpha: 0.1),
-                    side: BorderSide(color: color.withValues(alpha: 0.35)),
-                  ),
-                )
-                .toList(),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Estado del plan en pantalla de suscripcion.
 class SubscriptionPlanCard extends StatelessWidget {
   final bool isPro;
@@ -277,12 +129,9 @@ class SubscriptionPlanCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Plan actual',
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: isPro
-                ? scheme.onPrimary.withValues(alpha: 0.9)
-                : scheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
+          'Plan actual'.toUpperCase(),
+          style: DesignTokens.overline.copyWith(
+            color: isPro ? DesignTokens.onHeroAccent : scheme.onSurfaceVariant,
           ),
         ),
         Text(
@@ -290,28 +139,29 @@ class SubscriptionPlanCard extends StatelessWidget {
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w700,
             letterSpacing: -0.4,
-            color: isPro ? scheme.onPrimary : scheme.primary,
+            color: isPro ? DesignTokens.onHero : scheme.primary,
           ),
         ),
         const SizedBox(height: DesignTokens.spacingXs),
         Text(
           subtitle,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: isPro
-                ? scheme.onPrimary.withValues(alpha: 0.85)
-                : scheme.onSurfaceVariant,
+            color: isPro ? DesignTokens.onHero : scheme.onSurfaceVariant,
           ),
         ),
       ],
     );
 
+    // Plan Pro en la card `hero` v2 (#2A0640), igual en claro y oscuro:
+    // texto `onHero` 17,5:1 y overline `onHeroAccent` 8,5:1. Antes usaba
+    // `primaryContainer`/`onPrimary`, que en oscuro quedaba morado sobre
+    // morado.
     if (isPro) {
       return Container(
         padding: const EdgeInsets.all(DesignTokens.spacingLg),
         decoration: BoxDecoration(
-          color: scheme.primaryContainer,
-          borderRadius: DesignTokens.borderRadiusMd,
-          border: Border.all(color: scheme.primary.withValues(alpha: 0.35)),
+          color: DesignTokens.hero,
+          borderRadius: DesignTokens.borderRadiusCard,
         ),
         child: Row(
           children: [
@@ -319,12 +169,12 @@ class SubscriptionPlanCard extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: scheme.onPrimary.withValues(alpha: 0.15),
-                borderRadius: DesignTokens.borderRadiusMd,
+                color: DesignTokens.onHero.withValues(alpha: 0.12),
+                borderRadius: DesignTokens.borderRadiusCell,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.workspace_premium_rounded,
-                color: scheme.onPrimary,
+                color: DesignTokens.onHeroAccent,
               ),
             ),
             const SizedBox(width: DesignTokens.spacingMd),
@@ -337,96 +187,3 @@ class SubscriptionPlanCard extends StatelessWidget {
     return TogescCard(child: content);
   }
 }
-
-/// Hero del paywall Pro.
-class PaywallHero extends StatelessWidget {
-  final String title;
-  final String subtitle;
-
-  const PaywallHero({
-    super.key,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            vertical: DesignTokens.spacingLg * 2,
-            horizontal: DesignTokens.spacingLg,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: DesignTokens.borderRadiusMd,
-            color: scheme.surfaceContainerLow,
-            border: Border.all(color: scheme.outlineVariant),
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: DesignTokens.spacingMd,
-                  vertical: DesignTokens.spacingXs,
-                ),
-                decoration: BoxDecoration(
-                  color: scheme.primaryContainer,
-                  borderRadius: DesignTokens.borderRadiusMd,
-                ),
-                child: Text(
-                  'TOGESC Pro',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: scheme.onPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: DesignTokens.spacingLg),
-              Container(
-                width: 88,
-                height: 88,
-                decoration: BoxDecoration(
-                  color: scheme.primaryContainer,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: scheme.primary.withValues(alpha: 0.35),
-                  ),
-                ),
-                child: Icon(
-                  Icons.workspace_premium_rounded,
-                  size: 44,
-                  color: scheme.onPrimary,
-                ),
-              ),
-              const SizedBox(height: DesignTokens.spacingLg),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                  color: scheme.primary,
-                ),
-              ),
-              const SizedBox(height: DesignTokens.spacingMd),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-

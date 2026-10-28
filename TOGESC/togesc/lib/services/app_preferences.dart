@@ -11,6 +11,9 @@ import '../models/srs_intensity_profile.dart';
 import '../models/ui_preferences.dart';
 
 const String onboardingCompleteKey = 'togesc_onboarding_complete';
+
+/// Paso actual del onboarding v2.1 (0–3), para retomarlo al volver.
+const String onboardingStepKey = 'togesc_onboarding_step';
 const String sessionCountKey = 'togesc_session_count';
 const String csatLastSubmittedKey = 'togesc_csat_last_submitted';
 const String csatLastDismissedKey = 'togesc_csat_last_dismissed';
@@ -28,9 +31,47 @@ const String sessionRoundGoalKey = 'togesc_session_round_goal';
 const String autoAdvanceAfterResultKey = 'togesc_auto_advance_after_result';
 const String gameInputModeKey = 'togesc_game_input_mode';
 const String confirmBeforeSubmitKey = 'togesc_confirm_before_submit';
+
+// Claves v2 (rediseño v2, D1/D2/D3/D6). Las claves legacy de arriba se leen
+// solo como respaldo de migración; las escrituras van a las claves v2.
+// Motivo: `setUiPreferences` y `setPracticeSessionPreferences` escriben TODOS
+// los campos a la vez, así que un valor legacy igual al default antiguo no
+// distingue «nunca lo tocó» de «lo eligió». Regla de migración
+// ([migrateLegacyPreference]): un valor legacy distinto del default antiguo
+// es una elección explícita y se conserva; uno igual al default antiguo (o
+// ausente) recibe el default nuevo.
+const String sessionRoundGoalV2Key = 'togesc_session_round_goal_v2';
+const String autoAdvanceAfterResultV2Key =
+    'togesc_auto_advance_after_result_v2';
+const String gameInputModeV2Key = 'togesc_game_input_mode_v2';
+const String confirmBeforeSubmitV2Key = 'togesc_confirm_before_submit_v2';
+
+/// Defaults anteriores al rediseño v2 (solo para migrar valores legacy).
+const bool legacyDefaultConfirmBeforeSubmit = true;
+const bool legacyDefaultAutoAdvanceAfterResult = false;
+const String legacyDefaultGameInputModeId = 'both';
+const int legacyDefaultSessionRoundGoalRounds = 0;
+
+/// Resuelve una preferencia migrada a v2.
+///
+/// - Si existe valor v2 ([v2Value]), manda siempre.
+/// - Si no, un valor legacy distinto de [legacyDefault] es una elección
+///   explícita del usuario y se conserva.
+/// - En otro caso (sin valor o igual al default antiguo) se usa [newDefault].
+T migrateLegacyPreference<T>({
+  required T? v2Value,
+  required T? legacyValue,
+  required T legacyDefault,
+  required T newDefault,
+}) {
+  if (v2Value != null) return v2Value;
+  if (legacyValue != null && legacyValue != legacyDefault) return legacyValue;
+  return newDefault;
+}
 const String hidePianoLabelsKey = 'togesc_hide_piano_labels';
 const String largePianoKey = 'togesc_large_piano';
 const String reduceAnimationsKey = 'togesc_reduce_animations';
+const String largeTextKey = 'togesc_large_text';
 const String themePreferenceKey = 'togesc_theme_preference';
 const String octaveVariationKey = 'togesc_octave_variation';
 const String toneDurationKey = 'togesc_tone_duration_sec';
@@ -50,6 +91,12 @@ class AppPreferences {
 
   Future<void> setOnboardingComplete(bool value) async {
     await _prefs.setBool(onboardingCompleteKey, value);
+  }
+
+  int get onboardingStep => _prefs.getInt(onboardingStepKey) ?? 0;
+
+  Future<void> setOnboardingStep(int step) async {
+    await _prefs.setInt(onboardingStepKey, step);
   }
 
   int get sessionCount => _prefs.getInt(sessionCountKey) ?? 0;
@@ -174,42 +221,64 @@ class AppPreferences {
   }
 
   PracticeSessionPreferences get practiceSessionPreferences {
-    final goalRounds = _prefs.getInt(sessionRoundGoalKey);
+    final goalRounds = migrateLegacyPreference<int>(
+      v2Value: _prefs.getInt(sessionRoundGoalV2Key),
+      legacyValue: _prefs.getInt(sessionRoundGoalKey),
+      legacyDefault: legacyDefaultSessionRoundGoalRounds,
+      newDefault: defaultSessionRoundGoal.rounds,
+    );
     return PracticeSessionPreferences(
       roundGoal: SessionRoundGoal.fromRounds(goalRounds),
-      autoAdvanceAfterResult:
-          _prefs.getBool(autoAdvanceAfterResultKey) ?? false,
+      autoAdvanceAfterResult: migrateLegacyPreference<bool>(
+        v2Value: _prefs.getBool(autoAdvanceAfterResultV2Key),
+        legacyValue: _prefs.getBool(autoAdvanceAfterResultKey),
+        legacyDefault: legacyDefaultAutoAdvanceAfterResult,
+        newDefault: defaultAutoAdvanceAfterResult,
+      ),
     );
   }
 
   Future<void> setPracticeSessionPreferences(
     PracticeSessionPreferences value,
   ) async {
-    await _prefs.setInt(sessionRoundGoalKey, value.roundGoal.rounds);
+    await _prefs.setInt(sessionRoundGoalV2Key, value.roundGoal.rounds);
     await _prefs.setBool(
-      autoAdvanceAfterResultKey,
+      autoAdvanceAfterResultV2Key,
       value.autoAdvanceAfterResult,
     );
   }
 
   UiPreferences get uiPreferences {
+    final inputModeId = migrateLegacyPreference<String>(
+      v2Value: _prefs.getString(gameInputModeV2Key),
+      legacyValue: _prefs.getString(gameInputModeKey),
+      legacyDefault: legacyDefaultGameInputModeId,
+      newDefault: defaultGameInputMode.name,
+    );
     return UiPreferences(
-      inputMode: GameInputMode.fromId(_prefs.getString(gameInputModeKey)),
-      confirmBeforeSubmit: _prefs.getBool(confirmBeforeSubmitKey) ?? true,
+      inputMode: GameInputMode.fromId(inputModeId),
+      confirmBeforeSubmit: migrateLegacyPreference<bool>(
+        v2Value: _prefs.getBool(confirmBeforeSubmitV2Key),
+        legacyValue: _prefs.getBool(confirmBeforeSubmitKey),
+        legacyDefault: legacyDefaultConfirmBeforeSubmit,
+        newDefault: defaultConfirmBeforeSubmit,
+      ),
       hidePianoLabels: _prefs.getBool(hidePianoLabelsKey) ?? false,
       largePiano: _prefs.getBool(largePianoKey) ?? false,
       reduceAnimations: _prefs.getBool(reduceAnimationsKey) ?? false,
+      largeText: _prefs.getBool(largeTextKey) ?? false,
       themePreference:
           AppThemePreference.fromId(_prefs.getString(themePreferenceKey)),
     );
   }
 
   Future<void> setUiPreferences(UiPreferences value) async {
-    await _prefs.setString(gameInputModeKey, value.inputMode.name);
-    await _prefs.setBool(confirmBeforeSubmitKey, value.confirmBeforeSubmit);
+    await _prefs.setString(gameInputModeV2Key, value.inputMode.name);
+    await _prefs.setBool(confirmBeforeSubmitV2Key, value.confirmBeforeSubmit);
     await _prefs.setBool(hidePianoLabelsKey, value.hidePianoLabels);
     await _prefs.setBool(largePianoKey, value.largePiano);
     await _prefs.setBool(reduceAnimationsKey, value.reduceAnimations);
+    await _prefs.setBool(largeTextKey, value.largeText);
     await _prefs.setString(themePreferenceKey, value.themePreference.name);
   }
 

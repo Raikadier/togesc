@@ -14,6 +14,9 @@ class NoteProgressSummary {
   final bool isOverdue;
   final double avgResponseTimeSec;
 
+  /// Índice del intervalo de consolidación (para `srsLevel`). No se persiste.
+  final int intervalIndex;
+
   const NoteProgressSummary({
     required this.note,
     required this.isLearning,
@@ -23,6 +26,7 @@ class NoteProgressSummary {
     required this.weight,
     required this.isOverdue,
     this.avgResponseTimeSec = 0,
+    this.intervalIndex = 0,
   });
 
   double get accuracyPercent =>
@@ -45,6 +49,7 @@ class NoteProgressSummary {
       weight: data.weight,
       isOverdue: isOverdue,
       avgResponseTimeSec: data.avgResponseTimeSec,
+      intervalIndex: data.intervalIndex,
     );
   }
 }

@@ -30,7 +30,7 @@ class AboutScreen extends ConsumerWidget {
           const InfoSectionHeader(title: 'Cómo entrena la app'),
           PedagogySectionCard(
             icon: Icons.psychology_rounded,
-            accentColor: scheme.primaryContainer,
+            accentColor: scheme.primary,
             title: 'Repetición espaciada (SRS)',
             body:
                 'El sistema repite más las notas que te cuestan y espacia las '
