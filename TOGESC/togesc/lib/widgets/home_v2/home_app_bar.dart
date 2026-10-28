@@ -94,18 +94,24 @@ class StreakChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            // #FFB300 sobre el chip claro da 1,6:1; en claro va el ámbar
+            // profundo (3:1 de icono informativo).
+            Icon(
               Icons.local_fire_department_rounded,
               size: 18,
-              color: DesignTokens.ctaAmber,
+              color: Theme.of(context).brightness == Brightness.light
+                  ? TogescColors.of(context).selectionDeep
+                  : DesignTokens.ctaAmber,
             ),
             const SizedBox(width: 4),
             Text(
               '$streakDays',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              style: Theme.of(context).textTheme.labelLarge
+                  ?.copyWith(
                     fontWeight: FontWeight.w800,
                     color: scheme.onSurface,
-                  ).merge(DesignTokens.tabularNumbers),
+                  )
+                  .merge(DesignTokens.tabularNumbers),
             ),
           ],
         ),

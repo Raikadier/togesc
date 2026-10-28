@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +11,8 @@ import 'package:togesc/screens/account_screen.dart';
 import 'package:togesc/screens/statistics_screen.dart';
 import 'package:togesc/services/app_preferences.dart';
 import 'package:togesc/widgets/togesc_shell.dart';
+
+import '../helpers/contrast_audit.dart';
 
 /// Tema oscuro de las pantallas v2 del shell (Home, Progreso, Perfil, barra
 /// inferior y rail). Base: paleta de sesión (#141018, #1A121E, #241B2A,
@@ -25,6 +28,11 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     SharedPreferences.setMockInitialValues({onboardingCompleteKey: true});
   });
+
+  void expectAuditClean(WidgetTester tester, String where) {
+    final failures = auditContrast(tester);
+    expect(failures, isEmpty, reason: '$where: ${failures.join('; ')}');
+  }
 
   Future<void> pumpApp(
     WidgetTester tester, {
@@ -299,6 +307,111 @@ void main() {
         find.byKey(const ValueKey('home-see-all-modes')),
       );
       expect(seeAll.style!.foregroundColor!.resolve({}), DesignTokens.primary);
+    });
+  });
+
+  // Lote 8 (cierre v2.1): auditoría de todo texto e icono de cada pantalla
+  // del shell frente a su fondo real, en los dos temas y los dos layouts.
+  const auditedRoutes = [
+    AppRoutes.home,
+    AppRoutes.statistics,
+    AppRoutes.account,
+    AppRoutes.settings,
+    AppRoutes.paywall,
+    AppRoutes.speedSelect,
+    AppRoutes.subscription,
+    AppRoutes.about,
+    AppRoutes.privacy,
+  ];
+  const auditedSizes = {
+    'móvil': Size(400, 2400),
+    'escritorio': Size(1280, 1600),
+  };
+
+  group('auditoría AA de pantallas v2.1', () {
+    testWidgets('el auditor detecta un texto sin contraste', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: ColoredBox(
+            color: Color(0xFFFFFFFF),
+            child: Text(
+              'gris claro',
+              style: TextStyle(color: Color(0xFFBBBBBB)),
+            ),
+          ),
+        ),
+      );
+      expect(auditContrast(tester), hasLength(1));
+    });
+
+    for (final mode in [ThemeMode.dark, ThemeMode.light]) {
+      for (final size in auditedSizes.entries) {
+        for (final route in auditedRoutes) {
+          testWidgets('${mode.name} · ${size.key} · $route', (tester) async {
+            await pumpApp(
+              tester,
+              size: size.value,
+              location: route,
+              mode: mode,
+            );
+            expectAuditClean(tester, route);
+          });
+        }
+      }
+    }
+
+    testWidgets('oscuro: los 4 pasos del onboarding', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      await pumpApp(
+        tester,
+        size: const Size(400, 1400),
+        location: AppRoutes.onboarding,
+      );
+      for (var step = 1; step <= 4; step++) {
+        expect(find.bySemanticsLabel('Paso $step de 4'), findsOneWidget);
+        expectAuditClean(tester, 'onboarding paso $step');
+        if (step < 4) {
+          await tester.tap(find.byKey(const ValueKey('onboarding-next')));
+          await tester.pumpAndSettle();
+        }
+      }
+    });
+
+    testWidgets('oscuro: hoja «Restablecer ajustes»', (tester) async {
+      await pumpApp(
+        tester,
+        size: const Size(400, 2400),
+        location: AppRoutes.settings,
+      );
+      final reset = find.byKey(const ValueKey('settings-reset'));
+      await tester.ensureVisible(reset);
+      await tester.pumpAndSettle();
+      await tester.tap(reset);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('settings-reset-sheet')),
+        findsOneWidget,
+      );
+      expectAuditClean(tester, 'hoja de restablecer');
+    });
+
+    testWidgets('el motivo de un interruptor desactivado se lee con AA', (
+      tester,
+    ) async {
+      // En tests no hay recordatorios (solo Android e iOS): el interruptor
+      // va desactivado, pero su explicación no puede ir en gris.
+      await pumpApp(
+        tester,
+        size: const Size(400, 2400),
+        location: AppRoutes.account,
+      );
+      final note = tester.renderObject<RenderParagraph>(
+        find.text('Disponible en Android e iOS.'),
+      );
+      expect(
+        contrastRatio(note.text.style!.color!, surface),
+        greaterThanOrEqualTo(4.5),
+      );
     });
   });
 }

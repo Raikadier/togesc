@@ -111,12 +111,16 @@ SwitchListTile _switch({
   required String subtitle,
   required bool value,
   required ValueChanged<bool>? onChanged,
+  Color? subtitleColor,
 }) {
   return SwitchListTile(
     key: key,
     contentPadding: EdgeInsets.zero,
     title: Text(title),
-    subtitle: Text(subtitle),
+    subtitle: Text(
+      subtitle,
+      style: subtitleColor == null ? null : TextStyle(color: subtitleColor),
+    ),
     value: value,
     onChanged: onChanged,
   );
@@ -310,6 +314,10 @@ class SettingsSessionGroup extends ConsumerWidget {
             subtitle: PracticeReminderService.isSupported
                 ? 'Notificación local si tienes notas vencidas.'
                 : 'Disponible en Android e iOS.',
+            // El interruptor se desactiva, pero el motivo debe leerse (AA).
+            subtitleColor: PracticeReminderService.isSupported
+                ? null
+                : Theme.of(context).colorScheme.onSurfaceVariant,
             value: reminders && PracticeReminderService.isSupported,
             onChanged: PracticeReminderService.isSupported
                 ? (value) async {

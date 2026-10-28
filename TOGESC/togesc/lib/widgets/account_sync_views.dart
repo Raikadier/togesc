@@ -322,10 +322,13 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
                     ),
                   ),
                   title: const Text('Recordatorios diarios'),
+                  // Desactivado fuera de móvil, pero el motivo debe leerse
+                  // (AA): color explícito en vez del gris de deshabilitado.
                   subtitle: Text(
                     PracticeReminderService.isSupported
                         ? 'Notificación local si tienes notas vencidas.'
                         : 'Disponible en Android e iOS.',
+                    style: TextStyle(color: scheme.onSurfaceVariant),
                   ),
                   value: enabled && PracticeReminderService.isSupported,
                   onChanged: PracticeReminderService.isSupported

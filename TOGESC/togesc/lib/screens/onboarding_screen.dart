@@ -190,8 +190,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               icon: const Icon(Icons.arrow_back_rounded),
               label: const Text('Atrás'),
             ),
-          const Spacer(),
-          next,
+          const SizedBox(width: DesignTokens.spacingSm),
+          // En móvil estrecho (o con texto grande) el botón cede y su texto
+          // pasa a dos líneas en vez de desbordar la fila.
+          Expanded(
+            child: Align(alignment: Alignment.centerRight, child: next),
+          ),
         ],
       ),
     );

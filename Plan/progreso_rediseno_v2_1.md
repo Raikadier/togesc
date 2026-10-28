@@ -2,6 +2,24 @@
 
 Log en orden cronológico inverso. Hoja de ruta: `Plan/hoja_ruta_rediseno_v2_1.md`. Qué cambia: `docs/design_v2_1/SPEC_rediseno_v2_1.md`.
 
+## 2026-10-28 · Lote 8: cierre · Claude Code
+- **Contraste del tema oscuro** (`dark_theme_v2_test.dart`):
+  - Nuevo `auditContrast` (`test/helpers/contrast_audit.dart`). Recorre cada texto e icono pintado y lo compara con el fondo opaco real que tiene detrás (Material, ColoredBox, DecoratedBox o Ink, mezclando los translúcidos).
+    - Texto: 4,5:1, o 3:1 si es grande. Iconos: 3:1.
+    - Exentos: controles desactivados e iconos decorativos dentro de `ExcludeSemantics`.
+    - Un test comprueba que detecta un texto gris claro sobre blanco.
+  - Auditadas Home, Progreso, Perfil, Ajustes, Paywall, Velocidad, Suscripción, Acerca de y Privacidad, en claro y oscuro y en móvil y escritorio (36 casos). También los 4 pasos del onboarding y la hoja «Restablecer ajustes».
+- **Fallos que encontró y quedan corregidos:**
+  - Fuego de la racha del Home: #FFB300 sobre el chip claro daba 1,55:1. En claro pasa a `selectionDeep`; en oscuro sigue ámbar.
+  - «Disponible en Android e iOS.» (recordatorios en Perfil y Ajustes) salía con el gris de deshabilitado: 2,7:1 en claro y 3,6:1 en oscuro. Ahora lleva `onSurfaceVariant` explícito, porque explica por qué el interruptor está desactivado.
+  - El pie del onboarding desbordaba 28 px a 400 px de ancho (Atrás + «Seguir sin probar» / «Entendido, empezar»). El botón principal va ahora en `Expanded` + `Align` y cede en vez de desbordar.
+- **`integration_test`:** en esta máquina no hay emulador Android, chromedriver ni Visual Studio (Windows desktop). Pasa en `flutter-tester` (+2). Las capturas frente al prototipo en Android y Chrome siguen pendientes; los comandos están en la cabecera de `app_journey_test.dart`.
+- **`docs/qa_checklist.md`:** nueva sección «Rediseño v2.1: cierre», que separa lo automático (pasado) de lo manual con TalkBack o VoiceOver, NVDA y movimiento reducido del sistema (pendiente, necesita un dispositivo y una persona).
+- **`DESIGN.md`:** tabla «Qué cambió de v2 a v2.1» con **Vigente** o **Sustituido** en cada punto. «Pantallas fuera de v2» queda marcada como sustituida y la accesibilidad documenta el auditor.
+- **Anotado, sin tocar:** el icono marca de agua del hero del Home usa `Color(0x14FFFFFF)` suelto (es decorativo y está en `ExcludeSemantics`, pero incumple la regla de no usar hex sueltos).
+- **Verificación:** `flutter analyze` sin avisos, `flutter test` +680 ~1 e `integration_test` en `flutter-tester` +2.
+- **Pendiente del lote:** el paso manual con lectores de pantalla, las capturas en Android y Chrome, y el PR final con la preview de Vercel (necesita push, a la espera del visto bueno del propietario).
+
 ## 2026-10-27 · Lote 7: Perfil, paywall, onboarding y ajustes · Claude Code
 - **Perfil** (`account_screen.dart` y `profile_views.dart`, nuevo):
   - `ProfileIdentityHeader` con avatar de 64 px. Sin cuenta: «Entrenando sin cuenta · Tu progreso vive en este dispositivo» y «Entrar o crear cuenta» (`profile-sign-in`), solo si hay backend. Con cuenta: el email y si está verificado.

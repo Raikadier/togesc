@@ -2,7 +2,7 @@
 name: TOGESC v2 «La sesión como instrumento»
 description: Design system de TOGESC. Es la evolución v2 de Harmonic Precision para entrenar el oído absoluto, con Material 3 y un tono académico.
 version: 2.1
-updated: 2026-10-26
+updated: 2026-10-28
 source: docs/design_v2/SPEC_rediseno_v2.md
 source_v2_1: docs/design_v2_1/SPEC_rediseno_v2_1.md
 colors:
@@ -199,6 +199,23 @@ Aprobado el 2026-10-26 a partir del feedback del propietario sobre v2: se veía 
   - Rejilla de timbres con preescucha y volumen con su valor en %.
   - «Restablecer ajustes» se confirma en una hoja.
 
+## Qué cambió de v2 a v2.1 (cierre, lote 8)
+
+| Punto de v2 | Estado en v2.1 |
+|---|---|
+| Paleta, Hanken Grotesk, radios, sesión oscura, sin XP en el Home y un CTA dominante | **Vigente** |
+| Rejilla de dominio con el % visible | **Vigente**. Convive con el mapa del oído (`EarMapWheel`): rueda por defecto en móvil y las dos en escritorio |
+| Duraciones `motion*` sueltas | **Sustituido** por los tokens de movimiento y `motionDuration` (lote 1); `motion*` quedan como alias |
+| Idle mínimo de la sesión (D4) | **Sustituido** por «Preparado» con «Estoy listo» (lote 4) |
+| Sesión sin pausa | **Sustituido** por la pausa con Esc o volver (lote 4) |
+| Home con hero y rejilla de 12 | **Sustituido** por el hero con 3 pasos y hoja de ajuste, el mapa del oído y los últimos 7 días (lote 3) |
+| Progreso en una sola vista | **Sustituido** por las pestañas «Resumen \| Historial» y la hoja de detalle de nota (lote 5) |
+| Velocidad con la estructura de v1 | **Sustituido** por las tarjetas de dificultad, la cuenta atrás y el anillo de 168 px (lote 6) |
+| Paywall, cuenta, onboarding y ajustes «con tokens v2 y la estructura antigua» | **Sustituido** por el rediseño del lote 7. La sección «Pantallas fuera de v2» queda solo como historia |
+| Onboarding de una pantalla | **Sustituido** por 4 pasos con el paso guardado (lote 7) |
+| Confirmaciones en diálogo (borrar cuenta, restablecer) | **Sustituido** por hojas inferiores (lote 7) |
+| Contraste comprobado por pares de tokens (`design_tokens_v2_test.dart`) | **Vigente**, y se suma la auditoría de cada texto e icono de cada pantalla frente a su fondo real (`test/helpers/contrast_audit.dart`, en `dark_theme_v2_test.dart`) |
+
 ## Qué queda de Harmonic Precision
 
 | Elemento | Estado |
@@ -306,7 +323,7 @@ Sigue disponible como preferencia para las pantallas del shell, con los tokens `
 - Espacio solo actúa si ningún control tiene el foco: una tecla del piano enfocada consume su propio Enter/Espacio.
 
 ## Accesibilidad (WCAG 2.2 AA)
-- **Contraste:** el texto normal llega a 4,5:1 y los iconos y bordes informativos a 3:1. Cuando el spec daba un valor por debajo, el token se oscureció manteniendo el tono, y el valor original queda documentado en el código: `outline`, el verde medio y el acento de velocidad. Nada de texto con opacidad reducida: para el texto terciario se usa `outline`.
+- **Contraste:** `auditContrast` (`test/helpers/contrast_audit.dart`) recorre en los tests cada texto e icono frente a su fondo real. Los controles desactivados y los iconos decorativos dentro de `ExcludeSemantics` quedan exentos, pero la explicación de un control desactivado («Disponible en Android e iOS.») lleva color AA explícito. El texto normal llega a 4,5:1 y los iconos y bordes informativos a 3:1. Cuando el spec daba un valor por debajo, el token se oscureció manteniendo el tono, y el valor original queda documentado en el código: `outline`, el verde medio y el acento de velocidad. Nada de texto con opacidad reducida: para el texto terciario se usa `outline`.
 - **El color nunca es la única señal:**
   - Rejilla: % visible.
   - Semana: icono por estado.
@@ -317,7 +334,9 @@ Sigue disponible como preferencia para las pantallas del shell, con los tokens `
 - **Movimiento:** se respetan `reduceAnimations` y `disableAnimations` en barras, transiciones y pulsos.
 - **Lector de pantalla:** cada tecla del piano tiene su Semantics («C sostenido, correcta»), y las cabeceras de sección se marcan con `header: true`.
 
-## Pantallas fuera de v2
+## Pantallas fuera de v2 (**Sustituido** en v2.1)
+Esta sección describe el estado de v2. En v2.1 el lote 7 rediseñó paywall, cuenta (Perfil), onboarding y ajustes. Siguen con la estructura de v2 suscripción, acerca de y privacidad.
+
 Onboarding, velocidad, paywall, suscripción, ajustes, acerca de, privacidad y cuenta **adoptan los tokens de v2 sin cambiar de estructura** (lote 3). Eso cubre:
 - Radios card, hero, CTA y píldora.
 - Cabeceras en overline.
@@ -325,7 +344,7 @@ Onboarding, velocidad, paywall, suscripción, ajustes, acerca de, privacidad y c
 - Cifras tabulares en las métricas de velocidad.
 - Las mismas reglas de contraste AA.
 
-Rediseñar el paywall y la cuenta, la versión clara de la sesión y el Home sin card oscura siguen pendientes (los señala el propio spec).
+El paywall y la cuenta ya están rediseñados (lote 7). La versión clara de la sesión y el Home sin card oscura siguen pendientes.
 
 ## Hacer y no hacer
 **Hacer**
