@@ -189,6 +189,9 @@ void main() {
         location: AppRoutes.statistics,
       );
       expect(find.byType(StatisticsScreen), findsOneWidget);
+      // v2.1: en móvil la card de dominio abre en «Rueda».
+      await tester.tap(find.text('Rejilla'));
+      await tester.pumpAndSettle();
 
       final cell = tester.widget<Material>(
         find.byKey(const ValueKey('mastery-cell-C')),

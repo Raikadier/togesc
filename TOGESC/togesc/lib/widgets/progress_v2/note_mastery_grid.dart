@@ -5,6 +5,7 @@ import '../../app/togesc_colors.dart';
 import '../../constants/note_naming.dart';
 import '../../models/note_progress_summary.dart';
 import '../../utils/srs_level.dart';
+import '../staggered_entrance.dart';
 import 'progress_metrics.dart';
 
 /// Rejilla 4×3 de dominio por nota (Progreso v2, 1c). Gratis (D7).
@@ -14,6 +15,8 @@ import 'progress_metrics.dart';
 /// - Nota nunca vista: «—» sobre `masteryEmpty`.
 /// - A11y: el % y el estado se leen en cada celda; el color no es la única
 ///   señal.
+/// - v2.1: las celdas entran escalonadas ([cellStagger]) y las vencidas
+///   llevan el icono `schedule` («pendiente de repaso»).
 class NoteMasteryGrid extends StatelessWidget {
   const NoteMasteryGrid({
     super.key,
@@ -23,6 +26,7 @@ class NoteMasteryGrid extends StatelessWidget {
     this.namingMode = NoteNamingMode.letter,
     this.learningThreshold = 5,
     this.onNoteTap,
+    this.showHeader = true,
   });
 
   final List<NoteProgressSummary> summaries;
@@ -32,7 +36,14 @@ class NoteMasteryGrid extends StatelessWidget {
   final int learningThreshold;
   final ValueChanged<NoteProgressSummary>? onNoteTap;
 
+  /// Título y subtítulo propios. `false` dentro de la card de dominio, que
+  /// ya los pinta.
+  final bool showHeader;
+
   static const int columns = 4;
+
+  /// Desfase de la entrada escalonada de las celdas.
+  static const Duration cellStagger = Duration(milliseconds: 35);
 
   @override
   Widget build(BuildContext context) {
@@ -49,24 +60,26 @@ class NoteMasteryGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          header: true,
-          child: Text(
-            'Dominio por nota',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
+        if (showHeader) ...[
+          Semantics(
+            header: true,
+            child: Text(
+              'Dominio por nota',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: DesignTokens.spacingXs),
-        Text(
-          '$consolidatedCount consolidadas · $inProgressCount en curso',
-          key: const Key('progress-mastery-subtitle'),
-          style: theme.textTheme.bodyMedium
-              ?.merge(DesignTokens.tabularNumbers)
-              .copyWith(color: scheme.onSurfaceVariant),
-        ),
-        const SizedBox(height: DesignTokens.spacingMd),
+          const SizedBox(height: DesignTokens.spacingXs),
+          Text(
+            '$consolidatedCount consolidadas · $inProgressCount en curso',
+            key: const Key('progress-mastery-subtitle'),
+            style: theme.textTheme.bodyMedium
+                ?.merge(DesignTokens.tabularNumbers)
+                .copyWith(color: scheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: DesignTokens.spacingMd),
+        ],
         for (var r = 0; r < rows.length; r++) ...[
           if (r > 0) const SizedBox(height: DesignTokens.spacingSm),
           Row(
@@ -75,13 +88,17 @@ class NoteMasteryGrid extends StatelessWidget {
                 if (c > 0) const SizedBox(width: DesignTokens.spacingSm),
                 Expanded(
                   child: c < rows[r].length
-                      ? NoteMasteryCell(
-                          summary: rows[r][c],
-                          namingMode: namingMode,
-                          learningThreshold: learningThreshold,
-                          onTap: onNoteTap == null
-                              ? null
-                              : () => onNoteTap!(rows[r][c]),
+                      ? StaggeredEntrance(
+                          index: r * columns + c,
+                          step: cellStagger,
+                          child: NoteMasteryCell(
+                            summary: rows[r][c],
+                            namingMode: namingMode,
+                            learningThreshold: learningThreshold,
+                            onTap: onNoteTap == null
+                                ? null
+                                : () => onNoteTap!(rows[r][c]),
+                          ),
                         )
                       : const SizedBox.shrink(),
                 ),
@@ -113,7 +130,8 @@ class NoteMasteryCell extends StatelessWidget {
 
   static const double height = 68;
 
-  /// Etiqueta semántica completa: «A sostenido, 42 %, crítica, nivel 1 de 5».
+  /// Etiqueta semántica completa: «A sostenido, 42 %, crítica, nivel 1 de 5»
+  /// (y «, pendiente de repaso» si está vencida).
   static String semanticsLabelFor(
     NoteProgressSummary summary, {
     NoteNamingMode namingMode = NoteNamingMode.letter,
@@ -129,7 +147,8 @@ class NoteMasteryCell extends StatelessWidget {
       summary,
       learningThreshold: learningThreshold,
     );
-    return '$name, $pct %, ${status.label}, nivel $level de $srsMaxLevel';
+    final due = summary.isOverdue ? ', pendiente de repaso' : '';
+    return '$name, $pct %, ${status.label}, nivel $level de $srsMaxLevel$due';
   }
 
   @override
@@ -189,6 +208,24 @@ class NoteMasteryCell extends StatelessWidget {
       ),
     );
 
+    final cell = summary.isOverdue && seen
+        ? Stack(
+            children: [
+              content,
+              Positioned(
+                top: 4,
+                right: 4,
+                child: Icon(
+                  Icons.schedule_rounded,
+                  key: ValueKey('mastery-due-${summary.note}'),
+                  size: 14,
+                  color: foreground,
+                ),
+              ),
+            ],
+          )
+        : content;
+
     return Semantics(
       label: semanticsLabelFor(
         summary,
@@ -202,7 +239,7 @@ class NoteMasteryCell extends StatelessWidget {
         color: background,
         borderRadius: DesignTokens.borderRadiusCell,
         clipBehavior: Clip.antiAlias,
-        child: onTap == null ? content : InkWell(onTap: onTap, child: content),
+        child: onTap == null ? cell : InkWell(onTap: onTap, child: cell),
       ),
     );
   }
@@ -224,6 +261,7 @@ class MasteryLegend extends StatelessWidget {
       (DesignTokens.masteryGreenLight, 'Dominada ≥75%'),
       (colors.muted, 'Sin datos'),
     ];
+    final textColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return Wrap(
       key: const Key('progress-mastery-legend'),
@@ -249,6 +287,14 @@ class MasteryLegend extends StatelessWidget {
               Text(text, style: style),
             ],
           ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.schedule_rounded, size: 14, color: textColor),
+            const SizedBox(width: DesignTokens.spacingXs),
+            Text('Pendiente de repaso', style: style),
+          ],
+        ),
       ],
     );
   }

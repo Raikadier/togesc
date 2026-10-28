@@ -1,6 +1,8 @@
 import 'dart:math';
+import 'dart:ui' as ui show Tristate;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -41,6 +43,8 @@ void main() {
     final NoteData data = srs.noteData[note]!;
     data.timesSeen = seen;
     data.timesCorrect = correct;
+    // Sin `nextReview` el SRS la da por vencida; por defecto, al día.
+    data.nextReview = _now.add(const Duration(days: 1)).toIso8601String();
   }
 
   Widget buildApp({
@@ -61,6 +65,11 @@ void main() {
         GoRoute(
           path: AppRoutes.home,
           builder: (_, _) => const Scaffold(body: Text('HOME')),
+        ),
+        GoRoute(
+          path: '${AppRoutes.game}/:modeId',
+          builder: (_, state) =>
+              Scaffold(body: Text('GAME ${state.pathParameters['modeId']}')),
         ),
       ],
     );
@@ -85,11 +94,18 @@ void main() {
     WidgetTester tester, {
     bool pro = true,
     List<PracticeSessionLog> history = const [],
+    bool grid = true,
   }) async {
     await tester.binding.setSurfaceSize(const Size(420, 3000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(buildApp(pro: pro, history: history));
     await tester.pumpAndSettle();
+    // En móvil la card de dominio abre en «Rueda» (v2.1); los tests de la
+    // rejilla cambian a «Rejilla».
+    if (grid) {
+      await tester.tap(find.text('Rejilla'));
+      await tester.pumpAndSettle();
+    }
   }
 
   PracticeSessionLog log(int daysAgo, {int rounds = 10, int correct = 8}) {
@@ -226,7 +242,16 @@ void main() {
       ),
       findsOneWidget,
     );
+    // La invitación a Pro vive en la pestaña Historial (v2.1).
+    expect(find.text('Evolución e historial · Pro'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('progress-tab-history')));
+    await tester.pumpAndSettle();
     expect(find.text('Evolución e historial · Pro'), findsOneWidget);
+    expect(find.byKey(const Key('progress-history-chart')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('progress-tab-summary')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rejilla'));
+    await tester.pumpAndSettle();
 
     await tester.tap(historyButton);
     await tester.pumpAndSettle();
@@ -247,11 +272,14 @@ void main() {
       ),
       findsNothing,
     );
-    expect(find.text('Exportar progreso (CSV)'), findsOneWidget);
+    expect(find.text('Exportar progreso (CSV)'), findsNothing);
 
+    // «Historial» cambia a la pestaña Historial (no abre otra página).
     await tester.tap(historyButton);
     await tester.pumpAndSettle();
-    expect(find.text('Historial'), findsWidgets);
+    expect(find.byKey(const ValueKey('progress-panel-history')), findsOneWidget);
+    expect(find.byKey(const Key('progress-history-chart')), findsOneWidget);
+    expect(find.text('Exportar progreso (CSV)'), findsOneWidget);
     expect(find.text('4 sesiones'), findsOneWidget);
   });
 
@@ -263,7 +291,130 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(BottomSheet), findsOneWidget);
-    expect(find.text('Practicar G'), findsOneWidget);
+    expect(find.byKey(const ValueKey('note-detail-sheet')), findsOneWidget);
+    expect(find.text('Practicar esta nota'), findsOneWidget);
+    expect(find.text('Escuchar'), findsOneWidget);
+  });
+
+  testWidgets('pestañas Resumen | Historial con semántica y flechas', (
+    tester,
+  ) async {
+    seed('C', seen: 10, correct: 9);
+    final handle = tester.ensureSemantics();
+    await pumpScreen(tester, history: [log(0), log(1)], grid: false);
+
+    expect(find.byKey(const ValueKey('progress-panel-summary')), findsOneWidget);
+    final summaryTab = tester
+        .getSemantics(find.byKey(const ValueKey('progress-tab-summary')))
+        .getSemanticsData();
+    expect(summaryTab.flagsCollection.isSelected, ui.Tristate.isTrue);
+
+    await tester.tap(find.byKey(const ValueKey('progress-tab-summary')));
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('progress-panel-history')), findsOneWidget);
+    expect(find.byKey(const Key('progress-history-chart')), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp(r'^Precisión por sesión, de la más antigua')),
+      findsOneWidget,
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('progress-panel-summary')), findsOneWidget);
+    handle.dispose();
+  });
+
+  testWidgets('móvil: rueda por defecto y selector Rueda / Rejilla', (
+    tester,
+  ) async {
+    seed('C', seen: 10, correct: 9);
+    seed('D', seen: 10, correct: 8);
+    await pumpScreen(tester, history: [log(0)], grid: false);
+
+    expect(find.byKey(const ValueKey('ear-map')), findsOneWidget);
+    expect(find.byKey(const ValueKey('mastery-cell-C')), findsNothing);
+    expect(find.text('2/12'), findsOneWidget);
+    expect(find.text('consolidadas'), findsOneWidget);
+
+    await tester.tap(find.text('Rejilla'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ear-map')), findsNothing);
+    expect(find.byKey(const ValueKey('mastery-cell-C')), findsOneWidget);
+  });
+
+  testWidgets('escritorio: rueda y rejilla lado a lado, sin selector', (
+    tester,
+  ) async {
+    seed('C', seen: 10, correct: 9);
+    await tester.binding.setSurfaceSize(const Size(1280, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(buildApp(history: [log(0)]));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('ear-map')), findsOneWidget);
+    expect(find.byKey(const ValueKey('mastery-cell-C')), findsOneWidget);
+    expect(find.byKey(const Key('progress-mastery-view')), findsNothing);
+  });
+
+  testWidgets('celdas vencidas llevan el icono schedule', (tester) async {
+    seed('C', seen: 10, correct: 9);
+    srs.noteData['C']!.nextReview =
+        _now.subtract(const Duration(days: 2)).toIso8601String();
+    await pumpScreen(tester, history: [log(0)]);
+
+    expect(find.byKey(const ValueKey('mastery-due-C')), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp(r'^C, 90 %, .*, pendiente de repaso$')),
+      findsWidgets,
+    );
+  });
+
+  testWidgets('KPI «Pendientes» abre la sesión de hoy', (tester) async {
+    seed('C', seen: 10, correct: 9);
+    await pumpScreen(tester, history: [log(0)], grid: false);
+
+    await tester.tap(find.byKey(const Key('progress-kpi-pending')));
+    await tester.pumpAndSettle();
+    expect(find.text('GAME ${GameMode.singleNote.id}'), findsOneWidget);
+  });
+
+  testWidgets('«Tus extremos»: Pro ve difíciles y fáciles; gratis, candado', (
+    tester,
+  ) async {
+    seed('C', seen: 10, correct: 2);
+    seed('D', seen: 10, correct: 5);
+    seed('E', seen: 10, correct: 7);
+    seed('F', seen: 10, correct: 8);
+    seed('G', seen: 10, correct: 9);
+    seed('A', seen: 10, correct: 10);
+    await pumpScreen(tester, history: [log(0)], grid: false);
+
+    final hard = find.byKey(const Key('progress-extremes-hard'));
+    final easy = find.byKey(const Key('progress-extremes-easy'));
+    expect(hard, findsOneWidget);
+    expect(
+      find.descendant(of: hard, matching: find.text('20 %')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: easy, matching: find.text('100 %')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('«Tus extremos» sin Pro: candado al paywall', (tester) async {
+    seed('C', seen: 10, correct: 2);
+    seed('D', seen: 10, correct: 9);
+    await pumpScreen(tester, pro: false, history: [log(0)], grid: false);
+
+    final locked = find.byKey(const Key('progress-extremes-locked'));
+    expect(locked, findsOneWidget);
+    expect(find.byKey(const Key('progress-extremes-hard')), findsNothing);
+    await tester.ensureVisible(locked);
+    await tester.tap(locked);
+    await tester.pumpAndSettle();
+    expect(find.text('PAYWALL'), findsOneWidget);
   });
 
   testWidgets('web ancho: contenido centrado con ancho máximo', (

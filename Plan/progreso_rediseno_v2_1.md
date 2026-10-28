@@ -2,6 +2,56 @@
 
 Log en orden cronológico inverso. Hoja de ruta: `Plan/hoja_ruta_rediseno_v2_1.md`. Qué cambia: `docs/design_v2_1/SPEC_rediseno_v2_1.md`.
 
+## 2026-10-27 · Lote 5: Progreso · Claude Code
+- **Pestañas «Resumen | Historial»** (`progress_tabs.dart`): `Semantics` con `SemanticsRole.tabBar`, `tab` (con `selected`) y `tabPanel` (`progress-panel-{summary|history}`). Las flechas ← → cambian de pestaña y mueven el foco. Al tocar una pestaña se le da el foco. Anillo de foco de 3 px.
+- **Cabecera** (`global_accuracy_header.dart`):
+  - La precisión global usa `CountUpText`: misma clave y mismo Semantics, que lee el valor final.
+  - Meta con degradado `primaryContainer → primary` que crece en 900 ms.
+  - El delta semanal existente se reutiliza.
+  - **Se mantiene el texto actual** «78% de la meta (90%)» (regla 6) frente a «X % de la meta / Meta 90 %».
+- **KPI «Pendientes»:** ahora **siempre** es pulsable (`progress-kpi-pending`, con el icono `event_repeat`). Abre la sesión de hoy con el foco del plan (`setPracticeFocusNotes`). Antes era una sesión de nota única y solo con pendientes > 0.
+- **Dominio por nota** (`mastery_overview.dart`):
+  - Por debajo de 720 de ancho, el selector «Rueda | Rejilla» abre en la rueda. A partir de 720, las dos lado a lado y sin selector.
+  - `StatisticsScreen.maxContentWidth` pasa de 720 a 960 para que quepan.
+  - Centro de la rueda: «N/12 consolidadas», con N = notas con ≥ 75 %, como la meta de octava del Home. El subtítulo sigue con los consolidados del SRS, como en v2.
+  - `NoteMasteryGrid`:
+    - Celdas con entrada escalonada de 35 ms.
+    - Icono `schedule` (`mastery-due-{nota}`) en las vencidas vistas.
+    - «, pendiente de repaso» en Semantics, que la rueda hereda.
+    - Leyenda con «Pendiente de repaso».
+    - `showHeader` para incrustarla en la card.
+- **Hoja de detalle de nota** (`note_detail_sheet.dart`, `note-detail-sheet`). Sustituye a `NoteSrsDetailCard` en Progreso; `NoteProgressScreen` sigue usando la antigua.
+  - Celda de 88 px y estado (más «· pendiente de repaso»).
+  - Precisión, intentos y latencia media (`avgResponseTimeSec`, «—» sin datos).
+  - Pista de nivel 1–5 y una frase por estado (`noteDetailAdvice`).
+  - «Escuchar» (la nota en octava 4 con el timbre de preferencias) y «Practicar esta nota».
+  - **Cambio de gating:** la hoja antigua mostraba precisión e intentos solo con Pro y el botón decía «Practicar (Pro)» aunque dejaba practicar. Ahora se muestra a todos, porque la rejilla gratuita (D7) ya enseña el % y el modo de una nota es gratis. El «Peso SRS» (avanzado) ya no aparece.
+- **«Tus extremos»** (`note_extremes.dart`, Pro con `progressProAccessProvider`):
+  - Las 3 notas vistas con menor y mayor precisión, sin solaparse. Con menos de 6 notas vistas reparte la mitad; con menos de 2, un mensaje.
+  - Las filas son pulsables y abren el detalle.
+  - Sin Pro, una card con candado que lleva al paywall.
+- **Historial** (Pro, D7):
+  - `SessionAccuracyBars` se añade a `session_evolution_chart.dart`: barras rellenas de las últimas 8 sesiones, de la más antigua a la más reciente. Son verdes a partir del 75 % y crecen escalonadas.
+  - El Semantics de imagen lee cada sesión («Una sola nota, 9/10, 80 %; …»).
+  - Debajo: evolución por periodo y exportación CSV, movidas desde Resumen, y la lista completa (`SessionHistoryCard`).
+  - Sin Pro, la invitación de siempre («Evolución e historial · Pro»).
+  - «Historial» en Últimas sesiones cambia de pestaña en lugar de abrir otra página. `SessionHistoryPage` queda sin uso desde Progreso.
+- **Entrada escalonada** de los bloques del Resumen.
+- **Tests (+17):**
+  - `statistics_screen_test`:
+    - El helper cambia a «Rejilla».
+    - Tests nuevos de pestañas (Semantics `selected`, flechas y panel), rueda o rejilla en móvil, las dos en escritorio, icono de vencidas, Pendientes que abre la sesión, extremos Pro y gratuitos, y el detalle nuevo.
+    - Ajustes: la invitación Pro se ve en Historial y «Historial» cambia de pestaña.
+  - `note_detail_sheet_test` (nuevo): la hoja completa, sin datos, 320 px sin desbordar, `noteExtremes` y `SessionAccuracyBars` (orden, texto alternativo y movimiento reducido).
+  - `dark_theme_v2_test` cambia a la rejilla.
+  - `note_progress_screen_test`: sin cambios, en verde.
+- **Hallazgo en los tests:** el SRS da por vencida cualquier nota sin `nextReview`. El `seed` de `statistics_screen_test` ahora fija una revisión futura, para que el icono de vencida no salga en todas.
+- **Verificación:**
+  - `flutter analyze`: «No issues found!».
+  - `flutter test`: `+608 ~1: All tests passed!` (antes 591).
+  - `flutter test integration_test -d flutter-tester`: `+2: All tests passed!`.
+  - **No revisado a ojo en un navegador.**
+
 ## 2026-10-27 · Lote 4: sesión · Claude Code
 - **«Preparado» siempre al entrar** (`SessionPhase.idle`, `GameState.idle`):
   - Overline «Preparado», icono `headphones`, «Ponte los auriculares» y un subtítulo con datos reales: «12 rondas · 1 nota · foco en D», o «Sin límite de rondas».

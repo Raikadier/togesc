@@ -20,7 +20,8 @@ class ProgressKpiRow extends StatelessWidget {
   final int attempts;
   final int pending;
 
-  /// Abre un repaso de las notas pendientes (solo si [pending] > 0).
+  /// Abre la sesión de hoy (v2.1: pulsable siempre, aunque no haya
+  /// pendientes).
   final VoidCallback? onReviewPending;
 
   @override
@@ -47,10 +48,11 @@ class ProgressKpiRow extends StatelessWidget {
         caption: pending > 0 ? 'repasar ahora' : 'al día',
         value: '$pending',
         hero: true,
+        icon: Icons.event_repeat_rounded,
         semanticsLabel: pending > 0
-            ? 'Pendientes: $pending notas. Toca para repasar.'
-            : 'Pendientes: ninguna nota',
-        onTap: pending > 0 ? onReviewPending : null,
+            ? 'Pendientes: $pending notas. Abre la sesión de hoy.'
+            : 'Pendientes: ninguna nota. Abre la sesión de hoy.',
+        onTap: onReviewPending,
       ),
     ];
 
@@ -75,9 +77,11 @@ class _KpiCard extends StatelessWidget {
     required this.value,
     required this.semanticsLabel,
     this.hero = false,
+    this.icon,
     this.onTap,
   });
 
+  final IconData? icon;
   final String label;
   final String caption;
   final String value;
@@ -101,13 +105,20 @@ class _KpiCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            maxLines: 2,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: labelColor,
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: labelColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (icon != null) Icon(icon, size: 18, color: labelColor),
+            ],
           ),
           const SizedBox(height: DesignTokens.spacingSm),
           FittedBox(
@@ -147,7 +158,13 @@ class _KpiCard extends StatelessWidget {
               : BorderSide(color: colors.cardBorder),
         ),
         clipBehavior: Clip.antiAlias,
-        child: onTap == null ? content : InkWell(onTap: onTap, child: content),
+        child: onTap == null
+            ? content
+            : InkWell(
+                key: hero ? const Key('progress-kpi-pending') : null,
+                onTap: onTap,
+                child: content,
+              ),
       ),
     );
   }

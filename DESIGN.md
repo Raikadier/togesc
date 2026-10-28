@@ -152,6 +152,16 @@ Aprobado el 2026-10-26 a partir del feedback del propietario sobre v2: se veía 
 - **Resumen** al cumplir la meta: medalla, precisión, aciertos, tiempo medio medido, cambios de nivel SRS frente a la instantánea del inicio y la rueda actualizada.
 - **Escritorio:** el panel SRS resalta la nota de la ronda solo en el resultado.
 
+### Progreso v2.1 (lote 5)
+- **Pestañas «Resumen | Historial»:** semántica de pestañas y flechas ← →.
+- **Resumen:**
+  - La precisión global cuenta al cargar y la meta lleva degradado.
+  - «Pendientes» abre la sesión de hoy.
+  - Dominio por nota: rueda o rejilla en móvil (rueda por defecto) y las dos lado a lado en escritorio. Icono `schedule` en las vencidas.
+  - «Tus extremos» (Pro) y últimas sesiones.
+- **Detalle de nota:** hoja con celda de 88 px, precisión, intentos, latencia, nivel 1–5, una frase por estado, «Escuchar» y «Practicar esta nota».
+- **Historial (Pro):** barras rellenas de precisión por sesión (verde a partir del 75 %) con texto alternativo, evolución por periodo, exportación y lista completa.
+
 ## Qué queda de Harmonic Precision
 
 | Elemento | Estado |

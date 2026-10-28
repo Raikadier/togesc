@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import '../../app/design_tokens.dart';
 import '../../app/togesc_colors.dart';
 import '../../utils/calendar_week.dart';
+import '../count_up_text.dart';
 import 'progress_metrics.dart';
 
 /// Cabecera de Progreso v2: precisión global, delta semanal y meta.
+///
+/// v2.1: la cifra cuenta al cargar (`CountUpText`, 900 ms) y la barra de
+/// meta lleva un degradado `primaryContainer → primary` que crece.
 ///
 /// D10: la precisión global es **por nota** (SRS) y el delta es **por
 /// rondas** (historial). El delta se rotula como «precisión de rondas» y solo
@@ -45,9 +49,11 @@ class GlobalAccuracyHeader extends StatelessWidget {
         Semantics(
           label: 'Precisión global por nota: $accuracyText',
           excludeSemantics: true,
-          child: Text(
-            accuracyText,
+          child: CountUpText(
             key: const Key('progress-global-accuracy'),
+            value: accuracy,
+            format: (v) => '${v.toStringAsFixed(1)}%',
+            semanticsLabel: 'Precisión global por nota: $accuracyText',
             style: DesignTokens.bigNumberLarge.copyWith(
               color: scheme.primary,
             ),
@@ -64,15 +70,7 @@ class GlobalAccuracyHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ClipRRect(
-                borderRadius: DesignTokens.borderRadiusPill,
-                child: LinearProgressIndicator(
-                  value: goalPct / 100,
-                  minHeight: 8,
-                  backgroundColor: TogescColors.of(context).muted,
-                  color: scheme.primary,
-                ),
-              ),
+              _GoalBar(fraction: goalPct / 100),
               const SizedBox(height: DesignTokens.spacingXs),
               Text(
                 goalText,
@@ -84,6 +82,44 @@ class GlobalAccuracyHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Barra de meta de 8 px con degradado que crece al cargar.
+class _GoalBar extends StatelessWidget {
+  const _GoalBar({required this.fraction});
+
+  final double fraction;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ClipRRect(
+      key: const Key('progress-goal-bar'),
+      borderRadius: DesignTokens.borderRadiusPill,
+      child: Container(
+        height: 8,
+        color: TogescColors.of(context).muted,
+        alignment: Alignment.centerLeft,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: fraction.clamp(0.0, 1.0)),
+          duration: motionDuration(context, const Duration(milliseconds: 900)),
+          curve: DesignTokens.easeOut,
+          builder: (context, value, _) => FractionallySizedBox(
+            widthFactor: value,
+            heightFactor: 1,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: DesignTokens.borderRadiusPill,
+                gradient: LinearGradient(
+                  colors: [scheme.primaryContainer, scheme.primary],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

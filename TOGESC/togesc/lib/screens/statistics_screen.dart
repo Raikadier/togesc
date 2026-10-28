@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart' show SemanticsRole;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,8 @@ import '../constants/subscription_constants.dart';
 import '../models/note_progress_summary.dart';
 import '../models/practice_session_log.dart';
 import '../providers/app_preferences_provider.dart';
+import '../providers/audio_preferences_provider.dart';
+import '../providers/audio_provider.dart';
 import '../providers/clock_provider.dart';
 import '../providers/practice_focus_provider.dart';
 import '../providers/session_history_provider.dart';
@@ -22,25 +25,35 @@ import '../services/progress_export_download.dart';
 import '../services/progress_export_service.dart';
 import '../utils/session_history_stats.dart';
 import '../widgets/info_views.dart';
-import '../widgets/note_srs_detail_card.dart';
+import '../widgets/note_srs_detail_card.dart' show startFocusedNotePractice;
 import '../widgets/progress_v2/global_accuracy_header.dart';
-import '../widgets/progress_v2/note_mastery_grid.dart';
+import '../widgets/progress_v2/mastery_overview.dart';
+import '../widgets/progress_v2/note_detail_sheet.dart';
+import '../widgets/progress_v2/note_extremes.dart';
 import '../widgets/progress_v2/progress_access.dart';
 import '../widgets/progress_v2/progress_kpi_row.dart';
 import '../widgets/progress_v2/progress_metrics.dart';
+import '../widgets/progress_v2/progress_tabs.dart';
 import '../widgets/progress_v2/recent_sessions_list.dart';
-import '../widgets/progress_v2/session_history_page.dart';
+import '../widgets/session_history_card.dart';
 import '../widgets/session_evolution_chart.dart';
+import '../widgets/staggered_entrance.dart';
 import '../widgets/stats_free_dashboard.dart';
 import '../widgets/togesc_ui.dart';
 
-/// Progreso v2 (pantalla 1c): precisión global, KPI, rejilla de 12 notas
-/// (gratis, D7), últimas sesiones y, debajo, la sección Pro de evolución.
+/// Progreso v2.1 (SPEC §2.3): pestañas «Resumen | Historial».
+///
+/// - Resumen: precisión global (cuenta al cargar) con meta, KPI (Pendientes
+///   abre la sesión de hoy), dominio por nota (rueda o rejilla; las dos en
+///   escritorio, gratis D7), «Tus extremos» (Pro) y últimas sesiones.
+/// - Historial (Pro, D7): precisión por sesión, evolución por periodo,
+///   exportación y lista completa. Sin Pro, la invitación a Pro.
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
 
-  /// Ancho máximo del contenido en web/escritorio.
-  static const double maxContentWidth = 720;
+  /// Ancho máximo del contenido en web/escritorio (rueda y rejilla caben
+  /// lado a lado).
+  static const double maxContentWidth = 960;
 
   @override
   ConsumerState<StatisticsScreen> createState() => _StatisticsScreenState();
@@ -48,6 +61,7 @@ class StatisticsScreen extends ConsumerStatefulWidget {
 
 class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   StatsPeriod _period = StatsPeriod.days7;
+  ProgressTab _tab = ProgressTab.summary;
 
   @override
   Widget build(BuildContext context) {
@@ -102,52 +116,60 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     final overdueCount = stats['overdue_count'] as int? ?? 0;
     final isNewUser = totalSeen == 0 && history.isEmpty;
 
-    final grid = NoteMasteryGrid(
+    void openNote(NoteProgressSummary summary) =>
+        _showNoteDetail(context, summary, naming, learningThreshold);
+
+    final mastery = MasteryOverview(
       summaries: summaries,
       consolidatedCount: graduated,
       inProgressCount: learningPhase,
       namingMode: naming,
       learningThreshold: learningThreshold,
-      onNoteTap: (summary) => _showNoteDetail(context, summary, proAccess),
+      onNoteTap: openNote,
     );
 
-    final children = <Widget>[
-      Semantics(
-        header: true,
-        child: Text(
-          'Progreso',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: Theme.of(context).colorScheme.primary,
-                letterSpacing: -0.4,
-              ),
-        ),
-      ),
-      const SizedBox(height: DesignTokens.spacingLg),
+    var index = 0;
+    Widget rise(Widget child) =>
+        StaggeredEntrance(index: index++, child: child);
+
+    final summaryTab = <Widget>[
       if (isNewUser) ...[
         _ProgressEmptyState(onStart: () => context.go(AppRoutes.home)),
         const SizedBox(height: DesignTokens.spacingLg),
-        grid,
+        mastery,
       ] else ...[
-        GlobalAccuracyHeader(accuracy: accuracy, delta: delta),
+        rise(GlobalAccuracyHeader(accuracy: accuracy, delta: delta)),
         const SizedBox(height: DesignTokens.spacingLg),
-        ProgressKpiRow(
-          meanLatencySec: approximateMeanLatencySec(summaries),
-          attempts: totalSeen,
-          pending: overdueCount,
-          onReviewPending: () => _startReviewPractice(context),
+        rise(
+          ProgressKpiRow(
+            meanLatencySec: approximateMeanLatencySec(summaries),
+            attempts: totalSeen,
+            pending: overdueCount,
+            onReviewPending: () => _startTodaySession(context),
+          ),
         ),
         const SizedBox(height: DesignTokens.spacingLg),
-        grid,
+        rise(mastery),
         const SizedBox(height: DesignTokens.spacingLg),
-        RecentSessionsList(
-          entries: history,
-          now: now,
-          historyUnlocked: proAccess,
-          onOpenHistory: () => _openHistory(context, proAccess),
+        rise(
+          NoteExtremes(
+            summaries: summaries,
+            unlocked: proAccess,
+            onUnlock: () => _openPaywall(context),
+            onNoteTap: openNote,
+            namingMode: naming,
+            learningThreshold: learningThreshold,
+          ),
         ),
         const SizedBox(height: DesignTokens.spacingLg),
-        ..._buildProSection(context, history, now, proAccess),
+        rise(
+          RecentSessionsList(
+            entries: history,
+            now: now,
+            historyUnlocked: proAccess,
+            onOpenHistory: () => _openHistory(context, proAccess),
+          ),
+        ),
         const SizedBox(height: DesignTokens.spacingLg),
         Align(
           alignment: Alignment.centerLeft,
@@ -164,6 +186,51 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           ),
         ),
       ],
+    ];
+
+    final historyTab = <Widget>[
+      if (proAccess) ...[
+        SessionAccuracyBars(entries: history),
+        const SizedBox(height: DesignTokens.spacingLg),
+      ],
+      ..._buildProSection(context, history, now, proAccess),
+      if (proAccess) ...[
+        const SizedBox(height: DesignTokens.spacingLg),
+        const SessionHistoryCard(),
+      ],
+    ];
+
+    final children = <Widget>[
+      Semantics(
+        header: true,
+        child: Text(
+          'Progreso',
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).colorScheme.primary,
+                letterSpacing: -0.4,
+              ),
+        ),
+      ),
+      const SizedBox(height: DesignTokens.spacingMd),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: ProgressTabs(
+          selected: _tab,
+          onChanged: (tab) => setState(() => _tab = tab),
+        ),
+      ),
+      const SizedBox(height: DesignTokens.spacingLg),
+      Semantics(
+        key: ValueKey('progress-panel-${_tab.name}'),
+        role: SemanticsRole.tabPanel,
+        label: _tab.label,
+        explicitChildNodes: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: _tab == ProgressTab.summary ? summaryTab : historyTab,
+        ),
+      ),
     ];
 
     return Scaffold(
@@ -292,49 +359,70 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     );
   }
 
+  /// «Historial» en Últimas sesiones: con Pro cambia de pestaña; sin Pro,
+  /// paywall (D7).
   void _openHistory(BuildContext context, bool proAccess) {
     if (!proAccess) {
       _openPaywall(context);
       return;
     }
-    Navigator.of(context).push(SessionHistoryPage.route());
+    setState(() => _tab = ProgressTab.history);
   }
 
-  void _startReviewPractice(BuildContext context) {
+  /// KPI «Pendientes»: la sesión de hoy, con el foco del plan.
+  void _startTodaySession(BuildContext context) {
+    ref.read(audioPlayerServiceProvider).captureUserGesture();
+    final plan = ref.read(todaySessionPlanProvider);
     ref.read(practiceFocusNoteProvider.notifier).state = null;
+    setPracticeFocusNotes(ref, plan.focusNoteNames);
     context.push('${AppRoutes.game}/${GameMode.singleNote.id}');
+  }
+
+  /// «Escuchar» de la hoja de detalle: la nota en la octava 4.
+  Future<void> _playNote(String note) async {
+    final audio = ref.read(audioPlayerServiceProvider);
+    audio.captureUserGesture();
+    try {
+      await audio.waitUntilReady();
+      final prefs = await ref.read(audioPreferencesProvider.future);
+      final (frequencies, _) = ref
+          .read(audioGeneratorProvider)
+          .getNoteFrequencies([note], varyOctaves: false);
+      audio.setMasterVolume(prefs.masterVolume);
+      await audio.playTones(
+        frequencies,
+        duration: prefs.toneDurationSec,
+        instrument: prefs.playbackInstrument(),
+      );
+    } catch (_) {
+      // Sin audio disponible: la hoja sigue funcionando.
+    }
   }
 
   void _showNoteDetail(
     BuildContext context,
     NoteProgressSummary summary,
-    bool proAccess,
+    NoteNamingMode naming,
+    int learningThreshold,
   ) {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            DesignTokens.spacingLg,
-            0,
-            DesignTokens.spacingLg,
-            DesignTokens.spacingLg,
-          ),
-          child: NoteSrsDetailCard(
-            summary: summary,
-            showAdvanced: proAccess,
-            onPractice: () {
-              Navigator.of(sheetContext).pop();
-              startFocusedNotePractice(
-                context: context,
-                ref: ref,
-                note: summary.note,
-              );
-            },
-          ),
-        ),
+      useSafeArea: true,
+      builder: (sheetContext) => NoteDetailSheet(
+        summary: summary,
+        namingMode: naming,
+        learningThreshold: learningThreshold,
+        onListen: () => _playNote(summary.note),
+        onPractice: () {
+          Navigator.of(sheetContext).pop();
+          startFocusedNotePractice(
+            context: context,
+            ref: ref,
+            note: summary.note,
+          );
+        },
       ),
     );
   }
