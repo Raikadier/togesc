@@ -52,6 +52,31 @@ void main() {
     });
   });
 
+  group('resolvePracticeNotePool con numNotes', () {
+    test('pool configurado menor que las notas de la ronda usa todas', () {
+      expect(
+        resolvePracticeNotePool(
+          mode: GameMode.chord,
+          configuredPool: ['C', 'D'],
+          numNotes: 3,
+        ),
+        isNull,
+      );
+    });
+
+    test('foco de nota única en una ronda de varias notas usa todas', () {
+      expect(
+        resolvePracticeNotePool(
+          mode: GameMode.interval,
+          configuredPool: const [],
+          focusNote: 'C',
+          numNotes: 2,
+        ),
+        isNull,
+      );
+    });
+  });
+
   group('resolveFocusRoundPool', () {
     const focus = ['E', 'G', 'A'];
 

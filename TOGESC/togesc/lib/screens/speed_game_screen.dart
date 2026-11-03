@@ -158,6 +158,9 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
             correctRounds: session.correctRounds,
           );
     }
+    // Sin pantalla no hay partida: que el tiempo no siga corriendo ni
+    // penalice el SRS por detrás.
+    ref.read(speedSessionProvider.notifier).stop();
     super.deactivate();
   }
 
@@ -203,11 +206,13 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     final audio = ref.read(audioPlayerServiceProvider);
     audio.captureUserGesture();
     await audio.waitUntilReady();
+    if (!mounted) return;
 
     setState(() {
       _selectedNotes.clear();
     });
     await ref.read(speedSessionProvider.notifier).startRound();
+    if (!mounted) return;
     setState(() => _roundStartTime = DateTime.now());
   }
 

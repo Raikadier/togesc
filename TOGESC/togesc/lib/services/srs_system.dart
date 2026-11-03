@@ -268,11 +268,8 @@ class SRSSystem {
         nextDate = now.add(Duration(days: _scaleIntervalDays(days)));
       }
     } else {
-      // Fase de consolidacion
-      if (!wasCorrect) {
-        data.intervalIndex = max(0, data.intervalIndex - forgetPenaltySteps);
-      }
-
+      // Fase de consolidacion. El retroceso por olvido ya lo aplica
+      // updateAfterResponse; restarlo aquí lo duplicaría.
       final baseInterval = reviewIntervals[
           min(data.intervalIndex, reviewIntervals.length - 1)];
       final days = (baseInterval * data.easeFactor).toInt();

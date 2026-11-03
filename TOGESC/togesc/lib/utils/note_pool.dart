@@ -13,16 +13,24 @@ const double focusRoundShare = 0.6;
 ///
 /// [focusNote] es el foco de nota única (flujo «practicar esta nota»): si es
 /// válida, el pool es solo esa nota.
+///
+/// [numNotes] son las notas distintas que pide la ronda. Si el foco o el pool
+/// configurado tienen menos, se usan todas las notas (null), porque
+/// `SRSSystem.selectNotes` no podría elegir notas distintas.
 List<String>? resolvePracticeNotePool({
   required GameMode mode,
   required List<String> configuredPool,
   String? focusNote,
+  int numNotes = 1,
 }) {
   if (mode == GameMode.sharpsOnly) return sharpNotes;
-  if (focusNote != null && notes.containsKey(focusNote)) return [focusNote];
+  if (focusNote != null && notes.containsKey(focusNote) && numNotes <= 1) {
+    return [focusNote];
+  }
 
   final valid = configuredPool.where(notes.containsKey).toList();
   if (valid.isEmpty || valid.length >= notes.length) return null;
+  if (valid.length < numNotes) return null;
   return valid;
 }
 
@@ -46,6 +54,7 @@ List<String>? resolveFocusRoundPool({
   final basePool = resolvePracticeNotePool(
     mode: mode,
     configuredPool: configuredPool,
+    numNotes: numNotes,
   );
   if (mode == GameMode.sharpsOnly) return basePool;
 

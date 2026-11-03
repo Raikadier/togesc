@@ -12,6 +12,7 @@ import 'last_practice_provider.dart';
 import 'practice_focus_provider.dart';
 import 'srs_provider.dart';
 import 'today_session_provider.dart';
+import '../services/srs_system.dart';
 import '../utils/note_pool.dart';
 import '../utils/session_summary.dart';
 import 'app_preferences_provider.dart';
@@ -229,6 +230,7 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
             mode: state.mode,
             configuredPool: appPrefs.practiceNotePool,
             focusNote: focusNote,
+            numNotes: numNotes,
           )
         : resolveFocusRoundPool(
             mode: state.mode,
@@ -271,17 +273,40 @@ class GameSessionNotifier extends Notifier<GameSessionState> {
       instrument: instrument,
     );
 
+    // Si la ronda se saltó o cambió mientras sonaba, no la reabrimos.
+    if (state.state != GameState.listening ||
+        !identical(state.currentNotes, selectedNotes)) {
+      return;
+    }
     state = state.copyWith(
       state: GameState.waitingForAnswer,
       lastInstrument: instUsed,
     );
   }
 
+  /// Evita contar dos veces la misma ronda (dos toques seguidos mientras
+  /// se guarda el progreso).
+  bool _submitting = false;
+
   /// Procesa la respuesta del usuario.
   Future<void> submitAnswer(List<String> answerNotes, double responseTime) async {
+    if (_submitting || state.state != GameState.waitingForAnswer) return;
     final srsAsync = ref.read(srsSystemProvider);
     final srs = srsAsync.valueOrNull;
     if (srs == null) return;
+    _submitting = true;
+    try {
+      await _applyAnswer(srs, answerNotes, responseTime);
+    } finally {
+      _submitting = false;
+    }
+  }
+
+  Future<void> _applyAnswer(
+    SRSSystem srs,
+    List<String> answerNotes,
+    double responseTime,
+  ) async {
 
     final correctNotesSet = state.currentNotes.toSet();
     final answerSet = answerNotes.toSet();

@@ -103,6 +103,10 @@ final speedSessionProvider =
 class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
   Timer? _countdownTimer;
 
+  /// Sube con cada nueva sesión o al salir de la pantalla: una ronda cuyo
+  /// audio termina después ya no arranca la cuenta atrás.
+  int _generation = 0;
+
   @override
   SpeedSessionState build() {
     ref.onDispose(() => _countdownTimer?.cancel());
@@ -115,12 +119,16 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
       speedMinTime,
       speedMaxTime,
     );
-    state = state.copyWith(
+    // Cada visita empieza de cero: sin rondas, racha ni resultado previos.
+    _countdownTimer?.cancel();
+    _generation++;
+    state = SpeedSessionState(
       targetMode: mode,
       numNotes: fixed ?? randomMinNotes,
       sessionInitialTime: start,
       currentTimeLimit: start,
       remainingTime: start,
+      sessionInstrumentOverride: state.sessionInstrumentOverride,
     );
     ref
         .read(lastPracticeSessionProvider.notifier)
@@ -149,12 +157,15 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
     final srsAsync = ref.read(srsSystemProvider);
     final srs = srsAsync.valueOrNull;
     if (srs == null) return;
+    final generation = _generation;
 
     final numNotes = _getNumNotes(state.targetMode);
     final appPrefs = await ref.read(appPreferencesProvider.future);
+    if (generation != _generation) return;
     final notePool = resolvePracticeNotePool(
       mode: state.targetMode,
       configuredPool: appPrefs.practiceNotePool,
+      numNotes: numNotes,
     );
     final selectedNotes = srs.selectNotes(numNotes, notePool: notePool);
 
@@ -182,6 +193,9 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
       duration: audioPrefs.toneDurationSec,
       instrument: instrument,
     );
+
+    // Si se salió de la pantalla mientras sonaba, no hay cuenta atrás.
+    if (generation != _generation || state.state != SpeedState.playing) return;
 
     // Iniciar countdown
     state = state.copyWith(state: SpeedState.waitingForAnswer);
@@ -226,9 +240,9 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
 
   /// Procesa respuesta en modo velocidad.
   void submitAnswer(List<String> answerNotes, double responseTime) {
+    // Solo se responde una vez por ronda, y nunca tras el tiempo agotado.
+    if (state.state != SpeedState.waitingForAnswer) return;
     _countdownTimer?.cancel();
-
-    if (state.state == SpeedState.timeout) return;
 
     final correctNotesSet = state.currentNotes.toSet();
     final answerSet = answerNotes.toSet();
@@ -284,6 +298,7 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
   /// Reinicia la sesion para reintentar.
   void retry() {
     _countdownTimer?.cancel();
+    _generation++;
     final start = state.sessionInitialTime;
     state = state.copyWith(
       state: SpeedState.idle,
@@ -298,6 +313,15 @@ class SpeedSessionNotifier extends Notifier<SpeedSessionState> {
 
   void reset() {
     _countdownTimer?.cancel();
+    _generation++;
     state = const SpeedSessionState();
+  }
+
+  /// Detiene la sesión al salir de la pantalla: cancela la cuenta atrás y
+  /// descarta la ronda en curso, sin tocar el SRS. No cambia el estado,
+  /// así que es seguro llamarlo desde `deactivate`.
+  void stop() {
+    _countdownTimer?.cancel();
+    _generation++;
   }
 }

@@ -171,6 +171,28 @@ void main() {
       expect(container.read(gameSessionProvider).isPaused, isFalse);
     });
 
+    test('dos envíos seguidos de la misma ronda cuentan una sola vez',
+        () async {
+      final notifier = container.read(gameSessionProvider.notifier);
+      await notifier.startRound();
+      final notes = container.read(gameSessionProvider).currentNotes;
+
+      await Future.wait([
+        notifier.submitAnswer(notes, 1.0),
+        notifier.submitAnswer(['X'], 1.2),
+      ]);
+
+      final state = container.read(gameSessionProvider);
+      expect(state.roundsCompleted, 1);
+      expect(state.lastResult!.isCorrect, isTrue);
+    });
+
+    test('submitAnswer sin ronda esperando respuesta no hace nada', () async {
+      final notifier = container.read(gameSessionProvider.notifier);
+      await notifier.submitAnswer(['C'], 1.0);
+      expect(container.read(gameSessionProvider).roundsCompleted, 0);
+    });
+
     test('submitAnswer incorrecta muestra resultado incorrecto', () async {
       final notifier = container.read(gameSessionProvider.notifier);
       await notifier.startRound();
