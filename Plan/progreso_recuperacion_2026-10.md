@@ -5,6 +5,22 @@ Cada entrada indica qué se hizo, quién lo hizo (usuario, Claude o el agente co
 
 ---
 
+## 2026-11-03 — Backup con datos, keepalive y sync abierta mientras no se cobra
+
+Hecho por Claude Code a petición del propietario. Nada desplegado: los workflows programados se ejecutan desde `main`, y la migración hay que aplicarla con Supabase reactivado.
+
+- **Supabase sigue pausado.** El backup del 2026-11-01 (run 41299662672) falló con «project is paused». El uptime de `main` sale en verde porque solo comprueba la web.
+- **Backup** (`supabase-backup.yml`): vuelca roles, esquema y datos de `public` y `auth`, y los cifra con gpg (secret `BACKUP_PASSPHRASE`). Falla si falta el secret o si el volcado de datos sale vacío. Retención de 90 días. Restauración documentada en `docs/supabase_setup.md` §8, sin ensayar.
+- **Keepalive** (`supabase-keepalive.yml`): consulta ligera a PostgREST cada 3 días.
+- **Sync** (migración `20261103120000_open_cloud_sync_while_free.sql`): `has_cloud_sync_access` comprueba solo que la fila sea del usuario. Las pruebas Pro de 14 días caducaron hacia el 2026-08-08 y desde entonces la nube no guardaba ni devolvía progreso para nadie. Al activar los pagos hay que recuperar la comprobación Pro.
+- **Cliente:** `SupabaseProgressRepository.load()` y `loadLastSessionIso()` ya no convierten los errores en «sin datos». El repositorio híbrido sigue con lo local y deja la subida pendiente, y el diagnóstico de sync ya no da la nube por alcanzable cuando no lo está. Dos tests nuevos.
+
+**Pendiente del propietario:**
+1. Reactivar el proyecto en el panel de Supabase.
+2. Crear el secret `BACKUP_PASSPHRASE` y guardar la frase fuera de GitHub.
+3. Llevar los workflows a `main` y aplicar la migración (`supabase db push`).
+4. Lanzar el backup a mano y descargar el artefacto.
+
 ## 2026-10-28 — Rescate del backup y reactivación de la monitorización
 
 Hecho por Claude Code a petición del propietario.

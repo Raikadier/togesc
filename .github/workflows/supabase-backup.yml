@@ -15,18 +15,51 @@ jobs:
         with:
           version: latest
 
-      - name: Dump schema and data
+      # `db dump` sin flags solo saca el esquema. Hacen falta tres volcados:
+      # roles, esquema y datos. Los datos incluyen `auth` porque user_progress
+      # y user_subscriptions referencian auth.users.
+      - name: Volcar roles, esquema y datos
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
+          set -euo pipefail
           supabase link --project-ref puetlvcsrntwweuxinee
+          stamp=$(date +%Y%m%d)
+          mkdir -p dump
+          supabase db dump --role-only -f "dump/roles-$stamp.sql"
+          supabase db dump -f "dump/schema-$stamp.sql"
+          supabase db dump --data-only --use-copy --schema public,auth \
+            -f "dump/data-$stamp.sql"
+          if [ ! -s "dump/data-$stamp.sql" ]; then
+            echo "El volcado de datos está vacío"
+            exit 1
+          fi
+          ls -l dump
+
+      # El repo es público: cualquier usuario de GitHub con sesión puede bajar
+      # los artefactos. El volcado lleva datos de usuarios (emails y hashes),
+      # así que solo se sube cifrado.
+      - name: Cifrar el volcado
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "Falta el secret BACKUP_PASSPHRASE: no se sube un backup sin cifrar"
+            exit 1
+          fi
           mkdir -p backups
-          supabase db dump -f "backups/togesc-$(date +%Y%m%d).sql"
-          echo "Backup generado en backups/"
+          tar -czf - -C dump . \
+            | gpg --batch --yes --pinentry-mode loopback --symmetric \
+                --cipher-algo AES256 --passphrase-fd 3 \
+                -o "backups/togesc-$(date +%Y%m%d).tar.gz.gpg" \
+                3<<<"$BACKUP_PASSPHRASE"
+          rm -rf dump
+          ls -l backups
 
       - uses: actions/upload-artifact@v4
         with:
-          name: supabase-backup
+          name: supabase-backup-${{ github.run_id }}
           path: backups/
-          retention-days: 30
+          retention-days: 90

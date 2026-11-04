@@ -46,8 +46,16 @@ class HybridProgressRepository implements ProgressRepository {
     final remote = await _remote();
     if (remote == null) return localData;
 
-    final remoteData = await remote.load();
-    final remoteSession = await remote.loadLastSessionIso();
+    final Map<String, NoteData>? remoteData;
+    final String? remoteSession;
+    try {
+      remoteData = await remote.load();
+      remoteSession = await remote.loadLastSessionIso();
+    } catch (_) {
+      // Sin nube: se juega con lo local y se sube en el próximo flush.
+      if (localData != null) await _syncPending.markPending();
+      return localData;
+    }
 
     if (remoteData == null) return localData;
     if (localData == null) {
@@ -75,8 +83,12 @@ class HybridProgressRepository implements ProgressRepository {
     final remote = await _remote();
     if (remote == null) return localSession;
 
-    final remoteSession = await remote.loadLastSessionIso();
-    return ProgressMerge.pickNewerSession(localSession, remoteSession);
+    try {
+      final remoteSession = await remote.loadLastSessionIso();
+      return ProgressMerge.pickNewerSession(localSession, remoteSession);
+    } catch (_) {
+      return localSession;
+    }
   }
 
   @override
@@ -147,10 +159,19 @@ class HybridProgressRepository implements ProgressRepository {
   }
 
   /// Tras iniciar sesion: fusiona progreso local y remoto por nota.
+  ///
+  /// Si la nube no responde, deja la subida pendiente en lugar de fallar.
   Future<void> mergeOnSignIn() async {
     final remote = await _remote();
     if (remote == null) return;
+    try {
+      await _mergeOnSignIn(remote);
+    } catch (_) {
+      if (await _local.load() != null) await _syncPending.markPending();
+    }
+  }
 
+  Future<void> _mergeOnSignIn(ProgressRepository remote) async {
     final localData = await _local.load();
     if (localData == null) {
       final remoteData = await remote.load();
