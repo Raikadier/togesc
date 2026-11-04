@@ -13,24 +13,24 @@ class SessionShortcut {
   final bool pause;
 
   const SessionShortcut.note(String this.note)
-      : repeat = false,
-        next = false,
-        pause = false;
+    : repeat = false,
+      next = false,
+      pause = false;
   const SessionShortcut.repeat()
-      : note = null,
-        repeat = true,
-        next = false,
-        pause = false;
+    : note = null,
+      repeat = true,
+      next = false,
+      pause = false;
   const SessionShortcut.next()
-      : note = null,
-        repeat = false,
-        next = true,
-        pause = false;
+    : note = null,
+      repeat = false,
+      next = true,
+      pause = false;
   const SessionShortcut.pause()
-      : note = null,
-        repeat = false,
-        next = false,
-        pause = true;
+    : note = null,
+      repeat = false,
+      next = false,
+      pause = true;
 
   @override
   bool operator ==(Object other) =>
@@ -146,7 +146,8 @@ class _SessionShortcutsState extends State<SessionShortcuts> {
     final shortcut = sessionShortcutFor(
       event.logicalKey,
       shift: keyboard.isShiftPressed,
-      otherModifier: keyboard.isControlPressed ||
+      otherModifier:
+          keyboard.isControlPressed ||
           keyboard.isAltPressed ||
           keyboard.isMetaPressed,
     );
@@ -176,6 +177,9 @@ class _SessionShortcutsState extends State<SessionShortcuts> {
     return Focus(
       focusNode: _node,
       autofocus: true,
+      // Recibe las teclas que suben de sus hijos, pero no es una parada de
+      // Tab (era una parada extra que envolvía toda la pantalla).
+      skipTraversal: true,
       onKeyEvent: _onKey,
       child: widget.child,
     );

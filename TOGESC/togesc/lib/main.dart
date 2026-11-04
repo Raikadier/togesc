@@ -70,7 +70,9 @@ class TogescApp extends ConsumerWidget {
     final router = ref.watch(goRouterProvider);
     final themeMode = ref.watch(appThemeModeProvider);
     final uiPrefs = ref.watch(uiPreferencesProvider).valueOrNull;
-    final reduceAnimations = uiPrefs?.reduceAnimations ?? false;
+    // Hasta leer las preferencias (unos pocos frames) no se arranca ninguna
+    // animación: si el usuario pidió reducirlas, no deben llegar a empezar.
+    final reduceAnimations = uiPrefs?.reduceAnimations ?? true;
     final largeText = uiPrefs?.largeText ?? false;
 
     return MaterialApp.router(
@@ -87,6 +89,11 @@ class TogescApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
+      // El fundido de tema vive por encima de `builder`, así que no ve el
+      // disableAnimations que añade la preferencia.
+      themeAnimationDuration: reduceAnimations
+          ? Duration.zero
+          : kThemeAnimationDuration,
       routerConfig: router,
       builder: (context, child) {
         final media = MediaQuery.of(context);
@@ -95,10 +102,9 @@ class TogescApp extends ConsumerWidget {
             disableAnimations: media.disableAnimations || reduceAnimations,
             textScaler: applyLargeText(media.textScaler, largeText: largeText),
           ),
-          child: TickerMode(
-            enabled: !reduceAnimations,
-            child: child ?? const SizedBox.shrink(),
-          ),
+          // Solo disableAnimations: un TickerMode apagado congelaba las
+          // transiciones de ruta y dejaba la página nueva invisible.
+          child: child ?? const SizedBox.shrink(),
         );
       },
     );

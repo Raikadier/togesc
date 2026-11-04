@@ -233,21 +233,6 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     );
   }
 
-  KeyEventResult _handleKeyActivation(
-    String note,
-    FocusNode node,
-    KeyEvent event,
-  ) {
-    if (widget.disabled) return KeyEventResult.ignored;
-    if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (event.logicalKey == LogicalKeyboardKey.enter ||
-        event.logicalKey == LogicalKeyboardKey.space) {
-      _tap(note);
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
-
   Widget _accessibleKey({
     required String note,
     required Widget visual,
@@ -271,49 +256,50 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     final splash = _isSession
         ? DesignTokens.sessionAccent.withValues(alpha: 0.5)
         : colors.selection.withValues(alpha: 0.15);
+    // Un solo nodo para el lector: nombre, estado y acción de tocar juntos
+    // (el InkWell creaba otro nodo con la acción pero sin nombre). El
+    // InkWell es la única parada de foco y activa con Intro/Espacio.
     return Semantics(
+      container: true,
       button: true,
       enabled: !widget.disabled,
+      focusable: !widget.disabled,
       label: _semanticsLabel(note),
       hint: _semanticsHint(note),
       selected: widget.selectedNotes.contains(note),
-      child: Focus(
-        canRequestFocus: !widget.disabled,
-        onKeyEvent: (node, event) => _handleKeyActivation(note, node, event),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: widget.disabled ? null : () => _tap(note),
-            focusColor: colors.selection.withValues(alpha: 0.2),
-            hoverColor: colors.selection.withValues(alpha: 0.1),
-            splashColor: splash,
-            child: Stack(
-              alignment:
-                  _isSession ? Alignment.bottomCenter : Alignment.topCenter,
-              children: [
-                if (_isSession)
-                  _KeyFeedbackMotion(
-                    feedback: _feedbackOf(note),
-                    child: visual,
-                  )
-                else
-                  visual,
-                if (badge != null)
-                  Padding(
-                    // En sesión el badge va sobre la etiqueta, en la parte
-                    // visible de la tecla (las negras tapan el borde superior
-                    // de las blancas).
-                    padding: _isSession
-                        ? EdgeInsets.only(
-                            bottom: onDarkKey
-                                ? (widget.hideLabels ? 8 : 24)
-                                : (widget.hideLabels ? 12 : 34),
-                          )
-                        : const EdgeInsets.only(top: 4),
-                    child: badge,
-                  ),
-              ],
-            ),
+      onTap: widget.disabled ? null : () => _tap(note),
+      excludeSemantics: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.disabled ? null : () => _tap(note),
+          focusColor: colors.selection.withValues(alpha: 0.2),
+          hoverColor: colors.selection.withValues(alpha: 0.1),
+          splashColor: splash,
+          child: Stack(
+            alignment: _isSession
+                ? Alignment.bottomCenter
+                : Alignment.topCenter,
+            children: [
+              if (_isSession)
+                _KeyFeedbackMotion(feedback: _feedbackOf(note), child: visual)
+              else
+                visual,
+              if (badge != null)
+                Padding(
+                  // En sesión el badge va sobre la etiqueta, en la parte
+                  // visible de la tecla (las negras tapan el borde superior
+                  // de las blancas).
+                  padding: _isSession
+                      ? EdgeInsets.only(
+                          bottom: onDarkKey
+                              ? (widget.hideLabels ? 8 : 24)
+                              : (widget.hideLabels ? 12 : 34),
+                        )
+                      : const EdgeInsets.only(top: 4),
+                  child: badge,
+                ),
+            ],
           ),
         ),
       ),
@@ -326,177 +312,188 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     final scheme = Theme.of(context).colorScheme;
     final colors = TogescColors.of(context);
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final animDuration = reduceMotion
-        ? Duration.zero
-        : DesignTokens.motionFast;
+    final animDuration = reduceMotion ? Duration.zero : DesignTokens.motionFast;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = widget.large ? 640.0 : 500.0;
-        // 7 teclas x 48dp minimo (WCAG 2.5.8).
-        const minWidth = 336.0;
-        final totalWidth = constraints.maxWidth.clamp(minWidth, maxWidth);
-        final whiteKeyWidth = totalWidth / 7;
-        final whiteKeyHeight = whiteKeyWidth * 3.5;
-        final blackKeyWidth = whiteKeyWidth * 0.6;
-        final blackKeyHeight = whiteKeyHeight * 0.62;
-        final blackHitWidth = DesignTokens.touchTargetMin;
+    return Align(
+      // Sin estirarse: el teclado mide lo que calcula y las negras cuadran.
+      heightFactor: 1,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = widget.large ? 640.0 : 500.0;
+          // Las negras se colocan con whiteKeyWidth: debe salir del ancho que
+          // de verdad se pinta (relleno 4 + borde 1 por lado), nunca de un
+          // mínimo teórico mayor que la pantalla.
+          const chrome = 10.0;
+          final available = constraints.hasBoundedWidth
+              ? constraints.maxWidth - chrome
+              : maxWidth;
+          final totalWidth = math.max(0.0, math.min(available, maxWidth));
+          final whiteKeyWidth = totalWidth / 7;
+          final whiteKeyHeight = whiteKeyWidth * 3.5;
+          final blackKeyWidth = whiteKeyWidth * 0.6;
+          final blackKeyHeight = whiteKeyHeight * 0.62;
+          final blackHitWidth = DesignTokens.touchTargetMin;
 
-        return Semantics(
-          container: true,
-          label: 'Teclado de piano',
-          child: Container(
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerLow,
-              borderRadius: DesignTokens.borderRadiusMd,
-              border: Border.all(color: scheme.outlineVariant),
-            ),
-            padding: const EdgeInsets.all(4),
-            child: SizedBox(
-              width: totalWidth,
-              height: whiteKeyHeight,
-              child: Stack(
-                children: [
-                  Row(
-                    children: PianoKeyboard.whiteNotes.map((note) {
-                      final pressed = _pressed.contains(note);
-                      return Expanded(
-                        child: _accessibleKey(
-                          note: note,
-                          onDarkKey: false,
-                          colors: colors,
-                          visual: AnimatedContainer(
-                            duration: animDuration,
-                            transform: pressed
-                                ? (Matrix4.identity()
-                                    ..translateByDouble(0.0, 4.0, 0.0, 1.0)
-                                    ..scaleByDouble(0.985, 0.985, 1.0, 1.0))
-                                : Matrix4.identity(),
-                            margin: const EdgeInsets.symmetric(horizontal: 0.5),
-                            decoration: BoxDecoration(
-                              gradient: _whiteGradient(
-                                note,
-                                pressed,
-                                scheme,
-                                colors,
+          return Semantics(
+            container: true,
+            label: 'Teclado de piano',
+            child: Container(
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerLow,
+                borderRadius: DesignTokens.borderRadiusMd,
+                border: Border.all(color: scheme.outlineVariant),
+              ),
+              padding: const EdgeInsets.all(4),
+              child: SizedBox(
+                width: totalWidth,
+                height: whiteKeyHeight,
+                child: Stack(
+                  children: [
+                    Row(
+                      children: PianoKeyboard.whiteNotes.map((note) {
+                        final pressed = _pressed.contains(note);
+                        return Expanded(
+                          child: _accessibleKey(
+                            note: note,
+                            onDarkKey: false,
+                            colors: colors,
+                            visual: AnimatedContainer(
+                              duration: animDuration,
+                              transform: pressed
+                                  ? (Matrix4.identity()
+                                      ..translateByDouble(0.0, 4.0, 0.0, 1.0)
+                                      ..scaleByDouble(0.985, 0.985, 1.0, 1.0))
+                                  : Matrix4.identity(),
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 0.5,
                               ),
-                              border: Border.all(
-                                color: _whiteKeyBorder(note, scheme, colors),
-                                width: _whiteKeyBorderWidth(note),
-                              ),
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(
-                                  note == 'C' ? 8 : 2,
+                              decoration: BoxDecoration(
+                                gradient: _whiteGradient(
+                                  note,
+                                  pressed,
+                                  scheme,
+                                  colors,
                                 ),
-                                bottomRight: Radius.circular(
-                                  note == 'B' ? 8 : 2,
+                                border: Border.all(
+                                  color: _whiteKeyBorder(note, scheme, colors),
+                                  width: _whiteKeyBorderWidth(note),
                                 ),
-                              ),
-                            ),
-                            alignment: Alignment.bottomCenter,
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: widget.hideLabels
-                                ? const SizedBox.shrink()
-                                : ExcludeSemantics(
-                                    child: Text(
-                                      formatNoteLabel(
-                                        note,
-                                        widget.noteNamingMode,
-                                      ),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            fontSize: widget.large ? 18 : 15,
-                                            fontWeight: FontWeight.w700,
-                                            letterSpacing: -0.3,
-                                            color: scheme.onSurfaceVariant,
-                                          ),
-                                    ),
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(
+                                    note == 'C' ? 8 : 2,
                                   ),
+                                  bottomRight: Radius.circular(
+                                    note == 'B' ? 8 : 2,
+                                  ),
+                                ),
+                              ),
+                              alignment: Alignment.bottomCenter,
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: widget.hideLabels
+                                  ? const SizedBox.shrink()
+                                  : ExcludeSemantics(
+                                      child: Text(
+                                        formatNoteLabel(
+                                          note,
+                                          widget.noteNamingMode,
+                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontSize: widget.large ? 18 : 15,
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: -0.3,
+                                              color: scheme.onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    ...PianoKeyboard.blackNoteMap.entries.map((entry) {
+                      final whiteIndex = PianoKeyboard.whiteNotes.indexOf(
+                        entry.key,
+                      );
+                      final sharpNote = entry.value;
+                      final pressed = _pressed.contains(sharpNote);
+                      final leftOffset =
+                          (whiteIndex + 1) * whiteKeyWidth - blackHitWidth / 2;
+
+                      return Positioned(
+                        left: leftOffset,
+                        top: 0,
+                        width: blackHitWidth,
+                        height: blackKeyHeight,
+                        child: _accessibleKey(
+                          note: sharpNote,
+                          onDarkKey: true,
+                          colors: colors,
+                          visual: Align(
+                            child: AnimatedContainer(
+                              duration: animDuration,
+                              width: blackKeyWidth,
+                              height: blackKeyHeight,
+                              transform: pressed
+                                  ? (Matrix4.identity()
+                                      ..translateByDouble(0.0, 5.0, 0.0, 1.0)
+                                      ..scaleByDouble(0.97, 0.97, 1.0, 1.0))
+                                  : Matrix4.identity(),
+                              decoration: BoxDecoration(
+                                gradient: _blackGradient(
+                                  sharpNote,
+                                  pressed,
+                                  colors,
+                                ),
+                                border: Border.all(
+                                  color:
+                                      widget.selectedNotes.contains(sharpNote)
+                                      ? colors.selection
+                                      : Colors.transparent,
+                                  width:
+                                      widget.selectedNotes.contains(sharpNote)
+                                      ? 2
+                                      : 0,
+                                ),
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(4),
+                                  bottomRight: Radius.circular(4),
+                                ),
+                              ),
+                              alignment: Alignment.bottomCenter,
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: widget.hideLabels
+                                  ? const SizedBox.shrink()
+                                  : ExcludeSemantics(
+                                      child: Text(
+                                        formatNoteLabel(
+                                          sharpNote,
+                                          widget.noteNamingMode,
+                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge
+                                            ?.copyWith(
+                                              fontSize: widget.large ? 12 : 10,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                            ),
+                                      ),
+                                    ),
+                            ),
                           ),
                         ),
                       );
-                    }).toList(),
-                  ),
-                  ...PianoKeyboard.blackNoteMap.entries.map((entry) {
-                    final whiteIndex = PianoKeyboard.whiteNotes.indexOf(
-                      entry.key,
-                    );
-                    final sharpNote = entry.value;
-                    final pressed = _pressed.contains(sharpNote);
-                    final leftOffset =
-                        (whiteIndex + 1) * whiteKeyWidth - blackHitWidth / 2;
-
-                    return Positioned(
-                      left: leftOffset,
-                      top: 0,
-                      width: blackHitWidth,
-                      height: blackKeyHeight,
-                      child: _accessibleKey(
-                        note: sharpNote,
-                        onDarkKey: true,
-                        colors: colors,
-                        visual: Align(
-                          child: AnimatedContainer(
-                            duration: animDuration,
-                            width: blackKeyWidth,
-                            height: blackKeyHeight,
-                            transform: pressed
-                                ? (Matrix4.identity()
-                                    ..translateByDouble(0.0, 5.0, 0.0, 1.0)
-                                    ..scaleByDouble(0.97, 0.97, 1.0, 1.0))
-                                : Matrix4.identity(),
-                            decoration: BoxDecoration(
-                              gradient: _blackGradient(
-                                sharpNote,
-                                pressed,
-                                colors,
-                              ),
-                              border: Border.all(
-                                color: widget.selectedNotes.contains(sharpNote)
-                                    ? colors.selection
-                                    : Colors.transparent,
-                                width: widget.selectedNotes.contains(sharpNote)
-                                    ? 2
-                                    : 0,
-                              ),
-                              borderRadius: const BorderRadius.only(
-                                bottomLeft: Radius.circular(4),
-                                bottomRight: Radius.circular(4),
-                              ),
-                            ),
-                            alignment: Alignment.bottomCenter,
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: widget.hideLabels
-                                ? const SizedBox.shrink()
-                                : ExcludeSemantics(
-                                    child: Text(
-                                      formatNoteLabel(
-                                        sharpNote,
-                                        widget.noteNamingMode,
-                                      ),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelLarge
-                                          ?.copyWith(
-                                            fontSize: widget.large ? 12 : 10,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.white,
-                                          ),
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ],
+                    }),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -583,136 +580,148 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
         ? DesignTokens.touchTargetMin
         : blackSize.width;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = wide ? 960.0 : 560.0;
-        // 7 teclas x 48 dp mínimo + relleno del contenedor.
-        const minWidth = 336.0 + padding * 2;
-        final available =
-            constraints.hasBoundedWidth ? constraints.maxWidth : maxWidth;
-        final totalWidth = available.clamp(minWidth, maxWidth);
-        final innerWidth = totalWidth - padding * 2;
-        final keysHeight = containerHeight - padding * 2;
-        final whiteKeyWidth = innerWidth / 7;
-        final blackHeight = blackSize.height.clamp(0.0, keysHeight * 0.7);
+    return Align(
+      // Sin estirarse: el teclado mide lo que calcula y las negras cuadran.
+      heightFactor: 1,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = wide ? 960.0 : 560.0;
+          // El ancho real dibujado, no un mínimo mayor que la pantalla: con
+          // 352 fijo a 360 dp las blancas encogían y las negras no.
+          final available = constraints.hasBoundedWidth
+              ? constraints.maxWidth
+              : maxWidth;
+          final totalWidth = math.min(available, maxWidth);
+          final innerWidth = totalWidth - padding * 2;
+          final keysHeight = containerHeight - padding * 2;
+          final whiteKeyWidth = innerWidth / 7;
+          final blackHeight = blackSize.height.clamp(0.0, keysHeight * 0.7);
 
-        return Semantics(
-          container: true,
-          label: 'Teclado de piano',
-          child: Container(
-            key: const ValueKey('piano-session-container'),
-            width: totalWidth,
-            height: containerHeight,
-            padding: const EdgeInsets.all(padding),
-            decoration: BoxDecoration(
-              color: DesignTokens.pianoSessionContainer,
-              borderRadius: BorderRadius.circular(
-                DesignTokens.pianoSessionRadius,
+          return Semantics(
+            container: true,
+            label: 'Teclado de piano',
+            child: Container(
+              key: const ValueKey('piano-session-container'),
+              width: totalWidth,
+              height: containerHeight,
+              padding: const EdgeInsets.all(padding),
+              decoration: BoxDecoration(
+                color: DesignTokens.pianoSessionContainer,
+                borderRadius: BorderRadius.circular(
+                  DesignTokens.pianoSessionRadius,
+                ),
+                border: Border.all(color: DesignTokens.sessionBorderSubtle),
               ),
-              border: Border.all(color: DesignTokens.sessionBorderSubtle),
-            ),
-            child: Stack(
-              children: [
-                Row(
-                  children: PianoKeyboard.whiteNotes.map((note) {
-                    final pressed = _pressed.contains(note);
-                    final selected = widget.selectedNotes.contains(note);
-                    return Expanded(
-                      child: _accessibleKey(
-                        note: note,
-                        onDarkKey: false,
-                        colors: colors,
-                        visual: AnimatedContainer(
-                          key: ValueKey('piano-key-$note'),
-                          duration: animDuration,
-                          transform: pressed
-                              ? (Matrix4.identity()
-                                ..translateByDouble(0.0, 2.0, 0.0, 1.0))
-                              : Matrix4.identity(),
-                          margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                          decoration: BoxDecoration(
-                            gradient: _sessionGradient(
-                              note,
-                              black: false,
-                              colors: colors,
+              child: Stack(
+                children: [
+                  Row(
+                    children: PianoKeyboard.whiteNotes.map((note) {
+                      final pressed = _pressed.contains(note);
+                      final selected = widget.selectedNotes.contains(note);
+                      return Expanded(
+                        child: _accessibleKey(
+                          note: note,
+                          onDarkKey: false,
+                          colors: colors,
+                          visual: AnimatedContainer(
+                            key: ValueKey('piano-key-$note'),
+                            duration: animDuration,
+                            transform: pressed
+                                ? (Matrix4.identity()
+                                    ..translateByDouble(0.0, 2.0, 0.0, 1.0))
+                                : Matrix4.identity(),
+                            margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                            decoration: BoxDecoration(
+                              gradient: _sessionGradient(
+                                note,
+                                black: false,
+                                colors: colors,
+                              ),
+                              border: selected
+                                  ? Border.all(
+                                      color: colors.selection,
+                                      width: 3,
+                                    )
+                                  : null,
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(3),
+                                bottom: Radius.circular(8),
+                              ),
                             ),
-                            border: selected
-                                ? Border.all(color: colors.selection, width: 3)
-                                : null,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(3),
-                              bottom: Radius.circular(8),
-                            ),
+                            alignment: Alignment.bottomCenter,
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: _sessionLabel(note, black: false),
                           ),
-                          alignment: Alignment.bottomCenter,
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: _sessionLabel(note, black: false),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  ...PianoKeyboard.blackNoteMap.entries.map((entry) {
+                    final whiteIndex = PianoKeyboard.whiteNotes.indexOf(
+                      entry.key,
+                    );
+                    final sharpNote = entry.value;
+                    final pressed = _pressed.contains(sharpNote);
+                    final selected = widget.selectedNotes.contains(sharpNote);
+                    final leftOffset =
+                        (whiteIndex + 1) * whiteKeyWidth - blackHitWidth / 2;
+                    return Positioned(
+                      left: leftOffset,
+                      top: 0,
+                      width: blackHitWidth,
+                      height: blackHeight,
+                      child: _accessibleKey(
+                        note: sharpNote,
+                        onDarkKey: true,
+                        colors: colors,
+                        visual: Align(
+                          alignment: Alignment.topCenter,
+                          child: AnimatedContainer(
+                            key: ValueKey('piano-key-$sharpNote'),
+                            duration: animDuration,
+                            width: blackSize.width,
+                            height: blackHeight,
+                            transform: pressed
+                                ? (Matrix4.identity()
+                                    ..translateByDouble(0.0, 2.0, 0.0, 1.0))
+                                : Matrix4.identity(),
+                            decoration: BoxDecoration(
+                              gradient: _sessionGradient(
+                                sharpNote,
+                                black: true,
+                                colors: colors,
+                              ),
+                              border: selected
+                                  ? Border.all(
+                                      color: colors.selection,
+                                      width: 3,
+                                    )
+                                  : null,
+                              borderRadius: const BorderRadius.vertical(
+                                bottom: Radius.circular(6),
+                              ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x66000000),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            alignment: Alignment.bottomCenter,
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _sessionLabel(sharpNote, black: true),
+                          ),
                         ),
                       ),
                     );
-                  }).toList(),
-                ),
-                ...PianoKeyboard.blackNoteMap.entries.map((entry) {
-                  final whiteIndex =
-                      PianoKeyboard.whiteNotes.indexOf(entry.key);
-                  final sharpNote = entry.value;
-                  final pressed = _pressed.contains(sharpNote);
-                  final selected = widget.selectedNotes.contains(sharpNote);
-                  final leftOffset =
-                      (whiteIndex + 1) * whiteKeyWidth - blackHitWidth / 2;
-                  return Positioned(
-                    left: leftOffset,
-                    top: 0,
-                    width: blackHitWidth,
-                    height: blackHeight,
-                    child: _accessibleKey(
-                      note: sharpNote,
-                      onDarkKey: true,
-                      colors: colors,
-                      visual: Align(
-                        alignment: Alignment.topCenter,
-                        child: AnimatedContainer(
-                          key: ValueKey('piano-key-$sharpNote'),
-                          duration: animDuration,
-                          width: blackSize.width,
-                          height: blackHeight,
-                          transform: pressed
-                              ? (Matrix4.identity()
-                                ..translateByDouble(0.0, 2.0, 0.0, 1.0))
-                              : Matrix4.identity(),
-                          decoration: BoxDecoration(
-                            gradient: _sessionGradient(
-                              sharpNote,
-                              black: true,
-                              colors: colors,
-                            ),
-                            border: selected
-                                ? Border.all(color: colors.selection, width: 3)
-                                : null,
-                            borderRadius: const BorderRadius.vertical(
-                              bottom: Radius.circular(6),
-                            ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x66000000),
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          alignment: Alignment.bottomCenter,
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: _sessionLabel(sharpNote, black: true),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ],
+                  }),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -733,9 +742,7 @@ class _KeyFeedbackMotion extends StatefulWidget {
 
 class _KeyFeedbackMotionState extends State<_KeyFeedbackMotion>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-  );
+  late final AnimationController _controller = AnimationController(vsync: this);
   bool _started = false;
 
   @override

@@ -211,7 +211,7 @@ void main() {
       );
       // Ni pop/shake ni escala del icono: todo en reposo desde el primer
       // frame. (Material lleva una animación implícita propia, ajena a
-      // este widget; en la app la desactiva el TickerMode de TogescApp.)
+      // este widget.)
       final transforms = tester.widgetList<Transform>(
         find.ancestor(
           of: find.byIcon(Icons.check_circle),

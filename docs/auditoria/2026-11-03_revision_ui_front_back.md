@@ -89,7 +89,7 @@ Rama `feat/rediseno-v2.1`. Revisión de solo lectura hecha por tres agentes (UX 
   - Estados vacíos sin CTA.
   - Parpadeo al restaurar el paso del onboarding.
 
-## Arreglado el 2026-11-03 (sin commit)
+## Arreglado el 2026-11-03
 - **Doble penalización SRS:** se quita la segunda resta en `_scheduleNextReview`.
 - **F3:** `submitAnswer` del juego solo actúa en `waitingForAnswer` y con un cerrojo mientras guarda. Además, `startRound` no reabre una ronda saltada mientras sonaba (F10).
 - **F5:** `resolvePracticeNotePool` recibe `numNotes` y usa todas las notas si el pool o el foco no llegan.

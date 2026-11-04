@@ -13,6 +13,15 @@ import '../providers/subscription_provider.dart';
 import '../widgets/paywall_views.dart';
 
 /// Pantalla de paywall (Fase 5).
+/// Cierra el paywall; sin historial (deep link o `replace`) vuelve al Home.
+void _close(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go(AppRoutes.home);
+  }
+}
+
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({this.feature, super.key});
 
@@ -166,7 +175,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                               tooltip: 'Cerrar',
                               color: DesignTokens.onHero,
                               icon: const Icon(Icons.close_rounded),
-                              onPressed: () => context.pop(),
+                              onPressed: () => _close(context),
                             ),
                           ],
                         ),
@@ -302,7 +311,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             ),
             const SizedBox(height: DesignTokens.spacingLg),
             FilledButton(
-              onPressed: () => context.pop(),
+              onPressed: () => _close(context),
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
               ),

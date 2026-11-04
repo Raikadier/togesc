@@ -8,7 +8,11 @@ import 'togesc_colors.dart';
 abstract final class AppTheme {
   static const Color seedColor = DesignTokens.primaryContainer;
 
-  static ThemeData get light {
+  /// Instancia única: un `ThemeData` nuevo en cada build reiniciaba las
+  /// animaciones implícitas de Material (texto y elevación de los botones).
+  static final ThemeData light = _buildLight();
+
+  static ThemeData _buildLight() {
     final scheme =
         ColorScheme.fromSeed(
           seedColor: DesignTokens.primaryContainer,
@@ -171,7 +175,11 @@ abstract final class AppTheme {
     );
   }
 
-  static ThemeData get dark {
+  /// Instancia única: un `ThemeData` nuevo en cada build reiniciaba las
+  /// animaciones implícitas de Material (texto y elevación de los botones).
+  static final ThemeData dark = _buildDark();
+
+  static ThemeData _buildDark() {
     final scheme =
         ColorScheme.fromSeed(
           seedColor: DesignTokens.primaryContainer,
@@ -337,7 +345,11 @@ abstract final class AppTheme {
   /// 14,7:1, secundario (`onSurfaceVariant`) 6,2:1, etiquetas 11,1:1 y
   /// acento 9,1:1. `outline`/`outlineVariant` son bordes (#3A2E42/#2E2433):
   /// no usarlos como color de texto aquí; para etiquetas, `sessionTextLabel`.
-  static ThemeData get session {
+  /// Instancia única: un `ThemeData` nuevo en cada build reiniciaba las
+  /// animaciones implícitas de Material (texto y elevación de los botones).
+  static final ThemeData session = _buildSession();
+
+  static ThemeData _buildSession() {
     final scheme =
         ColorScheme.fromSeed(
           seedColor: DesignTokens.primaryContainer,
