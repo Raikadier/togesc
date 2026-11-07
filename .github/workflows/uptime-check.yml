@@ -17,3 +17,23 @@ jobs:
             echo "La web de produccion no responde 200"
             exit 1
           fi
+
+      # Supabase se pausa por inactividad y su host deja de resolver (NXDOMAIN).
+      # Se ejecuta aunque falle la web, para que cada caída se vea por separado.
+      - name: Comprobar Supabase (auth health)
+        if: ${{ !cancelled() }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Faltan los secrets SUPABASE_URL o SUPABASE_ANON_KEY"
+            exit 1
+          fi
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+            -H "apikey: $SUPABASE_ANON_KEY" "$SUPABASE_URL/auth/v1/health" || true)
+          echo "HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "Supabase no responde 200 (000 = el host no resuelve: proyecto pausado o borrado)"
+            exit 1
+          fi

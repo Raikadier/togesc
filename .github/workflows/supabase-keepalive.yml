@@ -1,0 +1,38 @@
+name: Supabase Keepalive
+
+# El plan gratuito pausa el proyecto tras unos días sin actividad. Esta
+# consulta ligera a PostgREST llega a la base de datos cada 3 días.
+# Con RLS, el rol anon no ve filas: basta con que la consulta se ejecute.
+
+on:
+  schedule:
+    - cron: '30 6 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consulta ligera a la base de datos
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Faltan los secrets SUPABASE_URL o SUPABASE_ANON_KEY"
+            exit 1
+          fi
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/user_progress?select=user_id&limit=1" || true)
+          echo "HTTP $code"
+          # 200: la consulta se ejecutó. 401/403: llegó a Postgres y RLS o los
+          # permisos la rechazaron, que también cuenta como actividad.
+          case "$code" in
+            200|401|403) ;;
+            *)
+              echo "Supabase no responde (000 = el host no resuelve: proyecto pausado o borrado)"
+              exit 1
+              ;;
+          esac
