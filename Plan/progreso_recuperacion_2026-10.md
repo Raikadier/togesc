@@ -5,6 +5,25 @@ Cada entrada indica qué se hizo, quién lo hizo (usuario, Claude o el agente co
 
 ---
 
+## 2026-11-10 — Supabase reactivado, vigilancia en verde y sync abierta en producción
+
+Hecho por Claude Code a petición del propietario, que reactivó el proyecto y conectó el MCP de Supabase.
+
+- **Supabase responde.** Auth y la API de la base de datos contestan, y la Edge Function `stripe-webhook` está desplegada.
+- **Vigilancia en `main`** (PR #10, mergeado el 2026-11-09): `Web Uptime Check` (run 42819981900) y `Supabase Keepalive` (run 42819987794) pasan, con HTTP 200 en la web, en la salud de Auth y en la consulta a `user_progress`.
+- **Migración aplicada en producción** por MCP: `open_cloud_sync_while_free`, versión `20261110131953`. El fichero del repo se renombró a esa versión para que el historial coincida.
+  - Comprobado en una transacción revertida, con el rol `authenticated` y el usuario de la única fila de progreso: ve su fila, `has_cloud_sync_access` da verdadero para sí mismo y falso para otro usuario, y `anon` no puede ejecutar la función.
+  - Antes de aplicarla había 0 usuarios Pro vigentes, así que nadie podía sincronizar. La última sincronización era del 2026-06-24.
+- **Estado de los datos:** 2 usuarios, 1 fila de progreso, 1 suscripción y 24 eventos de analítica.
+- **Avisos de seguridad de Supabase:** la protección contra contraseñas filtradas está desactivada. `public.rls_auto_enable()` no está en las migraciones del repo: es un disparador que activa RLS en las tablas nuevas, creado desde el panel.
+
+**Pendiente del propietario:**
+1. Crear el secret `BACKUP_PASSPHRASE` en GitHub Actions. Sigue sin existir, así que no hay ningún backup con datos.
+2. Lanzar «Supabase Backup» a mano y descargar el artefacto.
+3. Activar la protección contra contraseñas filtradas en Auth.
+
+**Sin comprobar:** la sync desde la app real con un usuario que inicie sesión. El cliente que distingue errores de red de «sin datos» sigue solo en `feat/rediseno-v2.1`.
+
 ## 2026-11-03 — Backup con datos, keepalive y sync abierta mientras no se cobra
 
 Hecho por Claude Code a petición del propietario. Nada desplegado: los workflows programados se ejecutan desde `main`, y la migración hay que aplicarla con Supabase reactivado.
@@ -12,7 +31,7 @@ Hecho por Claude Code a petición del propietario. Nada desplegado: los workflow
 - **Supabase sigue pausado.** El backup del 2026-11-01 (run 41299662672) falló con «project is paused». El uptime de `main` sale en verde porque solo comprueba la web.
 - **Backup** (`supabase-backup.yml`): vuelca roles, esquema y datos de `public` y `auth`, y los cifra con gpg (secret `BACKUP_PASSPHRASE`). Falla si falta el secret o si el volcado de datos sale vacío. Retención de 90 días. Restauración documentada en `docs/supabase_setup.md` §8, sin ensayar.
 - **Keepalive** (`supabase-keepalive.yml`): consulta ligera a PostgREST cada 3 días.
-- **Sync** (migración `20261103120000_open_cloud_sync_while_free.sql`): `has_cloud_sync_access` comprueba solo que la fila sea del usuario. Las pruebas Pro de 14 días caducaron hacia el 2026-08-08 y desde entonces la nube no guardaba ni devolvía progreso para nadie. Al activar los pagos hay que recuperar la comprobación Pro.
+- **Sync** (migración `20261110131953_open_cloud_sync_while_free.sql`): `has_cloud_sync_access` comprueba solo que la fila sea del usuario. Las pruebas Pro de 14 días caducaron hacia el 2026-08-08 y desde entonces la nube no guardaba ni devolvía progreso para nadie. Al activar los pagos hay que recuperar la comprobación Pro.
 - **Cliente:** `SupabaseProgressRepository.load()` y `loadLastSessionIso()` ya no convierten los errores en «sin datos». El repositorio híbrido sigue con lo local y deja la subida pendiente, y el diagnóstico de sync ya no da la nube por alcanzable cuando no lo está. Dos tests nuevos.
 
 **Pendiente del propietario:**

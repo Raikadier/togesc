@@ -16,5 +16,6 @@ App Flutter (Riverpod + flutter_soloud + Supabase opcional) para entrenar el oí
 - Nada de hex sueltos en widgets: usar `DesignTokens`, `ColorScheme` o `TogescColors.of(context)`.
 - Respetar `reduceAnimations` y `MediaQuery.disableAnimations` en todo el movimiento.
 - Mantener las `ValueKey` existentes, porque los tests e2e dependen de ellas.
+- Versión de Flutter: **3.47.7**, la misma en local y en los tres workflows (`ci.yml`, `deploy-web.yml` y `build-android.yml`). Si se cambia, se cambia en todos a la vez.
 - Antes de cerrar un cambio, ejecutar en `TOGESC/togesc`: `flutter analyze` (los info son fatales en el CI) y `flutter test`.
 - No hacer commit ni push sin que el propietario lo pida.
