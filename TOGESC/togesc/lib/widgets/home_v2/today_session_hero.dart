@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../app/design_tokens.dart';
 import '../../providers/today_session_provider.dart';
 import '../../utils/today_session.dart';
+import '../../constants/srs_constants.dart';
+import '../progress_v2/progress_metrics.dart';
 
 /// Texto del hero derivado solo de datos reales del SRS (D10).
 ///
@@ -55,10 +57,17 @@ String _countWord(int n) => switch (n) {
 String focusNoteStateLabel(TodayFocusNote note) {
   final pct = note.accuracyPercent;
   if (pct == null) return 'Nueva';
-  if (pct < DesignTokens.masteryAmberThreshold) return 'Crítica';
-  if (pct < DesignTokens.masteryGreenThreshold) return 'En curso';
-  return 'Consolidada';
+  return focusNoteStatus(note).title;
 }
+
+/// Estado de dominio de una nota foco. Sin intentos conocidos se juzga solo
+/// por la precisión.
+MasteryStatus focusNoteStatus(TodayFocusNote note) => masteryStatusOf(
+      timesSeen: note.accuracyPercent == null
+          ? 0
+          : (note.timesSeen ?? masteryMinAttempts),
+      pct: note.accuracyPercent ?? 0,
+    );
 
 /// Card hero «Sesión de hoy» (#2A0640) del Home v2.
 class TodaySessionHero extends StatelessWidget {
@@ -253,10 +262,15 @@ class FocusNoteMiniCard extends StatelessWidget {
     final pct = note.accuracyPercent;
     final textTheme = Theme.of(context).textTheme;
     final state = focusNoteStateLabel(note);
+    final measuring = pct != null &&
+        focusNoteStatus(note) == MasteryStatus.measuring;
+    final attempts = measuringProgressLabel(note.timesSeen ?? 0);
     final semantics = pct == null
         ? 'Nota ${note.note}: nueva, sin datos de precisión'
-        : 'Nota ${note.note}: ${pct.round()} % de precisión, '
-            '${state.toLowerCase()}';
+        : measuring
+            ? 'Nota ${note.note}: midiendo, $attempts intentos'
+            : 'Nota ${note.note}: ${pct.round()} % de precisión, '
+                '${state.toLowerCase()}';
     final labelStyle = textTheme.labelMedium
         ?.copyWith(
           color: DesignTokens.onHero.withValues(alpha: 0.86),
@@ -291,9 +305,14 @@ class FocusNoteMiniCard extends StatelessWidget {
               child: SizedBox(
                 height: 3,
                 child: LinearProgressIndicator(
-                  value: pct == null ? 0 : (pct / 100).clamp(0.0, 1.0),
+                  value: pct == null
+                      ? 0
+                      : measuring
+                          ? ((note.timesSeen ?? 0) / masteryMinAttempts)
+                              .clamp(0.0, 1.0)
+                          : (pct / 100).clamp(0.0, 1.0),
                   backgroundColor: const Color(0x29FFFFFF),
-                  color: pct == null
+                  color: pct == null || measuring
                       ? DesignTokens.onHeroAccent
                       : masteryBarColorOnDark(pct),
                 ),
@@ -307,7 +326,10 @@ class FocusNoteMiniCard extends StatelessWidget {
                 spacing: DesignTokens.spacingXs,
                 alignment: WrapAlignment.spaceBetween,
                 children: [
-                  Text('${pct.round()} %', style: labelStyle),
+                  Text(
+                    measuring ? attempts : '${pct.round()} %',
+                    style: labelStyle,
+                  ),
                   Text(state, style: labelStyle),
                 ],
               ),

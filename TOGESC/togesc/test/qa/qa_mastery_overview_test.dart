@@ -6,7 +6,6 @@ import 'package:togesc/constants/notes.dart';
 import 'package:togesc/models/note_progress_summary.dart';
 import 'package:togesc/widgets/progress_v2/mastery_overview.dart';
 
-import 'qa_support.dart';
 
 /// Rueda «Dominio por nota» de Progreso: centro y subtítulo cuentan
 /// «consolidadas» y deben decir lo mismo para los mismos datos.
@@ -32,8 +31,6 @@ void main() {
     WidgetTester tester,
     List<NoteProgressSummary> summaries,
   ) async {
-    final graduated = summaries.where((s) => !s.isLearning).length;
-    final learning = summaries.length - graduated;
     await tester.binding.setSurfaceSize(const Size(420, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -43,8 +40,6 @@ void main() {
           body: SingleChildScrollView(
             child: MasteryOverview(
               summaries: summaries,
-              consolidatedCount: graduated,
-              inProgressCount: learning,
               onNoteTap: (_) {},
             ),
           ),
@@ -85,5 +80,5 @@ void main() {
         },
     ]);
     expect(center, sub, reason: 'centro $center/12 vs «$sub consolidadas»');
-  }, skip: qaSkipBug);
+  });
 }

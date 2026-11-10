@@ -232,6 +232,18 @@ Una palabra por concepto. La interfaz no usa jerga técnica: «SRS» solo aparec
 | Dificultad intermedia de Velocidad | Medio | Pro (se confunde con el plan) |
 | Lo que reconoce el usuario | La nota | Clase de altura |
 
+**Estado de una nota (v2.2, lote B).** Lo decide solo `masteryStatusOf` (`widgets/progress_v2/progress_metrics.dart`); ningún widget compara porcentajes por su cuenta.
+
+| Estado | Regla | Color | Se muestra |
+|---|---|---|---|
+| Sin datos | 0 intentos | `muted` | «—» |
+| Midiendo | de 1 a 4 intentos | neutro (`masteryMeasuringColor`) | «2/5», sin porcentaje |
+| A reforzar | 5 o más intentos y < 50 % | rojo | porcentaje |
+| En curso | 50–74 % | ámbar | porcentaje |
+| Consolidada | ≥ 75 % | verde, según el nivel | porcentaje |
+
+No se juzga sin datos: con menos de 5 intentos no hay rojo ni porcentaje. En la rueda, el relleno mínimo es del 18 % y cada segmento lleva un contorno de 1 px.
+
 **Números:** siempre con `lib/utils/number_format.dart`.
 - Coma decimal y espacio antes de la unidad: «33,3 %», «2,4 s».
 - `formatPercentEs` quita el «,0»: «50 %».

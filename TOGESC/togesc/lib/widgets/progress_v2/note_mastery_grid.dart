@@ -7,6 +7,7 @@ import '../../models/note_progress_summary.dart';
 import '../../utils/srs_level.dart';
 import '../staggered_entrance.dart';
 import 'progress_metrics.dart';
+import '../../constants/srs_constants.dart';
 
 /// Rejilla 4×3 de dominio por nota (Progreso v2, 1c). Gratis (D7).
 ///
@@ -21,8 +22,6 @@ class NoteMasteryGrid extends StatelessWidget {
   const NoteMasteryGrid({
     super.key,
     required this.summaries,
-    required this.consolidatedCount,
-    required this.inProgressCount,
     this.namingMode = NoteNamingMode.letter,
     this.learningThreshold = 5,
     this.onNoteTap,
@@ -30,8 +29,6 @@ class NoteMasteryGrid extends StatelessWidget {
   });
 
   final List<NoteProgressSummary> summaries;
-  final int consolidatedCount;
-  final int inProgressCount;
   final NoteNamingMode namingMode;
   final int learningThreshold;
   final ValueChanged<NoteProgressSummary>? onNoteTap;
@@ -72,7 +69,7 @@ class NoteMasteryGrid extends StatelessWidget {
           ),
           const SizedBox(height: DesignTokens.spacingXs),
           Text(
-            '$consolidatedCount consolidadas · $inProgressCount en curso',
+            masterySubtitle(summaries),
             key: const Key('progress-mastery-subtitle'),
             style: theme.textTheme.bodyMedium
                 ?.merge(DesignTokens.tabularNumbers)
@@ -142,6 +139,10 @@ class NoteMasteryCell extends StatelessWidget {
     if (status == MasteryStatus.unseen) {
       return '$name, sin datos todavía';
     }
+    if (status == MasteryStatus.measuring) {
+      return '$name, midiendo, '
+          '${measuringProgressLabel(summary.timesSeen)} intentos';
+    }
     final pct = summary.accuracyPercent.round();
     final level = srsLevelForSummary(
       summary,
@@ -160,15 +161,13 @@ class NoteMasteryCell extends StatelessWidget {
       summary,
       learningThreshold: learningThreshold,
     );
-    // Sin datos: superficie apagada del tema (#F3ECF1 / #241B2A) con texto
-    // principal. Las celdas con datos llevan su propio par AA.
-    final colors = TogescColors.of(context);
-    final background = seen
-        ? masteryColor(pct, srsLevel: level)
-        : colors.muted;
-    final foreground = seen
-        ? masteryOnColor(pct, srsLevel: level)
-        : colors.textPrimary;
+    // Sin datos: superficie apagada. Midiendo: neutro. Con datos: su par AA.
+    final status = masteryStatusFor(summary);
+    final (:background, :foreground) = masteryCellColors(
+      context,
+      summary,
+      level: level,
+    );
     final label = formatNoteLabel(summary.note, namingMode);
 
     final content = SizedBox(
@@ -194,7 +193,12 @@ class NoteMasteryCell extends StatelessWidget {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                seen ? '${pct.round()} %' : '—',
+                switch (status) {
+                  MasteryStatus.unseen => '—',
+                  MasteryStatus.measuring =>
+                    '${summary.timesSeen}/$masteryMinAttempts',
+                  _ => '${pct.round()} %',
+                },
                 style: theme.textTheme.labelLarge
                     ?.merge(DesignTokens.tabularNumbers)
                     .copyWith(
@@ -256,9 +260,10 @@ class MasteryLegend extends StatelessWidget {
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         );
     final items = [
-      (DesignTokens.masteryRed, 'Crítica < 50 %'),
+      (DesignTokens.masteryRed, 'A reforzar < 50 %'),
       (DesignTokens.masteryAmber, 'En curso 50–74 %'),
       (DesignTokens.masteryGreenLight, 'Consolidada ≥ 75 %'),
+      (masteryMeasuringColor(context), 'Midiendo'),
       (colors.muted, 'Sin datos'),
     ];
     final textColor = Theme.of(context).colorScheme.onSurfaceVariant;

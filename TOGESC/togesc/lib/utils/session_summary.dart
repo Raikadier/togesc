@@ -56,12 +56,16 @@ class SessionLevelChange {
   final double? accuracyBefore;
   final double? accuracyAfter;
 
+  /// Intentos acumulados tras la sesión; `null` si no se conocen.
+  final int? timesSeenAfter;
+
   const SessionLevelChange({
     required this.note,
     required this.before,
     required this.after,
     required this.accuracyBefore,
     required this.accuracyAfter,
+    this.timesSeenAfter,
   });
 
   int get delta => after - before;
@@ -94,6 +98,7 @@ List<SessionLevelChange> buildSessionLevelChanges({
         after: a.level,
         accuracyBefore: b.accuracyPercent,
         accuracyAfter: a.accuracyPercent,
+        timesSeenAfter: a.timesSeen,
       ),
     );
   }

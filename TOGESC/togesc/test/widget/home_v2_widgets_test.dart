@@ -85,7 +85,22 @@ void main() {
 
     test('estado escrito de la mini-card', () {
       expect(focusNoteStateLabel(_note('C', null)), 'Nueva');
-      expect(focusNoteStateLabel(_note('C', 49.9)), 'Crítica');
+      expect(focusNoteStateLabel(_note('C', 49.9)), 'A reforzar');
+      // v2.2 (lote B): con menos de 5 intentos no se juzga, aunque vaya al 0 %.
+      expect(
+        focusNoteStateLabel(
+          const TodayFocusNote(
+            note: 'C',
+            accuracyPercent: 0,
+            isCritical: false,
+            isOverdue: false,
+            isLearning: true,
+            srsLevel: 0,
+            timesSeen: 1,
+          ),
+        ),
+        'Midiendo',
+      );
       expect(focusNoteStateLabel(_note('C', 50)), 'En curso');
       expect(focusNoteStateLabel(_note('C', 75)), 'Consolidada');
     });

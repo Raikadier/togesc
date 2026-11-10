@@ -69,7 +69,7 @@ void main() {
 
       expect(find.text('DETALLE DE NOTA'), findsOneWidget);
       expect(find.text('C sostenido'), findsOneWidget);
-      expect(find.text('Crítica · pendiente de repaso'), findsOneWidget);
+      expect(find.text('A reforzar · pendiente de repaso'), findsOneWidget);
       expect(find.text('42 %'), findsOneWidget);
       expect(find.text('12'), findsOneWidget);
       expect(find.text('2,4 s'), findsOneWidget);

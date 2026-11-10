@@ -657,12 +657,12 @@ void main() {
       expect(row('D, Sin datos, sin datos de precisión, nivel 0 de 5'),
           findsOneWidget);
 
-      // Ronda 1: acierto → En curso, 100 %, nivel 0 (1 acierto de 5).
+      // Ronda 1: acierto → Midiendo (menos de 5 intentos), 100 %, nivel 0.
       await tester.sendKeyEvent(LogicalKeyboardKey.keyD);
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('CORRECTO'), findsOneWidget);
       expect(find.text('Sin datos'), findsNothing);
-      expect(row('D, En curso, 100 por ciento, nivel 0 de 5'),
+      expect(row('D, Midiendo, 100 por ciento, nivel 0 de 5'),
           findsOneWidget);
 
       // Ronda 2: segundo acierto seguido → nivel 1.
@@ -670,7 +670,7 @@ void main() {
       await pumpFor(tester, const Duration(milliseconds: 1900));
       await tester.sendKeyEvent(LogicalKeyboardKey.keyD);
       await tester.pump(const Duration(milliseconds: 100));
-      expect(row('D, En curso, 100 por ciento, nivel 1 de 5'),
+      expect(row('D, Midiendo, 100 por ciento, nivel 1 de 5'),
           findsOneWidget);
 
       // Ronda 3: fallo → 67 %, la racha vuelve a 0.
@@ -679,7 +679,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.keyE);
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('INCORRECTO'), findsOneWidget);
-      expect(row('D, En curso, 67 por ciento, nivel 0 de 5'),
+      expect(row('D, Midiendo, 67 por ciento, nivel 0 de 5'),
           findsOneWidget);
       await pumpFor(tester, const Duration(milliseconds: 2400));
       handle.dispose();

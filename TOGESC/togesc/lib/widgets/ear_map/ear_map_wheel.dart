@@ -10,6 +10,8 @@ import '../../models/note_progress_summary.dart';
 import '../../models/practice_session_log.dart' show chromaticNotes;
 import '../../utils/srs_level.dart';
 import '../progress_v2/note_mastery_grid.dart' show NoteMasteryCell;
+import '../../constants/srs_constants.dart';
+import '../progress_v2/progress_metrics.dart';
 
 /// Mapa del oído (SPEC v2.1 §1.1): rueda de 12 segmentos en orden cromático,
 /// C arriba y en sentido horario. Cada segmento es una barra radial con el %
@@ -152,8 +154,16 @@ class _Segment {
   final double pct;
   final int level;
 
-  /// Fracción radial rellena: mínimo 6 % para que se vea el segmento.
-  double get fill => seen ? math.max(0.06, pct / 100).clamp(0.0, 1.0) : 0.06;
+  MasteryStatus get status => masteryStatusFor(summary);
+
+  /// Fracción radial rellena. Mínimo 18 % para que una nota al 0 % se lea
+  /// (v2.2, lote B). Midiendo: la parte de los intentos ya hechos.
+  double get fill => switch (status) {
+        MasteryStatus.unseen => 0,
+        MasteryStatus.measuring =>
+          math.max(0.18, summary.timesSeen / masteryMinAttempts),
+        _ => math.max(0.18, pct / 100).clamp(0.0, 1.0),
+      };
 }
 
 class _EarMapWheelState extends State<EarMapWheel>
@@ -309,6 +319,8 @@ class _EarMapWheelState extends State<EarMapWheel>
                             geometry: geometry,
                             progress: _entrance.value,
                             track: track,
+                            outline: theme.colorScheme.outlineVariant,
+                            measuring: masteryMeasuringColor(context),
                             highlight: highlight,
                             ring: ring,
                             activeIndex: active,
@@ -478,8 +490,15 @@ class _Center extends StatelessWidget {
     final String? big;
     final String? small;
     if (s != null) {
-      big = s.seen ? '${s.pct.round()} %' : '—';
-      small = '${s.label} · nivel ${s.level}/$srsMaxLevel';
+      big = switch (s.status) {
+        MasteryStatus.unseen => '—',
+        MasteryStatus.measuring =>
+          '${s.summary.timesSeen}/$masteryMinAttempts',
+        _ => '${s.pct.round()} %',
+      };
+      small = s.status == MasteryStatus.measuring
+          ? '${s.label} · midiendo'
+          : '${s.label} · nivel ${s.level}/$srsMaxLevel';
     } else {
       big = value;
       small = caption;
@@ -521,6 +540,8 @@ class _EarMapPainter extends CustomPainter {
     required this.geometry,
     required this.progress,
     required this.track,
+    required this.outline,
+    required this.measuring,
     required this.highlight,
     required this.ring,
     required this.activeIndex,
@@ -534,6 +555,12 @@ class _EarMapPainter extends CustomPainter {
   /// Progreso de la entrada escalonada (0–1 sobre la duración total).
   final double progress;
   final Color track;
+
+  /// Contorno de la pista: la separa de la tarjeta en el tema claro.
+  final Color outline;
+
+  /// Relleno neutro de las notas que aún se están midiendo.
+  final Color measuring;
   final Color highlight;
   final Color ring;
   final int? activeIndex;
@@ -571,13 +598,22 @@ class _EarMapPainter extends CustomPainter {
         trackPath,
         Paint()..color = i == activeIndex ? highlight : track,
       );
+      canvas.drawPath(
+        trackPath,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1
+          ..color = outline,
+      );
 
       final (segScale, opacity) = _entrance(i);
       if (opacity > 0) {
         final rf = geometry.r0 + (geometry.r1 - geometry.r0) * s.fill;
-        final fillColor = s.seen
-            ? masteryColor(s.pct, srsLevel: s.level)
-            : track;
+        final fillColor = switch (s.status) {
+          MasteryStatus.unseen => track,
+          MasteryStatus.measuring => measuring,
+          _ => masteryColor(s.pct, srsLevel: s.level),
+        };
         if (s.seen) {
           canvas.save();
           canvas.translate(c.dx, c.dy);
@@ -617,6 +653,8 @@ class _EarMapPainter extends CustomPainter {
       old.progress != progress ||
       old.segments != segments ||
       old.track != track ||
+      old.outline != outline ||
+      old.measuring != measuring ||
       old.activeIndex != activeIndex ||
       old.focusedIndex != focusedIndex ||
       old.selectedIndex != selectedIndex ||

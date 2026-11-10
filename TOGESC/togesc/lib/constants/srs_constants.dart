@@ -36,3 +36,7 @@ const double overdueThreshold = 1.5; // 150% del intervalo = vencida
 
 // Penalizacion por olvido (reinicio de fase)
 const int forgetPenaltySteps = 2; // Retroceder N intervalos al olvidar
+
+// Intentos mínimos antes de juzgar una nota (color y porcentaje). Con menos,
+// la nota está «midiendo»: un solo fallo no debe pintarla de rojo.
+const int masteryMinAttempts = 5;

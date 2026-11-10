@@ -4,10 +4,12 @@ import '../../app/design_tokens.dart';
 import '../../models/note_progress_summary.dart';
 import '../../utils/srs_level.dart';
 import 'srs_level_pill.dart';
+import '../../constants/srs_constants.dart';
 
 /// Estado de una nota en el panel «Enfoque SRS de la sesión».
 enum SessionFocusStatus {
-  critical('Crítica', DesignTokens.sessionError),
+  critical('A reforzar', DesignTokens.sessionError),
+  measuring('Midiendo', DesignTokens.sessionTextSecondary),
   inProgress('En curso', DesignTokens.sessionWarning),
   consolidating('Consolidando', DesignTokens.sessionSuccess),
   noData('Sin datos', DesignTokens.sessionTextSecondary);
@@ -37,7 +39,8 @@ class SessionFocusEntry {
 }
 
 /// Deriva las filas del panel (gap analysis §5):
-/// - Crítica: en `critical_notes` o vista con precisión < 50 %.
+/// - A reforzar: en `critical_notes`, o con datos suficientes y < 50 %.
+/// - Midiendo: vista con menos de [masteryMinAttempts] intentos.
 /// - Consolidando: ya graduada (`!isLearning`).
 /// - En curso: el resto de notas vistas.
 /// - Sin datos: nunca vista.
@@ -58,9 +61,14 @@ List<SessionFocusEntry> buildSessionFocusEntries({
         ? srsLevelForSummary(summary)
         : srsLevelForSummary(summary, learningThreshold: learningThreshold);
     final SessionFocusStatus status;
+    final measuring = seen && summary.timesSeen < masteryMinAttempts;
     if (criticalNotes.contains(note) ||
-        (accuracy != null && accuracy < DesignTokens.masteryAmberThreshold)) {
+        (!measuring &&
+            accuracy != null &&
+            accuracy < DesignTokens.masteryAmberThreshold)) {
       status = SessionFocusStatus.critical;
+    } else if (measuring) {
+      status = SessionFocusStatus.measuring;
     } else if (!summary.isLearning) {
       status = SessionFocusStatus.consolidating;
     } else if (seen) {

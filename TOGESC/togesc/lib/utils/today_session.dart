@@ -20,6 +20,9 @@ class TodayFocusNote {
   /// Nivel SRS 0..5 (ver `srsLevelFromValues`).
   final int srsLevel;
 
+  /// Intentos acumulados; `null` si no se conocen (se juzga por la precisión).
+  final int? timesSeen;
+
   const TodayFocusNote({
     required this.note,
     required this.accuracyPercent,
@@ -27,6 +30,7 @@ class TodayFocusNote {
     required this.isOverdue,
     required this.isLearning,
     required this.srsLevel,
+    this.timesSeen,
   });
 }
 
@@ -126,6 +130,7 @@ TodayFocusNote _toFocusNote(
       summary,
       learningThreshold: learningThreshold,
     ),
+    timesSeen: summary.timesSeen,
   );
 }
 
