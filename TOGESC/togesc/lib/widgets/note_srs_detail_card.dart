@@ -13,6 +13,7 @@ import '../providers/audio_provider.dart';
 import '../providers/practice_focus_provider.dart';
 import '../widgets/srs_progress_indicator.dart';
 import '../widgets/togesc_ui.dart';
+import '../utils/number_format.dart';
 
 /// Tarjeta de progreso SRS para una nota (12 clases de altura).
 class NoteSrsDetailCard extends ConsumerWidget {
@@ -98,9 +99,9 @@ class NoteSrsDetailCard extends ConsumerWidget {
           if (showAdvanced) ...[
             const SizedBox(height: DesignTokens.spacingMd),
             _MetricRow(
-              label: 'Precision',
+              label: 'Precisión',
               value: summary.timesSeen > 0
-                  ? '${summary.accuracyPercent.toStringAsFixed(0)}%'
+                  ? formatPercentEs(summary.accuracyPercent.roundToDouble())
                   : '—',
             ),
             _MetricRow(
@@ -108,8 +109,8 @@ class NoteSrsDetailCard extends ConsumerWidget {
               value: '${summary.timesCorrect}/${summary.timesSeen}',
             ),
             _MetricRow(
-              label: 'Peso SRS',
-              value: summary.weight.toStringAsFixed(1),
+              label: 'Peso de repaso',
+              value: formatDecimalEs(summary.weight),
             ),
             if (onPractice != null) ...[
               const SizedBox(height: DesignTokens.spacingMd),
@@ -147,7 +148,12 @@ class _MetricRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: scheme.onSurfaceVariant)),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            ),
+          ),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),

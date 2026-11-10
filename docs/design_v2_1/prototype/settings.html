@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ajustes · TOGESC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block">
+<link rel="stylesheet" href="assets/togesc.css">
+<style>
+  .intro { margin: 4px 0 8px; color: var(--fg-2); }
+  .set-grid { display: grid; gap: 0; }
+  .grp { margin-top: 24px; }
+  .grp > h2 { font-size: calc(13px * var(--fs)); font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--fg-2); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .grp > h2 .ms { font-size: 18px; color: var(--primary-2); }
+  .it { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-top: 1px solid var(--divider); min-height: 68px; }
+  .it:first-child { border-top: 0; }
+  .it .grow { flex: 1; min-width: 0; }
+  .it.col { flex-direction: column; align-items: stretch; gap: 10px; }
+  .timbre-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .timbre-grid button { min-height: 48px; border-radius: var(--r-cell); border: 1.5px solid var(--border); background: var(--panel); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; }
+  .timbre-grid button:hover { border-color: var(--primary-2); }
+  .timbre-grid button[aria-pressed="true"] { border-color: var(--primary); background: color-mix(in oklch, var(--primary) 9%, var(--panel)); color: var(--primary); }
+  .range { display: flex; align-items: center; gap: 12px; }
+  .range input { flex: 1; accent-color: var(--primary); height: 44px; }
+  .range output { min-width: 48px; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .preview-card { padding: 16px; display: grid; gap: 10px; }
+  .preview-card .cap { font-size: 13px; color: var(--fg-2); }
+  .seg-wrap { display: flex; flex-wrap: wrap; }
+  @media (min-width: 1024px) { .set-grid { grid-template-columns: 1fr 1fr; gap: 0 28px; align-items: start; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
+<div class="app has-rail">
+  <nav class="rail" id="rail" aria-label="Navegación principal"></nav>
+  <main class="main" id="main" data-od-id="settings">
+    <header class="appbar"><a class="icon-btn" href="profile.html" aria-label="Volver al perfil"><span class="ms">arrow_back</span></a><h1 class="appbar-title">Ajustes</h1></header>
+    <p class="intro">Configura la práctica. Los cambios se guardan al momento en este dispositivo.</p>
+
+    <div class="set-grid">
+      <div>
+        <section class="grp" aria-labelledby="g-a11y" data-od-id="settings-a11y">
+          <h2 id="g-a11y"><span class="ms" aria-hidden="true">accessibility_new</span>Práctica y accesibilidad</h2>
+          <div class="list">
+            <div class="it"><span class="grow"><span class="row-title" style="display:block" id="l-rm">Reducir animaciones</span><span class="row-sub">Desactiva el movimiento de la interfaz y acorta esperas entre rondas.</span></span><label class="switch"><input type="checkbox" data-pref="reduceMotion" aria-labelledby="l-rm"><span class="track"></span></label></div>
+            <div class="it"><span class="grow"><span class="row-title" style="display:block" id="l-lt">Texto más grande</span><span class="row-sub">Aumenta el tamaño de los textos un 12 %.</span></span><label class="switch"><input type="checkbox" data-pref="largeText" aria-labelledby="l-lt"><span class="track"></span></label></div>
+            <div class="it"><span class="grow"><span class="row-title" style="display:block" id="l-lp">Piano más grande</span><span class="row-sub">Teclas más amplias para facilitar el toque.</span></span><label class="switch"><input type="checkbox" data-pref="largePiano" aria-labelledby="l-lp"><span class="track"></span></label></div>
+            <div class="it"><span class="grow"><span class="row-title" style="display:block" id="l-hl">Ocultar etiquetas del piano</span><span class="row-sub">Entrena sin ver los nombres en las teclas.</span></span><label class="switch"><input type="checkbox" data-pref="hideLabels" aria-labelledby="l-hl"><span class="track"></span></label></div>
+            <div class="it"><span class="grow"><span class="row-title" style="display:block" id="l-sol">Notación Do/Re/Mi</span><span class="row-sub">Muestra solfeo en el piano y acepta respuestas en solfeo.</span></span><label class="switch"><input type="checkbox" id="sol" aria-labelledby="l-sol"><span class="track"></span></label></div>
+            <div class="preview-card"><span class="cap">Vista previa del teclado</span><div id="pv" aria-hidden="true"></div></div>
+          </div>
+        </section>
+
+        <section class="grp" aria-labelledby="g-ses" data-od-id="settings-session">
+          <h2 id="g-ses"><span class="ms" aria-hidden="true">timer</span>Sesión de práctica</h2>
+          <div class="list">
+            <div class="it col"><span><span class="row-title" style="display:block" id="l-goal">Objetivo de rondas</span><span class="row-sub">Para los modos de práctica libre.</span></span><div class="segmented" role="group" aria-labelledby="l-goal" id="goal"><button type="button" data-v="6">6</button><button type="button" data-v="12">12</button><button type="button" data-v="20">20</button><button type="button" data-v="30">30</button></div></div>
+            <div class="it"><span class="grow"><span class="row-title" style="display:block" id="l-aa">Continuar automáticamente</span><span class="row-sub">Tras cada resultado, pasa a la siguiente ronda sin pulsar Siguiente.</span></span><label class="switch"><input type="checkbox" data-pref="autoAdvance" aria-labelledby="l-aa"><span class="track"></span></label></div>
+            <div class="it"><span class="grow"><span class="row-title" style="display:block" id="l-cf">Confirmar antes de enviar</span><span class="row-sub">Si está desactivado, al tocar la tecla se envía la respuesta al instante.</span></span><label class="switch"><input type="checkbox" data-pref="confirm" aria-labelledby="l-cf"><span class="track"></span></label></div>
+            <div class="it col"><span><span class="row-title" style="display:block" id="l-srs">Intensidad SRS</span><span class="row-sub">Ajusta la frecuencia de repaso entre sesiones.</span></span><div class="segmented" role="group" aria-labelledby="l-srs" id="srs"><button type="button" data-v="soft">Suave</button><button type="button" data-v="normal">Normal</button><button type="button" data-v="intense">Intensa</button></div></div>
+          </div>
+        </section>
+      </div>
+
+      <div>
+        <section class="grp" aria-labelledby="g-snd" data-od-id="settings-sound">
+          <h2 id="g-snd"><span class="ms" aria-hidden="true">volume_up</span>Sonido</h2>
+          <div class="list">
+            <div class="it col"><span><span class="row-title" style="display:block" id="l-tim">Timbre por defecto</span><span class="row-sub">Durante la sesión puedes cambiarlo solo para esa sesión.</span></span><div class="timbre-grid" id="timbre" role="group" aria-labelledby="l-tim"></div></div>
+            <div class="it col"><label class="row-title" for="vol">Volumen</label><div class="range"><span class="ms o muted" aria-hidden="true">volume_down</span><input type="range" id="vol" min="0" max="100" step="5"><output id="vol-o" for="vol"></output></div></div>
+            <div class="it"><span class="grow"><span class="row-title" style="display:block" id="l-oct">Variación de octavas</span><span class="row-sub">Las notas pueden sonar una octava arriba o abajo en cada ronda.</span></span><label class="switch"><input type="checkbox" data-pref="octaveVar" aria-labelledby="l-oct"><span class="track"></span></label></div>
+            <div class="it"><span class="grow"><span class="row-title" style="display:block" id="l-cl">Limpieza tonal (cluster)</span><span class="row-sub">Sonido breve entre rondas para evitar el anclaje tonal.</span></span><label class="switch"><input type="checkbox" data-pref="cluster" aria-labelledby="l-cl"><span class="track"></span></label></div>
+            <div class="it"><button class="btn btn-secondary btn-block" id="test"><span class="ms sm" aria-hidden="true">play_circle</span>Probar sonido</button></div>
+          </div>
+        </section>
+
+        <section class="grp" aria-labelledby="g-app" data-od-id="settings-appearance">
+          <h2 id="g-app"><span class="ms" aria-hidden="true">palette</span>Apariencia</h2>
+          <div class="list">
+            <div class="it col"><span class="row-title" id="l-th">Tema de la app</span><div class="segmented" role="group" aria-labelledby="l-th" id="theme"><button type="button" data-v="light">Claro</button><button type="button" data-v="dark">Oscuro</button><button type="button" data-v="system">Sistema</button></div><span class="row-sub">La sesión de práctica siempre se muestra en oscuro.</span></div>
+          </div>
+        </section>
+
+        <section class="grp" aria-labelledby="g-more">
+          <h2 id="g-more"><span class="ms" aria-hidden="true">more_horiz</span>Más</h2>
+          <div class="list">
+            <a class="row" href="onboarding.html"><span class="grow"><span class="row-title" style="display:block">Ver el tutorial otra vez</span><span class="row-sub">Cómo funciona y prueba de respuesta</span></span><span class="ms o muted" aria-hidden="true">chevron_right</span></a>
+            <button class="row" id="reset"><span class="grow"><span class="row-title" style="display:block">Restablecer ajustes</span><span class="row-sub">Vuelve a los valores por defecto. Tu progreso no se toca.</span></span></button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <nav class="navbar" id="navbar" aria-label="Navegación principal"></nav>
+</div>
+<script src="assets/togesc.js"></script>
+<script>
+  TG.shell('profile');
+  const $ = id => document.getElementById(id), P = TG.prefs;
+  let pv;
+  function renderPV() { $('pv').innerHTML = '<div></div>'; pv = TG.piano($('pv').firstChild, { onPress: i => TG.playNote(TG.midiFor(i, 4), { dur: .8 }) }); }
+  document.querySelectorAll('[data-pref]').forEach(inp => {
+    inp.checked = !!P[inp.dataset.pref];
+    inp.onchange = () => { TG.setPref(inp.dataset.pref, inp.checked); if (['hideLabels', 'largePiano'].includes(inp.dataset.pref)) renderPV(); TG.toast('Guardado', 'check'); };
+  });
+  $('sol').checked = P.notation === 'solfege';
+  $('sol').onchange = e => { TG.setPref('notation', e.target.checked ? 'solfege' : 'letters'); renderPV(); TG.toast('Guardado', 'check'); };
+  function seg(id, key, num) {
+    const el = $(id), paint = () => el.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(num ? +b.dataset.v === P[key] : b.dataset.v === P[key])));
+    el.onclick = e => { const b = e.target.closest('button'); if (!b) return; TG.setPref(key, num ? +b.dataset.v : b.dataset.v); paint(); TG.toast('Guardado', 'check'); };
+    paint();
+  }
+  seg('goal', 'roundGoal', true); seg('srs', 'srsIntensity'); seg('theme', 'theme');
+  function renderTim() { $('timbre').innerHTML = Object.entries(TG.TIMBRES).map(([k, v]) => `<button type="button" data-k="${k}" aria-pressed="${k === P.timbre}">${v.label}</button>`).join(''); }
+  $('timbre').onclick = e => { const b = e.target.closest('button'); if (!b) return; TG.setPref('timbre', b.dataset.k); renderTim(); TG.ac(); TG.playNote(60, { dur: .9 }); $('timbre').querySelector(`[data-k="${b.dataset.k}"]`).focus(); };
+  renderTim();
+  $('vol').value = P.volume; $('vol-o').textContent = P.volume + ' %';
+  $('vol').oninput = e => { $('vol-o').textContent = e.target.value + ' %'; };
+  $('vol').onchange = e => { TG.setPref('volume', +e.target.value); TG.ac(); TG.playNote(69, { dur: .5 }); };
+  $('test').onclick = () => { TG.ac(); [60, 64, 67].forEach((m, k) => TG.playNote(m, { delay: k * .25, dur: .8 })); };
+  $('reset').onclick = () => { TG.store.set('prefs', {}); location.reload(); };
+  renderPV();
+</script>
+</body>
+</html>

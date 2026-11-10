@@ -85,3 +85,10 @@ Escrito el 2026-07-26 a partir de evidencia del repositorio. El 2026-07-26 (S1) 
 ### Notas S1 Home
 
 Implementado: Daily Focus solo críticas; `PracticeStreakLabel`; XP oculto en Home; ModeBento con play visible y Semantics. Detalle en `Plan/impeccable_s1_log.md`.
+
+### Decisión 2026-10-26 · Pulido v2.1
+
+El propietario aprueba un pulido v2.1 del rediseño v2. Su feedback: v2 «se ve demasiado simple, falto de movimiento, falto de accesibilidad, poco intuitivo para un usuario común y demasiado genérico para una app gamificada».
+- **Qué cambia:** `docs/design_v2_1/SPEC_rediseno_v2_1.md`.
+- **Plan:** `Plan/hoja_ruta_rediseno_v2_1.md`.
+- **Se mantiene:** sin XP en el Home, sin métricas inventadas (D10), un solo front Flutter, Hanken Grotesk, la paleta v2 y el tono académico.

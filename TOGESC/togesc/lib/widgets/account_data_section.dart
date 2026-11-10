@@ -18,7 +18,7 @@ import '../services/user_data_export_service.dart';
 import 'account_monetization_views.dart';
 import 'togesc_ui.dart';
 
-/// Exportacion JSON y eliminacion de cuenta (Fase 7E-1).
+/// Exportación JSON y eliminación de cuenta (Fase 7E-1).
 class AccountDataSection extends ConsumerWidget {
   const AccountDataSection({
     super.key,
@@ -45,9 +45,9 @@ class AccountDataSection extends ConsumerWidget {
     if (kIsWeb) {
       downloadCsvWeb(json, filename: filename);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Descarga JSON iniciada')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Descarga JSON iniciada')));
       }
     } else {
       await Clipboard.setData(ClipboardData(text: json));
@@ -65,30 +65,78 @@ class AccountDataSection extends ConsumerWidget {
     SupabaseClient client,
     String email,
   ) async {
-    final confirmed = await showDialog<bool>(
+    // v2.1 (SPEC §2.5): la confirmación va en una hoja, no en un diálogo.
+    final confirmed = await showModalBottomSheet<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar cuenta'),
-        content: Text(
-          'Se borrarán tu cuenta ($email) y el progreso sincronizado '
-          'en la nube. El progreso local en este dispositivo se conserva. '
-          'Esta acción no se puede deshacer.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: DesignTokens.error,
-              foregroundColor: DesignTokens.onError,
+      showDragHandle: true,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        final scheme = theme.colorScheme;
+        return SafeArea(
+          child: Padding(
+            key: const ValueKey('account-delete-sheet'),
+            padding: const EdgeInsets.fromLTRB(
+              DesignTokens.marginMobile,
+              0,
+              DesignTokens.marginMobile,
+              DesignTokens.spacingLg,
             ),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Eliminar cuenta'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, color: scheme.error),
+                    const SizedBox(width: DesignTokens.spacingSm),
+                    Expanded(
+                      child: Semantics(
+                        header: true,
+                        child: Text(
+                          'Eliminar cuenta',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: DesignTokens.spacingSm),
+                Text(
+                  'Se borrarán tu cuenta ($email) y el progreso sincronizado '
+                  'en la nube. El progreso local en este dispositivo se conserva. '
+                  'Esta acción no se puede deshacer.',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: DesignTokens.spacingLg),
+                FilledButton(
+                  key: const ValueKey('account-delete-confirm'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(
+                      DesignTokens.touchTargetMin,
+                    ),
+                    backgroundColor: scheme.error,
+                    foregroundColor: scheme.onError,
+                  ),
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Eliminar cuenta'),
+                ),
+                const SizedBox(height: DesignTokens.spacingSm),
+                OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(
+                      DesignTokens.touchTargetMin,
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Cancelar'),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
     if (confirmed != true || !context.mounted) return;
 
@@ -132,15 +180,16 @@ class AccountDataSection extends ConsumerWidget {
           ),
           const SizedBox(height: DesignTokens.spacingMd),
           OutlinedButton.icon(
+            key: const ValueKey('account-export'),
             onPressed: busy ? null : () => _exportJson(context, ref),
             icon: const Icon(Icons.file_download_outlined),
-            label: const Text('Exportar datos (JSON)'),
+            label: const Text('Exportar mi progreso (JSON)'),
           ),
           const SizedBox(height: DesignTokens.spacingSm),
           OutlinedButton.icon(
             onPressed: busy ? null : () => context.push(AppRoutes.privacy),
             icon: const Icon(Icons.privacy_tip_outlined),
-            label: const Text('Politica de privacidad'),
+            label: const Text('Política de privacidad'),
           ),
           if (signedIn && client != null) ...[
             const SizedBox(height: DesignTokens.spacingSm),
@@ -148,15 +197,18 @@ class AccountDataSection extends ConsumerWidget {
               onPressed: busy
                   ? null
                   : () => _deleteAccount(
-                        context,
-                        ref,
-                        client,
-                        ref.read(currentUserEmailProvider)!,
-                      ),
-              icon: Icon(Icons.delete_forever_outlined, color: DesignTokens.error),
+                      context,
+                      ref,
+                      client,
+                      ref.read(currentUserEmailProvider)!,
+                    ),
+              icon: Icon(
+                Icons.delete_forever_outlined,
+                color: Theme.of(context).colorScheme.error,
+              ),
               label: Text(
                 'Eliminar cuenta',
-                style: TextStyle(color: DesignTokens.error),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
           ],

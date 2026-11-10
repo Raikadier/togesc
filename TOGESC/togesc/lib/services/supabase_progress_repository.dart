@@ -16,46 +16,42 @@ class SupabaseProgressRepository implements ProgressRepository {
   final SupabaseClient _client;
   final String _userId;
 
+  /// Devuelve `null` solo si no hay fila. Los errores de red o del servidor
+  /// se propagan: tratarlos como «sin datos» ocultaba las caídas y hacía que
+  /// el diagnóstico diera la nube por alcanzable.
   @override
   Future<Map<String, NoteData>?> load() async {
-    try {
-      final row = await _client
-          .from(userProgressTable)
-          .select('progress')
-          .eq('user_id', _userId)
-          .maybeSingle();
-      if (row == null) return null;
+    final row = await _client
+        .from(userProgressTable)
+        .select('progress')
+        .eq('user_id', _userId)
+        .maybeSingle();
+    if (row == null) return null;
 
-      final progress = row['progress'];
-      if (progress is! Map<String, dynamic>) return null;
-      return parseProgressPayload(progress);
-    } catch (_) {
-      return null;
-    }
+    final progress = row['progress'];
+    if (progress is! Map<String, dynamic>) return null;
+    return parseProgressPayload(progress);
   }
 
+  /// Igual que [load]: `null` si no hay fila; los errores se propagan.
   @override
   Future<String?> loadLastSessionIso() async {
-    try {
-      final row = await _client
-          .from(userProgressTable)
-          .select('last_session, progress')
-          .eq('user_id', _userId)
-          .maybeSingle();
-      if (row == null) return null;
+    final row = await _client
+        .from(userProgressTable)
+        .select('last_session, progress')
+        .eq('user_id', _userId)
+        .maybeSingle();
+    if (row == null) return null;
 
-      final fromColumn = row['last_session'];
-      if (fromColumn is String && fromColumn.isNotEmpty) {
-        return fromColumn;
-      }
-      final progress = row['progress'];
-      if (progress is Map<String, dynamic>) {
-        return progress['last_session'] as String?;
-      }
-      return null;
-    } catch (_) {
-      return null;
+    final fromColumn = row['last_session'];
+    if (fromColumn is String && fromColumn.isNotEmpty) {
+      return fromColumn;
     }
+    final progress = row['progress'];
+    if (progress is Map<String, dynamic>) {
+      return progress['last_session'] as String?;
+    }
+    return null;
   }
 
   @override

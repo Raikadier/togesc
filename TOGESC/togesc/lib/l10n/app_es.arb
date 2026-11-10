@@ -4,7 +4,7 @@
   "@appTitle": {
     "description": "Titulo de la aplicacion"
   },
-  "srsIntensityTitle": "Intensidad SRS",
+  "srsIntensityTitle": "Intensidad del repaso",
   "srsIntensitySubtitle": "Ajusta la frecuencia de repaso entre sesiones.",
   "microphoneModeTitle": "Modo canto (experimental)",
   "microphoneModeWebHint": "Canta o tararea la nota. El audio no se sube a internet.",

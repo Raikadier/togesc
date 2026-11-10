@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Práctica · TOGESC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block">
+<link rel="stylesheet" href="assets/togesc.css">
+<style>
+  .date { margin: 4px 0 14px; }
+  .home-grid { display: grid; gap: 0; }
+  .hero .wm { position: absolute; right: -24px; top: -18px; font-size: 170px; color: rgb(255 255 255 / .05); z-index: -1; }
+  .hero .overline-lg { color: var(--on-hero-accent); display: flex; align-items: center; gap: 8px; }
+  .hero .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--on-hero-accent); animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform: scale(1.6); opacity: .35; } }
+  .hero-count { display: flex; align-items: baseline; gap: 10px; margin: 14px 0 8px; }
+  .hero-count .unit { font-size: 17px; font-weight: 600; color: #E9DDF0; }
+  .hero p.lead { color: #E9DDF0; font-size: calc(15px * var(--fs)); max-width: 40ch; }
+  .focus-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 18px 0 18px; }
+  .focus-card { background: rgb(255 255 255 / .07); border: 1px solid rgb(255 255 255 / .12); border-radius: var(--r-cell); padding: 10px 12px; }
+  .focus-card .n { font-size: 22px; font-weight: 800; line-height: 1.1; }
+  .focus-card .bar { background: rgb(255 255 255 / .12); height: 3px; margin: 8px 0 6px; }
+  .focus-card .p { font-size: 12px; color: #E9DDF0; font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; }
+  .steps { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 16px; padding: 0; list-style: none; font-size: 13px; color: #E9DDF0; }
+  .steps li { display: flex; align-items: center; gap: 6px; }
+  .steps .ms { font-size: 18px; color: var(--on-hero-accent); }
+  .hero .adjust { display: flex; justify-content: center; margin-top: 6px; }
+  .hero .adjust button { background: none; border: 0; color: var(--on-hero-accent); font-weight: 700; font-size: 14px; min-height: 48px; padding: 0 12px; border-radius: 10px; }
+  .hero .adjust button:hover { background: rgb(255 255 255 / .08); }
+  .hero .adjust button:focus-visible { outline-color: var(--on-hero-accent); }
+
+  .resume { display: flex; align-items: center; gap: 14px; margin-top: 12px; padding: 12px 14px; border: 1.5px dashed var(--border); border-radius: var(--r-card); text-decoration: none; transition: background var(--t-fast), border-color var(--t-fast); }
+  .resume:hover { background: var(--panel); border-color: var(--primary-2); }
+  .resume .grow { flex: 1; min-width: 0; }
+  .resume .icon-box { background: color-mix(in oklch, var(--primary-2) 12%, transparent); }
+
+  .map-card { display: grid; gap: 8px; }
+  .wheel-wrap { position: relative; width: min(100%, 340px); margin: 0 auto; }
+  .wheel-center { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; text-align: center; }
+  .wheel-center .big-num { font-size: 34px; color: var(--primary); }
+  .wheel-center .cap { font-size: 12px; font-weight: 600; color: var(--fg-2); margin-top: 4px; }
+  .map-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: space-between; }
+  .milestone { display: flex; align-items: center; gap: 10px; }
+  .milestone .ring { width: 44px; height: 44px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--fg-2); justify-content: center; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 12px; height: 12px; border-radius: 4px; }
+  .note-peek { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--r-cell); background: var(--chip); }
+  .note-peek[hidden] { display: none; }
+  .note-peek .cell { width: 48px; height: 48px; border-radius: var(--r-cell); display: grid; place-items: center; font-weight: 800; font-size: 18px; }
+
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .tile { position: relative; background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-card); padding: 14px 12px 12px; text-decoration: none; display: flex; flex-direction: column; gap: 8px; min-height: 132px; transition: transform var(--t-med) var(--ease-out), border-color var(--t-fast), box-shadow var(--t-med); }
+  .tile:hover { transform: translateY(-2px); border-color: var(--primary-2); box-shadow: 0 10px 24px -14px color-mix(in oklch, var(--primary) 60%, transparent); }
+  .tile .icon-box { width: 36px; height: 36px; }
+  .tile .t { font-weight: 700; font-size: calc(14px * var(--fs)); line-height: 1.25; }
+  .tile .meta { margin-top: auto; font-size: 12px; color: var(--fg-2); font-variant-numeric: tabular-nums; }
+  .tile .bar { height: 4px; }
+  .tile .badge-pro { position: absolute; top: 12px; right: 10px; }
+  .tile.locked .icon-box { color: var(--pro); background: color-mix(in oklch, var(--pro) 10%, transparent); }
+
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .day { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .day .lab { font-size: 12px; font-weight: 700; color: var(--fg-2); }
+  .day .cell { width: 100%; height: 48px; border-radius: var(--r-cell); display: grid; place-items: center; }
+  .day .cell.today { outline: 2px dashed var(--primary-2); outline-offset: -2px; background: var(--panel); color: var(--primary); }
+  .day.is-today .lab { color: var(--primary); }
+  .week-cap { font-size: 13px; color: var(--fg-2); margin-top: 10px; }
+
+  .mode-list .row .badge-pro { margin-left: 6px; }
+  .opt-label { font-weight: 700; font-size: 14px; margin: 18px 0 8px; display: block; }
+  .note-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .note-chip { min-width: 52px; min-height: 44px; border-radius: var(--r-pill); border: 1.5px solid var(--border); background: var(--panel); font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; }
+  .note-chip:hover { border-color: var(--primary-2); }
+  .note-chip[aria-pressed="true"] { background: var(--hero); border-color: var(--hero); color: #fff; }
+  .note-chip .sw { width: 8px; height: 8px; border-radius: 50%; }
+
+  @media (min-width: 1024px) {
+    .home-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+    .home-grid .col-r { position: sticky; top: 88px; }
+    .hero { padding: 32px; }
+    .hero .big-num { font-size: 52px; }
+    .tiles { gap: 12px; }
+    .col-r .section:first-child { margin-top: 0; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
+<div class="app has-rail">
+  <nav class="rail" id="rail" aria-label="Navegación principal"></nav>
+  <main class="main" id="main" data-od-id="home">
+    <header class="appbar" data-od-id="home-appbar">
+      <a class="logo" href="home.html">TOGESC</a>
+      <span class="spacer"></span>
+      <span class="chip streak-chip" data-od-id="streak-chip" id="streak-chip"><span class="ms sm" aria-hidden="true">local_fire_department</span><span id="streak-n"></span></span>
+      <a class="avatar-btn" href="profile.html" aria-label="Perfil"><span class="avatar" aria-hidden="true">DB</span></a>
+    </header>
+
+    <p class="overline date" id="today-date"></p>
+
+    <div class="home-grid">
+      <div class="col-l">
+        <section class="hero rise" data-od-id="today-hero" aria-labelledby="today-title">
+          <span class="ms wm" aria-hidden="true">graphic_eq</span>
+          <h1 class="overline-lg" id="today-title"><span class="live-dot" aria-hidden="true"></span>Sesión de hoy</h1>
+          <div class="hero-count"><span class="big-num" id="h-rounds">12</span><span class="unit">rondas · <span id="h-min">6</span> min</span></div>
+          <p class="lead" id="h-lead">El SRS priorizó tres notas que perdieron precisión esta semana.</p>
+          <div class="focus-row" id="focus-row" data-od-id="today-focus"></div>
+          <ol class="steps" aria-label="Cómo funciona">
+            <li><span class="ms" aria-hidden="true">hearing</span>1 · Escucha</li>
+            <li><span class="ms" aria-hidden="true">piano</span>2 · Toca la tecla</li>
+            <li><span class="ms" aria-hidden="true">trending_up</span>3 · El SRS ajusta tu repaso</li>
+          </ol>
+          <a class="btn btn-cta btn-block" href="session.html?mode=today" data-od-id="today-start-cta"><span class="ms" aria-hidden="true">play_arrow</span>Empezar sesión</a>
+          <div class="adjust"><button type="button" id="open-adjust" data-od-id="today-adjust">Ajustar enfoque y duración</button></div>
+        </section>
+
+        <a class="resume rise" style="--i:2" href="session.html?mode=single" data-od-id="resume-row">
+          <span class="icon-box" aria-hidden="true"><span class="ms">replay</span></span>
+          <span class="grow"><span class="row-title" style="display:block">Retomar «Una sola nota»</span><span class="row-sub">8 rondas · hace 2 h</span></span>
+          <span class="ms o muted" aria-hidden="true">chevron_right</span>
+        </a>
+
+        <section class="section rise" style="--i:3" aria-labelledby="free-h" data-od-id="free-practice">
+          <div class="section-head"><h2 id="free-h">Práctica libre</h2><button class="link" type="button" id="open-modes">Ver todos</button></div>
+          <div class="tiles">
+            <a class="tile" href="session.html?mode=single" data-od-id="free-tile-single"><span class="icon-box" aria-hidden="true"><span class="ms">music_note</span></span><span class="t">Una nota</span><span class="bar" aria-hidden="true"><i style="width:86%"></i></span><span class="meta">86 % · 24 ses.</span></a>
+            <a class="tile" href="session.html?mode=interval" data-od-id="free-tile-interval"><span class="icon-box" aria-hidden="true"><span class="ms">queue_music</span></span><span class="t">Intervalo</span><span class="bar" aria-hidden="true"><i style="width:61%"></i></span><span class="meta">61 % · 9 ses.</span></a>
+            <a class="tile locked" href="paywall.html?feature=acordes" data-od-id="free-tile-chord" aria-label="Acorde, función Pro, bloqueado"><span class="badge-pro" aria-hidden="true"><span class="ms" style="font-size:12px">lock</span>PRO</span><span class="icon-box" aria-hidden="true"><span class="ms">piano</span></span><span class="t">Acorde</span><span class="meta">3 notas a la vez</span></a>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-r">
+        <section class="section card map-card rise" style="--i:4" aria-labelledby="map-h" data-od-id="ear-map">
+          <div class="section-head" style="margin:0"><h2 id="map-h">Mapa del oído</h2><a class="link" href="progress.html">Ver progreso</a></div>
+          <div class="wheel-wrap">
+            <div id="wheel"></div>
+            <div class="wheel-center" aria-hidden="true"><div><div class="big-num" id="wc-num">0</div><div class="cap" id="wc-cap">precisión global</div></div></div>
+          </div>
+          <div class="note-peek" id="note-peek" hidden aria-live="polite"></div>
+          <div class="legend" aria-label="Leyenda"><span><i class="m-red-l"></i>&lt; 50 % crítica</span><span><i class="m-amb-d"></i>50–74 % en curso</span><span><i class="m-grn-2"></i>≥ 75 % consolidada</span></div>
+          <div class="map-foot">
+            <div class="milestone" id="milestone"></div>
+          </div>
+        </section>
+
+        <section class="section rise" style="--i:5" aria-labelledby="week-h" data-od-id="week-strip">
+          <div class="section-head"><h2 id="week-h">Últimos 7 días</h2><span class="label-lg muted tnum" id="week-n"></span></div>
+          <div class="week" id="week" role="list"></div>
+          <p class="week-cap" id="week-cap"></p>
+        </section>
+      </div>
+    </div>
+  </main>
+  <nav class="navbar" id="navbar" aria-label="Navegación principal"></nav>
+</div>
+
+<dialog id="adjust-dlg" aria-labelledby="adj-h">
+  <form class="sheet" method="dialog" id="adjust-form">
+    <div class="sheet-head"><h2 class="t-lg" id="adj-h">Ajustar la sesión de hoy</h2><button class="icon-btn" value="cancel" aria-label="Cerrar"><span class="ms">close</span></button></div>
+    <span class="opt-label" id="rounds-l">Duración</span>
+    <div class="segmented" role="group" aria-labelledby="rounds-l" id="rounds-seg">
+      <button type="button" data-v="6">6 rondas · 3 min</button><button type="button" data-v="12">12 · 6 min</button><button type="button" data-v="20">20 · 10 min</button>
+    </div>
+    <span class="opt-label" id="focus-l">Notas foco <span class="muted label-md">(elige hasta 4)</span></span>
+    <div class="note-chips" role="group" aria-labelledby="focus-l" id="focus-chips"></div>
+    <p class="label-md muted" style="margin-top:12px">Las notas foco suenan más a menudo; el resto mantiene el repaso SRS normal.</p>
+    <div style="display:flex; gap:10px; margin-top:22px">
+      <button class="btn btn-secondary" value="cancel" style="flex:1">Cancelar</button>
+      <button class="btn btn-primary" value="ok" id="adj-save" style="flex:1">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="modes-dlg" aria-labelledby="modes-h">
+  <div class="sheet">
+    <div class="sheet-head"><h2 class="t-lg" id="modes-h">Todos los modos</h2><button class="icon-btn" aria-label="Cerrar" onclick="this.closest('dialog').close()"><span class="ms">close</span></button></div>
+    <div class="list mode-list">
+      <a class="row" href="session.html?mode=single" data-od-id="mode-single"><span class="icon-box"><span class="ms" aria-hidden="true">music_note</span></span><span class="grow"><span class="row-title" style="display:block">Una sola nota</span><span class="row-sub">Identifica la clase de altura</span></span></a>
+      <a class="row" href="session.html?mode=interval" data-od-id="mode-interval"><span class="icon-box"><span class="ms" aria-hidden="true">queue_music</span></span><span class="grow"><span class="row-title" style="display:block">Intervalo</span><span class="row-sub">Dos notas simultáneas</span></span></a>
+      <a class="row" href="session.html?mode=sharps" data-od-id="mode-sharps"><span class="icon-box"><span class="ms" aria-hidden="true">tag</span></span><span class="grow"><span class="row-title" style="display:block">Solo sostenidos</span><span class="row-sub">C♯/D♭, D♯/E♭…</span></span></a>
+      <a class="row" href="paywall.html?feature=acordes" data-od-id="mode-chord"><span class="icon-box" style="color:var(--pro)"><span class="ms" aria-hidden="true">piano</span></span><span class="grow"><span class="row-title" style="display:block">Acorde <span class="badge-pro">PRO</span></span><span class="row-sub">Tres notas simultáneas</span></span><span class="ms o muted" aria-hidden="true">lock</span></a>
+      <a class="row" href="paywall.html?feature=aleatorio" data-od-id="mode-random"><span class="icon-box" style="color:var(--pro)"><span class="ms" aria-hidden="true">shuffle</span></span><span class="grow"><span class="row-title" style="display:block">Aleatorio <span class="badge-pro">PRO</span></span><span class="row-sub">De 1 a 5 notas</span></span><span class="ms o muted" aria-hidden="true">lock</span></a>
+      <a class="row" href="speed.html" data-od-id="mode-speed"><span class="icon-box" style="color:var(--speed)"><span class="ms" aria-hidden="true">bolt</span></span><span class="grow"><span class="row-title" style="display:block">Velocidad <span class="badge-pro">PRO</span></span><span class="row-sub">El tiempo baja con cada acierto</span></span><span class="ms o muted" aria-hidden="true">chevron_right</span></a>
+    </div>
+  </div>
+</dialog>
+
+<script src="assets/togesc.js"></script>
+<script>
+  TG.shell('home');
+  document.getElementById('today-date').textContent = TG.fmtDate(new Date());
+  const st = TG.streak();
+  document.getElementById('streak-n').textContent = st;
+  document.getElementById('streak-chip').setAttribute('aria-label', `Racha de ${st} días`);
+
+  // Sesión de hoy
+  const today = Object.assign({ rounds: 12, focus: TG.focusNotes(3).map(n => n.i) }, TG.store.get('today', {}));
+  function renderHero() {
+    document.getElementById('h-rounds').textContent = today.rounds;
+    document.getElementById('h-min').textContent = Math.round(today.rounds / 2);
+    const words = ['', 'una nota', 'dos notas', 'tres notas', 'cuatro notas'];
+    document.getElementById('h-lead').textContent = `El SRS priorizó ${words[today.focus.length] || today.focus.length + ' notas'} que perdieron precisión esta semana.`;
+    document.getElementById('focus-row').style.gridTemplateColumns = `repeat(${Math.max(3, today.focus.length)}, 1fr)`;
+    document.getElementById('focus-row').innerHTML = today.focus.map(i => { const n = TG.NOTES[i]; return `<div class="focus-card" data-od-id="focus-${i}" aria-label="${TG.spoken(i)}, ${n.pct} %"><div class="n">${TG.name(i)}</div><div class="bar" aria-hidden="true"><i style="width:${n.pct}%;background:${TG.barOnDark(n.pct)}"></i></div><div class="p"><span>${n.pct} %</span><span>${TG.STATE_LABEL[TG.state(n.pct)]}</span></div></div>`; }).join('');
+  }
+  renderHero();
+
+  // Mapa del oído
+  const num = document.getElementById('wc-num'), cap = document.getElementById('wc-cap'), peek = document.getElementById('note-peek');
+  const g = TG.globalPct();
+  const showGlobal = () => { num.textContent = g.toLocaleString('es-ES', { maximumFractionDigits: 1 }) + ' %'; cap.textContent = 'precisión global'; };
+  TG.wheel(document.getElementById('wheel'), {
+    onHover(i) { if (i == null) return showGlobal(); const n = TG.NOTES[i]; num.textContent = n.pct + ' %'; cap.textContent = `${TG.name(i)} · nivel ${n.lvl}/5`; },
+    onSelect(i) {
+      const n = TG.NOTES[i];
+      peek.hidden = false;
+      peek.innerHTML = `<span class="cell ${TG.mClass(n.pct, n.lvl)}">${TG.name(i)}</span><span class="grow" style="flex:1"><span class="row-title" style="display:block">${TG.spoken(i)} · ${TG.STATE_LABEL[TG.state(n.pct)]}</span><span class="row-sub tnum">${n.pct} % · ${n.att} intentos · nivel ${n.lvl} de 5</span></span><a class="btn btn-secondary" href="session.html?mode=single&note=${i}">Practicar</a>`;
+    },
+  });
+  num.textContent = '0 %';
+  TG.countUp(num, g, 1, ' %');
+  const solid = TG.NOTES.filter(n => n.pct >= 75).length;
+  const C = 2 * Math.PI * 18;
+  document.getElementById('milestone').innerHTML = `<svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="none" stroke="#F3ECF1" stroke-width="5"/><circle cx="22" cy="22" r="18" fill="none" stroke="#2E7D32" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C * solid / 12} ${C}" transform="rotate(-90 22 22)"/></svg><span><span class="row-title tnum" style="display:block">${solid} de 12 notas consolidadas</span><span class="row-sub">Te faltan ${12 - solid} para dominar la octava completa</span></span>`;
+
+  // Semana
+  const ICON = { done: 'check', partial: 'remove', missed: 'close', today: 'radio_button_unchecked' };
+  const LBL = { done: 'meta cumplida', partial: 'práctica parcial', missed: 'sin práctica', today: 'hoy, pendiente' };
+  const CLS = { done: 'm-grn-2', partial: 'm-amb-l', missed: 'm-empty', today: 'today' };
+  const wk = TG.week();
+  document.getElementById('week').innerHTML = wk.map((x, k) => { const L = x.d.toLocaleDateString('es-ES', { weekday: 'narrow' }).toUpperCase(); const full = x.d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }); return `<div class="day ${k === 6 ? 'is-today' : ''}" role="listitem" aria-label="${full}: ${LBL[x.s]}"><span class="lab" aria-hidden="true">${k === 6 ? 'HOY' : L}</span><span class="cell ${CLS[x.s]}" aria-hidden="true"><span class="ms sm">${ICON[x.s]}</span></span></div>`; }).join('');
+  document.getElementById('week-n').textContent = `${TG.practicedDays()} de 7 días`;
+  document.getElementById('week-cap').textContent = wk[6].s === 'done' ? `Hoy ya practicaste. Llevas ${st} días seguidos.` : `Completa la sesión de hoy para llevar la racha a ${st + 1} días.`;
+
+  // Diálogos
+  const adj = document.getElementById('adjust-dlg'), seg = document.getElementById('rounds-seg'), chips = document.getElementById('focus-chips');
+  let draft;
+  function renderAdjust() {
+    seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === draft.rounds));
+    chips.innerHTML = TG.NOTES.map((n, i) => `<button type="button" class="note-chip" data-i="${i}" aria-pressed="${draft.focus.includes(i)}" aria-label="${TG.spoken(i)}, ${n.pct} %"><span class="sw" style="background:${TG.mHex(n.pct, n.lvl)}" aria-hidden="true"></span>${TG.name(i)}</button>`).join('');
+  }
+  document.getElementById('open-adjust').onclick = () => { draft = { rounds: today.rounds, focus: today.focus.slice() }; renderAdjust(); adj.showModal(); };
+  seg.onclick = e => { const b = e.target.closest('button'); if (!b) return; draft.rounds = +b.dataset.v; renderAdjust(); };
+  chips.onclick = e => {
+    const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.i;
+    if (draft.focus.includes(i)) { if (draft.focus.length > 1) draft.focus = draft.focus.filter(x => x !== i); }
+    else if (draft.focus.length < 4) draft.focus.push(i); else TG.toast('Máximo 4 notas foco', 'info');
+    renderAdjust(); chips.querySelector(`[data-i="${i}"]`).focus();
+  };
+  adj.addEventListener('close', () => { if (adj.returnValue === 'ok') { Object.assign(today, draft); TG.store.set('today', today); renderHero(); TG.toast('Sesión de hoy actualizada'); } });
+  document.getElementById('open-modes').onclick = () => document.getElementById('modes-dlg').showModal();
+</script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Perfil · TOGESC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block">
+<link rel="stylesheet" href="assets/togesc.css">
+<style>
+  .who { display: flex; align-items: center; gap: 16px; margin: 6px 0 20px; }
+  .who .av { width: 64px; height: 64px; border-radius: 50%; background: var(--hero); color: var(--on-hero-accent); display: grid; place-items: center; font-weight: 800; font-size: 22px; flex: none; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat { padding: 14px; border-radius: var(--r-card); background: var(--panel); border: 1px solid var(--border); display: grid; gap: 2px; }
+  .stat .ms { color: var(--primary-2); }
+  .stat b { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+  .stat span.l { font-size: 12px; color: var(--fg-2); font-weight: 600; }
+  .stat.fire .ms { color: var(--amber); }
+  .plan { display: grid; gap: 14px; }
+  .plan .top { display: flex; align-items: center; gap: 12px; }
+  .plan .lab { color: #E9DDF0; font-size: 13px; }
+  .plan ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 14px; color: #E9DDF0; }
+  .plan li { display: flex; gap: 8px; align-items: center; }
+  .plan li .ms { color: var(--on-hero-accent); font-size: 18px; }
+  .btn-on-hero { background: #fff; color: var(--hero); }
+  .btn-on-hero:hover { background: #F3ECF1; }
+  .btn-on-hero:focus-visible { outline-color: #fff; }
+  .sync { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+  .sync .state { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: var(--correct); }
+  .row .switch { margin-left: auto; }
+  .field { display: grid; gap: 6px; margin-bottom: 14px; }
+  .field label { font-weight: 600; font-size: 14px; }
+  .field input { height: 52px; border-radius: var(--r-cell); border: 1.5px solid var(--border); background: var(--panel); padding: 0 14px; font-size: 16px; }
+  .field input:hover { border-color: var(--fg-3); }
+  .field input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 20%, transparent); }
+  .field input[aria-invalid="true"] { border-color: var(--incorrect); }
+  .err { color: var(--incorrect); font-size: 13px; display: flex; gap: 6px; align-items: center; }
+  .err:empty { display: none; }
+  @media (min-width: 1024px) { .pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; } .pf-grid > div > .section:first-child { margin-top: 0; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
+<div class="app has-rail">
+  <nav class="rail" id="rail" aria-label="Navegación principal"></nav>
+  <main class="main" id="main" data-od-id="profile">
+    <header class="appbar"><h1 class="appbar-title">Perfil</h1><span class="spacer"></span><a class="icon-btn" href="settings.html" aria-label="Ajustes"><span class="ms o">settings</span></a></header>
+    <section class="who rise" id="who" data-od-id="profile-who"></section>
+
+    <div class="pf-grid">
+      <div>
+        <section class="rise" style="--i:1" aria-labelledby="st-h" data-od-id="profile-stats">
+          <div class="section-head"><h2 id="st-h">Tu oído en cifras</h2></div>
+          <div class="stats">
+            <div class="stat fire"><span class="ms" aria-hidden="true">local_fire_department</span><b id="s-streak"></b><span class="l">Días de racha</span></div>
+            <div class="stat"><span class="ms" aria-hidden="true">verified</span><b id="s-solid"></b><span class="l">Notas consolidadas</span></div>
+            <div class="stat"><span class="ms" aria-hidden="true">history</span><b id="s-ses"></b><span class="l">Sesiones</span></div>
+          </div>
+        </section>
+
+        <section class="section hero plan rise" style="--i:2" aria-labelledby="plan-h" data-od-id="profile-plan">
+          <div class="top"><span class="ms lg" style="color:var(--on-hero-accent)" aria-hidden="true">workspace_premium</span><div style="flex:1"><p class="lab">Plan actual</p><h2 class="t-lg" id="plan-h">Gratis</h2></div><span class="badge-pro">PRO</span></div>
+          <ul><li><span class="ms" aria-hidden="true">check_circle</span>Acordes, aleatorio y modo velocidad</li><li><span class="ms" aria-hidden="true">check_circle</span>Estadísticas avanzadas</li><li><span class="ms" aria-hidden="true">check_circle</span>Sincronización SRS en la nube</li></ul>
+          <a class="btn btn-on-hero btn-block" href="paywall.html" data-od-id="account-pro-entry">Ver TOGESC Pro</a>
+        </section>
+      </div>
+
+      <div>
+        <section class="section rise" style="--i:3" aria-labelledby="sy-h" data-od-id="profile-sync">
+          <div class="section-head"><h2 id="sy-h">Sincronización</h2></div>
+          <div class="list" id="sync-box"></div>
+        </section>
+
+        <section class="section rise" style="--i:4" aria-labelledby="pr-h" data-od-id="profile-prefs">
+          <div class="section-head"><h2 id="pr-h">Preferencias de práctica</h2></div>
+          <div class="list">
+            <a class="row" href="settings.html"><span class="icon-box" aria-hidden="true"><span class="ms">tune</span></span><span class="grow"><span class="row-title" style="display:block">Ajustes</span><span class="row-sub">Sonido, sesión, apariencia y accesibilidad</span></span><span class="ms o muted" aria-hidden="true">chevron_right</span></a>
+            <div class="row"><span class="icon-box" aria-hidden="true"><span class="ms">notifications</span></span><span class="grow"><span class="row-title" style="display:block" id="rem-l">Recordatorios diarios</span><span class="row-sub">Notificación local si tienes notas vencidas.</span></span><label class="switch"><input type="checkbox" id="rem" aria-labelledby="rem-l"><span class="track"></span></label></div>
+            <div class="row"><span class="icon-box" aria-hidden="true"><span class="ms">translate</span></span><span class="grow"><span class="row-title" style="display:block" id="sol-l">Notación Do/Re/Mi</span><span class="row-sub">Usa solfeo en el piano y en las respuestas.</span></span><label class="switch"><input type="checkbox" id="sol" aria-labelledby="sol-l"><span class="track"></span></label></div>
+          </div>
+        </section>
+
+        <section class="section rise" style="--i:5" aria-labelledby="inf-h">
+          <div class="section-head"><h2 id="inf-h">Información y datos</h2></div>
+          <div class="list">
+            <a class="row" href="onboarding.html"><span class="icon-box" aria-hidden="true"><span class="ms">school</span></span><span class="grow"><span class="row-title" style="display:block">Acerca de TOGESC</span><span class="row-sub">Pedagogía, tutorial y enlaces útiles</span></span><span class="ms o muted" aria-hidden="true">chevron_right</span></a>
+            <button class="row" id="export"><span class="icon-box" aria-hidden="true"><span class="ms">download</span></span><span class="grow"><span class="row-title" style="display:block">Exportar mi progreso</span><span class="row-sub">Archivo JSON con tu SRS e historial</span></span></button>
+            <button class="row" id="logout" hidden><span class="icon-box" aria-hidden="true"><span class="ms">logout</span></span><span class="grow"><span class="row-title" style="display:block">Cerrar sesión</span><span class="row-sub">Tu progreso local se conserva</span></span></button>
+          </div>
+          <button class="btn btn-danger btn-block" id="del" style="margin-top:12px" hidden>Eliminar cuenta</button>
+        </section>
+      </div>
+    </div>
+  </main>
+  <nav class="navbar" id="navbar" aria-label="Navegación principal"></nav>
+</div>
+
+<dialog id="auth" aria-labelledby="auth-h">
+  <form class="sheet" id="auth-form" novalidate>
+    <div class="sheet-head"><h2 class="t-lg" id="auth-h">Iniciar sesión</h2><button type="button" class="icon-btn" aria-label="Cerrar" onclick="this.closest('dialog').close()"><span class="ms">close</span></button></div>
+    <div class="segmented" role="group" aria-label="Tipo de acceso" style="margin-bottom:18px"><button type="button" data-m="in" aria-pressed="true">Entrar</button><button type="button" data-m="up" aria-pressed="false">Crear cuenta</button></div>
+    <div class="field"><label for="em">Email</label><input id="em" type="email" autocomplete="email" aria-describedby="em-e"><span class="err" id="em-e" role="alert"></span></div>
+    <div class="field"><label for="pw">Contraseña</label><input id="pw" type="password" autocomplete="current-password" aria-describedby="pw-h pw-e"><span class="label-md muted" id="pw-h">Mínimo 6 caracteres.</span><span class="err" id="pw-e" role="alert"></span></div>
+    <button class="btn btn-primary btn-block" type="submit" id="auth-go">Entrar</button>
+    <button class="btn btn-ghost btn-block" type="button" id="forgot" style="margin-top:6px">Olvidé mi contraseña</button>
+    <p class="label-md muted" style="margin-top:10px;text-align:center">Puedes seguir entrenando sin cuenta.</p>
+  </form>
+</dialog>
+<dialog id="del-dlg" aria-labelledby="del-h">
+  <form class="sheet" method="dialog">
+    <div class="sheet-head"><h2 class="t-lg" id="del-h">¿Eliminar tu cuenta?</h2></div>
+    <p class="muted" style="margin-bottom:20px">Se borrarán tu cuenta y tu progreso en la nube. El progreso guardado en este dispositivo no se toca.</p>
+    <div style="display:flex;gap:10px"><button class="btn btn-secondary" value="no" style="flex:1">Cancelar</button><button class="btn btn-danger" value="yes" style="flex:1">Eliminar</button></div>
+  </form>
+</dialog>
+
+<script src="assets/togesc.js"></script>
+<script>
+  TG.shell('profile');
+  const $ = id => document.getElementById(id);
+  let user = TG.store.get('user', null);
+  const esc = t => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  $('s-streak').textContent = TG.streak();
+  $('s-solid').textContent = TG.NOTES.filter(n => n.pct >= 75).length + '/12';
+  $('s-ses').textContent = TG.history().length;
+
+  function render() {
+    $('who').innerHTML = user
+      ? `<span class="av" aria-hidden="true">${esc(user.email[0].toUpperCase())}</span><div style="min-width:0"><h2 class="t-lg" style="overflow-wrap:anywhere">${esc(user.email)}</h2><p class="muted label-lg">Cuenta verificada · Plan Gratis</p></div>`
+      : `<span class="av" aria-hidden="true"><span class="ms lg">person</span></span><div style="flex:1"><h2 class="t-lg">Entrenando sin cuenta</h2><p class="muted label-lg">Tu progreso vive en este dispositivo.</p></div>`;
+    $('sync-box').innerHTML = user
+      ? `<div class="sync"><span class="icon-box" aria-hidden="true"><span class="ms">cloud_done</span></span><span class="grow" style="flex:1"><span class="row-title" style="display:block">Sincronización cloud</span><span class="state" id="sync-state"><span class="ms xs" aria-hidden="true">check_circle</span>Sincronizado</span></span><button class="btn btn-secondary" id="sync-now">Sincronizar ahora</button></div>`
+      : `<div class="sync"><span class="icon-box" aria-hidden="true"><span class="ms">cloud_off</span></span><span class="grow" style="flex:1"><span class="row-title" style="display:block">Opcional</span><span class="row-sub">Vincula tu progreso SRS entre dispositivos.</span></span><button class="btn btn-primary" id="open-auth" data-od-id="profile-login">Iniciar sesión</button></div>`;
+    $('logout').hidden = !user; $('del').hidden = !user;
+    if (!user) $('open-auth').onclick = () => $('auth').showModal();
+    else $('sync-now').onclick = () => {
+      const s = $('sync-state'); s.style.color = 'var(--fg-2)'; s.innerHTML = '<span class="ms xs" aria-hidden="true">sync</span>Sincronizando…';
+      setTimeout(() => { s.style.color = ''; s.innerHTML = '<span class="ms xs" aria-hidden="true">check_circle</span>Sincronizado'; TG.toast('Sincronización completada.'); }, 1100);
+    };
+  }
+  render();
+
+  $('rem').checked = TG.prefs.reminders; $('rem').onchange = e => { TG.setPref('reminders', e.target.checked); TG.toast(e.target.checked ? 'Recordatorios activados' : 'Recordatorios desactivados', 'notifications'); };
+  $('sol').checked = TG.prefs.notation === 'solfege'; $('sol').onchange = e => { TG.setPref('notation', e.target.checked ? 'solfege' : 'letters'); TG.toast(e.target.checked ? 'Notación Do/Re/Mi activada' : 'Notación C/D/E activada', 'translate'); };
+
+  // Auth
+  let mode = 'in';
+  document.querySelector('#auth .segmented').onclick = e => { const b = e.target.closest('button'); if (!b) return; mode = b.dataset.m; document.querySelectorAll('#auth .segmented button').forEach(x => x.setAttribute('aria-pressed', x === b)); $('auth-h').textContent = mode === 'in' ? 'Iniciar sesión' : 'Crear cuenta'; $('auth-go').textContent = mode === 'in' ? 'Entrar' : 'Crear cuenta'; $('pw').autocomplete = mode === 'in' ? 'current-password' : 'new-password'; };
+  function val() {
+    const em = $('em').value.trim(), pw = $('pw').value; let ok = true;
+    const okEm = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+    $('em-e').innerHTML = okEm ? '' : '<span class="ms xs" aria-hidden="true">error</span>' + (em ? 'Revisa el formato del email.' : 'Introduce tu email.');
+    $('em').setAttribute('aria-invalid', !okEm); ok = ok && okEm;
+    const okPw = pw.length >= 6;
+    $('pw-e').innerHTML = okPw ? '' : '<span class="ms xs" aria-hidden="true">error</span>La contraseña debe tener al menos 6 caracteres.';
+    $('pw').setAttribute('aria-invalid', !okPw); ok = ok && okPw;
+    return ok;
+  }
+  $('auth-form').onsubmit = e => {
+    e.preventDefault(); if (!val()) { (document.querySelector('#auth [aria-invalid="true"]') || $('em')).focus(); return; }
+    user = { email: $('em').value.trim() }; TG.store.set('user', user); $('auth').close(); render();
+    TG.toast(mode === 'in' ? 'Sesión iniciada. Progreso sincronizado.' : 'Cuenta creada. Revisa tu email para verificar la cuenta.');
+  };
+  $('forgot').onclick = () => { const em = $('em').value.trim(); if (!em) { $('em-e').innerHTML = '<span class="ms xs" aria-hidden="true">error</span>Introduce tu email.'; $('em').focus(); return; } TG.toast('Revisa tu email para restablecer la contraseña.', 'mail'); };
+  $('logout').onclick = () => { user = null; TG.store.set('user', null); render(); TG.toast('Sesión cerrada. Tu progreso local se conserva.', 'logout'); };
+  $('del').onclick = () => $('del-dlg').showModal();
+  $('del-dlg').addEventListener('close', () => { if ($('del-dlg').returnValue === 'yes') { user = null; TG.store.set('user', null); render(); TG.toast('Cuenta eliminada', 'delete'); } });
+
+  // Exportar (real)
+  $('export').onclick = () => {
+    const data = { app: 'TOGESC', exportedAt: new Date().toISOString(), notes: TG.NOTES.map((n, i) => ({ note: TG.LETTERS[i], accuracy: n.pct, srsLevel: n.lvl, attempts: n.att })), history: TG.history() };
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); a.download = 'togesc-progreso.json'; a.click();
+    TG.toast('Progreso exportado', 'download');
+  };
+</script>
+</body>
+</html>

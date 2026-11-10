@@ -10,12 +10,19 @@ class _ThrowingRemoteRepository implements ProgressRepository {
 
   final ProgressRepository _inner;
   var failNext = false;
+  var failReads = false;
 
   @override
-  Future<Map<String, NoteData>?> load() => _inner.load();
+  Future<Map<String, NoteData>?> load() async {
+    if (failReads) throw StateError('offline');
+    return _inner.load();
+  }
 
   @override
-  Future<String?> loadLastSessionIso() => _inner.loadLastSessionIso();
+  Future<String?> loadLastSessionIso() async {
+    if (failReads) throw StateError('offline');
+    return _inner.loadLastSessionIso();
+  }
 
   @override
   Future<void> save(
@@ -161,5 +168,34 @@ void main() {
       expect(await pendingStore.isPending, isFalse);
       expect((await remoteInner!.load())!['G']!.weight, 7.0);
     });
+
+    test(
+      'load con la nube caída devuelve lo local y deja la subida pendiente',
+      () async {
+        await local.save({'A': NoteData(weight: 5.0)});
+        remote!.failReads = true;
+
+        final loaded = await hybrid.load();
+        expect(loaded!['A']!.weight, 5.0);
+        expect(await pendingStore.isPending, isTrue);
+        expect(await hybrid.loadLastSessionIso(), isNotNull);
+      },
+    );
+
+    test(
+      'mergeOnSignIn con la nube caída no falla y deja la subida pendiente',
+      () async {
+        await local.save({'B': NoteData(weight: 6.0)});
+        remote!.failReads = true;
+
+        await hybrid.mergeOnSignIn();
+        expect(await pendingStore.isPending, isTrue);
+        expect(await remoteInner!.load(), isNull);
+
+        remote!.failReads = false;
+        expect(await hybrid.flushPendingSync(), isTrue);
+        expect((await remoteInner!.load())!['B']!.weight, 6.0);
+      },
+    );
   });
 }

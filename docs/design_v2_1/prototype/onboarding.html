@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bienvenida · TOGESC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block">
+<link rel="stylesheet" href="assets/togesc.css">
+<style>
+  .ob { max-width: 560px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; padding: 0 20px calc(20px + env(safe-area-inset-bottom)); }
+  .ob-top { height: 60px; display: flex; align-items: center; justify-content: space-between; }
+  .steps-dots { display: flex; gap: 6px; }
+  .steps-dots i { width: 8px; height: 8px; border-radius: 4px; background: var(--border); transition: width var(--t-med) var(--ease-out), background var(--t-med); }
+  .steps-dots i.on { width: 26px; background: var(--primary); }
+  .steps-dots i.past { background: var(--primary-2); }
+  .ob-body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 12px 0 20px; }
+  .step { display: none; gap: 18px; flex-direction: column; }
+  .step.on { display: flex; animation: rise .45s var(--ease-out) both; }
+  .step h1 { font-size: calc(30px * var(--fs)); font-weight: 800; line-height: 1.15; letter-spacing: -.5px; }
+  .step .lead { font-size: calc(17px * var(--fs)); color: var(--fg-2); }
+  .welcome-art { position: relative; height: 220px; border-radius: var(--r-hero); background: var(--hero); overflow: hidden; display: grid; place-items: center; }
+  .welcome-art .eq { display: flex; gap: 8px; align-items: center; height: 120px; }
+  .welcome-art .eq i { width: 10px; height: 120px; border-radius: 6px; background: var(--on-hero-accent); animation: eq 1.2s ease-in-out infinite; animation-delay: calc(var(--k) * .12s); }
+  @keyframes eq { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
+  html.rm .welcome-art .eq i { transform: scaleY(calc(.3 + var(--k) * .06)); }
+  .welcome-art .tag { position: absolute; left: 16px; bottom: 16px; background: rgb(255 255 255 / .1); border: 1px solid rgb(255 255 255 / .16); color: #fff; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+  .pillars { display: grid; gap: 10px; }
+  .pillar { display: flex; gap: 14px; padding: 16px; border-radius: var(--r-card); background: var(--panel); border: 1px solid var(--border); animation: rise .5s var(--ease-out) both; animation-delay: calc(var(--i) * 90ms); }
+  .pillar .icon-box { width: 48px; height: 48px; }
+  .pillar b { display: block; font-size: 16px; margin-bottom: 2px; }
+  .pillar span.s { color: var(--fg-2); font-size: 14px; }
+  .try-box { display: grid; gap: 14px; }
+  .try-status { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--r-card); background: var(--panel); border: 1px solid var(--border); min-height: 72px; }
+  .try-status .icon-box { transition: background var(--t-med), color var(--t-med); }
+  .try-status.ok .icon-box { background: color-mix(in oklch, var(--correct) 14%, transparent); color: var(--correct); }
+  .try-status.bad .icon-box { background: color-mix(in oklch, var(--incorrect) 12%, transparent); color: var(--incorrect); }
+  .opt { display: grid; gap: 10px; padding: 16px; border-radius: var(--r-card); background: var(--panel); border: 1px solid var(--border); }
+  .opt .row-l { display: flex; align-items: center; gap: 12px; }
+  .preview { display: flex; gap: 6px; flex-wrap: wrap; }
+  .preview span { min-width: 40px; height: 36px; padding: 0 8px; border-radius: 8px; background: var(--chip); display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+  .ob-foot { display: flex; gap: 10px; }
+  .ob-foot .btn { flex: 1; }
+  .ob-foot .btn-cta { flex: 2; }
+  @media (min-width: 1024px) { .ob { max-width: 620px; } .welcome-art { height: 260px; } }
+</style>
+</head>
+<body>
+<div class="ob" data-od-id="onboarding">
+  <header class="ob-top">
+    <span class="logo">TOGESC</span>
+    <div class="steps-dots" id="dots" role="img" aria-label=""></div>
+    <a class="link" href="home.html" id="skip-ob">Saltar</a>
+  </header>
+  <main class="ob-body" id="main">
+    <section class="step on" data-od-id="ob-welcome" aria-labelledby="s1">
+      <div class="welcome-art" aria-hidden="true"><div class="eq"></div><span class="tag">SRS · variación · limpieza tonal</span></div>
+      <p class="overline">Motor pedagógico TOGESC</p>
+      <h1 id="s1">Entrena tu oído absoluto, una nota cada vez</h1>
+      <p class="lead">Método con repetición espaciada, variación de estímulos y limpieza tonal. Sesiones cortas, progreso que no se pierde.</p>
+    </section>
+
+    <section class="step" data-od-id="ob-how" aria-labelledby="s2">
+      <p class="overline">Cómo funciona</p>
+      <h1 id="s2">Tres ideas detrás de cada sesión</h1>
+      <div class="pillars">
+        <div class="pillar" style="--i:0"><span class="icon-box" aria-hidden="true"><span class="ms">neurology</span></span><span><b>Algoritmo SRS</b><span class="s">Repetición inteligente de las notas críticas para consolidar tu memoria de altura.</span></span></div>
+        <div class="pillar" style="--i:1"><span class="icon-box" aria-hidden="true"><span class="ms">graphic_eq</span></span><span><b>Timbre universal</b><span class="s">Entrena en varios registros e instrumentos para reconocer la nota en cualquier sonido.</span></span></div>
+        <div class="pillar" style="--i:2"><span class="icon-box" aria-hidden="true"><span class="ms">blur_on</span></span><span><b>Neutralidad tonal</b><span class="s">Un estímulo de limpieza breve tras cada ejercicio evita que la nota anterior te sirva de referencia.</span></span></div>
+      </div>
+    </section>
+
+    <section class="step" data-od-id="ob-try" aria-labelledby="s3">
+      <p class="overline">Pruébalo</p>
+      <h1 id="s3">Así se responde</h1>
+      <p class="lead">Escucha la nota y toca la tecla. No hay botón de confirmar: la respuesta se envía al instante.</p>
+      <div class="try-box">
+        <button class="btn btn-secondary" id="play-try"><span class="ms" aria-hidden="true">volume_up</span>Escuchar la nota</button>
+        <div id="try-piano" data-od-id="ob-piano"></div>
+        <div class="try-status" id="try-status" aria-live="polite"><span class="icon-box" aria-hidden="true"><span class="ms" id="try-ic">hearing</span></span><span><b id="try-t" style="display:block">Primero, escucha</b><span class="row-sub" id="try-s">Usa auriculares si puedes.</span></span></div>
+      </div>
+    </section>
+
+    <section class="step" data-od-id="ob-prefs" aria-labelledby="s4">
+      <p class="overline">Antes de empezar</p>
+      <h1 id="s4">Ajusta lo básico</h1>
+      <div class="opt">
+        <div class="row-l"><span class="icon-box" aria-hidden="true"><span class="ms">translate</span></span><span style="flex:1"><b style="display:block">Nombre de las notas</b><span class="row-sub">Vista previa</span></span></div>
+        <div class="segmented" role="group" aria-label="Notación" id="not-seg"><button type="button" data-v="letters">C · D · E</button><button type="button" data-v="solfege">Do · Re · Mi</button></div>
+        <div class="preview" id="preview" aria-hidden="true"></div>
+      </div>
+      <div class="opt">
+        <div class="row-l"><span class="icon-box" aria-hidden="true"><span class="ms">motion_photos_off</span></span><span style="flex:1"><b style="display:block" id="rm-l">Reducir animaciones</b><span class="row-sub">Desactiva el movimiento y acorta las esperas.</span></span><label class="switch"><input type="checkbox" id="rm" aria-labelledby="rm-l"><span class="track"></span></label></div>
+      </div>
+      <div class="opt">
+        <div class="row-l"><span class="icon-box" aria-hidden="true"><span class="ms">text_increase</span></span><span style="flex:1"><b style="display:block" id="lt-l">Texto más grande</b><span class="row-sub">Aumenta el tamaño de toda la interfaz.</span></span><label class="switch"><input type="checkbox" id="lt" aria-labelledby="lt-l"><span class="track"></span></label></div>
+      </div>
+      <p class="label-md muted">Puedes cambiarlo después en Ajustes.</p>
+    </section>
+  </main>
+  <footer class="ob-foot">
+    <button class="btn btn-secondary" id="prev">Atrás</button>
+    <button class="btn btn-cta" id="next" data-od-id="ob-next">Siguiente</button>
+  </footer>
+</div>
+<script src="assets/togesc.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  document.querySelector('.welcome-art .eq').innerHTML = Array.from({ length: 9 }, (_, k) => `<i style="--k:${k}"></i>`).join('');
+  const steps = [...document.querySelectorAll('.step')];
+  let cur = Math.min(steps.length - 1, TG.store.get('obStep', 0));
+  const TARGET = 9; // La
+  let tried = false;
+  function go(n) {
+    cur = Math.max(0, Math.min(steps.length - 1, n)); TG.store.set('obStep', cur);
+    steps.forEach((s, k) => s.classList.toggle('on', k === cur));
+    $('dots').innerHTML = steps.map((_, k) => `<i class="${k === cur ? 'on' : k < cur ? 'past' : ''}"></i>`).join('');
+    $('dots').setAttribute('aria-label', `Paso ${cur + 1} de ${steps.length}`);
+    $('prev').style.visibility = cur ? 'visible' : 'hidden';
+    $('next').innerHTML = cur === steps.length - 1 ? 'Entendido, empezar' : cur === 2 && !tried ? 'Seguir sin probar' : 'Siguiente';
+    $('next').classList.toggle('btn-cta', !(cur === 2 && !tried)); $('next').classList.toggle('btn-secondary', cur === 2 && !tried);
+    steps[cur].querySelector('h1').setAttribute('tabindex', '-1'); steps[cur].querySelector('h1').focus({ preventScroll: true });
+  }
+  $('next').onclick = () => { if (cur === steps.length - 1) { TG.store.set('onboarded', true); TG.store.set('obStep', 0); location.href = 'home.html'; } else go(cur + 1); };
+  $('prev').onclick = () => go(cur - 1);
+
+  // Prueba
+  const kb = TG.piano($('try-piano'), { onPress(i) {
+    TG.playNote(TG.midiFor(i, 4), { dur: .6, gain: .5 });
+    if (!heard) { $('try-t').textContent = 'Pulsa «Escuchar la nota» primero'; return; }
+    kb.reset(); kb.set(TARGET, 'is-correct', 'check');
+    const ok = i === TARGET; if (!ok) kb.set(i, 'is-wrong', 'close');
+    $('try-status').className = 'try-status ' + (ok ? 'ok' : 'bad');
+    $('try-ic').textContent = ok ? 'check_circle' : 'cancel';
+    $('try-t').textContent = ok ? `¡Correcto! Era ${TG.name(TARGET)}` : `Era ${TG.name(TARGET)}, respondiste ${TG.name(i)}`;
+    $('try-s').textContent = ok ? 'Así de simple. El SRS sube de nivel cada nota que aciertas.' : 'Sin problema: la tecla correcta queda en verde y el SRS la repetirá antes.';
+    tried = true; go(cur);
+  } });
+  let heard = false;
+  $('play-try').onclick = () => { TG.ac(); TG.playNote(TG.midiFor(TARGET, 4)); heard = true; kb.reset(); $('try-status').className = 'try-status'; $('try-ic').textContent = 'touch_app'; $('try-t').textContent = '¿Qué nota escuchaste?'; $('try-s').textContent = 'Toca la tecla en el piano.'; };
+
+  // Preferencias
+  function renderNot() { document.querySelectorAll('#not-seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === TG.prefs.notation)); $('preview').innerHTML = [0, 2, 4, 5, 7, 9, 11].map(i => `<span>${TG.name(i)}</span>`).join(''); kb.relabel(); }
+  $('not-seg').onclick = e => { const b = e.target.closest('button'); if (b) { TG.setPref('notation', b.dataset.v); renderNot(); } };
+  $('rm').checked = TG.prefs.reduceMotion; $('rm').onchange = e => TG.setPref('reduceMotion', e.target.checked);
+  $('lt').checked = TG.prefs.largeText; $('lt').onchange = e => TG.setPref('largeText', e.target.checked);
+  renderNot();
+  go(cur);
+  document.addEventListener('keydown', e => { if (cur !== 2) return; const n = TG.keyToNote(e); if (n != null) kb.press(n, true); });
+</script>
+</body>
+</html>

@@ -28,7 +28,7 @@ enum GameMode {
 /// Nivel de dificultad del modo velocidad (tiempo inicial).
 enum SpeedDifficulty {
   easy(15.0, 'Fácil'),
-  pro(10.0, 'Pro'),
+  pro(10.0, 'Medio'),
   elite(5.0, 'Elite');
 
   const SpeedDifficulty(this.initialTime, this.label);

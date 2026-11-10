@@ -10,200 +10,6 @@ import '../providers/sync_provider.dart';
 import '../services/practice_reminder_service.dart';
 import 'togesc_ui.dart';
 
-/// Cabecera de perfil en cuenta (Stitch sync settings).
-class AccountProfileHeader extends StatelessWidget {
-  final String email;
-  final String? userId;
-  final bool isSynced;
-
-  const AccountProfileHeader({
-    super.key,
-    required this.email,
-    required this.isSynced,
-    this.userId,
-  });
-
-  String get _shortId {
-    if (userId == null || userId!.length < 4) return '';
-    final len = userId!.length > 8 ? 8 : userId!.length;
-    return '#${userId!.substring(0, len)}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final colors = TogescColors.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(DesignTokens.spacingLg),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        borderRadius: DesignTokens.borderRadiusMd,
-        border: Border.all(color: scheme.outlineVariant),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: scheme.primaryContainer,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: scheme.surfaceContainerLowest,
-                width: 3,
-              ),
-            ),
-            child: const Icon(
-              Icons.person_rounded,
-              size: 40,
-              color: DesignTokens.onPrimary,
-            ),
-          ),
-          const SizedBox(width: DesignTokens.spacingLg),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  email,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: DesignTokens.spacingSm),
-                Wrap(
-                  spacing: DesignTokens.spacingSm,
-                  runSpacing: DesignTokens.spacingXs,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: DesignTokens.spacingMd,
-                        vertical: DesignTokens.spacingXs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: (isSynced
-                                ? colors.correct
-                                : colors.selection)
-                            .withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: (isSynced
-                                  ? colors.correct
-                                  : colors.selection)
-                              .withValues(alpha: 0.25),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isSynced
-                                ? Icons.cloud_done_rounded
-                                : Icons.cloud_sync_rounded,
-                            size: 16,
-                            color: isSynced
-                                ? colors.correct
-                                : colors.selection,
-                          ),
-                          const SizedBox(width: DesignTokens.spacingXs),
-                          Text(
-                            isSynced ? 'Sincronizado' : 'Pendiente',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: isSynced
-                                  ? colors.correct
-                                  : colors.selection,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (_shortId.isNotEmpty)
-                      Text(
-                        'ID: $_shortId',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Banner upsell sync Pro (Stitch).
-class AccountSyncProBanner extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const AccountSyncProBanner({super.key, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(DesignTokens.spacingMd),
-      decoration: BoxDecoration(
-        color: scheme.secondaryContainer.withValues(alpha: 0.3),
-        borderRadius: DesignTokens.borderRadiusXl,
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.35),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: scheme.secondaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.stars_rounded,
-              color: scheme.secondary,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: DesignTokens.spacingMd),
-          Expanded(
-            child: Text(
-              'La sincronización automática es una función Pro exclusiva.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    height: 1.3,
-                  ),
-            ),
-          ),
-          const SizedBox(width: DesignTokens.spacingSm),
-          FilledButton(
-            onPressed: onTap,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: DesignTokens.spacingMd,
-                vertical: DesignTokens.spacingSm,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: DesignTokens.borderRadiusXl,
-              ),
-            ),
-            child: const Text('Ver más'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Panel de diagnóstico de sync (Stitch).
 class AccountSyncDiagnosticsPanel extends ConsumerWidget {
   const AccountSyncDiagnosticsPanel({super.key});
@@ -251,7 +57,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
               padding: const EdgeInsets.all(DesignTokens.spacingMd),
               decoration: BoxDecoration(
                 color: scheme.surfaceContainer,
-                borderRadius: DesignTokens.borderRadiusXl,
+                borderRadius: DesignTokens.borderRadiusCard,
                 border: Border.all(
                   color: scheme.outlineVariant.withValues(alpha: 0.5),
                 ),
@@ -262,9 +68,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: (globalOk
-                              ? colors.correct
-                              : colors.selection)
+                      color: (globalOk ? colors.correct : colors.selection)
                           .withValues(alpha: 0.12),
                       borderRadius: DesignTokens.borderRadiusMd,
                     ),
@@ -272,9 +76,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
                       globalOk
                           ? Icons.check_circle_rounded
                           : Icons.warning_amber_rounded,
-                      color: globalOk
-                          ? colors.correct
-                          : colors.selection,
+                      color: accountSyncStatusInk(context, synced: globalOk),
                     ),
                   ),
                   const SizedBox(width: DesignTokens.spacingMd),
@@ -283,10 +85,9 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Estado global',
-                          style: theme.textTheme.labelMedium?.copyWith(
+                          'Estado global'.toUpperCase(),
+                          style: DesignTokens.overline.copyWith(
                             color: scheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
@@ -305,7 +106,7 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
             Container(
               decoration: BoxDecoration(
                 color: scheme.surfaceContainerLowest,
-                borderRadius: DesignTokens.borderRadiusXl,
+                borderRadius: DesignTokens.borderRadiusCard,
                 border: Border.all(
                   color: scheme.outlineVariant.withValues(alpha: 0.5),
                 ),
@@ -448,11 +249,14 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: DesignTokens.spacingMd),
-        Container(
-          decoration: BoxDecoration(
-            color: scheme.surfaceContainerLowest,
-            borderRadius: DesignTokens.borderRadiusXl,
-            border: Border.all(
+        // Material (no Container con color) para que los SwitchListTile
+        // pinten su splash sobre la card.
+        Material(
+          color: scheme.surfaceContainerLowest,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: DesignTokens.borderRadiusCard,
+            side: BorderSide(
               color: scheme.outlineVariant.withValues(alpha: 0.5),
             ),
           ),
@@ -472,7 +276,7 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
                     ),
                     child: Icon(
                       Icons.music_note_rounded,
-                      color: scheme.primaryContainer,
+                      color: scheme.primary,
                     ),
                   ),
                   title: const Text('Notación Do/Re/Mi'),
@@ -481,7 +285,9 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
                   ),
                   value: mode == NoteNamingMode.solfege,
                   onChanged: (value) {
-                    ref.read(noteNamingModeProvider.notifier).setMode(
+                    ref
+                        .read(noteNamingModeProvider.notifier)
+                        .setMode(
                           value
                               ? NoteNamingMode.solfege
                               : NoteNamingMode.letter,
@@ -512,14 +318,17 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
                     ),
                     child: Icon(
                       Icons.notifications_active_rounded,
-                      color: scheme.primaryContainer,
+                      color: scheme.primary,
                     ),
                   ),
                   title: const Text('Recordatorios diarios'),
+                  // Desactivado fuera de móvil, pero el motivo debe leerse
+                  // (AA): color explícito en vez del gris de deshabilitado.
                   subtitle: Text(
                     PracticeReminderService.isSupported
                         ? 'Notificación local si tienes notas vencidas.'
                         : 'Disponible en Android e iOS.',
+                    style: TextStyle(color: scheme.onSurfaceVariant),
                   ),
                   value: enabled && PracticeReminderService.isSupported,
                   onChanged: PracticeReminderService.isSupported
@@ -568,10 +377,7 @@ class AccountSettingsShortcutCard extends StatelessWidget {
             color: scheme.primary.withValues(alpha: 0.06),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            Icons.tune_rounded,
-            color: scheme.primaryContainer,
-          ),
+          child: Icon(Icons.tune_rounded, color: scheme.primary),
         ),
         title: const Text('Ajustes de práctica'),
         subtitle: const Text('Sonido, sesión, apariencia y accesibilidad'),
@@ -611,7 +417,7 @@ class AccountSyncActionButtons extends StatelessWidget {
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(52),
               shape: RoundedRectangleBorder(
-                borderRadius: DesignTokens.borderRadiusXl,
+                borderRadius: DesignTokens.borderRadiusCard,
               ),
             ),
             icon: const Icon(Icons.sync_rounded),
@@ -623,7 +429,7 @@ class AccountSyncActionButtons extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             minimumSize: const Size.fromHeight(48),
             shape: RoundedRectangleBorder(
-              borderRadius: DesignTokens.borderRadiusXl,
+              borderRadius: DesignTokens.borderRadiusCard,
             ),
             side: BorderSide(
               color: scheme.outlineVariant.withValues(alpha: 0.8),
@@ -635,4 +441,15 @@ class AccountSyncActionButtons extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Tinta AA del estado de sincronización. El ámbar de selección (#FFB300)
+/// no llega a 3:1 sobre fondos claros, así que en claro el estado pendiente
+/// usa `selectionDeep` (#5D4800) y en oscuro el ámbar claro.
+Color accountSyncStatusInk(BuildContext context, {required bool synced}) {
+  final colors = TogescColors.of(context);
+  if (synced) return colors.correct;
+  return Theme.of(context).brightness == Brightness.dark
+      ? colors.selection
+      : colors.selectionDeep;
 }

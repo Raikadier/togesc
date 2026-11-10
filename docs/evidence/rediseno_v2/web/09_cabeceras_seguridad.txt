@@ -1,0 +1,23 @@
+
+[http://127.0.0.1:8080/ → HTTP 200]
+  PASS  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  PASS  X-Content-Type-Options: nosniff
+  PASS  X-Frame-Options: DENY
+  PASS  Referrer-Policy: strict-origin-when-cross-origin
+  PASS  Permissions-Policy: microphone=(self), camera=(), geolocation=(), payment=(), usb=()
+  PASS  Content-Security-Policy presente (impuesta)
+  PASS  CSP: default-src 'self'
+  PASS  CSP: frame-ancestors 'none'
+  PASS  CSP: object-src 'none'
+  PASS  CSP: base-uri 'self'
+  PASS  CSP: script-src con 'wasm-unsafe-eval' (CanvasKit)
+  PASS  CSP: connect-src con Supabase
+  PASS  CSP: script-src sin 'unsafe-inline'
+  PASS  CSP: script-src sin 'unsafe-eval'
+  PASS  CSP: ninguna directiva con comodín *
+  PASS  HSTS max-age >= 1 año
+  PASS  X-Content-Type-Options = nosniff
+  PASS  X-Frame-Options = DENY
+
+RESULTADO: OK
+Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), file src\win\async.c, line 76

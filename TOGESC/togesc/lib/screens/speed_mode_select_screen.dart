@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../app/design_tokens.dart';
 import '../app/router.dart';
 import '../constants/game_constants.dart';
+import '../providers/speed_best_streak_provider.dart';
 import '../providers/speed_difficulty_provider.dart';
 import '../widgets/speed_mode_select_views.dart';
 import '../widgets/speed_session_views.dart';
@@ -17,34 +18,63 @@ class SpeedModeSelectScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final difficulty = ref.watch(speedDifficultyProvider);
+    final bests = ref.watch(speedBestStreakProvider).valueOrNull ?? const {};
 
     return TogescScaffold(
       title: 'Velocidad — Elige modo',
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(DesignTokens.marginMobile),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SpeedModeSelectHero(),
-            const SizedBox(height: DesignTokens.spacingLg),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final wide =
-                    constraints.maxWidth >= DesignTokens.shellBreakpoint;
-                return _SpeedModeBento(
-                  wide: wide,
-                  onStart: (mode) => _start(context, mode),
-                );
-              },
-            ),
-            const SizedBox(height: DesignTokens.spacingLg),
-            SpeedDifficultySelector(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final wide = constraints.maxWidth >= DesignTokens.shellBreakpoint;
+            // v2.1: primero la dificultad (tarjetas radio) y después el
+            // modo, que arranca la ráfaga al tocarlo.
+            final selector = SpeedDifficultySelector(
               selected: difficulty,
+              bestStreaks: bests,
               onChanged: (value) {
                 ref.read(speedDifficultyProvider.notifier).state = value;
               },
-            ),
-          ],
+            );
+            const how = SpeedHowItWorksCard();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SpeedModeSelectHero(),
+                const SizedBox(height: DesignTokens.spacingLg),
+                if (wide)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(flex: 13, child: selector),
+                      const SizedBox(width: DesignTokens.spacingLg),
+                      const Expanded(flex: 10, child: how),
+                    ],
+                  )
+                else
+                  selector,
+                const SizedBox(height: DesignTokens.spacingLg),
+                Semantics(
+                  header: true,
+                  child: Text(
+                    'Elige el modo para empezar'.toUpperCase(),
+                    style: DesignTokens.overline.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: DesignTokens.spacingMd),
+                _SpeedModeBento(
+                  wide: wide,
+                  onStart: (mode) => _start(context, mode),
+                ),
+                if (!wide) ...[
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  how,
+                ],
+              ],
+            );
+          },
         ),
       ),
     );
@@ -120,7 +150,7 @@ class _SpeedModeBento extends StatelessWidget {
       mode: GameMode.sharpsOnly,
       title: 'Teclas negras',
       subtitle: 'Entrenamiento enfocado en semitonos y accidentales.',
-      icon: Icons.tag_rounded,
+      icon: Icons.piano_rounded,
       variant: SpeedModeCardVariant.darkKeys,
       compact: true,
       showCta: false,

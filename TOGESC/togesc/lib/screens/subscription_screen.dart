@@ -107,7 +107,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     ? 'Periodo de prueba activo'
                     : status.isPro
                         ? 'Acceso completo'
-                        : 'Modos basicos y SRS local';
+                        : 'Modos básicos y progreso local';
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -134,7 +134,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                           icon: const Icon(Icons.payment_rounded),
                           label: Text(
                             kIsWeb
-                                ? 'Gestionar pago (Stripe)'
+                                ? 'Gestionar pago'
                                 : 'Restaurar compras',
                           ),
                         ),

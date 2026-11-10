@@ -15,10 +15,18 @@ enum GameInputMode {
   static GameInputMode fromId(String? raw) {
     return GameInputMode.values.firstWhere(
       (m) => m.name == raw,
-      orElse: () => GameInputMode.both,
+      orElse: () => defaultGameInputMode,
     );
   }
 }
+
+/// Modo de entrada por defecto (rediseño v2, D6): solo piano.
+/// La entrada por texto sigue disponible como opción en Ajustes.
+const GameInputMode defaultGameInputMode = GameInputMode.pianoOnly;
+
+/// Confirmar antes de enviar, por defecto (rediseño v2, D1): un solo toque.
+/// Se puede reactivar en Ajustes por accesibilidad.
+const bool defaultConfirmBeforeSubmit = false;
 
 /// Preferencia de tema de la aplicacion.
 enum AppThemePreference {
@@ -46,14 +54,18 @@ class UiPreferences {
   final bool hidePianoLabels;
   final bool largePiano;
   final bool reduceAnimations;
+
+  /// Texto más grande (v2.1): `TextScaler.linear(1.125)` sobre el del sistema.
+  final bool largeText;
   final AppThemePreference themePreference;
 
   const UiPreferences({
-    this.inputMode = GameInputMode.both,
-    this.confirmBeforeSubmit = true,
+    this.inputMode = defaultGameInputMode,
+    this.confirmBeforeSubmit = defaultConfirmBeforeSubmit,
     this.hidePianoLabels = false,
     this.largePiano = false,
     this.reduceAnimations = false,
+    this.largeText = false,
     this.themePreference = AppThemePreference.system,
   });
 
@@ -63,6 +75,7 @@ class UiPreferences {
     bool? hidePianoLabels,
     bool? largePiano,
     bool? reduceAnimations,
+    bool? largeText,
     AppThemePreference? themePreference,
   }) {
     return UiPreferences(
@@ -71,6 +84,7 @@ class UiPreferences {
       hidePianoLabels: hidePianoLabels ?? this.hidePianoLabels,
       largePiano: largePiano ?? this.largePiano,
       reduceAnimations: reduceAnimations ?? this.reduceAnimations,
+      largeText: largeText ?? this.largeText,
       themePreference: themePreference ?? this.themePreference,
     );
   }

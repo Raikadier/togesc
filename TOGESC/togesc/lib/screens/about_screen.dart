@@ -30,8 +30,8 @@ class AboutScreen extends ConsumerWidget {
           const InfoSectionHeader(title: 'Cómo entrena la app'),
           PedagogySectionCard(
             icon: Icons.psychology_rounded,
-            accentColor: scheme.primaryContainer,
-            title: 'Repetición espaciada (SRS)',
+            accentColor: scheme.primary,
+            title: 'Repaso inteligente',
             body:
                 'El sistema repite más las notas que te cuestan y espacia las '
                 'que ya dominas. Así consolidas memoria a largo plazo.',
@@ -42,16 +42,15 @@ class AboutScreen extends ConsumerWidget {
             title: 'Variación de octavas y timbres',
             body:
                 'Las notas suenan en distintas octavas y timbres para que '
-                'aprendas la clase de altura (Do, Re, Mi…) y no una '
-                'frecuencia fija.',
+                'reconozcas la nota (Do, Re, Mi…) y no un sonido concreto.',
           ),
           PedagogySectionCard(
             icon: Icons.blur_on_rounded,
             accentColor: scheme.tertiary,
-            title: 'Limpieza tonal',
+            title: 'Borrado de referencia',
             body:
-                'Tras cada ejercicio oirás un sonido caótico breve que rompe '
-                'el anclaje al tono anterior y favorece oído absoluto.',
+                'Tras cada ejercicio oirás un sonido breve para que no '
+                'compares con la nota anterior.',
           ),
           PedagogySectionCard(
             icon: Icons.music_note_rounded,

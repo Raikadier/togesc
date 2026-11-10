@@ -2,19 +2,19 @@
 enum SrsIntensityProfile {
   relaxed(
     'Relajado',
-    'Intervalos mas largos; ideal para repaso ligero.',
+    'Intervalos más largos; ideal para repaso ligero.',
     1.35,
     6,
   ),
   balanced(
     'Equilibrado',
-    'Ritmo recomendado para la mayoria.',
+    'Ritmo recomendado para la mayoría.',
     1.0,
     5,
   ),
   intense(
     'Intenso',
-    'Revisiones mas frecuentes; maximo progreso.',
+    'Revisiones más frecuentes; máximo progreso.',
     0.75,
     4,
   );

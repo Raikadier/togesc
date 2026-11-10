@@ -64,11 +64,11 @@ class AudioPreferences {
 const Map<String, String> instrumentDisplayNames = {
   'sine': 'Seno',
   'piano': 'Piano',
-  'violin': 'Violin',
+  'violin': 'Violín',
   'guitar': 'Guitarra',
   'flute': 'Flauta',
   'trumpet': 'Trompeta',
-  'organ': 'Organo',
+  'organ': 'Órgano',
 };
 
 String instrumentLabel(String id) =>

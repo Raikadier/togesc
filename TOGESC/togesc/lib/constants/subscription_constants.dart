@@ -29,4 +29,20 @@ abstract final class SubscriptionConstants {
         GameMode.speedTraining => 'Entrenamiento de velocidad',
         _ => mode.displayName,
       };
+
+  /// Clave de `/paywall?feature=` que usa Estadísticas para el historial.
+  static const historyFeatureKey = 'historial';
+
+  /// Valores de `feature` que la app genera hoy, con el texto que se muestra.
+  ///
+  /// PT-10: el parámetro llega por URL (deep link), así que solo se pinta si
+  /// está en esta lista; cualquier otro valor cae al título genérico.
+  static final Map<String, String> paywallFeatureTitles = {
+    for (final mode in proGameModes) modeProLabel(mode): modeProLabel(mode),
+    historyFeatureKey: historyFeatureKey,
+  };
+
+  /// Texto seguro para [feature], o `null` si no es una función Pro conocida.
+  static String? paywallFeatureTitle(String? feature) =>
+      feature == null ? null : paywallFeatureTitles[feature];
 }

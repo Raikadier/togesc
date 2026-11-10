@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app_theme.dart';
+import 'app/large_text_scaler.dart';
 import 'config/observability_config.dart';
 import 'config/supabase_config.dart';
 import 'l10n/app_localizations.dart';
@@ -68,8 +69,11 @@ class TogescApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
     final themeMode = ref.watch(appThemeModeProvider);
-    final reduceAnimations =
-        ref.watch(uiPreferencesProvider).valueOrNull?.reduceAnimations ?? false;
+    final uiPrefs = ref.watch(uiPreferencesProvider).valueOrNull;
+    // Hasta leer las preferencias (unos pocos frames) no se arranca ninguna
+    // animación: si el usuario pidió reducirlas, no deben llegar a empezar.
+    final reduceAnimations = uiPrefs?.reduceAnimations ?? true;
+    final largeText = uiPrefs?.largeText ?? false;
 
     return MaterialApp.router(
       title: 'TOGESC',
@@ -85,17 +89,22 @@ class TogescApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
+      // El fundido de tema vive por encima de `builder`, así que no ve el
+      // disableAnimations que añade la preferencia.
+      themeAnimationDuration: reduceAnimations
+          ? Duration.zero
+          : kThemeAnimationDuration,
       routerConfig: router,
       builder: (context, child) {
         final media = MediaQuery.of(context);
         return MediaQuery(
           data: media.copyWith(
             disableAnimations: media.disableAnimations || reduceAnimations,
+            textScaler: applyLargeText(media.textScaler, largeText: largeText),
           ),
-          child: TickerMode(
-            enabled: !reduceAnimations,
-            child: child ?? const SizedBox.shrink(),
-          ),
+          // Solo disableAnimations: un TickerMode apagado congelaba las
+          // transiciones de ruta y dejaba la página nueva invisible.
+          child: child ?? const SizedBox.shrink(),
         );
       },
     );

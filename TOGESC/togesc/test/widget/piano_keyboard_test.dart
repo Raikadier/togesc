@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:togesc/app/app_theme.dart';
+import 'package:togesc/app/design_tokens.dart';
 import 'package:togesc/widgets/piano_keyboard.dart';
 
 void main() {
@@ -109,6 +110,124 @@ void main() {
       expect(find.byIcon(Icons.check_circle), findsWidgets);
       final semantics = tester.getSemantics(find.bySemanticsLabel('D'));
       expect(semantics.hint, 'correcta');
+    });
+  });
+
+  group('PianoKeyboard · variante de sesión v2', () {
+    Widget buildSession({
+      PianoKeyboardVariant variant = PianoKeyboardVariant.session,
+      double width = 390,
+      Set<String> correctNotes = const {},
+      Set<String> incorrectNotes = const {},
+      bool dimOthers = false,
+      ValueChanged<String>? onNoteTapped,
+    }) {
+      return MaterialApp(
+        theme: AppTheme.session,
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: width,
+              child: PianoKeyboard(
+                variant: variant,
+                correctNotes: correctNotes,
+                incorrectNotes: incorrectNotes,
+                dimOthers: dimOthers,
+                onNoteTapped: onNoteTapped,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('móvil: 230 de alto y negras de 38×140', (tester) async {
+      await tester.pumpWidget(buildSession());
+      expect(
+        tester
+            .getSize(find.byKey(const ValueKey('piano-session-container')))
+            .height,
+        230,
+      );
+      expect(
+        tester.getSize(find.byKey(const ValueKey('piano-key-F#'))),
+        const Size(38, 140),
+      );
+    });
+
+    testWidgets('negras: zona táctil de 48 aunque midan 38', (tester) async {
+      String? tapped;
+      await tester.pumpWidget(buildSession(onNoteTapped: (n) => tapped = n));
+      final rect = tester.getRect(find.byKey(const ValueKey('piano-key-C#')));
+      // 4 px fuera del dibujo de la tecla, aún dentro de la zona de 48.
+      await tester.tapAt(Offset(rect.right + 4, rect.top + 40));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tapped, 'C#');
+      final semantics = tester.getSemantics(find.bySemanticsLabel('C#'));
+      expect(semantics.rect.width, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('escritorio: 210 de alto y negras de 52×126', (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        buildSession(variant: PianoKeyboardVariant.sessionWide, width: 900),
+      );
+      expect(
+        tester
+            .getSize(find.byKey(const ValueKey('piano-session-container')))
+            .height,
+        210,
+      );
+      expect(
+        tester.getSize(find.byKey(const ValueKey('piano-key-A#'))),
+        const Size(52, 126),
+      );
+    });
+
+    testWidgets('feedback con badges ✓/✗ además del color y resto atenuado',
+        (tester) async {
+      await tester.pumpWidget(
+        buildSession(
+          correctNotes: {'D'},
+          incorrectNotes: {'F#'},
+          dimOthers: true,
+        ),
+      );
+      expect(find.byIcon(Icons.check_circle), findsOneWidget);
+      expect(find.byIcon(Icons.cancel), findsOneWidget);
+      expect(tester.getSemantics(find.bySemanticsLabel('D')).hint, 'correcta');
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('F#')).hint,
+        'incorrecta',
+      );
+
+      BoxDecoration deco(String note) => tester
+          .widget<AnimatedContainer>(find.byKey(ValueKey('piano-key-$note')))
+          .decoration! as BoxDecoration;
+      expect(deco('D').gradient, DesignTokens.pianoWhiteKeyCorrectGradient);
+      expect(deco('F#').gradient, DesignTokens.pianoBlackKeyWrongGradient);
+      expect(deco('E').gradient, DesignTokens.pianoWhiteKeyDimmedGradient);
+      expect(deco('C#').gradient, DesignTokens.pianoBlackKeyDimmedGradient);
+    });
+
+    testWidgets('a 320 px no desborda', (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.session,
+          home: const Scaffold(
+            body: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: PianoKeyboard(variant: PianoKeyboardVariant.session),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
     });
   });
 }

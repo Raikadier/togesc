@@ -258,6 +258,21 @@ void main() {
       // intervalIndex deberia ser 0 (max(0, 1-2) = 0), que es < 2, entonces isLearning = true
       expect(srs.noteData['C']!.isLearning, isTrue);
     });
+
+    test('un olvido en consolidacion retrocede forgetPenaltySteps una sola vez',
+        () async {
+      await initDefault();
+      for (var i = 0; i < learningPhaseThreshold; i++) {
+        srs.updateAfterResponse(notes: ['C'], correctNotes: ['C'], responseTime: 1.0);
+      }
+      srs.noteData['C']!.intervalIndex = 4;
+
+      srs.updateAfterResponse(notes: ['C'], correctNotes: [], responseTime: 5.0);
+
+      // 4 - 2 = 2: sigue consolidada (antes restaba dos veces y caía a 0).
+      expect(srs.noteData['C']!.intervalIndex, 4 - forgetPenaltySteps);
+      expect(srs.noteData['C']!.isLearning, isFalse);
+    });
   });
 
   group('Penalizacion de notas incorrectas externas', () {

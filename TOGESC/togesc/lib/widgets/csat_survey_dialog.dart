@@ -61,7 +61,7 @@ class _CsatSurveyDialogState extends State<CsatSurveyDialog> {
               filled: true,
               fillColor: scheme.surfaceContainerLow,
               border: OutlineInputBorder(
-                borderRadius: DesignTokens.borderRadiusXl,
+                borderRadius: DesignTokens.borderRadiusCard,
               ),
             ),
           ),
@@ -85,7 +85,7 @@ class _CsatSurveyDialogState extends State<CsatSurveyDialog> {
           style: FilledButton.styleFrom(
             minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
             shape: RoundedRectangleBorder(
-              borderRadius: DesignTokens.borderRadiusXl,
+              borderRadius: DesignTokens.borderRadiusCard,
             ),
           ),
           child: const Text('Enviar'),

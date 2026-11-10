@@ -21,12 +21,15 @@ class InfoSectionHeader extends StatelessWidget {
         bottom: DesignTokens.spacingMd,
         top: DesignTokens.spacingSm,
       ),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: scheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
+      // Cabecera de sección v2: overline 13/700 en mayúsculas.
+      child: Semantics(
+        header: true,
+        child: Text(
+          title.toUpperCase(),
+          style: DesignTokens.overlineLarge.copyWith(
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
       ),
     );
   }
@@ -45,7 +48,7 @@ class AboutHeroCard extends StatelessWidget {
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow,
-        borderRadius: DesignTokens.borderRadiusMd,
+        borderRadius: DesignTokens.borderRadiusHero,
         border: Border.all(color: scheme.outlineVariant),
       ),
       child: Column(
@@ -53,11 +56,7 @@ class AboutHeroCard extends StatelessWidget {
         children: [
           Text(
             'TOGESC',
-            style: theme.textTheme.headlineMedium?.copyWith(
-              color: scheme.primary,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.8,
-            ),
+            style: DesignTokens.logo.copyWith(color: scheme.primary),
           ),
           const SizedBox(height: DesignTokens.spacingSm),
           Text(
@@ -105,12 +104,12 @@ class PrivacyHeroHeader extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: scheme.primaryContainer.withValues(alpha: 0.12),
-                borderRadius: DesignTokens.borderRadiusXl,
+                color: scheme.primary.withValues(alpha: 0.12),
+                borderRadius: DesignTokens.borderRadiusCard,
               ),
               child: Icon(
                 Icons.privacy_tip_rounded,
-                color: scheme.primaryContainer,
+                color: scheme.primary,
               ),
             ),
             const SizedBox(width: DesignTokens.spacingMd),
@@ -133,7 +132,7 @@ class PrivacyHeroHeader extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: scheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: DesignTokens.borderRadiusPill,
           ),
           child: Text(
             'Última actualización: $lastUpdated',
@@ -184,7 +183,7 @@ class InfoLinkCard extends StatelessWidget {
               color: scheme.primary.withValues(alpha: 0.06),
               borderRadius: DesignTokens.borderRadiusMd,
             ),
-            child: Icon(icon, color: scheme.primaryContainer, size: 22),
+            child: Icon(icon, color: scheme.primary, size: 22),
           ),
           title: Text(
             title,
@@ -276,7 +275,7 @@ Future<bool> showResetProgressDialog(BuildContext context) async {
             foregroundColor: DesignTokens.onError,
             minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
             shape: RoundedRectangleBorder(
-              borderRadius: DesignTokens.borderRadiusXl,
+              borderRadius: DesignTokens.borderRadiusCta,
             ),
           ),
           child: const Text('Reiniciar'),

@@ -72,13 +72,6 @@ GoRouter createAppRouter({
         builder: (_, _) => const SettingsScreen(),
       ),
       GoRoute(
-        path: AppRoutes.speedSelect,
-        builder: (_, _) => ProRouteGuard(
-          mode: GameMode.speedTraining,
-          child: const SpeedModeSelectScreen(),
-        ),
-      ),
-      GoRoute(
         path: '${AppRoutes.game}/:modeId',
         builder: (context, state) {
           final modeId = int.tryParse(state.pathParameters['modeId'] ?? '');
@@ -122,10 +115,21 @@ GoRouter createAppRouter({
               ),
             ],
           ),
+          // Pestaña «Velocidad» (D8). Sigue guardada por Pro: sin acceso,
+          // ProRouteGuard reemplaza por `/paywall?feature=…`.
+          GoRoute(
+            path: AppRoutes.speedSelect,
+            builder: (_, _) => ProRouteGuard(
+              mode: GameMode.speedTraining,
+              child: const SpeedModeSelectScreen(),
+            ),
+          ),
           GoRoute(
             path: AppRoutes.account,
             builder: (_, _) => const AccountScreen(),
           ),
+          // Rutas Pro: ya no son pestaña, pero se conservan para deep links,
+          // candados y la entrada «TOGESC Pro» de Perfil.
           GoRoute(
             path: AppRoutes.subscription,
             builder: (_, _) => const SubscriptionScreen(),

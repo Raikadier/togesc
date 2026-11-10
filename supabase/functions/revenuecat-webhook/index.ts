@@ -4,10 +4,19 @@ import {
   isWebhookDuplicate,
   markWebhookProcessed,
 } from "../_shared/webhook_idempotency.ts";
+import {
+  configFromEnv,
+  decideRevenueCatEvent,
+  isAuthorized,
+  type RcEvent,
+} from "./logic.ts";
 
 const webhookSecret = Deno.env.get("REVENUECAT_WEBHOOK_SECRET");
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+// SANDBOX rechazado salvo REVENUECAT_ALLOW_SANDBOX=true; entitlements/productos
+// permitidos en REVENUECAT_PRO_ENTITLEMENTS / REVENUECAT_PRO_PRODUCTS (PT-01).
+const rcConfig = configFromEnv((k) => Deno.env.get(k));
 
 function jsonResponse(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -15,15 +24,6 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
     headers: { "Content-Type": "application/json" },
   });
 }
-
-type RcEvent = {
-  id?: string;
-  type?: string;
-  app_user_id?: string;
-  product_id?: string;
-  expiration_at_ms?: number | null;
-  period_type?: string;
-};
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") {
@@ -34,21 +34,26 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Missing env configuration" }, 500);
   }
 
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${webhookSecret}`) {
+  if (!(await isAuthorized(req.headers.get("authorization"), webhookSecret))) {
     return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
-  const body = await req.json();
-  const event: RcEvent = body.event ?? body;
-  const userId = event.app_user_id;
-
-  if (!userId) {
-    return jsonResponse({ received: true, skipped: "no app_user_id" });
+  let body: { event?: RcEvent } & RcEvent;
+  try {
+    body = await req.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400);
+  }
+  const event: RcEvent = body?.event ?? body;
+  if (!event || typeof event !== "object") {
+    return jsonResponse({ error: "Invalid payload" }, 400);
   }
 
+  const userId = event.app_user_id;
   const eventId = event.id ??
-    `rc:${event.type ?? "unknown"}:${userId}:${event.expiration_at_ms ?? 0}`;
+    `rc:${event.type ?? "unknown"}:${userId ?? "none"}:${event.expiration_at_ms ?? 0}`;
+
+  const decision = decideRevenueCatEvent(event, rcConfig, Date.now());
 
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
@@ -56,50 +61,17 @@ Deno.serve(async (req) => {
     return jsonResponse({ received: true, duplicate: true });
   }
 
-  const eventType = event.type ?? "";
-
-  const activeEvents = new Set([
-    "INITIAL_PURCHASE",
-    "RENEWAL",
-    "UNCANCELLATION",
-    "PRODUCT_CHANGE",
-    "SUBSCRIPTION_EXTENDED",
-  ]);
-
-  const inactiveEvents = new Set([
-    "CANCELLATION",
-    "EXPIRATION",
-    "BILLING_ISSUE",
-  ]);
-
-  let plan = "free";
-  let status = "expired";
-  let trialEndsAt: string | null = null;
-  let expiresAt: string | null = null;
-
-  if (activeEvents.has(eventType)) {
-    plan = "pro";
-    status = event.period_type === "trial" ? "trialing" : "active";
-  } else if (!inactiveEvents.has(eventType)) {
-    return jsonResponse({ received: true, skipped: eventType });
-  }
-
-  if (event.expiration_at_ms) {
-    const exp = new Date(event.expiration_at_ms);
-    expiresAt = exp.toISOString();
-    if (status === "trialing") {
-      trialEndsAt = exp.toISOString();
-    }
-    if (exp.getTime() < Date.now() && inactiveEvents.has(eventType)) {
-      plan = "free";
-      status = "expired";
-    }
+  if (decision.kind === "skip") {
+    // 200 + marcado como procesado: RC no reintenta eventos que nunca aplicaremos.
+    console.warn("RevenueCat event skipped", { eventId, type: event.type, reason: decision.reason });
+    await markWebhookProcessed(supabase, eventId, "revenuecat");
+    return jsonResponse({ received: true, skipped: decision.reason });
   }
 
   const { data: existing, error: lookupError } = await supabase
     .from("user_subscriptions")
     .select("expires_at, status, plan")
-    .eq("user_id", userId)
+    .eq("user_id", userId!)
     .maybeSingle();
 
   if (lookupError) {
@@ -107,19 +79,19 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Lookup failed" }, 500);
   }
 
-  if (isStaleSubscriptionUpdate(existing, expiresAt)) {
+  if (isStaleSubscriptionUpdate(existing, decision.expiresAt)) {
     await markWebhookProcessed(supabase, eventId, "revenuecat");
     return jsonResponse({ received: true, skipped: "stale" });
   }
 
   const { error } = await supabase.from("user_subscriptions").upsert({
     user_id: userId,
-    plan,
-    status,
+    plan: decision.plan,
+    status: decision.status,
     source: "revenuecat",
     external_id: event.product_id ?? null,
-    trial_ends_at: trialEndsAt,
-    expires_at: expiresAt,
+    trial_ends_at: decision.trialEndsAt,
+    expires_at: decision.expiresAt,
   });
 
   if (error) {

@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Progreso · TOGESC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block">
+<link rel="stylesheet" href="assets/togesc.css">
+<style>
+  .tabs-row { margin: 4px 0 20px; }
+  .g-head { display: grid; gap: 6px; }
+  .g-head .big-num-lg { color: var(--primary); }
+  .delta { display: inline-flex; align-items: center; gap: 4px; color: var(--correct); font-weight: 700; font-size: 14px; }
+  .goal { margin-top: 12px; display: grid; gap: 6px; }
+  .goal .bar { height: 10px; position: relative; }
+  .goal .bar > i { background: linear-gradient(90deg, var(--primary-2), var(--primary)); }
+  .goal .mark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--fg); right: 0; }
+  .goal .cap { display: flex; justify-content: space-between; font-size: 13px; color: var(--fg-2); font-variant-numeric: tabular-nums; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+  .kpi { padding: 14px; border-radius: var(--r-card); background: var(--panel); border: 1px solid var(--border); display: grid; gap: 4px; }
+  .kpi .ms { color: var(--primary-2); }
+  .kpi .v { font-size: 26px; font-weight: 800; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
+  .kpi .l { font-size: 12px; font-weight: 600; color: var(--fg-2); }
+  .kpi.dark { background: var(--hero); border-color: var(--hero); color: #fff; text-decoration: none; transition: transform var(--t-med) var(--ease-out); }
+  .kpi.dark:hover { transform: translateY(-2px); }
+  .kpi.dark .ms { color: var(--on-hero-accent); }
+  .kpi.dark .l { color: #E9DDF0; }
+
+  .dom-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .dom-sub { font-size: 13px; color: var(--fg-2); }
+  .dom-body { display: grid; gap: 20px; }
+  .wheel-wrap { position: relative; width: min(100%, 360px); margin: 0 auto; }
+  .wheel-center { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; text-align: center; }
+  .wheel-center .v { font-size: 30px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
+  .wheel-center .c { font-size: 12px; font-weight: 600; color: var(--fg-2); }
+  .grid12 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .cell { border: 0; border-radius: var(--r-cell); min-height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; position: relative; transition: transform var(--t-med) var(--ease-out), box-shadow var(--t-med); animation: rise .5s var(--ease-out) both; animation-delay: calc(var(--i) * 35ms); }
+  .cell:hover { transform: translateY(-2px); box-shadow: 0 8px 18px -10px rgb(0 0 0 / .45); }
+  .cell .n { font-size: 20px; font-weight: 800; }
+  .cell .p { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cell .due { position: absolute; top: 6px; right: 6px; font-size: 16px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--fg-2); margin-top: 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 12px; height: 12px; border-radius: 4px; }
+  .view-toggle { display: inline-flex; }
+
+  .insights { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ins { display: grid; gap: 10px; }
+  .ins h3 { font-size: 13px; font-weight: 700; color: var(--fg-2); display: flex; align-items: center; gap: 6px; }
+  .ins .ms { font-size: 18px; }
+  .ins ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .ins li { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .ins li .sq { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font-size: 13px; }
+  .ins li .tnum { margin-left: auto; font-size: 14px; color: var(--fg-2); }
+
+  .pct { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .pct.good { color: var(--correct); } .pct.mid { color: oklch(from var(--amber) .5 c h); } .pct.bad { color: var(--incorrect); }
+
+  .chart { display: flex; align-items: flex-end; gap: 10px; height: 160px; padding: 8px 4px 0; border-bottom: 1px solid var(--divider); }
+  .chart .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; }
+  .chart .b { width: 100%; max-width: 44px; border-radius: 8px 8px 3px 3px; background: var(--primary-2); transform-origin: bottom; animation: grow-y .8s var(--ease-out) both; animation-delay: calc(var(--i) * 70ms); }
+  .chart .b.hi { background: var(--correct); }
+  .chart .v { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--fg-2); }
+  @keyframes grow-y { from { transform: scaleY(0); } }
+  .chart-x { display: flex; gap: 10px; padding: 6px 4px 0; }
+  .chart-x span { flex: 1; text-align: center; font-size: 11px; color: var(--fg-2); }
+
+  .detail-cell { width: 88px; height: 88px; border-radius: 18px; display: grid; place-items: center; font-size: 34px; font-weight: 800; flex: none; }
+  .detail-top { display: flex; gap: 16px; align-items: center; }
+  .detail-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 18px 0; }
+  .detail-stats div { background: var(--chip); border-radius: var(--r-cell); padding: 12px; }
+  .detail-stats b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .detail-stats span { font-size: 12px; color: var(--fg-2); }
+  .lvl-track { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 8px 0 4px; }
+  .lvl-track i { height: 8px; border-radius: 4px; background: var(--chip); }
+  .lvl-track i.on { background: var(--primary); }
+
+  @media (min-width: 1024px) {
+    .top-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; align-items: end; }
+    .kpis { margin-top: 0; }
+    .dom-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
+    .view-toggle { display: none; }
+    .dom-body > [hidden] { display: block !important; }
+    .low-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 28px; align-items: start; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
+<div class="app has-rail">
+  <nav class="rail" id="rail" aria-label="Navegación principal"></nav>
+  <main class="main" id="main" data-od-id="progress">
+    <header class="appbar"><h1 class="appbar-title">Progreso</h1><span class="spacer"></span><a class="icon-btn" href="settings.html" aria-label="Ajustes"><span class="ms o">settings</span></a></header>
+    <div class="tabs-row"><div class="segmented" role="tablist" aria-label="Vista de progreso">
+      <button role="tab" id="tab-sum" aria-selected="true" aria-controls="p-sum" data-od-id="tab-summary">Resumen</button>
+      <button role="tab" id="tab-his" aria-selected="false" aria-controls="p-his" data-od-id="tab-history" tabindex="-1">Historial</button>
+    </div></div>
+
+    <div id="p-sum" role="tabpanel" aria-labelledby="tab-sum">
+      <div class="top-grid">
+        <section class="g-head rise" data-od-id="global-accuracy" aria-labelledby="gh">
+          <h2 class="overline" id="gh">Precisión global</h2>
+          <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span class="big-num-lg" id="g-num">0 %</span><span class="delta"><span class="ms xs" aria-hidden="true">trending_up</span>+4,1 pts vs. semana pasada</span></div>
+          <div class="goal"><div class="bar" role="meter" aria-label="Avance hacia la meta del 90 %" aria-valuemin="0" aria-valuemax="100" id="goal-m"><i id="goal-i"></i></div><div class="cap"><span id="goal-t"></span><span>Meta 90 %</span></div></div>
+        </section>
+        <div class="kpis rise" style="--i:1" data-od-id="kpi-row">
+          <div class="kpi"><span class="ms o" aria-hidden="true">timer</span><span class="v" id="k-lat"></span><span class="l">Latencia media</span></div>
+          <div class="kpi"><span class="ms o" aria-hidden="true">touch_app</span><span class="v" id="k-att"></span><span class="l">Intentos</span></div>
+          <a class="kpi dark" href="session.html?mode=today" data-od-id="kpi-due" aria-describedby="due-l"><span class="ms" aria-hidden="true">event_repeat</span><span class="v" id="k-due"></span><span class="l" id="due-l">Pendientes · repasar</span></a>
+        </div>
+      </div>
+
+      <section class="section card rise" style="--i:2" aria-labelledby="dom-h" data-od-id="mastery">
+        <div class="dom-head">
+          <div><h2 class="overline-lg" id="dom-h" style="color:var(--fg-2)">Dominio por nota</h2><p class="dom-sub tnum" id="dom-sub"></p></div>
+          <div class="segmented view-toggle" role="group" aria-label="Tipo de vista">
+            <button type="button" aria-pressed="true" data-v="wheel">Rueda</button><button type="button" aria-pressed="false" data-v="grid">Rejilla</button>
+          </div>
+        </div>
+        <div class="dom-body">
+          <div id="v-wheel"><div class="wheel-wrap"><div id="wheel"></div><div class="wheel-center" aria-hidden="true"><div><div class="v" id="wc-v">12</div><div class="c" id="wc-c">notas</div></div></div></div></div>
+          <div id="v-grid" hidden><div class="grid12" id="grid12" role="list" aria-label="Rejilla de dominio por nota"></div>
+            <div class="legend"><span><i class="m-red-l"></i>&lt; 50 % crítica</span><span><i class="m-amb-d"></i>50–74 % en curso</span><span><i class="m-grn-2"></i>≥ 75 % consolidada</span><span><span class="ms xs" aria-hidden="true">schedule</span>pendiente de repaso</span></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="low-grid">
+        <section class="section rise" style="--i:3" aria-labelledby="ins-h" data-od-id="insights">
+          <div class="section-head"><h2 id="ins-h">Tus extremos</h2><span class="badge-pro">PRO</span></div>
+          <div class="insights">
+            <div class="card ins"><h3><span class="ms" style="color:var(--incorrect)" aria-hidden="true">south</span>Más difíciles</h3><ol id="hard"></ol></div>
+            <div class="card ins"><h3><span class="ms" style="color:var(--correct)" aria-hidden="true">north</span>Más fáciles</h3><ol id="easy"></ol></div>
+          </div>
+        </section>
+        <section class="section rise" style="--i:4" aria-labelledby="rec-h" data-od-id="recent-sessions">
+          <div class="section-head"><h2 id="rec-h">Últimas sesiones</h2><button class="link" type="button" id="to-his">Historial</button></div>
+          <div class="list" id="recent"></div>
+        </section>
+      </div>
+    </div>
+
+    <div id="p-his" role="tabpanel" aria-labelledby="tab-his" hidden>
+      <section class="card" aria-labelledby="ch-h" data-od-id="history-chart">
+        <div class="section-head"><h2 id="ch-h">Precisión por sesión</h2><span class="label-md muted">Más antigua → más reciente</span></div>
+        <div class="chart" id="chart" role="img"></div><div class="chart-x" id="chart-x" aria-hidden="true"></div>
+      </section>
+      <section class="section" aria-labelledby="all-h"><div class="section-head"><h2 id="all-h">Todas las sesiones</h2></div><div class="list" id="all"></div></section>
+    </div>
+  </main>
+  <nav class="navbar" id="navbar" aria-label="Navegación principal"></nav>
+</div>
+
+<dialog id="note-dlg" aria-labelledby="nd-h">
+  <div class="sheet" id="nd-body"></div>
+</dialog>
+
+<script src="assets/togesc.js"></script>
+<script>
+  TG.shell('progress');
+  const $ = id => document.getElementById(id), N = TG.NOTES;
+  const g = TG.globalPct();
+  TG.countUp($('g-num'), g, 1, ' %');
+  $('goal-i').style.width = Math.min(100, g / 90 * 100) + '%';
+  $('goal-m').setAttribute('aria-valuenow', Math.round(g / 90 * 100));
+  $('goal-t').textContent = `${Math.round(g / 90 * 100)} % de la meta`;
+  $('k-lat').textContent = TG.avgLatency().toLocaleString('es-ES', { maximumFractionDigits: 1 }) + ' s';
+  $('k-att').textContent = TG.totalAttempts().toLocaleString('es-ES');
+  const due = N.filter(n => n.due).length; $('k-due').textContent = due;
+  const solid = N.filter(n => n.pct >= 75).length;
+  $('dom-sub').textContent = `${solid} consolidadas · ${12 - solid} en curso o críticas`;
+
+  // Rueda + rejilla
+  TG.wheel($('wheel'), {
+    onHover(i) { if (i == null) { $('wc-v').textContent = solid + '/12'; $('wc-c').textContent = 'consolidadas'; return; } $('wc-v').textContent = N[i].pct + ' %'; $('wc-c').textContent = `${TG.name(i)} · nivel ${N[i].lvl}/5`; },
+    onSelect: openNote,
+  });
+  $('wc-v').textContent = solid + '/12'; $('wc-c').textContent = 'consolidadas';
+  $('grid12').innerHTML = N.map((n, i) => `<button class="cell ${TG.mClass(n.pct, n.lvl)}" role="listitem" style="--i:${i}" data-i="${i}" data-od-id="mastery-cell-${i}" aria-label="${TG.spoken(i)}, ${n.pct} %, ${TG.STATE_LABEL[TG.state(n.pct)].toLowerCase()}, nivel ${n.lvl} de 5${n.due ? ', pendiente de repaso' : ''}"><span class="n">${TG.name(i)}</span><span class="p">${n.pct} %</span>${n.due ? '<span class="ms due" aria-hidden="true">schedule</span>' : ''}</button>`).join('');
+  $('grid12').onclick = e => { const b = e.target.closest('.cell'); if (b) openNote(+b.dataset.i); };
+  document.querySelector('.view-toggle').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('.view-toggle button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    $('v-wheel').hidden = b.dataset.v !== 'wheel'; $('v-grid').hidden = b.dataset.v !== 'grid';
+  };
+
+  // Extremos
+  const sorted = N.map((n, i) => ({ i, ...n })).sort((a, b) => a.pct - b.pct);
+  const li = x => `<li><span class="sq ${TG.mClass(x.pct, x.lvl)}">${TG.name(x.i)}</span>${TG.spoken(x.i)}<span class="tnum">${x.pct} %</span></li>`;
+  $('hard').innerHTML = sorted.slice(0, 3).map(li).join('');
+  $('easy').innerHTML = sorted.slice(-3).reverse().map(li).join('');
+
+  // Sesiones
+  const H = TG.history();
+  const pc = (h) => Math.round(h.hits / h.rounds * 100);
+  const cls = p => p >= 75 ? 'good' : p >= 50 ? 'mid' : 'bad';
+  const row = h => `<div class="row"><span class="icon-box" aria-hidden="true"><span class="ms">${h.icon}</span></span><span class="grow"><span class="row-title" style="display:block">${h.mode}</span><span class="row-sub tnum">${h.rounds} rondas · ${h.hits} aciertos · ${h.when}</span></span><span class="pct ${cls(pc(h))}">${pc(h)} %</span></div>`;
+  $('recent').innerHTML = H.slice(0, 4).map(row).join('');
+  $('all').innerHTML = H.map(row).join('');
+  const C = H.slice(0, 8).reverse();
+  $('chart').innerHTML = C.map((h, k) => `<div class="col"><span class="v">${pc(h)}</span><span class="b ${pc(h) >= 75 ? 'hi' : ''}" style="height:${pc(h)}%;--i:${k}"></span></div>`).join('');
+  $('chart').setAttribute('aria-label', 'Precisión por sesión: ' + C.map(h => `${h.mode} ${pc(h)} %`).join(', '));
+  $('chart-x').innerHTML = C.map(h => `<span>${h.when.replace(' · ', ' ')}</span>`).join('');
+
+  // Tabs
+  const tabs = [$('tab-sum'), $('tab-his')];
+  function sel(t) { tabs.forEach(x => { const on = x === t; x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1; $(x.getAttribute('aria-controls')).hidden = !on; }); t.focus(); }
+  tabs.forEach(t => { t.onclick = () => sel(t); t.onkeydown = e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') sel(tabs[1 - tabs.indexOf(t)]); }; });
+  $('to-his').onclick = () => sel(tabs[1]);
+
+  // Detalle de nota
+  function openNote(i) {
+    const n = N[i], s = TG.state(n.pct);
+    const msg = { critical: 'Esta nota aparece con más frecuencia hasta que superes el 50 %.', progress: 'Vas bien. Sube de nivel acertándola en sesiones distintas.', solid: 'Consolidada. El SRS la repasa a intervalos cada vez más largos.' }[s];
+    $('nd-body').innerHTML = `
+      <div class="sheet-head"><span class="overline">Detalle de nota</span><button class="icon-btn" aria-label="Cerrar" onclick="this.closest('dialog').close()"><span class="ms">close</span></button></div>
+      <div class="detail-top"><span class="detail-cell ${TG.mClass(n.pct, n.lvl)}">${TG.name(i)}</span><div><h2 class="h-md" id="nd-h">${TG.spoken(i)}</h2><p class="muted">${TG.STATE_LABEL[s]}${n.due ? ' · pendiente de repaso' : ''}</p></div></div>
+      <div class="detail-stats"><div><b>${n.pct} %</b><span>Precisión</span></div><div><b>${n.att}</b><span>Intentos</span></div><div><b>${n.lat.toLocaleString('es-ES')} s</b><span>Latencia</span></div></div>
+      <p class="label-lg" style="font-weight:700">Nivel SRS ${n.lvl} de 5</p>
+      <div class="lvl-track" aria-hidden="true">${[1, 2, 3, 4, 5].map(k => `<i class="${k <= n.lvl ? 'on' : ''}"></i>`).join('')}</div>
+      <p class="label-lg muted" style="margin:8px 0 20px">${msg}</p>
+      <div style="display:flex;gap:10px"><button class="btn btn-secondary" id="nd-play" style="flex:1"><span class="ms sm" aria-hidden="true">volume_up</span>Escuchar</button><a class="btn btn-primary" style="flex:1.4" href="session.html?mode=single&note=${i}">Practicar esta nota</a></div>`;
+    $('nd-play').onclick = () => TG.playNote(TG.midiFor(i, 4));
+    $('note-dlg').showModal();
+  }
+</script>
+</body>
+</html>

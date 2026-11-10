@@ -17,6 +17,12 @@ abstract final class MicrophonePitchService {
   static String? _lastNote;
   static int _stableCount = 0;
 
+  /// El grabador nativo solo se toca si alguna vez se pidió el micrófono:
+  /// cada salida de la sesión llama a [stopListening] y, sin esta guarda,
+  /// creaba el grabador nativo aunque no se hubiera usado (y fallaba sin
+  /// control donde no hay plugin).
+  static bool _recorderUsed = false;
+
   static bool get isSupported => true;
 
   static Future<bool> startListening({
@@ -29,6 +35,7 @@ abstract final class MicrophonePitchService {
     _stableCount = 0;
 
     try {
+      _recorderUsed = true;
       if (!await _recorder.hasPermission()) {
         onStatus?.call('Permiso de micrófono denegado.');
         return false;
@@ -91,7 +98,7 @@ abstract final class MicrophonePitchService {
   static Future<void> stopListening() async {
     await _subscription?.cancel();
     _subscription = null;
-    if (await _recorder.isRecording()) {
+    if (_recorderUsed && await _recorder.isRecording()) {
       await _recorder.stop();
     }
     _onNote = null;

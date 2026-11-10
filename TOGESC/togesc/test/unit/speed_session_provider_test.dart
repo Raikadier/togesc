@@ -269,5 +269,59 @@ void main() {
 
       expect(container.read(speedSessionProvider).state, SpeedState.incorrect);
     });
+
+    test('setTargetMode empieza una sesión nueva sin arrastrar la anterior',
+        () async {
+      final notifier = container.read(speedSessionProvider.notifier);
+      await notifier.startRound();
+      notifier.submitAnswer(
+        container.read(speedSessionProvider).currentNotes,
+        1.0,
+      );
+      expect(container.read(speedSessionProvider).roundsPlayed, 1);
+
+      notifier.setTargetMode(GameMode.singleNote);
+
+      final state = container.read(speedSessionProvider);
+      expect(state.state, SpeedState.idle);
+      expect(state.roundsPlayed, 0);
+      expect(state.correctRounds, 0);
+      expect(state.consecutiveCorrect, 0);
+      expect(state.responseTimes, isEmpty);
+    });
+
+    test('una segunda respuesta en la misma ronda se ignora', () async {
+      final notifier = container.read(speedSessionProvider.notifier);
+      await notifier.startRound();
+      final notes = container.read(speedSessionProvider).currentNotes;
+
+      notifier.submitAnswer(notes, 1.0);
+      notifier.submitAnswer(['X'], 1.2);
+
+      final state = container.read(speedSessionProvider);
+      expect(state.state, SpeedState.correct);
+      expect(state.roundsPlayed, 1);
+      expect(state.consecutiveCorrect, 1);
+      expect(state.responseTimes, [1.0]);
+    });
+
+    test('stop cancela la cuenta atrás: no hay timeout ni penalización SRS',
+        () async {
+      final notifier = container.read(speedSessionProvider.notifier);
+      notifier.setTargetMode(GameMode.singleNote, initialTime: speedMinTime);
+      await notifier.startRound();
+      final note = container.read(speedSessionProvider).currentNotes.single;
+      final seenBefore = srs.noteData[note]!.timesSeen;
+
+      notifier.stop();
+      await Future<void>.delayed(
+        Duration(milliseconds: (speedMinTime * 1000).toInt() + 300),
+      );
+
+      final state = container.read(speedSessionProvider);
+      expect(state.state, isNot(SpeedState.timeout));
+      expect(state.roundsPlayed, 0);
+      expect(srs.noteData[note]!.timesSeen, seenBefore);
+    });
   });
 }

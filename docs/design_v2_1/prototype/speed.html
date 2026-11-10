@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Velocidad · TOGESC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=block">
+<link rel="stylesheet" href="assets/togesc.css">
+<style>
+  .intro { display: grid; gap: 6px; margin: 4px 0 20px; }
+  .intro .ttl { display: flex; align-items: center; gap: 10px; }
+  .intro .ttl .ms { color: var(--speed); font-size: 32px; }
+  .diffs { display: grid; gap: 10px; }
+  .diff { position: relative; display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: var(--r-card); border: 1.5px solid var(--border); background: var(--panel); cursor: pointer; transition: border-color var(--t-fast), background var(--t-fast), transform var(--t-med) var(--ease-out); }
+  .diff:hover { border-color: var(--speed); }
+  .diff input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .diff:has(input:checked) { border-color: var(--speed); background: var(--speed-container); }
+  .diff:has(input:focus-visible) { outline: 3px solid var(--ring); outline-offset: 2px; }
+  .diff .sec { width: 64px; height: 64px; border-radius: var(--r-cell); display: grid; place-items: center; background: var(--chip); flex: none; font-weight: 800; font-size: 22px; font-variant-numeric: tabular-nums; color: var(--speed); }
+  .diff:has(input:checked) .sec { background: var(--speed); color: #fff; }
+  .diff .t { font-weight: 700; font-size: calc(17px * var(--fs)); }
+  .diff .d { font-size: 13px; color: var(--fg-2); }
+  .diff .best { margin-left: auto; text-align: right; font-size: 12px; color: var(--fg-2); }
+  .diff .best b { display: block; font-size: 18px; color: var(--fg); font-variant-numeric: tabular-nums; }
+  .diff .check { position: absolute; top: 10px; right: 10px; color: var(--speed); opacity: 0; transition: opacity var(--t-fast); }
+  .diff:has(input:checked) .check { opacity: 1; }
+  .blk { margin-top: 12px; background: var(--hero); color: #fff; border-radius: var(--r-card); padding: 16px; display: flex; align-items: center; gap: 14px; }
+  .blk .ms { color: var(--on-hero-accent); }
+  .blk .d { font-size: 13px; color: #E9DDF0; }
+  .blk .switch input:checked + .track { background: var(--on-hero-accent); border-color: var(--on-hero-accent); }
+  .blk .switch input:checked + .track::after { background: var(--hero); }
+  .blk .switch .track { background: rgb(255 255 255 / .1); border-color: #CFC3CD; }
+  .blk .switch .track::after { background: #CFC3CD; }
+  .how { display: grid; gap: 12px; }
+  .how li { display: flex; gap: 12px; align-items: flex-start; }
+  .how ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .how .num { width: 28px; height: 28px; border-radius: 50%; background: var(--speed-container); color: var(--speed); font-weight: 800; display: grid; place-items: center; flex: none; font-size: 14px; }
+  .start-bar { margin-top: 24px; }
+  @media (min-width: 1024px) { .sel-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 28px; align-items: start; } .sel-grid .section:first-child { margin-top: 0; } }
+
+  /* Juego */
+  #game { display: none; min-height: 100dvh; flex-direction: column; max-width: 980px; margin: 0 auto; }
+  body.playing #game { display: flex; }
+  body.playing .app { display: none; }
+  .g-top { height: 64px; display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+  .g-top .chips { flex: 1; display: flex; justify-content: center; gap: 6px; }
+  .g-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; padding: 12px 16px; }
+  .timer { position: relative; width: 168px; height: 168px; }
+  .timer svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .timer .trk { stroke: var(--chip); } .timer .arc { stroke: var(--speed-dark); }
+  .timer.low .arc { stroke: var(--s-error); }
+  .timer .val { position: absolute; inset: 0; display: grid; place-items: center; }
+  .timer .val b { font-size: 46px; font-weight: 800; letter-spacing: -1px; font-variant-numeric: tabular-nums; line-height: 1; }
+  .timer .val span { font-size: 12px; color: var(--fg-2); font-weight: 600; display: block; margin-top: 4px; }
+  .timer.low .val b { color: var(--s-error); animation: beat .5s ease-in-out infinite; }
+  @keyframes beat { 50% { transform: scale(1.08); } }
+  .countdown { font-size: 96px; font-weight: 800; color: var(--speed-dark); animation: pop .6s var(--ease-spring); }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } }
+  .g-phase { color: var(--speed-dark); }
+  .g-title { font-size: calc(22px * var(--fs)); font-weight: 700; }
+  .g-sub { color: var(--fg-2); font-size: 14px; }
+  .g-piano { padding: 0 16px calc(16px + env(safe-area-inset-bottom)); }
+  .flash-ok { animation: flash-ok .5s ease; } .flash-bad { animation: flash-bad .5s ease; }
+  @keyframes flash-ok { 30% { background: rgb(129 199 132 / .12); } }
+  @keyframes flash-bad { 30% { background: rgb(239 154 154 / .14); } }
+  .res { display: grid; gap: 16px; width: min(100%, 520px); }
+  .res-kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .res-kpis div { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-card); padding: 14px; }
+  .res-kpis b { display: block; font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .res-kpis span { font-size: 12px; color: var(--fg-2); font-weight: 600; }
+  .record { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; background: var(--speed-dark); color: var(--hero); font-weight: 800; font-size: 13px; justify-self: center; animation: pop .5s var(--ease-spring); }
+  .btn-dark2 { background: var(--btn); border: 1px solid var(--border); color: var(--fg); }
+  .btn-dark2:hover { background: var(--chip); }
+  .btn-speed { min-height: var(--cta-h); border-radius: var(--r-cta); background: var(--speed-dark); color: var(--hero); font-weight: 800; font-size: 17px; }
+  .btn-speed:hover { background: oklch(from #FF8A65 calc(l - .06) c h); }
+  @media (min-width: 1024px) { .piano { --h: 210px; --bw: 52px; --bh: 126px; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
+<div class="app has-rail">
+  <nav class="rail" id="rail" aria-label="Navegación principal"></nav>
+  <main class="main" id="main" data-od-id="speed-select">
+    <header class="appbar"><a class="logo" href="home.html">TOGESC</a><span class="spacer"></span><span class="badge-pro">PRO</span></header>
+    <div class="intro rise">
+      <h1 class="h-lg ttl"><span class="ms" aria-hidden="true">bolt</span>Modo velocidad</h1>
+      <p class="muted body-lg">Elige un desafío de ráfagas. El tiempo límite baja con cada acierto.</p>
+    </div>
+    <div class="sel-grid">
+      <section class="section rise" style="--i:1" aria-labelledby="diff-h">
+        <div class="section-head"><h2 id="diff-h">Tiempo inicial</h2></div>
+        <div class="diffs" role="radiogroup" aria-labelledby="diff-h" id="diffs"></div>
+        <div class="blk" data-od-id="speed-black-keys">
+          <span class="ms lg" aria-hidden="true">piano</span>
+          <div style="flex:1"><div style="font-weight:700" id="blk-l">Teclas negras</div><div class="d">Incluye C♯, D♯, F♯, G♯ y A♯ en la ráfaga.</div></div>
+          <label class="switch"><input type="checkbox" id="blk" checked aria-labelledby="blk-l"><span class="track"></span></label>
+        </div>
+        <div class="start-bar"><button class="btn btn-cta btn-block" id="go" data-od-id="speed-start"><span class="ms" aria-hidden="true">play_arrow</span>Comenzar</button></div>
+      </section>
+      <section class="section card how rise" style="--i:2" aria-labelledby="how-h" data-od-id="speed-how">
+        <h2 class="overline-lg" id="how-h" style="color:var(--fg-2)">Cómo funciona</h2>
+        <ol>
+          <li><span class="num">1</span><span>Suena una nota. Respóndela en el piano o con las teclas A–G antes de que se acabe el tiempo.</span></li>
+          <li><span class="num">2</span><span>Cada acierto reduce el tiempo límite un 10 %, hasta un mínimo de 1,5 s.</span></li>
+          <li><span class="num">3</span><span>Un fallo o un tiempo agotado cierra la ráfaga. Mantén la concentración.</span></li>
+        </ol>
+      </section>
+    </div>
+  </main>
+  <nav class="navbar" id="navbar" aria-label="Navegación principal"></nav>
+</div>
+
+<div id="game" class="theme-session" data-od-id="speed-game">
+  <header class="g-top">
+    <button class="icon-btn" id="quit" aria-label="Salir al menú"><span class="ms">close</span></button>
+    <div class="chips">
+      <span class="chip"><span class="ms" style="font-size:16px;color:var(--s-amber)" aria-hidden="true">bolt</span><span id="g-streak" aria-label="">0</span></span>
+      <span class="chip"><span class="ms" style="font-size:16px;color:var(--speed-dark)" aria-hidden="true">timer</span><span id="g-limit">15,0 s</span></span>
+    </div>
+    <span style="width:48px"></span>
+  </header>
+  <section class="g-stage" id="g-stage" aria-live="polite"></section>
+  <div class="g-piano" id="g-piano-wrap"><div id="g-piano" data-od-id="speed-piano"></div></div>
+</div>
+
+<script src="assets/togesc.js"></script>
+<script>
+  TG.shell('speed');
+  const $ = id => document.getElementById(id);
+  const DIFF = [{ id: 'easy', t: 'Fácil', s: 15, d: 'Para calentar el oído' }, { id: 'pro', t: 'Pro', s: 10, d: 'Ritmo de práctica habitual' }, { id: 'elite', t: 'Elite', s: 5, d: 'Reconocimiento inmediato' }];
+  const best = TG.store.get('speedBest', {});
+  let diff = TG.store.get('speedDiff', 'pro');
+  $('diffs').innerHTML = DIFF.map(x => `<label class="diff" data-od-id="speed-diff-${x.id}"><input type="radio" name="diff" value="${x.id}" ${x.id === diff ? 'checked' : ''} aria-label="${x.t}, ${x.s} segundos"><span class="sec">${x.s}s</span><span><span class="t" style="display:block">${x.t}</span><span class="d">${x.d}</span></span><span class="best">Mejor racha<b>${best[x.id] ?? '—'}</b></span><span class="ms check sm" aria-hidden="true">check_circle</span></label>`).join('');
+  $('diffs').onchange = e => { diff = e.target.value; TG.store.set('speedDiff', diff); };
+
+  let limit, streak, times, timer, tStart, target, phase, rafId;
+  const stage = $('g-stage');
+  const kb = TG.piano($('g-piano'), { onPress: i => answer(i) });
+  function applyPool() { const blk = $('blk').checked; [1, 3, 6, 8, 10].forEach(i => { kb.keys[i].disabled = !blk; kb.keys[i].classList.toggle('is-dim', !blk); }); }
+  const fmt = s => s.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+  function begin() {
+    TG.ac(); document.body.classList.add('playing', 'theme-session'); window.scrollTo(0, 0);
+    limit = DIFF.find(x => x.id === diff).s; streak = 0; times = []; phase = 'count';
+    $('g-streak').textContent = 0; $('g-limit').textContent = fmt(limit) + ' s';
+    kb.reset(); kb.disable(true); applyPool(); $('g-piano-wrap').hidden = false;
+    let n = 3;
+    const tick = () => { if (phase !== 'count') return; if (n === 0) return round(); stage.innerHTML = `<p class="overline-lg g-phase">Listo para el desafío</p><div class="countdown" aria-live="assertive">${n}</div><p class="g-sub">Empieza ahora · ${DIFF.find(x => x.id === diff).t}</p>`; TG.playNote(n === 1 ? 84 : 72, { timbre: 'sine', dur: .15, gain: .3 }); n--; timer = setTimeout(tick, TG.reduced() ? 500 : 800); };
+    tick();
+  }
+  function round() {
+    phase = 'play'; kb.reset(); applyPool(); kb.disable(false); applyPool();
+    const pool = $('blk').checked ? [...Array(12).keys()] : [0, 2, 4, 5, 7, 9, 11];
+    let n; do { n = pool[Math.floor(Math.random() * pool.length)]; } while (n === target && pool.length > 1);
+    target = n;
+    stage.innerHTML = `<p class="overline-lg g-phase">Ráfaga activa</p>
+      <div class="timer" id="timer"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="trk" cx="50" cy="50" r="45" fill="none" stroke-width="6"/><circle class="arc" id="t-arc" cx="50" cy="50" r="45" fill="none" stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/></svg><div class="val"><div><b id="t-val">${fmt(limit)}</b><span>segundos</span></div></div></div>
+      <h1 class="g-title">¿Qué nota escuchaste?</h1><p class="g-sub">Escucha… y responde rápido</p>`;
+    TG.playNote(TG.midiFor(target, 3 + Math.floor(Math.random() * 3)), { dur: 1 });
+    tStart = performance.now();
+    const loop = () => {
+      const el = (performance.now() - tStart) / 1000, left = Math.max(0, limit - el);
+      const v = $('t-val'); if (!v) return;
+      v.textContent = fmt(left); $('t-arc').style.strokeDashoffset = (1 - left / limit) * 100;
+      $('timer').classList.toggle('low', left < Math.min(2, limit * .3));
+      if (left <= 0) return end('timeout');
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+  }
+  function answer(i) {
+    if (phase !== 'play') return;
+    cancelAnimationFrame(rafId);
+    const t = (performance.now() - tStart) / 1000;
+    if (i === target) {
+      streak++; times.push(t); kb.set(i, 'is-correct', 'check');
+      limit = Math.max(1.5, limit * .9);
+      $('g-streak').textContent = streak; $('g-limit').textContent = fmt(limit) + ' s';
+      document.getElementById('game').classList.remove('flash-ok'); void stage.offsetWidth; document.getElementById('game').classList.add('flash-ok');
+      TG.announce(`Correcto, ${TG.spoken(i)}. Racha ${streak}.`);
+      phase = 'gap'; kb.disable(true); setTimeout(round, TG.reduced() ? 250 : 550);
+    } else { kb.set(target, 'is-correct', 'check'); kb.set(i, 'is-wrong', 'close'); end('wrong', i); }
+  }
+  function end(why, picked) {
+    phase = 'end'; cancelAnimationFrame(rafId); kb.disable(true);
+    if (why === 'timeout') kb.set(target, 'is-correct', 'check');
+    document.getElementById('game').classList.remove('flash-bad'); void stage.offsetWidth; document.getElementById('game').classList.add('flash-bad');
+    const rec = streak > (best[diff] || 0); if (rec) { best[diff] = streak; TG.store.set('speedBest', best); }
+    TG.logSession({ mode: 'Velocidad · ' + DIFF.find(x => x.id === diff).t, icon: 'bolt', rounds: streak + 1, hits: streak, when: 'Ahora' });
+    const avg = times.length ? times.reduce((a, b) => a + b, 0) / times.length : 0, fast = times.length ? Math.min(...times) : 0;
+    setTimeout(() => {
+      $('g-piano-wrap').hidden = true;
+      stage.innerHTML = `<div class="res" data-od-id="speed-summary">
+        <p class="overline-lg g-phase">Fin de sesión</p>
+        <h1 class="h-lg" id="res-h">${why === 'timeout' ? 'Se acabó el tiempo' : `Era ${TG.name(target)}, respondiste ${TG.name(picked)}`}</h1>
+        ${rec && streak ? '<span class="record"><span class="ms sm" aria-hidden="true">emoji_events</span>Nuevo récord personal</span>' : ''}
+        <div class="res-kpis">
+          <div><b>${streak}</b><span>Racha final</span></div>
+          <div><b>${fast ? fmt(fast) + ' s' : '—'}</b><span>Mejor tiempo</span></div>
+          <div><b>${avg ? fmt(avg) + ' s' : '—'}</b><span>Promedio</span></div>
+          <div><b>${streak}/${streak + 1}</b><span>Respuestas</span></div>
+        </div>
+        <button class="btn btn-speed" id="again"><span class="ms" aria-hidden="true">replay</span>Reintentar</button>
+        <button class="btn btn-dark2" id="menu">Menú</button>
+      </div>`;
+      $('again').onclick = begin; $('menu').onclick = quit; $('again').focus();
+      TG.announce(`Fin de la ráfaga. Racha final ${streak}.`, true);
+    }, TG.reduced() ? 300 : 1300);
+  }
+  function quit() { clearTimeout(timer); cancelAnimationFrame(rafId); phase = 'idle'; document.body.classList.remove('playing'); location.reload(); }
+  $('go').onclick = begin; $('quit').onclick = quit;
+  document.addEventListener('keydown', e => {
+    if (!document.body.classList.contains('playing')) return;
+    if (e.key === 'Escape') return quit();
+    const n = TG.keyToNote(e); if (n != null && phase === 'play' && !kb.keys[n].disabled) { e.preventDefault(); kb.press(n, true); }
+  });
+</script>
+</body>
+</html>
