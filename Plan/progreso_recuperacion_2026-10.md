@@ -17,6 +17,10 @@ Hecho por Claude Code a petición del propietario, que reactivó el proyecto y c
 - **Estado de los datos:** 2 usuarios, 1 fila de progreso, 1 suscripción y 24 eventos de analítica.
 - **Avisos de seguridad de Supabase:** la protección contra contraseñas filtradas está desactivada. `public.rls_auto_enable()` no está en las migraciones del repo: es un disparador que activa RLS en las tablas nuevas, creado desde el panel.
 
+- **Producción al día (fase R2 cerrada).** El PR #9 se mergeó en `main` (commit `86384ef`) con la CI en verde. La CI de `main` pasó (run 42859327813) y Deploy Web publicó (run 42860132903), los dos con Flutter 3.47.7.
+  - Comprobado: https://togesc.vercel.app responde 200, `main.dart.js` es del 2026-11-10 y contiene los textos del lote A y ninguno de los antiguos. La web abre en el onboarding nuevo sin errores en la consola.
+  - Producción llevaba en la versión del 2026-07-24.
+
 **Pendiente del propietario:**
 1. Crear el secret `BACKUP_PASSPHRASE` en GitHub Actions. Sigue sin existir, así que no hay ningún backup con datos.
 2. Lanzar «Supabase Backup» a mano y descargar el artefacto.
