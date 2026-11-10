@@ -45,7 +45,7 @@ void main() {
     test('dos de tres vistas', () {
       expect(
         todayHeroCopy([_note('C', 40), _note('D', 55), _note('E', null)]),
-        'El SRS solo tiene datos de 2 notas; el resto del foco son notas '
+        'Solo hay datos de 2 notas; el resto del foco son notas '
         'nuevas.',
       );
     });
@@ -53,11 +53,11 @@ void main() {
     test('el copy se ajusta al número de notas foco', () {
       expect(
         todayHeroCopy([_note('C', 40, overdue: true)]),
-        'El SRS priorizó la nota atrasada o con menor precisión.',
+        'El repaso priorizó la nota atrasada o con menor precisión.',
       );
       expect(
         todayHeroCopy([_note('C', 40), _note('D', 50)]),
-        'El SRS priorizó las dos notas con menor precisión.',
+        'El repaso priorizó las dos notas con menor precisión.',
       );
       expect(
         todayHeroCopy([
@@ -66,19 +66,19 @@ void main() {
           _note('E', 60),
           _note('F', 70),
         ]),
-        'El SRS priorizó las cuatro notas con menor precisión.',
+        'El repaso priorizó las cuatro notas con menor precisión.',
       );
     });
 
     test('foco elegido a mano', () {
       expect(
         todayHeroCopy([_note('C', 40)], custom: true),
-        'Elegiste una nota foco para hoy; el resto sigue el repaso SRS '
+        'Elegiste una nota foco para hoy; el resto sigue el repaso '
         'normal.',
       );
       expect(
         todayHeroCopy([_note('C', 40), _note('D', null)], custom: true),
-        'Elegiste dos notas foco para hoy; el resto sigue el repaso SRS '
+        'Elegiste dos notas foco para hoy; el resto sigue el repaso '
         'normal.',
       );
     });
@@ -97,7 +97,7 @@ void main() {
           _note('D', 50),
           _note('E', 60),
         ]),
-        'El SRS priorizó las tres notas atrasadas o con menor precisión.',
+        'El repaso priorizó las tres notas atrasadas o con menor precisión.',
       );
       expect(
         todayHeroCopy([
@@ -105,11 +105,11 @@ void main() {
           _note('D', 50),
           _note('E', 60),
         ]),
-        'El SRS priorizó las tres notas en aprendizaje o con menor precisión.',
+        'El repaso priorizó las tres notas en aprendizaje o con menor precisión.',
       );
       expect(
         todayHeroCopy([_note('C', 40), _note('D', 50), _note('E', 60)]),
-        'El SRS priorizó las tres notas con menor precisión.',
+        'El repaso priorizó las tres notas con menor precisión.',
       );
     });
   });
@@ -160,7 +160,7 @@ void main() {
             correctRounds: 43,
           ),
         ).progressLabel,
-        '86% · 24 ses.',
+        '86 % · 24 ses.',
       );
     });
 

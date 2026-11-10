@@ -127,7 +127,7 @@ class _OnboardingWelcomeArtState extends State<OnboardingWelcomeArt>
             ),
             const SizedBox(height: DesignTokens.spacingMd),
             Text(
-              'SRS · variación · limpieza tonal',
+              'Escucha · responde · repasa',
               style: theme.textTheme.labelLarge?.copyWith(
                 color: DesignTokens.onHero,
                 fontWeight: FontWeight.w700,
@@ -212,28 +212,28 @@ class OnboardingPedagogyBento extends StatelessWidget {
       PedagogySectionCard(
         icon: Icons.update_rounded,
         accentColor: scheme.primary,
-        title: 'Algoritmo SRS',
+        title: 'Repaso inteligente',
         body:
-            'Repetición inteligente de las notas críticas para consolidar '
-            'memoria auditiva a largo plazo.',
+            'Las notas que te cuestan vuelven más a menudo; las que ya '
+            'reconoces, cada vez menos.',
         vertical: true,
       ),
       PedagogySectionCard(
         icon: Icons.piano_rounded,
         accentColor: scheme.secondary,
-        title: 'Timbre universal',
+        title: 'Distintos instrumentos',
         body:
-            'Entrena en varios registros e instrumentos para reconocer la '
-            'clase de altura, no una frecuencia fija.',
+            'Cada nota suena en varios instrumentos y octavas, para que '
+            'reconozcas la nota y no un sonido concreto.',
         vertical: true,
       ),
       PedagogySectionCard(
         icon: Icons.blur_on_rounded,
         accentColor: scheme.tertiary,
-        title: 'Neutralidad tonal',
+        title: 'Borrado de referencia',
         body:
-            'Un estímulo de limpieza breve tras cada ejercicio evita el '
-            'anclaje relativo entre rondas.',
+            'Un sonido breve entre rondas evita que compares con la nota '
+            'anterior.',
         vertical: true,
       ),
     ];

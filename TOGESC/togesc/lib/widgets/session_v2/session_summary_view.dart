@@ -59,11 +59,11 @@ class SessionSummaryView extends StatelessWidget {
     final changesColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('CAMBIOS DE NIVEL SRS', style: overline),
+        Text('CAMBIOS DE NIVEL', style: overline),
         const SizedBox(height: DesignTokens.spacingSm + 2),
         if (changes.isEmpty)
           Text(
-            'Esta sesión no tocó ninguna nota del SRS.',
+            'Esta sesión no tocó ninguna nota del repaso.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: DesignTokens.sessionTextSecondary,
             ),

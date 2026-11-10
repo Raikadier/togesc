@@ -5,6 +5,7 @@ import 'dart:ui' show CheckedState;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:togesc/utils/number_format.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:togesc/app/app_theme.dart';
@@ -197,7 +198,7 @@ void main() {
       );
       expect(
         find.bySemanticsLabel(
-          'Pro, 10 segundos. Ritmo de práctica habitual. Mejor racha: 4',
+          'Medio, 10 segundos. Ritmo de práctica habitual. Récord: 4 seguidas',
         ),
         findsOneWidget,
       );
@@ -232,10 +233,10 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    test('formatSpeedSeconds usa coma y quita ceros', () {
-      expect(formatSpeedSeconds(3), '3 s');
-      expect(formatSpeedSeconds(1.5), '1,5 s');
-      expect(formatSpeedSeconds(0.925, decimals: 2), '0,93 s');
+    test('formatSecondsEs usa coma y quita ceros', () {
+      expect(formatSecondsEs(3, trimZeros: true), '3 s');
+      expect(formatSecondsEs(1.5, trimZeros: true), '1,5 s');
+      expect(formatSecondsEs(0.925, decimals: 2, trimZeros: true), '0,93 s');
     });
   });
 
@@ -492,7 +493,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Racha final'), findsOneWidget);
+    expect(find.text('Seguidas'), findsOneWidget);
     expect(find.text('0,90 s'), findsOneWidget);
     expect(find.text('1,50 s'), findsOneWidget);
     expect(find.text('3/4'), findsOneWidget);

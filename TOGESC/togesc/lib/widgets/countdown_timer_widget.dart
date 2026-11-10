@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
 import '../app/togesc_colors.dart';
+import '../utils/number_format.dart';
 
 /// Temporizador en anillo del modo velocidad (v2.1, SPEC §2.4.2).
 ///
@@ -81,7 +82,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     final progress = total > 0 ? (remaining / total).clamp(0.0, 1.0) : 0.0;
     final low = CountdownTimerWidget.isLow(remaining, total);
     final color = low ? colors.incorrect : colors.speedAccent;
-    final value = remaining.toStringAsFixed(1).replaceAll('.', ',');
+    final value = formatDecimalEs(remaining);
     final wholeSeconds = remaining.ceil();
 
     return Semantics(

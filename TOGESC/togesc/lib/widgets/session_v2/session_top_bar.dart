@@ -5,6 +5,7 @@ import '../../app/design_tokens.dart';
 import '../../models/audio_preferences.dart';
 import '../../providers/audio_preferences_provider.dart';
 import '../session_instrument_sheet.dart';
+import '../../utils/number_format.dart';
 
 /// Datos de las chips de la sesión: ronda, precisión y racha.
 @immutable
@@ -34,7 +35,7 @@ class SessionStats {
       : 'Ronda $round';
 
   String get accuracyText =>
-      accuracyPercent == null ? '—' : '${accuracyPercent!.round()}%';
+      accuracyPercent == null ? '—' : '${accuracyPercent!.round()} %';
 
   String get accuracySemantics => accuracyPercent == null
       ? 'Precisión: sin rondas todavía'
@@ -138,7 +139,7 @@ class SessionStatChips extends StatelessWidget {
           icon: Icons.bolt_rounded,
           iconColor: DesignTokens.sessionAmber,
           text: '${stats.streak}',
-          semanticsLabel: 'Racha de ${stats.streak} aciertos seguidos',
+          semanticsLabel: plural(stats.streak, 'acierto seguido', 'aciertos seguidos'),
         ),
       ],
     );

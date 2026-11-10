@@ -25,6 +25,7 @@ import '../widgets/note_input_field.dart';
 import '../widgets/piano_keyboard.dart';
 import '../widgets/speed_session_views.dart';
 import '../widgets/togesc_ui.dart';
+import '../utils/number_format.dart';
 
 /// Pantalla del juego de velocidad con countdown.
 ///
@@ -367,7 +368,8 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
           SpeedSessionAnswerHeader(numNotes: required),
           const SizedBox(height: DesignTokens.spacingSm),
           Text(
-            '${_selectedNotes.length}/$required notas seleccionadas',
+            '${_selectedNotes.length}/$required '
+            '${required == 1 ? 'nota seleccionada' : 'notas seleccionadas'}',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium
                 ?.copyWith(
@@ -436,7 +438,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
       accentColor: TogescColors.of(context).correct,
       title: 'Correcto',
       subtitle:
-          'Tiempo límite: ${session.currentTimeLimit.toStringAsFixed(1)}s',
+          'Tiempo límite: ${formatSecondsEs(session.currentTimeLimit)}',
       footer: FilledButton.icon(
         onPressed: _startRound,
         icon: const Icon(Icons.skip_next_rounded),
@@ -484,7 +486,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
       icon: Icons.flag_rounded,
       accentColor: TogescColors.of(context).speedAccent,
       title: 'Fin de sesión',
-      subtitle: 'Racha final: ${session.consecutiveCorrect}',
+      subtitle: 'Seguidas: ${session.consecutiveCorrect}',
       newRecord: _newRecord,
       summary: _summary(session),
       onRetry: _retrySession,

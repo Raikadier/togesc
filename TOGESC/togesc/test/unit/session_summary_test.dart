@@ -143,12 +143,12 @@ void main() {
       );
       expect(
         sessionSummaryLead(const [same]),
-        'El SRS repetirá antes las notas que fallaste.',
+        'Las notas que fallaste volverán antes.',
       );
-      expect(sessionSummaryLead(const [up, same]), '1 nota subió de nivel SRS.');
+      expect(sessionSummaryLead(const [up, same]), '1 nota subió de nivel.');
       expect(
         sessionSummaryLead(const [up, up]),
-        '2 notas subieron de nivel SRS.',
+        '2 notas subieron de nivel.',
       );
     });
   });

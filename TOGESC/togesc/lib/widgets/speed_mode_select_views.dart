@@ -4,15 +4,8 @@ import '../app/design_tokens.dart';
 import '../app/togesc_colors.dart';
 import '../constants/game_constants.dart';
 import 'togesc_ui.dart';
+import '../utils/number_format.dart';
 
-/// Segundos con coma decimal y sin ceros sobrantes: «3 s», «1,5 s».
-String formatSpeedSeconds(double seconds, {int decimals = 1}) {
-  final fixed = seconds.toStringAsFixed(decimals);
-  final trimmed = fixed.contains('.')
-      ? fixed.replaceFirst(RegExp(r'\.?0+$'), '')
-      : fixed;
-  return '${trimmed.replaceAll('.', ',')} s';
-}
 
 /// Cabecera del selector de velocidad (v2.1, SPEC §2.4.1).
 class SpeedModeSelectHero extends StatelessWidget {
@@ -133,7 +126,7 @@ class SpeedDifficultyCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final speed = TogescColors.of(context);
-    final seconds = difficulty.initialTime.toStringAsFixed(0);
+    final seconds = formatDecimalEs(difficulty.initialTime, decimals: 0);
     final bestText = best == null ? '—' : '$best';
     final duration = motionDuration(context, DesignTokens.motionFast);
 
@@ -144,7 +137,7 @@ class SpeedDifficultyCard extends StatelessWidget {
       label:
           '${difficulty.label}, $seconds segundos. '
           '${speedDifficultyDescription(difficulty)}. '
-          'Mejor racha: ${best == null ? 'sin datos' : '$best'}',
+          'Récord: ${best == null ? 'sin datos' : '$best seguidas'}',
       onTap: onTap,
       excludeSemantics: true,
       child: Material(
@@ -216,7 +209,7 @@ class SpeedDifficultyCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'Mejor racha',
+                      'Récord',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -258,8 +251,8 @@ class SpeedHowItWorksCard extends StatelessWidget {
     'Suena una ráfaga. Respóndela en el piano o escribiendo las notas '
         'antes de que se acabe el tiempo.',
     'Cada acierto reduce el tiempo límite '
-        '${formatSpeedSeconds(speedCorrectDecrease)}, hasta un mínimo de '
-        '${formatSpeedSeconds(speedMinTime)}.',
+        '${formatSecondsEs(speedCorrectDecrease, trimZeros: true)}, hasta un mínimo de '
+        '${formatSecondsEs(speedMinTime, trimZeros: true)}.',
     'Un fallo o un tiempo agotado cierra la ráfaga. '
         'Mantén la concentración.',
   ];

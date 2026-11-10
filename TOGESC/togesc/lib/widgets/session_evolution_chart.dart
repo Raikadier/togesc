@@ -91,7 +91,7 @@ class _DayBar extends StatelessWidget {
       children: [
         if (summary.hasActivity)
           Text(
-            '${accuracy.round()}%',
+            '${accuracy.round()} %',
             style: theme.textTheme.labelSmall?.copyWith(
               color: _barColor(accuracy, scheme, colors),
               fontWeight: FontWeight.w600,

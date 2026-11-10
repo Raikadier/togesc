@@ -123,7 +123,7 @@ class SessionSrsPanel extends StatelessWidget {
           Semantics(
             header: true,
             child: Text(
-              'Enfoque SRS de la sesión'.toUpperCase(),
+              'Enfoque de la sesión'.toUpperCase(),
               style: labelStyle,
             ),
           ),
@@ -182,13 +182,13 @@ class _FocusRow extends StatelessWidget {
     final name = formatNote(entry.note);
     final pct = entry.accuracyPercent == null
         ? '—'
-        : '${entry.accuracyPercent!.round()}%';
+        : '${entry.accuracyPercent!.round()} %';
     final pctSemantics = entry.accuracyPercent == null
         ? 'sin datos de precisión'
         : '${entry.accuracyPercent!.round()} por ciento';
     return Semantics(
       container: true,
-      label: '$name, ${entry.status.label}, $pctSemantics, nivel SRS '
+      label: '$name, ${entry.status.label}, $pctSemantics, nivel '
           '${entry.srsLevel} de $srsMaxLevel'
           '${highlighted ? ', nota de esta ronda' : ''}',
       child: ExcludeSemantics(

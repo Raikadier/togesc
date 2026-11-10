@@ -6,18 +6,19 @@ import '../../constants/note_naming.dart';
 import '../../models/note_progress_summary.dart';
 import '../../utils/srs_level.dart';
 import 'progress_metrics.dart';
+import '../../utils/number_format.dart';
 
 /// Frase pedagógica de la hoja de detalle según el estado de la nota.
 String noteDetailAdvice(MasteryStatus status) => switch (status) {
       MasteryStatus.unseen =>
-        'Aún no la has practicado. Una sesión corta basta para que el SRS '
-            'empiece a conocerla.',
+        'Aún no la has practicado. Una sesión corta basta para empezar '
+            'a medirla.',
       MasteryStatus.critical =>
         'Esta nota aparece con más frecuencia hasta que superes el 50 %.',
       MasteryStatus.inProgress =>
         'Vas bien. Sube de nivel acertándola en sesiones distintas.',
       MasteryStatus.mastered =>
-        'Consolidada. El SRS la repasa a intervalos cada vez más largos.',
+        'Consolidada. La repasarás a intervalos cada vez más largos.',
     };
 
 /// Hoja «Detalle de nota» de Progreso v2.1 (SPEC §2.3.5): celda grande,
@@ -62,7 +63,7 @@ class NoteDetailSheet extends StatelessWidget {
         '${status.label[0].toUpperCase()}${status.label.substring(1)}'
         '${summary.isOverdue ? ' · pendiente de repaso' : ''}';
     final latency = summary.avgResponseTimeSec > 0 && seen
-        ? '${summary.avgResponseTimeSec.toStringAsFixed(1).replaceAll('.', ',')} s'
+        ? formatSecondsEs(summary.avgResponseTimeSec)
         : '—';
 
     return SingleChildScrollView(
@@ -168,14 +169,14 @@ class NoteDetailSheet extends StatelessWidget {
                 child: _Stat(
                   key: const ValueKey('note-detail-latency'),
                   value: latency,
-                  label: 'Latencia',
+                  label: 'Respuesta',
                 ),
               ),
             ],
           ),
           const SizedBox(height: DesignTokens.spacingLg),
           Text(
-            'Nivel SRS $level de $srsMaxLevel',
+            'Nivel $level de $srsMaxLevel',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: colors.textPrimary,

@@ -12,7 +12,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appTitle => 'Entrenador de oído absoluto';
 
   @override
-  String get srsIntensityTitle => 'Intensidad SRS';
+  String get srsIntensityTitle => 'Intensidad del repaso';
 
   @override
   String get srsIntensitySubtitle =>

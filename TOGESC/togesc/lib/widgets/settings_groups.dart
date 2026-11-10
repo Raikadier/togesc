@@ -353,7 +353,7 @@ class SettingsSessionGroup extends ConsumerWidget {
         ),
         if (srs != null) ...[
           const _FieldLabel(
-            'Intensidad SRS',
+            'Intensidad del repaso',
             subtitle: 'Ajusta la frecuencia de repaso entre sesiones.',
           ),
           RadioGroup<SrsIntensityProfile>(
@@ -520,8 +520,10 @@ class SettingsSoundGroup extends ConsumerWidget {
           onChanged: notifier.setOctaveVariationEnabled,
         ),
         _switch(
-          title: 'Limpieza tonal (cluster)',
-          subtitle: 'Sonido breve entre rondas para evitar anclaje tonal.',
+          title: 'Borrado de referencia',
+          subtitle:
+              'Un sonido entre rondas para que no compares con la nota '
+              'anterior.',
           value: prefs.clusterEnabled,
           onChanged: notifier.setClusterEnabled,
         ),

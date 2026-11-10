@@ -219,10 +219,15 @@ class ProfilePlanCard extends StatelessWidget {
     super.key,
     required this.hasPro,
     required this.onOpen,
+    this.monetizationActive = true,
   });
 
   final bool hasPro;
   final VoidCallback onOpen;
+
+  /// Con la monetización apagada todo está abierto: no se anuncia un plan
+  /// «Pro» que nadie ha contratado ni un botón «Gestionar».
+  final bool monetizationActive;
 
   @override
   Widget build(BuildContext context) {
@@ -245,7 +250,9 @@ class ProfilePlanCard extends StatelessWidget {
           ),
           const SizedBox(height: DesignTokens.spacingXs),
           Text(
-            hasPro ? 'TOGESC Pro' : 'Gratis',
+            !monetizationActive
+                ? 'Acceso completo'
+                : (hasPro ? 'TOGESC Pro' : 'Gratis'),
             style: theme.textTheme.headlineSmall?.copyWith(
               color: DesignTokens.onHero,
               fontWeight: FontWeight.w800,
@@ -287,7 +294,11 @@ class ProfilePlanCard extends StatelessWidget {
               ),
             ),
             onPressed: onOpen,
-            child: Text(hasPro ? 'Gestionar TOGESC Pro' : 'Ver TOGESC Pro'),
+            child: Text(
+              hasPro && monetizationActive
+                  ? 'Gestionar TOGESC Pro'
+                  : 'Ver TOGESC Pro',
+            ),
           ),
         ],
       ),

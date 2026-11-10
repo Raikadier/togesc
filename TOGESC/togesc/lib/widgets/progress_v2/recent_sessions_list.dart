@@ -4,6 +4,7 @@ import '../../app/design_tokens.dart';
 import '../../app/togesc_colors.dart';
 import '../../models/practice_session_log.dart';
 import '../../utils/relative_time.dart';
+import '../../utils/number_format.dart';
 
 /// Fila de sesión de Progreso v2: modo, «N rondas · M aciertos», % en una
 /// píldora del color de dominio y fecha relativa.
@@ -21,7 +22,8 @@ class SessionLogRow extends StatelessWidget {
     final rounded = pct.round();
     final when = formatRelativeTimeEs(entry.endedAt, now: now);
     final detail =
-        '${entry.roundsCompleted} rondas · ${entry.correctRounds} aciertos';
+        '${plural(entry.roundsCompleted, 'ronda', 'rondas')} · '
+        '${plural(entry.correctRounds, 'acierto', 'aciertos')}';
 
     return Semantics(
       label: '${entry.modeLabel}, $detail, $rounded %, $when',
@@ -65,7 +67,7 @@ class SessionLogRow extends StatelessWidget {
                     borderRadius: DesignTokens.borderRadiusPill,
                   ),
                   child: Text(
-                    '$rounded%',
+                    '$rounded %',
                     style: theme.textTheme.labelLarge
                         ?.merge(DesignTokens.tabularNumbers)
                         .copyWith(

@@ -244,8 +244,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         accent: colors.incorrect,
         title: 'Era $targetName',
         detail:
-            'Marcaste $answerName. Fallar es parte del método: el SRS te la '
-            'repetirá más.',
+            'Marcaste $answerName. Fallar es parte del método: esa nota '
+            'volverá más a menudo.',
       );
     }
 
@@ -417,10 +417,10 @@ class _WelcomeStep extends StatelessWidget {
         SizedBox(height: DesignTokens.spacingLg),
         OnboardingStepHeader(
           overline: 'Bienvenida',
-          title: 'Entrenador de oído absoluto',
+          title: 'Reconoce notas sin referencia',
           lead:
-              'Método con repetición espaciada, variación de estímulos y '
-              'limpieza tonal. Tres ideas clave antes de empezar.',
+              'Unos 6 minutos al día. La app repite más las notas que te '
+              'cuestan y te muestra cómo mejora tu oído.',
         ),
       ],
     );

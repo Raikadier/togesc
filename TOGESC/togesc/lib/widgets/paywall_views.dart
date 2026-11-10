@@ -20,7 +20,7 @@ const List<PaywallBenefit> paywallBenefits = [
   ),
   (
     icon: Icons.cloud_sync_rounded,
-    title: 'Sincronización SRS en la nube',
+    title: 'Sincronización en la nube',
     detail: 'El mismo progreso en tu móvil y en la web.',
   ),
 ];
@@ -32,7 +32,7 @@ typedef PaywallCompareRow = ({String label, bool free, bool pro});
 /// gratis son una nota, intervalo y sostenidos).
 const List<PaywallCompareRow> paywallCompareRows = [
   (label: 'Una nota, intervalo, sostenidos', free: true, pro: true),
-  (label: 'SRS y progreso local', free: true, pro: true),
+  (label: 'Repaso inteligente y progreso local', free: true, pro: true),
   (label: 'Acordes y aleatorio', free: false, pro: true),
   (label: 'Modo velocidad', free: false, pro: true),
   (label: 'Estadísticas avanzadas', free: false, pro: true),

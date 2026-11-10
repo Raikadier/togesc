@@ -33,7 +33,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Acerca de TOGESC'), findsOneWidget);
-    expect(find.text('Repetición espaciada (SRS)'), findsOneWidget);
+    expect(find.text('Repaso inteligente'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Política de privacidad'),

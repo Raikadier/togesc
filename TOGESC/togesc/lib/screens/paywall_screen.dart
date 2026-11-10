@@ -209,7 +209,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final fine = Text(
-      'Cancela cuando quieras. El progreso SRS local siempre se conserva.',
+      'Cancela cuando quieras. Tu progreso en este dispositivo siempre se '
+      'conserva.',
       textAlign: TextAlign.center,
       style: theme.textTheme.labelMedium?.copyWith(color: scheme.outline),
     );
@@ -289,7 +290,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
               ),
-              child: Text(kIsWeb ? 'Suscribirme (Stripe)' : 'Suscribirme'),
+              child: const Text('Suscribirme'),
             ),
             const SizedBox(height: DesignTokens.spacingMd),
             fine,

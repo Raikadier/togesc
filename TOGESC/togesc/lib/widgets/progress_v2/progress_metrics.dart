@@ -3,6 +3,7 @@ library;
 
 import '../../app/design_tokens.dart';
 import '../../models/note_progress_summary.dart';
+import '../../utils/number_format.dart';
 
 /// Latencia media global **aproximada**, en segundos.
 ///
@@ -59,10 +60,10 @@ String spokenNoteName(String label) {
   return label;
 }
 
-/// Texto del delta semanal: «+4.1 pts», «−2.0 pts», «±0.0 pts».
+/// Texto del delta semanal: «+4,1 pts», «−2,0 pts», «±0,0 pts».
 String formatDeltaPoints(double delta) {
-  final abs = delta.abs().toStringAsFixed(1);
-  if (abs == '0.0') return '±0.0 pts';
+  final abs = formatDecimalEs(delta.abs());
+  if (abs == '0,0') return '±0,0 pts';
   return delta > 0 ? '+$abs pts' : '−$abs pts';
 }
 

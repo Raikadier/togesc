@@ -275,7 +275,7 @@ void main() {
           matching: find.byType(SessionLogRow),
         );
         expect(
-          find.descendant(of: sessionRow, matching: find.text('80%')),
+          find.descendant(of: sessionRow, matching: find.text('80 %')),
           findsOneWidget,
         );
         expect(tester.takeException(), isNull);

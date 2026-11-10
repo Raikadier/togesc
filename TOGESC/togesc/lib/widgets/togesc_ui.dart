@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../utils/number_format.dart';
 
 /// Scaffold con AppBar unificado Harmonic Precision.
 class TogescScaffold extends StatelessWidget {
@@ -183,16 +184,16 @@ class TogescSpeedMetricsBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _Metric(label: 'Racha', value: '$streak', style: style),
+          _Metric(label: 'Seguidas', value: '$streak', style: style),
           _Metric(
             label: 'Límite',
-            value: '${timeLimit.toStringAsFixed(1)}s',
+            value: formatSecondsEs(timeLimit),
             style: style,
           ),
           _Metric(
             label: 'Promedio',
             value: averageTime != null
-                ? '${averageTime!.toStringAsFixed(2)}s'
+                ? formatSecondsEs(averageTime!, decimals: 2)
                 : '—',
             style: style,
           ),
@@ -216,20 +217,29 @@ class _Metric extends StatelessWidget {
     // Etiqueta en overline v2 y valor con cifras tabulares. El valor usa
     // `primary` (#4E0078 en claro y #DA9CFF en la sesión oscura): con
     // `primaryContainer` quedaba a 1,2:1 sobre el fondo de la sesión.
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: DesignTokens.overline.copyWith(color: scheme.onSurfaceVariant),
+    // Flexible + scaleDown: con texto grande las tres métricas encogen en
+    // lugar de desbordar la fila.
+    return Flexible(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label.toUpperCase(),
+              style: DesignTokens.overline.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              value,
+              style: style
+                  ?.copyWith(fontWeight: FontWeight.w700, color: scheme.primary)
+                  .merge(DesignTokens.tabularNumbers),
+            ),
+          ],
         ),
-        Text(
-          value,
-          style: style
-              ?.copyWith(fontWeight: FontWeight.w700, color: scheme.primary)
-              .merge(DesignTokens.tabularNumbers),
-        ),
-      ],
+      ),
     );
   }
 }

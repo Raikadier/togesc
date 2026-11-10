@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/design_tokens.dart';
 import '../../app/togesc_colors.dart';
 import 'progress_metrics.dart';
+import '../../utils/number_format.dart';
 
 /// Fila de 3 KPI de Progreso v2: latencia media (aprox.), intentos y
 /// pendientes. «Pendientes» va en la card `hero` (#2A0640).
@@ -29,19 +30,19 @@ class ProgressKpiRow extends StatelessWidget {
     final latency = meanLatencySec;
     final cards = [
       _KpiCard(
-        label: 'Latencia media',
-        caption: 'aprox.',
-        value: latency == null ? '—' : '${latency.toStringAsFixed(1)}s',
+        label: 'Respuesta',
+        caption: 'tiempo medio aprox.',
+        value: latency == null ? '—' : formatSecondsEs(latency),
         semanticsLabel: latency == null
-            ? 'Latencia media: sin datos'
-            : 'Latencia media aproximada: '
-                '${latency.toStringAsFixed(1)} segundos',
+            ? 'Tiempo de respuesta medio: sin datos'
+            : 'Tiempo de respuesta medio aproximado: '
+                '${formatDecimalEs(latency)} segundos',
       ),
       _KpiCard(
         label: 'Intentos',
-        caption: 'notas escuchadas',
+        caption: attempts == 1 ? 'nota escuchada' : 'notas escuchadas',
         value: formatThousands(attempts),
-        semanticsLabel: 'Intentos: $attempts notas escuchadas',
+        semanticsLabel: 'Intentos: ${plural(attempts, 'nota escuchada', 'notas escuchadas')}',
       ),
       _KpiCard(
         label: 'Pendientes',
@@ -50,7 +51,7 @@ class ProgressKpiRow extends StatelessWidget {
         hero: true,
         icon: Icons.event_repeat_rounded,
         semanticsLabel: pending > 0
-            ? 'Pendientes: $pending notas. Abre la sesión de hoy.'
+            ? 'Pendientes: ${plural(pending, 'nota', 'notas')}. Abre la sesión de hoy.'
             : 'Pendientes: ninguna nota. Abre la sesión de hoy.',
         onTap: onReviewPending,
       ),

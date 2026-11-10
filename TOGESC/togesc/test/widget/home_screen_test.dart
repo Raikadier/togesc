@@ -216,15 +216,15 @@ void main() {
       expect(find.text('12'), findsOneWidget);
       expect(find.text('rondas · ≈ 6 min (estimado)'), findsOneWidget);
       expect(
-        find.text('El SRS priorizó las tres notas atrasadas o con menor '
+        find.text('El repaso priorizó las tres notas atrasadas o con menor '
             'precisión.'),
         findsOneWidget,
       );
       expect(find.byKey(const ValueKey('focus-note-C')), findsOneWidget);
       expect(find.byKey(const ValueKey('focus-note-F#')), findsOneWidget);
       expect(find.byKey(const ValueKey('focus-note-A')), findsOneWidget);
-      expect(find.text('32%'), findsOneWidget);
-      expect(find.text('61%'), findsOneWidget);
+      expect(find.text('32 %'), findsOneWidget);
+      expect(find.text('61 %'), findsOneWidget);
       expect(find.text('Empezar sesión'), findsOneWidget);
       expect(find.text('Ajustar enfoque y duración'), findsOneWidget);
       expect(find.byKey(const ValueKey('home-streak-chip')), findsOneWidget);
@@ -236,7 +236,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Tu primera sesión le dará al SRS los datos para elegir '
+        find.text('Tu primera sesión dará al repaso los datos para elegir '
             'tu foco.'),
         findsOneWidget,
       );
@@ -269,12 +269,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('El SRS solo tiene datos de 1 nota; el resto del foco son '
+        find.text('Solo hay datos de 1 nota; el resto del foco son '
             'notas nuevas.'),
         findsOneWidget,
       );
       expect(find.text('Nueva'), findsNWidgets(2));
-      expect(find.text('32%'), findsOneWidget);
+      expect(find.text('32 %'), findsOneWidget);
     });
 
     testWidgets('Retomar oculto sin sesión previa', (tester) async {
@@ -387,7 +387,7 @@ void main() {
       expect(find.text('En curso'), findsNWidgets(2));
       expect(find.text('1 · Escucha'), findsOneWidget);
       expect(find.text('2 · Toca la tecla'), findsOneWidget);
-      expect(find.text('3 · El SRS ajusta tu repaso'), findsOneWidget);
+      expect(find.text('3 · El repaso se ajusta a ti'), findsOneWidget);
     });
 
     testWidgets('mapa del oído: precisión global, meta de octava y Practicar',
@@ -399,7 +399,13 @@ void main() {
 
       expect(find.byKey(const ValueKey('ear-map')), findsOneWidget);
       expect(find.text('Mapa del oído'), findsOneWidget);
-      expect(find.text('70 %'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('ear-map')),
+          matching: find.text('70 %'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('precisión global'), findsOneWidget);
       expect(find.byKey(const ValueKey('octave-goal')), findsOneWidget);
       expect(find.text('2 de 12 notas consolidadas'), findsOneWidget);
@@ -438,7 +444,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Práctica libre'), findsOneWidget);
-      expect(find.text('86% · 24 ses.'), findsOneWidget);
+      expect(find.text('86 % · 24 ses.'), findsOneWidget);
       expect(find.text('Sin sesiones'), findsNWidgets(2));
       expect(
         find.descendant(

@@ -73,7 +73,7 @@ void main() {
       expect(find.text('42 %'), findsOneWidget);
       expect(find.text('12'), findsOneWidget);
       expect(find.text('2,4 s'), findsOneWidget);
-      expect(find.text('Nivel SRS 1 de 5'), findsOneWidget);
+      expect(find.text('Nivel 1 de 5'), findsOneWidget);
       expect(
         find.text(noteDetailAdvice(MasteryStatus.critical)),
         findsOneWidget,
@@ -81,7 +81,7 @@ void main() {
       expect(taps.listen, 1);
       expect(taps.practice, 1);
       expect(
-        find.bySemanticsLabel('Latencia: 2,4 s'),
+        find.bySemanticsLabel('Respuesta: 2,4 s'),
         findsOneWidget,
       );
     });

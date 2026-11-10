@@ -95,7 +95,7 @@ class SessionPauseSheet extends StatelessWidget {
           ),
           const SizedBox(height: DesignTokens.spacingSm),
           Text(
-            'El SRS ya guardó cada respuesta. «Salir sin guardar» no '
+            'Cada respuesta ya está guardada. «Salir sin guardar» no '
             'registra esta sesión en tu historial.',
             style: theme.textTheme.bodySmall?.copyWith(
               color: DesignTokens.sessionTextSecondary,

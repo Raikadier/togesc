@@ -4,6 +4,7 @@ import '../app/design_tokens.dart';
 import '../app/togesc_colors.dart';
 import '../constants/game_constants.dart';
 import 'game_session_views.dart';
+import '../utils/number_format.dart';
 
 /// Vista idle del modo velocidad.
 class SpeedSessionIdleView extends StatelessWidget {
@@ -25,7 +26,7 @@ class SpeedSessionIdleView extends StatelessWidget {
       icon: Icons.speed_rounded,
       accentColor: speed,
       title: 'Listo para el desafío',
-      subtitle: 'Tiempo inicial: ${initialTime.toStringAsFixed(0)}s',
+      subtitle: 'Tiempo inicial: ${formatSecondsEs(initialTime, trimZeros: true)}',
       footer: FilledButton.icon(
         onPressed: onStart,
         style: FilledButton.styleFrom(
@@ -237,12 +238,12 @@ class SpeedSessionSummaryCard extends StatelessWidget {
   });
 
   static String _time(double s) =>
-      s > 0 ? '${s.toStringAsFixed(2).replaceAll('.', ',')} s' : '—';
+      s > 0 ? formatSecondsEs(s, decimals: 2) : '—';
 
   @override
   Widget build(BuildContext context) {
     final kpis = [
-      ('streak', 'Racha final', '$streak'),
+      ('streak', 'Seguidas', '$streak'),
       ('best', 'Mejor tiempo', _time(bestTime)),
       ('average', 'Promedio', _time(averageTime)),
       ('answers', 'Respuestas', '$correctRounds/$roundsPlayed'),

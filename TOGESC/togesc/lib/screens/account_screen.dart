@@ -222,6 +222,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               // D8: Pro sale de la nav; Perfil es su entrada permanente.
               ProfilePlanCard(
                 hasPro: hasPro,
+                monetizationActive: SubscriptionConfig.isActive,
                 onOpen: () => context.push(
                   hasPro ? AppRoutes.subscription : AppRoutes.paywall,
                 ),

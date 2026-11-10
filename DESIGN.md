@@ -216,6 +216,30 @@ Aprobado el 2026-10-26 a partir del feedback del propietario sobre v2: se veía 
 | Confirmaciones en diálogo (borrar cuenta, restablecer) | **Sustituido** por hojas inferiores (lote 7) |
 | Contraste comprobado por pares de tokens (`design_tokens_v2_test.dart`) | **Vigente**, y se suma la auditoría de cada texto e icono de cada pantalla frente a su fondo real (`test/helpers/contrast_audit.dart`, en `dark_theme_v2_test.dart`) |
 
+## Lenguaje y números (v2.2, lote A)
+Una palabra por concepto. La interfaz no usa jerga técnica: «SRS» solo aparece en el código y en la documentación.
+
+| Concepto | Se dice | No se dice |
+|---|---|---|
+| El algoritmo de repetición espaciada | Repaso inteligente; «el repaso» en frases | SRS, algoritmo SRS |
+| Ajuste de frecuencia del repaso | Intensidad del repaso | Intensidad SRS |
+| Nota con ≥ 75 % | Consolidada | Dominada |
+| Segundos que tardas en responder | Tiempo de respuesta. En etiquetas estrechas, «Respuesta» con el pie «tiempo medio» | Latencia |
+| Sonido entre rondas | Borrado de referencia | Limpieza tonal, neutralidad tonal, cluster, anclaje |
+| Aciertos consecutivos | Seguidas | Racha |
+| Días consecutivos practicando | Racha | — |
+| Mejor marca de Velocidad | Récord | Mejor racha |
+| Dificultad intermedia de Velocidad | Medio | Pro (se confunde con el plan) |
+| Lo que reconoce el usuario | La nota | Clase de altura |
+
+**Números:** siempre con `lib/utils/number_format.dart`.
+- Coma decimal y espacio antes de la unidad: «33,3 %», «2,4 s».
+- `formatPercentEs` quita el «,0»: «50 %».
+- `plural(n, 'ronda', 'rondas')` para concordar: «1 ronda», «3 rondas».
+- No uses `toStringAsFixed` en pantallas ni widgets.
+
+**Sin pagos activos** (`SubscriptionConfig.isActive` es falso): la tarjeta de plan del Perfil dice «Acceso completo» y lleva al paywall informativo. No se muestra «TOGESC Pro» ni «Gestionar» a quien no ha contratado nada.
+
 ## Qué queda de Harmonic Precision
 
 | Elemento | Estado |

@@ -176,7 +176,7 @@ class _AccountAuthSheetState extends ConsumerState<AccountAuthSheet> {
             Text(
               forgot
                   ? 'Te enviaremos un enlace a tu email.'
-                  : 'Opcional. Vincula tu progreso SRS entre dispositivos. '
+                  : 'Opcional. Vincula tu progreso entre dispositivos. '
                         'Puedes seguir entrenando sin cuenta.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,

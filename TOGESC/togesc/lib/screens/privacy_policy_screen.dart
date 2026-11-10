@@ -26,14 +26,14 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 'No mostramos publicidad ni vendemos tus datos. Sí registramos '
                 'eventos de uso (analítica propia, activa por defecto) y '
                 'errores técnicos (Sentry). Si activas una cuenta opcional '
-                '(Supabase), tu progreso SRS se sincroniza cifrado en tránsito '
+                '(Supabase), tu progreso se sincroniza cifrado en tránsito '
                 'y solo tu usuario puede leerlo. Abajo se detalla cada servicio '
                 'que recibe datos.',
           ),
           PolicySection(
             title: 'Datos que se guardan en tu dispositivo',
             body:
-                'Tu progreso de entrenamiento (pesos SRS, estadísticas, '
+                'Tu progreso de entrenamiento (pesos de repaso, estadísticas, '
                 'historial local de sesiones y preferencias como onboarding '
                 'completado) se almacena en tu dispositivo mediante '
                 'almacenamiento local del sistema (SharedPreferences en '
@@ -45,7 +45,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             body:
                 'Puedes entrenar sin registrarte. Si creas una cuenta, '
                 'Supabase guarda tu email, tu contraseña cifrada (hash) y un '
-                'JSON con tu progreso SRS vinculado a tu identificador de '
+                'JSON con tu progreso vinculado a tu identificador de '
                 'usuario, en Postgres con políticas RLS. También guarda el '
                 'estado de tu plan (gratuito o Pro).',
           ),
@@ -119,7 +119,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             title: 'Exportación de datos',
             body:
                 'En Cuenta puedes exportar un archivo JSON con tu progreso '
-                'SRS, preferencias e historial local de sesiones. En web se '
+                'de repaso, preferencias e historial local de sesiones. En web se '
                 'descarga el archivo; en móvil se copia al portapapeles. '
                 'Sirve para respaldo o portabilidad (RGPD).',
           ),

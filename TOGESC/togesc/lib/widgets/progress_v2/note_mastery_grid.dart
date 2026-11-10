@@ -194,7 +194,7 @@ class NoteMasteryCell extends StatelessWidget {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                seen ? '${pct.round()}%' : '—',
+                seen ? '${pct.round()} %' : '—',
                 style: theme.textTheme.labelLarge
                     ?.merge(DesignTokens.tabularNumbers)
                     .copyWith(
@@ -256,9 +256,9 @@ class MasteryLegend extends StatelessWidget {
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         );
     final items = [
-      (DesignTokens.masteryRed, 'Crítica <50%'),
-      (DesignTokens.masteryAmber, 'En curso 50–74%'),
-      (DesignTokens.masteryGreenLight, 'Dominada ≥75%'),
+      (DesignTokens.masteryRed, 'Crítica < 50 %'),
+      (DesignTokens.masteryAmber, 'En curso 50–74 %'),
+      (DesignTokens.masteryGreenLight, 'Consolidada ≥ 75 %'),
       (colors.muted, 'Sin datos'),
     ];
     final textColor = Theme.of(context).colorScheme.onSurfaceVariant;

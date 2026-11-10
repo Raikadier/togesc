@@ -213,7 +213,7 @@ void main() {
         streak: 2,
       );
       expect(stats.roundText, '3 / 12');
-      expect(stats.accuracyText, '78%');
+      expect(stats.accuracyText, '78 %');
       expect(stats.progress, closeTo(0.25, 1e-9));
       const empty = SessionStats(
         round: 1,

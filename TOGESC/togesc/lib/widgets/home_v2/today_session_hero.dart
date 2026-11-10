@@ -16,32 +16,32 @@ String todayHeroCopy(List<TodayFocusNote> focus, {bool custom = false}) {
   if (custom && focus.isNotEmpty) {
     final n = focus.length;
     final notas = n == 1 ? 'una nota foco' : '${_countWord(n)} notas foco';
-    return 'Elegiste $notas para hoy; el resto sigue el repaso SRS normal.';
+    return 'Elegiste $notas para hoy; el resto sigue el repaso normal.';
   }
   if (focus.isEmpty) {
-    return 'Tu primera sesión le dará al SRS los datos para elegir tu foco.';
+    return 'Tu primera sesión dará al repaso los datos para elegir tu foco.';
   }
   final seen = focus.where((f) => f.accuracyPercent != null).length;
   if (seen == 0) {
     return 'Aún no hay datos de precisión: empezarás por notas naturales '
-        'para que el SRS conozca tu oído.';
+        'para que el repaso conozca tu oído.';
   }
   if (seen < focus.length) {
     final notas = seen == 1 ? '1 nota' : '$seen notas';
-    return 'El SRS solo tiene datos de $notas; el resto del foco son notas '
+    return 'Solo hay datos de $notas; el resto del foco son notas '
         'nuevas.';
   }
   final one = focus.length == 1;
   final count = one ? 'la nota' : 'las ${_countWord(focus.length)} notas';
   if (focus.any((f) => f.isCritical || f.isOverdue)) {
     return one
-        ? 'El SRS priorizó $count atrasada o con menor precisión.'
-        : 'El SRS priorizó $count atrasadas o con menor precisión.';
+        ? 'El repaso priorizó $count atrasada o con menor precisión.'
+        : 'El repaso priorizó $count atrasadas o con menor precisión.';
   }
   if (focus.any((f) => f.isLearning)) {
-    return 'El SRS priorizó $count en aprendizaje o con menor precisión.';
+    return 'El repaso priorizó $count en aprendizaje o con menor precisión.';
   }
-  return 'El SRS priorizó $count con menor precisión.';
+  return 'El repaso priorizó $count con menor precisión.';
 }
 
 String _countWord(int n) => switch (n) {
@@ -307,7 +307,7 @@ class FocusNoteMiniCard extends StatelessWidget {
                 spacing: DesignTokens.spacingXs,
                 alignment: WrapAlignment.spaceBetween,
                 children: [
-                  Text('${pct.round()}%', style: labelStyle),
+                  Text('${pct.round()} %', style: labelStyle),
                   Text(state, style: labelStyle),
                 ],
               ),
@@ -398,7 +398,7 @@ class HeroSteps extends StatelessWidget {
   static const steps = [
     (Icons.hearing_rounded, '1 · Escucha'),
     (Icons.piano_rounded, '2 · Toca la tecla'),
-    (Icons.trending_up_rounded, '3 · El SRS ajusta tu repaso'),
+    (Icons.trending_up_rounded, '3 · El repaso se ajusta a ti'),
   ];
 
   @override
@@ -410,8 +410,8 @@ class HeroSteps extends StatelessWidget {
     return Semantics(
       key: const ValueKey('today-steps'),
       container: true,
-      label: 'Cómo funciona: escucha, toca la tecla y el SRS ajusta tu '
-          'repaso',
+      label: 'Cómo funciona: escucha, toca la tecla y el repaso se ajusta '
+          'a ti',
       excludeSemantics: true,
       child: Wrap(
         spacing: 14,

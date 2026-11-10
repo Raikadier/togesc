@@ -98,16 +98,16 @@ void main() {
     await _pump(tester);
 
     expect(find.bySemanticsLabel('Paso 1 de 4'), findsOneWidget);
-    expect(find.text('Entrenador de oído absoluto'), findsOneWidget);
-    expect(find.text('SRS · variación · limpieza tonal'), findsOneWidget);
+    expect(find.text('Reconoce notas sin referencia'), findsOneWidget);
+    expect(find.text('Escucha · responde · repasa'), findsOneWidget);
     expect(find.byKey(const ValueKey('onboarding-back')), findsNothing);
 
     await _tapVisible(tester, _next);
     expect(find.bySemanticsLabel('Paso 2 de 4'), findsOneWidget);
     expect(find.text('Cómo funciona'), findsOneWidget);
-    expect(find.text('Algoritmo SRS'), findsOneWidget);
-    expect(find.text('Timbre universal'), findsOneWidget);
-    expect(find.text('Neutralidad tonal'), findsOneWidget);
+    expect(find.text('Repaso inteligente'), findsOneWidget);
+    expect(find.text('Distintos instrumentos'), findsOneWidget);
+    expect(find.text('Borrado de referencia'), findsOneWidget);
 
     await _tapVisible(tester, find.byKey(const ValueKey('onboarding-back')));
     expect(find.bySemanticsLabel('Paso 1 de 4'), findsOneWidget);

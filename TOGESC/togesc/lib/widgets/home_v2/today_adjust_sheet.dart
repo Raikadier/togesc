@@ -206,7 +206,7 @@ class _TodayAdjustSheetState extends ConsumerState<TodayAdjustSheet> {
                     ? 'Máximo $maxPracticeFocusNotes notas foco. Quita una '
                         'para elegir otra.'
                     : 'Las notas foco suenan más a menudo; el resto mantiene '
-                        'el repaso SRS normal.',
+                        'el repaso normal.',
                 key: const ValueKey('today-adjust-hint'),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: _limitHit

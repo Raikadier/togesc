@@ -155,9 +155,13 @@ void main() {
     );
     expect(cellColor(tester, 'F'), DesignTokens.masteryEmpty);
 
-    expect(find.text('40%'), findsOneWidget);
-    expect(find.text('60%'), findsOneWidget);
-    expect(find.text('90%'), findsOneWidget);
+    Finder inCell(String note, String text) => find.descendant(
+          of: find.byKey(ValueKey('mastery-cell-$note')),
+          matching: find.text(text),
+        );
+    expect(inCell('C', '40 %'), findsOneWidget);
+    expect(inCell('D', '60 %'), findsOneWidget);
+    expect(inCell('E', '90 %'), findsOneWidget);
     // 9 notas nunca vistas muestran «—».
     expect(emptyCells(), findsNWidgets(9));
     expect(find.byKey(const Key('progress-mastery-legend')), findsOneWidget);
@@ -197,7 +201,7 @@ void main() {
     expect(find.byKey(const Key('progress-global-accuracy')), findsOneWidget);
     expect(find.byKey(const Key('progress-weekly-delta')), findsNothing);
     expect(find.textContaining('vs. semana pasada'), findsNothing);
-    expect(find.text('78% de la meta (90%)'), findsOneWidget);
+    expect(find.text('Meta: 90 %'), findsOneWidget);
   });
 
   testWidgets('delta visible y rotulado por rondas con dos semanas', (
@@ -212,7 +216,7 @@ void main() {
     expect(find.byKey(const Key('progress-weekly-delta')), findsOneWidget);
     expect(
       find.bySemanticsLabel(
-        'Precisión de rondas: +30.0 pts vs. semana pasada',
+        'Precisión de rondas: +30,0 pts vs. semana pasada',
       ),
       findsOneWidget,
     );

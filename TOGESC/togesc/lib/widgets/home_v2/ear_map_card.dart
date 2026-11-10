@@ -8,6 +8,7 @@ import '../../models/practice_session_log.dart' show chromaticNotes;
 import '../../utils/srs_level.dart';
 import '../ear_map/ear_map_wheel.dart';
 import '../progress_v2/progress_metrics.dart';
+import '../../utils/number_format.dart';
 
 /// Precisión global por nota vista (aciertos / intentos de todas las notas),
 /// con un decimal, como `SRSSystem.getStatistics()['accuracy_percentage']`.
@@ -32,14 +33,6 @@ int consolidatedNoteCount(List<NoteProgressSummary> summaries) => summaries
     )
     .length;
 
-/// «68,5 %» con coma decimal (es-ES) y sin «,0».
-String formatPercentEs(double value) {
-  final rounded = (value * 10).round() / 10;
-  final text = rounded == rounded.roundToDouble()
-      ? rounded.round().toString()
-      : rounded.toStringAsFixed(1).replaceAll('.', ',');
-  return '$text %';
-}
 
 /// Card «Mapa del oído» del Home v2.1 (SPEC §2.1.3): rueda con la precisión
 /// global, leyenda, meta de octava y fila de detalle con «Practicar».
@@ -315,7 +308,8 @@ class _NoteDetailRow extends StatelessWidget {
     final statusText =
         '${status.label[0].toUpperCase()}${status.label.substring(1)}';
     final detail = seen
-        ? '${pct.round()} % · ${summary.timesSeen} intentos · '
+        ? '${pct.round()} % · '
+            '${plural(summary.timesSeen, 'intento', 'intentos')} · '
             'nivel $level de $srsMaxLevel'
         : 'Aún no la has practicado';
 

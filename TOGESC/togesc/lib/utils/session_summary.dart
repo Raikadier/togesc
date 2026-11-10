@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/srs_constants.dart';
 import '../models/note_progress_summary.dart';
 import 'srs_level.dart';
+export 'number_format.dart' show formatSecondsEs;
 
 /// Estado SRS de una nota al empezar la sesión (para el resumen final).
 @immutable
@@ -139,11 +140,8 @@ enum SessionMedal {
 /// Frase bajo el titular del resumen, solo con datos reales.
 String sessionSummaryLead(List<SessionLevelChange> changes) {
   final up = changes.where((c) => c.improved).length;
-  if (up == 0) return 'El SRS repetirá antes las notas que fallaste.';
-  if (up == 1) return '1 nota subió de nivel SRS.';
-  return '$up notas subieron de nivel SRS.';
+  if (up == 0) return 'Las notas que fallaste volverán antes.';
+  if (up == 1) return '1 nota subió de nivel.';
+  return '$up notas subieron de nivel.';
 }
 
-/// «2,4 s» (es-ES, un decimal).
-String formatSecondsEs(double seconds) =>
-    '${seconds.toStringAsFixed(1).replaceAll('.', ',')} s';

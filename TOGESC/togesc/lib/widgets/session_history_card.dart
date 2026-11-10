@@ -8,6 +8,7 @@ import '../providers/clock_provider.dart';
 import '../providers/session_history_provider.dart';
 import 'progress_v2/recent_sessions_list.dart';
 import 'togesc_ui.dart';
+import '../utils/number_format.dart';
 
 /// Historial de sesiones de práctica guardadas localmente (Pro en v2).
 ///
@@ -48,7 +49,7 @@ class SessionHistoryCard extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      '${source.length} sesiones',
+                      plural(source.length, 'sesión', 'sesiones'),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),

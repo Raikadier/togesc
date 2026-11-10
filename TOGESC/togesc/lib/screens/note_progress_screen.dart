@@ -78,7 +78,7 @@ class NoteProgressScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Estado de cada clase de altura en el sistema SRS.',
+                    'Estado de cada nota en tu repaso.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),

@@ -20,7 +20,7 @@ class ModeMasteryStats {
   String get masteryLabel {
     if (sessionsCount == 0) return 'Nuevo';
     final acc = accuracyPercent;
-    if (acc >= 85) return '${acc.round()}% dominio';
+    if (acc >= 85) return '${acc.round()} % dominio';
     if (acc >= 60) return 'Nivel ${(acc / 20).floor().clamp(1, 4)}';
     return 'En progreso';
   }

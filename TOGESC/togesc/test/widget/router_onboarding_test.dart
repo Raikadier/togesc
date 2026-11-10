@@ -29,7 +29,7 @@ void main() {
     // v2.1: onboarding en 4 pasos; abre en la bienvenida.
     expect(find.byType(OnboardingScreen), findsOneWidget);
     expect(find.bySemanticsLabel('Paso 1 de 4'), findsOneWidget);
-    expect(find.text('Entrenador de oído absoluto'), findsOneWidget);
+    expect(find.text('Reconoce notas sin referencia'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('onboarding-next')));
     await tester.pumpAndSettle();
     expect(find.text('Cómo funciona'), findsOneWidget);

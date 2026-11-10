@@ -5,6 +5,7 @@ import '../../app/togesc_colors.dart';
 import '../../utils/calendar_week.dart';
 import '../count_up_text.dart';
 import 'progress_metrics.dart';
+import '../../utils/number_format.dart';
 
 /// Cabecera de Progreso v2: precisión global, delta semanal y meta.
 ///
@@ -32,8 +33,8 @@ class GlobalAccuracyHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final goalPct = goalProgressPercent(accuracy, goal: goal);
-    final accuracyText = '${accuracy.toStringAsFixed(1)}%';
-    final goalText = '${goalPct.round()}% de la meta (${goal.round()}%)';
+    final accuracyText = formatPercentEs(accuracy);
+    final goalText = 'Meta: ${goal.round()} %';
     final deltaPoints = delta.deltaPoints;
 
     return Column(
@@ -52,7 +53,10 @@ class GlobalAccuracyHeader extends StatelessWidget {
           child: CountUpText(
             key: const Key('progress-global-accuracy'),
             value: accuracy,
-            format: (v) => '${v.toStringAsFixed(1)}%',
+            // Durante la cuenta se fija un decimal para que el ancho no baile.
+            format: (v) => v == accuracy
+                ? accuracyText
+                : '${formatDecimalEs(v)} %',
             semanticsLabel: 'Precisión global por nota: $accuracyText',
             style: DesignTokens.bigNumberLarge.copyWith(
               color: scheme.primary,

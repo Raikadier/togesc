@@ -40,7 +40,7 @@ class HomeModeEntry {
   String get progressLabel {
     final acc = accuracy;
     if (acc == null) return 'Sin sesiones';
-    return '${acc.round()}% · $sessions ses.';
+    return '${acc.round()} % · $sessions ses.';
   }
 
   String get semanticsLabel {

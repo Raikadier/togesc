@@ -88,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Practicar '), findsWidgets);
-    expect(find.text('Precision'), findsWidgets);
+    expect(find.text('Precisión'), findsWidgets);
   });
 }
 
