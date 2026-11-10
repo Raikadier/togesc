@@ -10,6 +10,7 @@ import '../ear_map/ear_map_wheel.dart';
 import '../progress_v2/progress_metrics.dart';
 import '../staggered_entrance.dart';
 import 'srs_level_pill.dart';
+import '../../constants/srs_constants.dart';
 
 /// Resumen al terminar la sesión (SPEC v2.1 §2.2.7, clave `session-summary`).
 ///
@@ -366,12 +367,18 @@ class _ChangeRow extends StatelessWidget {
     final label = formatNoteLabel(change.note, namingMode);
     final spoken = spokenNoteName(label);
     final pct = change.accuracyAfter;
-    final cell = pct == null
-        ? DesignTokens.sessionChip
-        : masteryColor(pct, srsLevel: change.after);
-    final ink = pct == null
-        ? DesignTokens.sessionTextPrimary
-        : masteryOnColor(pct, srsLevel: change.after);
+    // Sin datos o aún midiendo: celda neutra, nunca roja.
+    final judged = pct != null &&
+        masteryStatusOf(
+          timesSeen: change.timesSeenAfter ?? masteryMinAttempts,
+          pct: pct,
+        ).isJudged;
+    final cell = judged
+        ? masteryColor(pct, srsLevel: change.after)
+        : DesignTokens.sessionChip;
+    final ink = judged
+        ? masteryOnColor(pct, srsLevel: change.after)
+        : DesignTokens.sessionTextPrimary;
     final (IconData icon, Color color, String trend) = change.improved
         ? (Icons.arrow_upward_rounded, DesignTokens.sessionSuccess, 'sube')
         : change.dropped

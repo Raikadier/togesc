@@ -7,12 +7,16 @@ import '../../models/note_progress_summary.dart';
 import '../../utils/srs_level.dart';
 import 'progress_metrics.dart';
 import '../../utils/number_format.dart';
+import '../../constants/srs_constants.dart';
 
 /// Frase pedagógica de la hoja de detalle según el estado de la nota.
 String noteDetailAdvice(MasteryStatus status) => switch (status) {
       MasteryStatus.unseen =>
         'Aún no la has practicado. Una sesión corta basta para empezar '
             'a medirla.',
+      MasteryStatus.measuring =>
+        'Aún la estamos midiendo. Hacen falta $masteryMinAttempts intentos '
+            'para valorarla.',
       MasteryStatus.critical =>
         'Esta nota aparece con más frecuencia hasta que superes el 50 %.',
       MasteryStatus.inProgress =>
@@ -56,11 +60,12 @@ class NoteDetailSheet extends StatelessWidget {
       summary,
       learningThreshold: learningThreshold,
     );
-    final cellColor = seen ? masteryColor(pct, srsLevel: level) : colors.muted;
-    final cellInk =
-        seen ? masteryOnColor(pct, srsLevel: level) : colors.textPrimary;
-    final statusText =
-        '${status.label[0].toUpperCase()}${status.label.substring(1)}'
+    final (background: cellColor, foreground: cellInk) = masteryCellColors(
+      context,
+      summary,
+      level: level,
+    );
+    final statusText = '${status.title}'
         '${summary.isOverdue ? ' · pendiente de repaso' : ''}';
     final latency = summary.avgResponseTimeSec > 0 && seen
         ? formatSecondsEs(summary.avgResponseTimeSec)
@@ -154,7 +159,7 @@ class NoteDetailSheet extends StatelessWidget {
               Expanded(
                 child: _Stat(
                   key: const ValueKey('note-detail-accuracy'),
-                  value: seen ? '${pct.round()} %' : '—',
+                  value: status.isJudged ? '${pct.round()} %' : '—',
                   label: 'Precisión',
                 ),
               ),

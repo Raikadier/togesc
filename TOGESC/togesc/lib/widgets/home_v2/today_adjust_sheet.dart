@@ -276,13 +276,14 @@ class _NoteChip extends StatelessWidget {
     final seen = s != null && s.timesSeen > 0;
     final label = formatNoteLabel(note, namingMode);
     final swatch = seen
-        ? masteryColor(
-            s.accuracyPercent,
-            srsLevel: srsLevelForSummary(
+        ? masteryCellColors(
+            context,
+            s,
+            level: srsLevelForSummary(
               s,
               learningThreshold: learningThreshold,
             ),
-          )
+          ).background
         : colors.muted;
     final spoken = spokenNoteName(label);
     final semantics =

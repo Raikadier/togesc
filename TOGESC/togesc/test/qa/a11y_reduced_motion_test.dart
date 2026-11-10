@@ -165,7 +165,9 @@ void main() {
   });
 
   group('control (sin movimiento reducido el muestreo sí detecta)', () {
-    for (final screen in [a11yScreens[0], a11yScreens[4]]) {
+    // Home (rueda y entrada escalonada) y Onboarding (ecualizador). Progreso
+    // dejó de servir de control: sin intentos ya no pinta la rueda.
+    for (final screen in [a11yScreens[0], a11yScreens.last]) {
       testWidgets(screen.name, (tester) async {
         try {
           await pumpA11yScreen(tester, screen, settle: false);

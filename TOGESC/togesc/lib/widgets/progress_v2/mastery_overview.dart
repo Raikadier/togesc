@@ -7,6 +7,7 @@ import '../../models/note_progress_summary.dart';
 import '../ear_map/ear_map_wheel.dart';
 import '../home_v2/ear_map_card.dart' show consolidatedNoteCount;
 import 'note_mastery_grid.dart';
+import 'progress_metrics.dart';
 
 /// Vista de la card «Dominio por nota».
 enum MasteryView {
@@ -28,8 +29,6 @@ class MasteryOverview extends StatefulWidget {
   const MasteryOverview({
     super.key,
     required this.summaries,
-    required this.consolidatedCount,
-    required this.inProgressCount,
     required this.onNoteTap,
     this.namingMode = NoteNamingMode.letter,
     this.learningThreshold = 5,
@@ -39,8 +38,6 @@ class MasteryOverview extends StatefulWidget {
   final List<NoteProgressSummary> summaries;
 
   /// Notas graduadas por el SRS (subtítulo, como en v2).
-  final int consolidatedCount;
-  final int inProgressCount;
   final ValueChanged<NoteProgressSummary> onNoteTap;
   final NoteNamingMode namingMode;
   final int learningThreshold;
@@ -75,8 +72,6 @@ class _MasteryOverviewState extends State<MasteryOverview> {
     );
     final grid = NoteMasteryGrid(
       summaries: widget.summaries,
-      consolidatedCount: widget.consolidatedCount,
-      inProgressCount: widget.inProgressCount,
       namingMode: widget.namingMode,
       learningThreshold: widget.learningThreshold,
       onNoteTap: widget.onNoteTap,
@@ -112,8 +107,7 @@ class _MasteryOverviewState extends State<MasteryOverview> {
                     ),
                     const SizedBox(height: DesignTokens.spacingXs),
                     Text(
-                      '${widget.consolidatedCount} consolidadas · '
-                      '${widget.inProgressCount} en curso',
+                      masterySubtitle(widget.summaries),
                       key: const Key('progress-mastery-subtitle'),
                       style: theme.textTheme.bodyMedium
                           ?.merge(DesignTokens.tabularNumbers)

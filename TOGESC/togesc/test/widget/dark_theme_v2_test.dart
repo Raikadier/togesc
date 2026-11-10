@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +11,9 @@ import 'package:togesc/app/router.dart';
 import 'package:togesc/providers/clock_provider.dart';
 import 'package:togesc/screens/account_screen.dart';
 import 'package:togesc/screens/statistics_screen.dart';
+import 'package:togesc/models/note_data.dart';
 import 'package:togesc/services/app_preferences.dart';
+import 'package:togesc/services/progress_repository.dart';
 import 'package:togesc/widgets/togesc_shell.dart';
 
 import '../helpers/contrast_audit.dart';
@@ -191,6 +195,16 @@ void main() {
     testWidgets('Progreso: celdas sin datos y paneles oscuros con AA', (
       tester,
     ) async {
+      // Con cero intentos Progreso solo enseña el estado vacío (v2.2, lote
+      // B): hace falta una nota practicada para que aparezca la rejilla.
+      SharedPreferences.setMockInitialValues({
+        onboardingCompleteKey: true,
+        progressStorageKey: jsonEncode(
+          encodeProgressPayload({
+            'D': NoteData(timesSeen: 1, timesCorrect: 1),
+          }),
+        ),
+      });
       await pumpApp(
         tester,
         size: const Size(400, 2400),

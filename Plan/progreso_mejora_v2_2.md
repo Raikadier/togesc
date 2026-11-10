@@ -2,6 +2,35 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-10 · Lote B: estados honestos del dominio · Claude Code
+**Decisión aplicada:** D3 = 5 intentos mínimos antes de juzgar una nota (`masteryMinAttempts` en `constants/srs_constants.dart`).
+
+- **Un solo estado por nota.** `MasteryStatus` y `masteryStatusOf` (`widgets/progress_v2/progress_metrics.dart`) son el único sitio donde se decide. Estados: sin datos, midiendo, a reforzar, en curso y consolidada.
+  - Lo usan la rueda, la rejilla, el Mapa del oído del Home, las mini-cards del hero, la hoja de detalle, la hoja «Ajustar enfoque», el panel de la sesión y las filas del resumen.
+  - «Crítica» desaparece de la interfaz: ahora es «A reforzar». «Dominada» pasa a «consolidada» también en los textos para lector de pantalla.
+- **«Midiendo».** Con 1 a 4 intentos la nota no lleva rojo ni porcentaje: muestra «2/5» y un color neutro (`masteryMeasuringColor`, el primario atenuado sobre la superficie apagada).
+  - En el hero del Home, la barra de la mini-card se llena con los intentos hechos.
+  - En el resumen, la fila de una nota que aún se mide ya no sale en rojo con una flecha verde.
+- **Rueda:**
+  - Relleno mínimo del 18 % (antes 6 %), para que una nota al 0 % se lea.
+  - Contorno de 1 px en `outlineVariant` en cada segmento, para separarla de la tarjeta en claro.
+  - Las notas en «Midiendo» se rellenan en neutro según los intentos hechos.
+- **Progreso:**
+  - Con cero intentos solo se ve el estado vacío con su botón; el bloque «Dominio por nota» aparece con el primer intento.
+  - El subtítulo cuenta los estados que tienen notas: «1 consolidada · 2 en curso · 3 midiendo · 6 sin datos» (`masterySubtitle`).
+  - La leyenda de la rejilla añade «Midiendo».
+- **Cierra el punto 9 del QA del front:** «Consolidadas» se contaba de dos formas en la misma card (precisión ≥ 75 % en el centro y notas graduadas por el SRS en el subtítulo). Ahora las dos salen del mismo estado. `MasteryOverview` y `NoteMasteryGrid` pierden los parámetros `consolidatedCount` e `inProgressCount`, y el test de QA correspondiente deja de estar en skip.
+- **Tests:** `test/unit/mastery_status_test.dart` nuevo (9 tests): límites de 0, 1, 4 y 5 intentos y de 49,9, 50, 74,9 y 75 %, y el subtítulo. Actualizados 9 ficheros de test.
+  - El test de contraste del tema oscuro siembra una nota practicada, porque la rejilla ya no aparece sin datos.
+  - El control de movimiento reducido usa el onboarding en lugar de Progreso, por el mismo motivo.
+
+**Verificación:** `flutter analyze` sin avisos y `flutter test` +884 ~45.
+
+**Sin hacer en este lote:**
+- No se ha visto en la app real: el color neutro y el contorno de la rueda hay que mirarlos en claro y en oscuro.
+- «Tus extremos» (Pro) sigue ordenando por precisión sin exigir los 5 intentos.
+- El panel de la sesión mantiene «A reforzar» para las notas muy atrasadas aunque tengan pocos intentos: ahí el criterio es el retraso, no la precisión.
+
 ## 2026-11-10 · Lote A: lenguaje y números · Claude Code
 **Decisiones aplicadas** (las recomendadas en el SPEC; el propietario aprobó el plan sin cambiarlas): D1 «repaso inteligente», D2 «Consolidada», D5 «Medio».
 

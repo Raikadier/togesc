@@ -111,8 +111,6 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
     final accuracy = (stats['accuracy_percentage'] as num?)?.toDouble() ?? 0.0;
     final totalSeen = stats['total_seen'] as int? ?? 0;
-    final learningPhase = stats['learning_phase'] as int? ?? 0;
-    final graduated = stats['graduated'] as int? ?? 0;
     final overdueCount = stats['overdue_count'] as int? ?? 0;
     final isNewUser = totalSeen == 0 && history.isEmpty;
 
@@ -121,8 +119,6 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
     final mastery = MasteryOverview(
       summaries: summaries,
-      consolidatedCount: graduated,
-      inProgressCount: learningPhase,
       namingMode: naming,
       learningThreshold: learningThreshold,
       onNoteTap: openNote,
@@ -135,8 +131,6 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     final summaryTab = <Widget>[
       if (isNewUser) ...[
         _ProgressEmptyState(onStart: () => context.go(AppRoutes.home)),
-        const SizedBox(height: DesignTokens.spacingLg),
-        mastery,
       ] else ...[
         rise(GlobalAccuracyHeader(accuracy: accuracy, delta: delta)),
         const SizedBox(height: DesignTokens.spacingLg),

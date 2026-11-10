@@ -165,7 +165,12 @@ void main() {
     // 9 notas nunca vistas muestran «—».
     expect(emptyCells(), findsNWidgets(9));
     expect(find.byKey(const Key('progress-mastery-legend')), findsOneWidget);
-    expect(find.textContaining('consolidadas · '), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('progress-mastery-subtitle')))
+          .data,
+      '1 consolidada · 1 en curso · 1 a reforzar · 9 sin datos',
+    );
   });
 
   testWidgets('cada celda tiene Semantics de lectura completa', (
@@ -175,7 +180,7 @@ void main() {
     await pumpScreen(tester, history: [log(0)]);
 
     expect(
-      find.bySemanticsLabel(RegExp(r'^A sostenido, 42 %, crítica, nivel \d de 5$')),
+      find.bySemanticsLabel(RegExp(r'^A sostenido, 42 %, a reforzar, nivel \d de 5$')),
       findsOneWidget,
     );
     expect(
@@ -185,13 +190,13 @@ void main() {
   });
 
   testWidgets('estado vacío para un usuario nuevo', (tester) async {
-    await pumpScreen(tester);
+    await pumpScreen(tester, grid: false);
 
     expect(find.byKey(const Key('progress-empty-state')), findsOneWidget);
     expect(find.text('Aún no hay progreso'), findsOneWidget);
     expect(find.byKey(const Key('progress-global-accuracy')), findsNothing);
-    // La rejilla se ve igualmente, con las 12 notas sin datos.
-    expect(emptyCells(), findsNWidgets(12));
+    // v2.2 (lote B): sin intentos no se enseña el bloque de dominio.
+    expect(find.byKey(const Key('progress-mastery')), findsNothing);
   });
 
   testWidgets('delta oculto sin datos de la semana pasada', (tester) async {

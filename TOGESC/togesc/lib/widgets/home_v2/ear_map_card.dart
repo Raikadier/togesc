@@ -24,13 +24,9 @@ double? globalAccuracyFromSummaries(List<NoteProgressSummary> summaries) {
   return (correct / seen * 1000).round() / 10;
 }
 
-/// Notas consolidadas para la meta de octava: vistas y con ≥ 75 %.
+/// Notas consolidadas para la meta de octava (estado único de dominio).
 int consolidatedNoteCount(List<NoteProgressSummary> summaries) => summaries
-    .where(
-      (s) =>
-          s.timesSeen > 0 &&
-          s.accuracyPercent >= DesignTokens.masteryGreenThreshold,
-    )
+    .where((s) => masteryStatusFor(s) == MasteryStatus.mastered)
     .length;
 
 
@@ -295,23 +291,26 @@ class _NoteDetailRow extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = TogescColors.of(context);
     final label = formatNoteLabel(summary.note, namingMode);
-    final seen = summary.timesSeen > 0;
     final pct = summary.accuracyPercent;
     final level = srsLevelForSummary(
       summary,
       learningThreshold: learningThreshold,
     );
     final status = masteryStatusFor(summary);
-    final cellColor = seen ? masteryColor(pct, srsLevel: level) : colors.muted;
-    final cellInk =
-        seen ? masteryOnColor(pct, srsLevel: level) : colors.textPrimary;
-    final statusText =
-        '${status.label[0].toUpperCase()}${status.label.substring(1)}';
-    final detail = seen
-        ? '${pct.round()} % · '
-            '${plural(summary.timesSeen, 'intento', 'intentos')} · '
-            'nivel $level de $srsMaxLevel'
-        : 'Aún no la has practicado';
+    final (background: cellColor, foreground: cellInk) = masteryCellColors(
+      context,
+      summary,
+      level: level,
+    );
+    final statusText = status.title;
+    final detail = switch (status) {
+      MasteryStatus.unseen => 'Aún no la has practicado',
+      MasteryStatus.measuring =>
+        '${measuringProgressLabel(summary.timesSeen)} intentos para valorarla',
+      _ => '${pct.round()} % · '
+          '${plural(summary.timesSeen, 'intento', 'intentos')} · '
+          'nivel $level de $srsMaxLevel',
+    };
 
     return Semantics(
       key: const ValueKey('ear-map-detail'),

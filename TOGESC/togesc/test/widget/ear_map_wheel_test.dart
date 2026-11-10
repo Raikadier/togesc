@@ -86,11 +86,11 @@ void main() {
       }
       // C#: 4/10 = 40 % → crítica; nivel 1 (2 aciertos seguidos, umbral 5).
       expect(
-        find.bySemanticsLabel('C sostenido, 40 %, crítica, nivel 1 de 5'),
+        find.bySemanticsLabel('C sostenido, 40 %, a reforzar, nivel 1 de 5'),
         findsOneWidget,
       );
       expect(
-        find.bySemanticsLabel('D, 80 %, dominada, nivel 1 de 5'),
+        find.bySemanticsLabel('D, 80 %, consolidada, nivel 1 de 5'),
         findsOneWidget,
       );
       final data = tester
