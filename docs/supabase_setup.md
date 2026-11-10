@@ -130,3 +130,26 @@ cd "D:\Github repos\togesc"
 ```
 
 Esto alinea las versiones locales con el proyecto remoto (2026-06-21 verificado).
+
+## 8. Backups y keepalive
+
+**Backup semanal** (`.github/workflows/supabase-backup.yml`, domingos a las 04:00 UTC y a mano con `workflow_dispatch`):
+- Vuelca roles, esquema y datos (`public` y `auth`), los empaqueta y los cifra con gpg simétrico (AES256).
+- Necesita los secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` y `BACKUP_PASSPHRASE`. Sin `BACKUP_PASSPHRASE` el workflow falla y no sube nada: el repo es público y cualquier usuario de GitHub con sesión puede bajar los artefactos.
+- Guarda la frase en un gestor de contraseñas fuera de GitHub. Sin ella, el backup no se puede abrir.
+- El artefacto dura 90 días. Descarga una copia y guárdala fuera de GitHub de vez en cuando.
+
+**Descifrar y restaurar** (en un proyecto de staging antes que en producción):
+
+```bash
+gpg --decrypt togesc-AAAAMMDD.tar.gz.gpg | tar -xzf - -C restore/
+psql "$STAGING_DB_URL" -f restore/roles-AAAAMMDD.sql
+psql "$STAGING_DB_URL" -f restore/schema-AAAAMMDD.sql
+psql "$STAGING_DB_URL" -c "set session_replication_role = replica" -f restore/data-AAAAMMDD.sql
+```
+
+`session_replication_role = replica` desactiva triggers y claves foráneas mientras se cargan los datos. La restauración todavía no se ha ensayado (OPS-001).
+
+**Keepalive** (`.github/workflows/supabase-keepalive.yml`, cada 3 días): una consulta ligera a PostgREST para que el plan gratuito no pause el proyecto. El uptime horario (`uptime-check.yml`) avisa si Supabase deja de responder.
+
+**Los workflows programados se ejecutan desde `main`.** Un cambio en estos ficheros no tiene efecto hasta que llega a `main`.
