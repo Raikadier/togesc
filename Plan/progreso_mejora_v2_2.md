@@ -2,6 +2,27 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-11 · Lote D: hitos reales · Claude Code
+- **Función pura** `utils/milestones.dart`: `sessionMilestones` recibe el estado de las notas al empezar y al acabar, y los récords anteriores; devuelve los hitos de la sesión.
+  - **Nota consolidada:** la que pasa a «Consolidada» en esta sesión (con el mínimo de 5 intentos del lote B). Sin estado inicial no se declara ninguna.
+  - **Octava completa:** al consolidarse la duodécima; no se repite si ya lo estaba.
+  - **Mejor sesión:** precisión por encima de la mejor anterior del mismo modo, con ≥ 3 sesiones previas. Igualarla no cuenta.
+  - **Racha récord:** desde 2 días y por encima de la mejor racha anterior.
+- **Guardado** (`app_preferences.dart`): mejor precisión por modo, mejor racha de días y la lista de hitos con fecha (máximo 100). Los récords se guardan aparte porque el historial se corta en 50 sesiones (F9); para usuarios con historial previo se toma el mayor entre lo guardado y lo que da el historial. Lo actualiza `SessionHistoryNotifier.record`, que es donde ya se registra cada sesión.
+- **Resumen:** píldoras «Do, consolidada», «Tu mejor sesión hasta hoy» y «Octava completa» (`session-summary-milestones`), también en la etiqueta semántica. El segmento de cada nota consolidada hace un pop en la rueda tras la entrada (sin animación con movimiento reducido). Si cambia el número de consolidadas, la rueda muestra «N/12 consolidadas».
+- **Home:** el chip de racha añade «Récord» el día en que se bate.
+- **Sesión:** el chip ⚡ aparece desde 2 seguidas, con tooltip y etiqueta «N seguidas».
+- **Perfil:** bloque «Tus hitos» con cada hito y su fecha, del más reciente al más antiguo. Sin hitos no aparece (D10).
+- **Tests:** `test/unit/milestones_test.dart` (10: cada hito, el caso sin hitos, la racha más larga, JSON) y `test/widget/milestones_ui_test.dart` (7: resumen con y sin hitos, chip ⚡, «Récord», «Tus hitos» y el guardado de récords en `record()`).
+
+**Verificación:** `flutter analyze` sin avisos y `flutter test` +912 ~45.
+
+**Sin hacer en este lote:**
+- No se ha visto en la app real: el pop de la rueda y las píldoras hay que mirarlos en una sesión de verdad.
+- El pop de la rueda no tiene test propio.
+- La sesión de Velocidad no calcula hitos de notas ni de mejor sesión; sí cuenta para la racha récord.
+- Los hitos se guardan en el dispositivo y no se sincronizan con Supabase.
+
 ## 2026-11-10 · Lote C: primera sesión y bucle diario · Claude Code
 - **Resumen de la sesión** (`session_summary_view.dart`, funciones puras en `utils/session_summary.dart`):
   - Las tres primeras sesiones titulan «Primera/Segunda/Tercera medición hecha», con el icono de oído, sin valorar la precisión. Desde la cuarta vuelve la medalla.

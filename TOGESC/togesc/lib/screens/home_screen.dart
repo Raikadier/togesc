@@ -26,6 +26,7 @@ import '../widgets/home_v2/today_session_hero.dart';
 import '../widgets/home_v2/week_strip.dart';
 import '../widgets/staggered_entrance.dart';
 import '../providers/session_history_provider.dart';
+import '../utils/milestones.dart';
 import '../utils/session_summary.dart';
 
 /// Ancho máximo del contenido del Home en móvil y tableta.
@@ -58,18 +59,8 @@ class HomeScreen extends ConsumerWidget {
       'Intervalo',
       'Dos notas simultáneas',
     ),
-    (
-      GameMode.chord,
-      Icons.piano_rounded,
-      'Acorde',
-      'Tres notas simultáneas',
-    ),
-    (
-      GameMode.random,
-      Icons.shuffle_rounded,
-      'Aleatorio',
-      'De 1 a 5 notas',
-    ),
+    (GameMode.chord, Icons.piano_rounded, 'Acorde', 'Tres notas simultáneas'),
+    (GameMode.random, Icons.shuffle_rounded, 'Aleatorio', 'De 1 a 5 notas'),
     (
       GameMode.sharpsOnly,
       Icons.tag_rounded,
@@ -102,6 +93,10 @@ class HomeScreen extends ConsumerWidget {
         ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
     final learningThreshold = ref.watch(srsLearningThresholdProvider);
     final engagement = ref.watch(engagementStatsProvider);
+    final streakRecord = streakRecordToday(
+      ref.watch(milestoneLogProvider),
+      now: now,
+    );
     final canPlay = ref.watch(homeModeAccessProvider);
     final desktop =
         MediaQuery.sizeOf(context).width >= DesignTokens.desktopBreakpoint;
@@ -160,6 +155,7 @@ class HomeScreen extends ConsumerWidget {
       if (desktop) ...[
         HomeAppBar(
           streakDays: engagement.currentStreakDays,
+          streakRecord: streakRecord,
           onAvatarTap: () => context.go(AppRoutes.account),
         ),
         HomeOverline(formatLongDateEs(now)),
@@ -169,7 +165,10 @@ class HomeScreen extends ConsumerWidget {
           child: Row(
             children: [
               Expanded(child: HomeOverline(formatLongDateEs(now))),
-              StreakChip(streakDays: engagement.currentStreakDays),
+              StreakChip(
+                streakDays: engagement.currentStreakDays,
+                isRecord: streakRecord,
+              ),
             ],
           ),
         ),
@@ -249,9 +248,7 @@ class HomeScreen extends ConsumerWidget {
           trailing: Text(
             '${recent.practicedDays} de 7 días',
             key: const ValueKey('home-recent-days-count'),
-            style: Theme.of(context)
-                .textTheme
-                .labelLarge
+            style: Theme.of(context).textTheme.labelLarge
                 ?.copyWith(color: TogescColors.of(context).textSecondary)
                 .merge(DesignTokens.tabularNumbers),
           ),
@@ -262,8 +259,8 @@ class HomeScreen extends ConsumerWidget {
           weekStreakCopy(streak),
           key: const ValueKey('week-streak-copy'),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: TogescColors.of(context).textSecondary,
-              ),
+            color: TogescColors.of(context).textSecondary,
+          ),
         ),
       ],
     );
@@ -321,16 +318,14 @@ class HomeScreen extends ConsumerWidget {
             child: Align(
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(maxWidth: homeContentMaxWidth),
+                constraints: const BoxConstraints(
+                  maxWidth: homeContentMaxWidth,
+                ),
                 child: Padding(
                   padding: padding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ...header,
-                      ...mobile,
-                    ],
+                    children: [...header, ...mobile],
                   ),
                 ),
               ),

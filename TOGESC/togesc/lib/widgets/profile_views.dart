@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/design_tokens.dart';
+import '../constants/note_naming.dart';
 import '../models/practice_session_log.dart';
+import '../providers/app_preferences_provider.dart';
 import '../providers/engagement_stats_provider.dart';
 import '../providers/session_history_provider.dart';
 import '../providers/srs_provider.dart';
+import '../utils/milestones.dart';
+import '../utils/relative_time.dart';
 import 'account_sync_views.dart' show accountSyncStatusInk;
 import 'home_v2/ear_map_card.dart' show consolidatedNoteCount;
 import 'paywall_views.dart';
@@ -161,6 +165,59 @@ class ProfileEarStats extends ConsumerWidget {
               Expanded(child: tiles[i]),
             ],
           ],
+        ),
+      ],
+    );
+  }
+}
+
+/// «Tus hitos»: los hitos conseguidos con su fecha, del más reciente al más
+/// antiguo. Sin hitos el bloque no se muestra (D10).
+class ProfileMilestones extends ConsumerWidget {
+  const ProfileMilestones({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final log = ref.watch(milestoneLogProvider);
+    if (log.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final naming =
+        ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
+    final items = log.reversed.toList();
+    return Column(
+      key: const ValueKey('profile-milestones'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: DesignTokens.spacingLg),
+        Semantics(
+          header: true,
+          child: Text(
+            'Tus hitos',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        const SizedBox(height: DesignTokens.spacingSm),
+        TogescCard(
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spacingMd,
+            vertical: DesignTokens.spacingSm,
+          ),
+          child: Column(
+            children: [
+              for (final m in items)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    Icons.emoji_events_rounded,
+                    color: theme.colorScheme.primary,
+                  ),
+                  title: Text(milestoneLabel(m, namingMode: naming)),
+                  subtitle: Text(formatShortDateEs(m.at.toLocal())),
+                ),
+            ],
+          ),
         ),
       ],
     );

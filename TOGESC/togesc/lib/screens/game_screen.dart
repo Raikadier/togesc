@@ -13,12 +13,14 @@ import '../constants/game_constants.dart';
 import '../constants/note_naming.dart';
 import '../models/audio_preferences.dart';
 import '../models/last_practice_session.dart';
-import '../models/practice_session_log.dart' show chromaticNotes;
+import '../models/note_progress_summary.dart';
+import '../models/practice_session_log.dart';
 import '../models/practice_session_preferences.dart';
 import '../models/ui_preferences.dart';
 import '../providers/app_preferences_provider.dart';
 import '../providers/audio_preferences_provider.dart';
 import '../providers/audio_provider.dart';
+import '../providers/clock_provider.dart';
 import '../providers/game_session_provider.dart';
 import '../providers/practice_focus_provider.dart';
 import '../providers/practice_session_preferences_provider.dart';
@@ -26,7 +28,9 @@ import '../providers/session_history_provider.dart';
 import '../providers/srs_provider.dart';
 import '../providers/today_session_provider.dart';
 import '../providers/ui_preferences_provider.dart';
+import '../services/app_preferences.dart';
 import '../services/microphone_pitch_service.dart';
+import '../utils/milestones.dart';
 import '../utils/piano_note_selection.dart';
 import '../utils/session_summary.dart';
 import '../utils/srs_level.dart';
@@ -132,9 +136,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   }
 
   int _requiredNotes(GameSessionState session) => selectableNoteCount(
-        screenMode: widget.mode,
-        sessionNumNotes: session.numNotes,
-      );
+    screenMode: widget.mode,
+    sessionNumNotes: session.numNotes,
+  );
 
   int _displayRound(GameSessionState session) {
     if (session.state == GameState.showingResult) {
@@ -166,11 +170,19 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     MicrophonePitchService.stopListening();
     final session = ref.read(gameSessionProvider);
     if (session.roundsCompleted > 0 && !_discardHistory) {
-      ref.read(sessionHistoryProvider.notifier).record(
+      ref
+          .read(sessionHistoryProvider.notifier)
+          .record(
             mode: session.mode,
             kind: PracticeKind.game,
             roundsCompleted: session.roundsCompleted,
             correctRounds: session.correctRounds,
+            sessionMilestones: _milestones(
+              session,
+              summaries: ref.read(noteProgressSummariesProvider),
+              history: ref.read(sessionHistoryProvider).valueOrNull ?? const [],
+              prefs: ref.read(appPreferencesProvider).valueOrNull,
+            ),
           );
     }
     // Riverpod prohíbe modificar providers mientras se desmonta el árbol
@@ -305,7 +317,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       await audio.playTones(
         frequencies,
         duration: prefs.toneDurationSec,
-        instrument: session.lastInstrument ??
+        instrument:
+            session.lastInstrument ??
             prefs.playbackInstrument(
               sessionOverrideKey: session.sessionInstrumentOverride,
             ),
@@ -541,7 +554,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final messenger = ScaffoldMessenger.maybeOf(context);
     final ok = await _playPreview(
       440.0,
-      instrumentOverride: ref.read(gameSessionProvider).sessionInstrumentOverride,
+      instrumentOverride: ref
+          .read(gameSessionProvider)
+          .sessionInstrumentOverride,
     );
     messenger?.hideCurrentSnackBar();
     messenger?.showSnackBar(
@@ -617,7 +632,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   /// «Piano · octava 4 · 1 nota». Solo datos reales (D10): el instrumento si
   /// está fijo y la octava solo si no varía.
   String _listenDetail(GameSessionState session) {
-    final prefs = ref.read(audioPreferencesProvider).valueOrNull ??
+    final prefs =
+        ref.read(audioPreferencesProvider).valueOrNull ??
         const AudioPreferences();
     final parts = <String>[];
     final id = prefs.playbackInstrument(
@@ -643,8 +659,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       confirmMode: ui.confirmBeforeSubmit,
       textOnly: ui.inputMode == GameInputMode.textOnly,
       isCorrect: result?.isCorrect,
-      correctLabels:
-          result == null ? const [] : _sortedLabels(result.correctNotes),
+      correctLabels: result == null
+          ? const []
+          : _sortedLabels(result.correctNotes),
       answerLabels: result == null
           ? const []
           : result.answerNotes.map(_label).toList(),
@@ -719,7 +736,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     ref.watch(audioPreferencesProvider);
     ref.watch(noteNamingModeProvider);
     ref.listen<GameSessionState>(gameSessionProvider, (previous, next) {
-      final becameResult = next.state == GameState.showingResult &&
+      final becameResult =
+          next.state == GameState.showingResult &&
           (previous?.state != GameState.showingResult ||
               !identical(previous?.lastResult, next.lastResult));
       if (becameResult) _onResultShown(next);
@@ -763,17 +781,18 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   }
 
   SessionStats _stats(GameSessionState session) => SessionStats(
-        round: _displayRound(session),
-        targetRounds: _sessionPrefs().targetRounds,
-        accuracyPercent: session.sessionAccuracyPercent,
-        streak: session.currentStreak,
-      );
+    round: _displayRound(session),
+    targetRounds: _sessionPrefs().targetRounds,
+    accuracyPercent: session.sessionAccuracyPercent,
+    streak: session.currentStreak,
+  );
 
   Widget _pauseButton(GameSessionState session, {bool showLabel = false}) {
     final phase = _phase(session);
     return SessionPauseButton(
       isPaused: session.isPaused,
-      enabled: phase == SessionPhase.answer ||
+      enabled:
+          phase == SessionPhase.answer ||
           phase == SessionPhase.result ||
           phase == SessionPhase.paused,
       onPause: _openPause,
@@ -787,10 +806,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       sessionInstrumentOverride: session.sessionInstrumentOverride,
       showLabel: showLabel,
       onPreview: _previewInstrument,
-      onOverrideChanged: (key) =>
-          ref.read(gameSessionProvider.notifier).setSessionInstrumentOverride(
-                key,
-              ),
+      onOverrideChanged: (key) => ref
+          .read(gameSessionProvider.notifier)
+          .setSessionInstrumentOverride(key),
     );
   }
 
@@ -844,7 +862,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           label: const Text('Reanudar'),
         );
       case SessionPhase.answer:
-        final pianoInput = ui.inputMode == GameInputMode.pianoOnly ||
+        final pianoInput =
+            ui.inputMode == GameInputMode.pianoOnly ||
             ui.inputMode == GameInputMode.both;
         if (!ui.confirmBeforeSubmit || !pianoInput) return null;
         return FilledButton.icon(
@@ -858,8 +877,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       case SessionPhase.result:
         final pills = _srsPills(session);
         final Widget? action;
-        if (session.goalReached &&
-            !_sessionPrefs().autoAdvanceAfterResult) {
+        if (session.goalReached && !_sessionPrefs().autoAdvanceAfterResult) {
           action = FilledButton.icon(
             key: const ValueKey('session-show-summary'),
             onPressed: _showSessionSummary,
@@ -1038,8 +1056,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     BoxConstraints constraints,
   ) {
     final stats = _stats(session);
-    final compactLandscape = constraints.maxWidth >= 600 &&
-        constraints.maxHeight < 560;
+    final compactLandscape =
+        constraints.maxWidth >= 600 && constraints.maxHeight < 560;
     final topBar = SessionTopBar(
       stats: stats,
       onBack: _onBack,
@@ -1047,11 +1065,15 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       pauseButton: _pauseButton(session),
     );
     final progress = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DesignTokens.marginMobile),
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.marginMobile,
+      ),
       child: SessionProgressBar(progress: stats.progress),
     );
     final ring = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DesignTokens.marginMobile),
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.marginMobile,
+      ),
       child: _ring(session, size: DesignTokens.sessionRingSize),
     );
     final keyboardBlock = Padding(
@@ -1135,8 +1157,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     // propuesta no vacía para que las filas no cambien a mitad de sesión.
     final frozen = _fallbackFocusNotes;
     if (frozen != null) return frozen;
-    final proposed =
-        ref.watch(todayFocusNotesProvider).map((f) => f.note).toList();
+    final proposed = ref
+        .watch(todayFocusNotesProvider)
+        .map((f) => f.note)
+        .toList();
     if (proposed.isNotEmpty) _fallbackFocusNotes = proposed;
     return proposed;
   }
@@ -1214,6 +1238,29 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
+  /// Hitos de esta sesión (v2.2, lote D). [history] aún no la incluye.
+  List<Milestone> _milestones(
+    GameSessionState session, {
+    required List<NoteProgressSummary> summaries,
+    required List<PracticeSessionLog> history,
+    required AppPreferences? prefs,
+  }) {
+    final modeId = session.mode.id;
+    return sessionMilestones(
+      before: session.srsSnapshot ?? const {},
+      after: summaries,
+      roundsCompleted: session.roundsCompleted,
+      correctRounds: session.correctRounds,
+      previousSessionsSameMode: gameSessionsOfMode(history, modeId),
+      previousBestAccuracy: bestAccuracyOfMode(
+        history,
+        modeId,
+        stored: prefs?.bestSessionAccuracy(modeId),
+      ),
+      now: ref.read(clockProvider)(),
+    );
+  }
+
   /// Resumen final (clave `session-summary`) con la diferencia SRS entre la
   /// instantánea del inicio y el estado actual.
   Widget _buildSummary(GameSessionState session) {
@@ -1247,9 +1294,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 Text(
                   widget.mode.displayName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: DesignTokens.sessionTextPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    color: DesignTokens.sessionTextPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -1265,7 +1312,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             namingMode: _namingMode(),
             learningThreshold: threshold,
             // La sesión se registra al salir: el historial aún no la incluye.
-            sessionNumber: history.where((e) => e.roundsCompleted > 0).length + 1,
+            sessionNumber:
+                history.where((e) => e.roundsCompleted > 0).length + 1,
             previousAccuracyPercent: previousSessionAccuracy(
               history,
               modeId: session.mode.id,
@@ -1275,6 +1323,15 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 formatNoteLabel(n.note, _namingMode()),
             ],
             bestStreak: session.bestStreak,
+            milestones: _milestones(
+              session,
+              summaries: summaries,
+              history: history,
+              prefs: ref.watch(appPreferencesProvider).valueOrNull,
+            ),
+            consolidatedBefore: session.srsSnapshot == null
+                ? null
+                : consolidatedBeforeCount(session.srsSnapshot!),
             onHome: _leave,
             onProgress: _openProgress,
           ),
