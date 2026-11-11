@@ -67,3 +67,7 @@ String weekdayLongLabelEs(DateTime day) => _weekdaysEs[day.weekday - 1];
 String formatLongDateEs(DateTime day) {
   return '${weekdayLongLabelEs(day)} ${day.day} de ${_monthsEs[day.month - 1]}';
 }
+
+/// Fecha con año para listas: «10 de noviembre de 2026».
+String formatShortDateEs(DateTime day) =>
+    '${day.day} de ${_monthsEs[day.month - 1]} de ${day.year}';

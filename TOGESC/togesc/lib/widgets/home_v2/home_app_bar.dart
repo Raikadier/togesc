@@ -6,12 +6,14 @@ import '../../app/togesc_colors.dart';
 /// App bar del Home v2 (56): logo, chip de racha y avatar.
 class HomeAppBar extends StatelessWidget {
   final int streakDays;
+  final bool streakRecord;
   final VoidCallback onAvatarTap;
 
   const HomeAppBar({
     super.key,
     required this.streakDays,
     required this.onAvatarTap,
+    this.streakRecord = false,
   });
 
   @override
@@ -30,7 +32,7 @@ class HomeAppBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          StreakChip(streakDays: streakDays),
+          StreakChip(streakDays: streakDays, isRecord: streakRecord),
           const SizedBox(width: DesignTokens.spacingXs),
           Semantics(
             button: true,
@@ -75,7 +77,14 @@ class HomeAppBar extends StatelessWidget {
 class StreakChip extends StatelessWidget {
   final int streakDays;
 
-  const StreakChip({super.key, required this.streakDays});
+  /// Hoy se batió la racha récord: el chip añade «Récord» (v2.2, lote D).
+  final bool isRecord;
+
+  const StreakChip({
+    super.key,
+    required this.streakDays,
+    this.isRecord = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +92,7 @@ class StreakChip extends StatelessWidget {
     final streakLabel = streakDays == 1 ? '1 día' : '$streakDays días';
     return Semantics(
       key: const ValueKey('home-streak-chip'),
-      label: 'Racha de práctica: $streakLabel',
+      label: 'Racha de práctica: $streakLabel${isRecord ? ', récord' : ''}',
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -113,6 +122,17 @@ class StreakChip extends StatelessWidget {
                   )
                   .merge(DesignTokens.tabularNumbers),
             ),
+            if (isRecord) ...[
+              const SizedBox(width: 6),
+              Text(
+                'Récord',
+                key: const ValueKey('home-streak-record'),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: scheme.onSurface,
+                ),
+              ),
+            ],
           ],
         ),
       ),

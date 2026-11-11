@@ -218,6 +218,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               ],
               gap,
               const ProfileEarStats(),
+              const ProfileMilestones(),
               gap,
               // D8: Pro sale de la nav; Perfil es su entrada permanente.
               ProfilePlanCard(

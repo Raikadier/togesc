@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/design_tokens.dart';
 import '../../constants/note_naming.dart';
 import '../../models/note_progress_summary.dart';
+import '../../utils/milestones.dart';
 import '../../utils/session_summary.dart';
 import '../../utils/srs_level.dart';
 import '../count_up_text.dart';
@@ -34,7 +35,15 @@ class SessionSummaryView extends StatelessWidget {
     this.previousAccuracyPercent,
     this.nextFocusLabels,
     this.bestStreak = 0,
+    this.milestones = const [],
+    this.consolidatedBefore,
   });
+
+  /// Hitos de la sesión (v2.2, lote D); sin hitos no se muestra nada.
+  final List<Milestone> milestones;
+
+  /// Notas consolidadas al empezar; si cambia, la rueda muestra «N/12».
+  final int? consolidatedBefore;
 
   /// Número de esta sesión (1 = la primera). `null`: no se conoce.
   final int? sessionNumber;
@@ -61,8 +70,7 @@ class SessionSummaryView extends StatelessWidget {
   /// Desfase de las filas de cambios de nivel.
   static const Duration changeStagger = Duration(milliseconds: 90);
 
-  double get accuracyPercent =>
-      rounds > 0 ? correctRounds / rounds * 100 : 0;
+  double get accuracyPercent => rounds > 0 ? correctRounds / rounds * 100 : 0;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +91,19 @@ class SessionSummaryView extends StatelessWidget {
       bestStreakLine(bestStreak),
       if (nextFocusLabels != null) nextSessionLine(nextFocusLabels!),
     ].whereType<String>().toList();
+    final consolidatedNow = summaries
+        .where((s) => masteryStatusFor(s) == MasteryStatus.mastered)
+        .length;
+    final octaveChanged =
+        consolidatedBefore != null && consolidatedBefore != consolidatedNow;
+    final popNotes = {
+      for (final m in milestones)
+        if (m.kind == MilestoneKind.noteConsolidated && m.note != null) m.note!,
+    };
+    final milestoneTexts = [
+      for (final m in milestones)
+        milestoneLabel(m, namingMode: namingMode, inSummary: true),
+    ];
     final overline = DesignTokens.overline.copyWith(
       color: DesignTokens.sessionTextLabel,
     );
@@ -104,10 +125,7 @@ class SessionSummaryView extends StatelessWidget {
             StaggeredEntrance(
               index: i,
               step: changeStagger,
-              child: _ChangeRow(
-                change: changes[i],
-                namingMode: namingMode,
-              ),
+              child: _ChangeRow(change: changes[i], namingMode: namingMode),
             ),
       ],
     );
@@ -125,6 +143,9 @@ class SessionSummaryView extends StatelessWidget {
               namingMode: namingMode,
               learningThreshold: learningThreshold,
               compact: true,
+              popNotes: popNotes,
+              centerValue: octaveChanged ? '$consolidatedNow/12' : null,
+              centerCaption: octaveChanged ? 'consolidadas' : null,
             ),
           ),
         ),
@@ -146,9 +167,7 @@ class SessionSummaryView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Cabecera con medalla.
-              _MedalBadge(
-                icon: measuring ? Icons.hearing_rounded : medal.icon,
-              ),
+              _MedalBadge(icon: measuring ? Icons.hearing_rounded : medal.icon),
               const SizedBox(height: DesignTokens.spacingMd),
               Text(
                 'SESIÓN COMPLETADA',
@@ -161,9 +180,11 @@ class SessionSummaryView extends StatelessWidget {
               Semantics(
                 liveRegion: true,
                 header: true,
-                label: 'Sesión completada. $headline. '
+                label:
+                    'Sesión completada. $headline. '
                     '$correctRounds de $rounds aciertos, $acc por ciento.'
-                    '${recap.isEmpty ? '' : ' ${recap.join(' ')}'}',
+                    '${recap.isEmpty ? '' : ' ${recap.join(' ')}'}'
+                    '${milestoneTexts.isEmpty ? '' : ' ${milestoneTexts.join('. ')}.'}',
                 child: ExcludeSemantics(
                   child: Text(
                     headline,
@@ -195,6 +216,21 @@ class SessionSummaryView extends StatelessWidget {
                       color: DesignTokens.sessionTextPrimary,
                       fontWeight: FontWeight.w600,
                     ),
+                  ),
+                ),
+              ],
+              if (milestoneTexts.isNotEmpty) ...[
+                const SizedBox(height: DesignTokens.spacingMd),
+                ExcludeSemantics(
+                  child: Wrap(
+                    key: const ValueKey('session-summary-milestones'),
+                    alignment: WrapAlignment.center,
+                    spacing: DesignTokens.spacingSm,
+                    runSpacing: DesignTokens.spacingSm,
+                    children: [
+                      for (final text in milestoneTexts)
+                        _MilestonePill(text: text),
+                    ],
                   ),
                 ),
               ],
@@ -231,7 +267,7 @@ class SessionSummaryView extends StatelessWidget {
                       semantics: meanResponseTimeSec == null
                           ? 'Tiempo medio de respuesta, sin datos'
                           : 'Tiempo medio de respuesta, '
-                              '${formatSecondsEs(meanResponseTimeSec!)}',
+                                '${formatSecondsEs(meanResponseTimeSec!)}',
                       child: Text(
                         meanResponseTimeSec == null
                             ? '—'
@@ -294,9 +330,7 @@ class SessionSummaryView extends StatelessWidget {
                     onPressed: onProgress,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: DesignTokens.sessionTextPrimary,
-                      side: const BorderSide(
-                        color: DesignTokens.sessionBorder,
-                      ),
+                      side: const BorderSide(color: DesignTokens.sessionBorder),
                       minimumSize: const Size(200, DesignTokens.touchTargetMin),
                       shape: RoundedRectangleBorder(
                         borderRadius: DesignTokens.borderRadiusCta,
@@ -310,6 +344,47 @@ class SessionSummaryView extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Píldora de un hito («Do, consolidada», «Tu mejor sesión hasta hoy»).
+class _MilestonePill extends StatelessWidget {
+  const _MilestonePill({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: DesignTokens.sessionAmber.withValues(alpha: 0.16),
+        borderRadius: DesignTokens.borderRadiusPill,
+        border: Border.all(
+          color: DesignTokens.sessionAmber.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.emoji_events_rounded,
+            size: 16,
+            color: DesignTokens.sessionAmber,
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: DesignTokens.sessionTextPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -392,8 +467,8 @@ class _Kpi extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: DesignTokens.sessionTextSecondary,
-                  ),
+                color: DesignTokens.sessionTextSecondary,
+              ),
             ),
           ],
         ),
@@ -415,7 +490,8 @@ class _ChangeRow extends StatelessWidget {
     final spoken = spokenNoteName(label);
     final pct = change.accuracyAfter;
     // Sin datos o aún midiendo: celda neutra, nunca roja.
-    final judged = pct != null &&
+    final judged =
+        pct != null &&
         masteryStatusOf(
           timesSeen: change.timesSeenAfter ?? masteryMinAttempts,
           pct: pct,
@@ -429,13 +505,14 @@ class _ChangeRow extends StatelessWidget {
     final (IconData icon, Color color, String trend) = change.improved
         ? (Icons.arrow_upward_rounded, DesignTokens.sessionSuccess, 'sube')
         : change.dropped
-            ? (Icons.arrow_downward_rounded, DesignTokens.sessionError, 'baja')
-            : (Icons.remove_rounded, DesignTokens.sessionTextSecondary, 'igual');
+        ? (Icons.arrow_downward_rounded, DesignTokens.sessionError, 'baja')
+        : (Icons.remove_rounded, DesignTokens.sessionTextSecondary, 'igual');
 
     return Semantics(
       key: ValueKey('session-summary-change-${change.note}'),
       container: true,
-      label: '$spoken: nivel ${change.before} a ${change.after} de '
+      label:
+          '$spoken: nivel ${change.before} a ${change.after} de '
           '$srsMaxLevel, $trend',
       excludeSemantics: true,
       child: Padding(

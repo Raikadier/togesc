@@ -5,7 +5,6 @@ import '../../app/design_tokens.dart';
 import '../../models/audio_preferences.dart';
 import '../../providers/audio_preferences_provider.dart';
 import '../session_instrument_sheet.dart';
-import '../../utils/number_format.dart';
 
 /// Datos de las chips de la sesión: ronda, precisión y racha.
 @immutable
@@ -30,9 +29,8 @@ class SessionStats {
   String get roundText =>
       targetRounds > 0 ? '$round / $targetRounds' : 'Ronda $round';
 
-  String get roundSemantics => targetRounds > 0
-      ? 'Ronda $round de $targetRounds'
-      : 'Ronda $round';
+  String get roundSemantics =>
+      targetRounds > 0 ? 'Ronda $round de $targetRounds' : 'Ronda $round';
 
   String get accuracyText =>
       accuracyPercent == null ? '—' : '${accuracyPercent!.round()} %';
@@ -83,9 +81,7 @@ class SessionStatChip extends StatelessWidget {
               ],
               Text(
                 text,
-                style: Theme.of(context)
-                    .textTheme
-                    .labelLarge
+                style: Theme.of(context).textTheme.labelLarge
                     ?.copyWith(
                       color: DesignTokens.sessionTextPrimary,
                       fontWeight: FontWeight.w700,
@@ -134,13 +130,18 @@ class SessionStatChips extends StatelessWidget {
           text: stats.accuracyText,
           semanticsLabel: stats.accuracySemantics,
         ),
-        SessionStatChip(
-          key: const ValueKey('session-chip-streak'),
-          icon: Icons.bolt_rounded,
-          iconColor: DesignTokens.sessionAmber,
-          text: '${stats.streak}',
-          semanticsLabel: plural(stats.streak, 'acierto seguido', 'aciertos seguidos'),
-        ),
+        // Solo desde 2 seguidas: con 0 o 1 no hay nada que celebrar.
+        if (stats.streak >= 2)
+          Tooltip(
+            message: '${stats.streak} seguidas',
+            child: SessionStatChip(
+              key: const ValueKey('session-chip-streak'),
+              icon: Icons.bolt_rounded,
+              iconColor: DesignTokens.sessionAmber,
+              text: '${stats.streak}',
+              semanticsLabel: '${stats.streak} seguidas',
+            ),
+          ),
       ],
     );
   }
@@ -219,12 +220,15 @@ class SessionPauseButton extends StatelessWidget {
 /// Estilo del botón secundario de sesión (#1E1622, borde #3A2E42).
 ButtonStyle sessionSecondaryButtonStyle() {
   return OutlinedButton.styleFrom(
-    minimumSize: const Size(DesignTokens.touchTargetMin,
-        DesignTokens.touchTargetMin),
+    minimumSize: const Size(
+      DesignTokens.touchTargetMin,
+      DesignTokens.touchTargetMin,
+    ),
     backgroundColor: DesignTokens.sessionButton,
     foregroundColor: DesignTokens.sessionTextPrimary,
-    disabledForegroundColor:
-        DesignTokens.sessionTextSecondary.withValues(alpha: 0.6),
+    disabledForegroundColor: DesignTokens.sessionTextSecondary.withValues(
+      alpha: 0.6,
+    ),
     side: const BorderSide(color: DesignTokens.sessionBorder),
     shape: RoundedRectangleBorder(borderRadius: DesignTokens.borderRadiusCta),
   );
@@ -250,7 +254,8 @@ class SessionInstrumentButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final prefs = ref.watch(audioPreferencesProvider).valueOrNull ??
+    final prefs =
+        ref.watch(audioPreferencesProvider).valueOrNull ??
         const AudioPreferences();
     final summary = sessionInstrumentSummary(
       prefs: prefs,
@@ -364,9 +369,9 @@ class SessionDesktopHeader extends StatelessWidget {
             modeName,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: DesignTokens.sessionTextPrimary,
-                  fontWeight: FontWeight.w800,
-                ),
+              color: DesignTokens.sessionTextPrimary,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
         const SizedBox(width: DesignTokens.spacingLg),

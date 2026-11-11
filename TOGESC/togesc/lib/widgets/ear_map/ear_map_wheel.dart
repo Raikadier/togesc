@@ -38,6 +38,7 @@ class EarMapWheel extends StatefulWidget {
     this.onHover,
     this.onDark = false,
     this.compact = false,
+    this.popNotes = const {},
   });
 
   /// Resúmenes por nota. El orden da igual: se colocan por clase de altura.
@@ -66,6 +67,13 @@ class EarMapWheel extends StatefulWidget {
 
   /// Variante compacta: anillo más grueso (r0 70, r1 132).
   final bool compact;
+
+  /// Notas que acaban de consolidarse: su segmento hace un pop tras la
+  /// entrada (v2.2, lote D). Sin animación con movimiento reducido.
+  final Set<String> popNotes;
+
+  /// Duración del pop de una nota consolidada.
+  static const Duration popDuration = Duration(milliseconds: 520);
 
   /// Duración de la entrada de cada segmento.
   static const Duration segmentDuration = Duration(milliseconds: 900);
@@ -159,18 +167,24 @@ class _Segment {
   /// Fracción radial rellena. Mínimo 18 % para que una nota al 0 % se lea
   /// (v2.2, lote B). Midiendo: la parte de los intentos ya hechos.
   double get fill => switch (status) {
-        MasteryStatus.unseen => 0,
-        MasteryStatus.measuring =>
-          math.max(0.18, summary.timesSeen / masteryMinAttempts),
-        _ => math.max(0.18, pct / 100).clamp(0.0, 1.0),
-      };
+    MasteryStatus.unseen => 0,
+    MasteryStatus.measuring => math.max(
+      0.18,
+      summary.timesSeen / masteryMinAttempts,
+    ),
+    _ => math.max(0.18, pct / 100).clamp(0.0, 1.0),
+  };
 }
 
 class _EarMapWheelState extends State<EarMapWheel>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _entrance = AnimationController(
     vsync: this,
     duration: EarMapWheel.entranceDuration,
+  );
+  late final AnimationController _pop = AnimationController(
+    vsync: this,
+    duration: EarMapWheel.popDuration,
   );
   late final List<FocusNode> _focusNodes = List.generate(
     chromaticNotes.length,
@@ -189,13 +203,16 @@ class _EarMapWheelState extends State<EarMapWheel>
         Duration.zero) {
       _entrance.value = 1;
     } else {
-      _entrance.forward();
+      _entrance.forward().whenComplete(() {
+        if (mounted && widget.popNotes.isNotEmpty) _pop.forward();
+      });
     }
   }
 
   @override
   void dispose() {
     _entrance.dispose();
+    _pop.dispose();
     for (final node in _focusNodes) {
       node.dispose();
     }
@@ -312,12 +329,17 @@ class _EarMapWheelState extends State<EarMapWheel>
                   Positioned.fill(
                     child: ExcludeSemantics(
                       child: AnimatedBuilder(
-                        animation: _entrance,
+                        animation: Listenable.merge([_entrance, _pop]),
                         builder: (context, _) => CustomPaint(
                           painter: _EarMapPainter(
                             segments: segments,
                             geometry: geometry,
                             progress: _entrance.value,
+                            pop: _pop.value,
+                            popIndices: {
+                              for (final n in widget.popNotes)
+                                chromaticNotes.indexOf(n),
+                            },
                             track: track,
                             outline: theme.colorScheme.outlineVariant,
                             measuring: masteryMeasuringColor(context),
@@ -492,8 +514,7 @@ class _Center extends StatelessWidget {
     if (s != null) {
       big = switch (s.status) {
         MasteryStatus.unseen => '—',
-        MasteryStatus.measuring =>
-          '${s.summary.timesSeen}/$masteryMinAttempts',
+        MasteryStatus.measuring => '${s.summary.timesSeen}/$masteryMinAttempts',
         _ => '${s.pct.round()} %',
       };
       small = s.status == MasteryStatus.measuring
@@ -539,6 +560,8 @@ class _EarMapPainter extends CustomPainter {
     required this.segments,
     required this.geometry,
     required this.progress,
+    this.pop = 0,
+    this.popIndices = const {},
     required this.track,
     required this.outline,
     required this.measuring,
@@ -554,6 +577,10 @@ class _EarMapPainter extends CustomPainter {
 
   /// Progreso de la entrada escalonada (0–1 sobre la duración total).
   final double progress;
+
+  /// Progreso del pop (0–1) de los segmentos [popIndices].
+  final double pop;
+  final Set<int> popIndices;
   final Color track;
 
   /// Contorno de la pista: la separa de la tarjeta en el tema claro.
@@ -606,7 +633,10 @@ class _EarMapPainter extends CustomPainter {
           ..color = outline,
       );
 
-      final (segScale, opacity) = _entrance(i);
+      var (segScale, opacity) = _entrance(i);
+      if (popIndices.contains(i) && pop > 0 && pop < 1) {
+        segScale *= 1 + 0.12 * math.sin(math.pi * pop);
+      }
       if (opacity > 0) {
         final rf = geometry.r0 + (geometry.r1 - geometry.r0) * s.fill;
         final fillColor = switch (s.status) {
@@ -651,6 +681,7 @@ class _EarMapPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _EarMapPainter old) =>
       old.progress != progress ||
+      old.pop != pop ||
       old.segments != segments ||
       old.track != track ||
       old.outline != outline ||

@@ -9,6 +9,7 @@ import '../models/practice_session_log.dart';
 import '../models/practice_session_preferences.dart';
 import '../models/srs_intensity_profile.dart';
 import '../models/ui_preferences.dart';
+import '../utils/milestones.dart';
 
 const String onboardingCompleteKey = 'togesc_onboarding_complete';
 
@@ -68,6 +69,7 @@ T migrateLegacyPreference<T>({
   if (legacyValue != null && legacyValue != legacyDefault) return legacyValue;
   return newDefault;
 }
+
 const String hidePianoLabelsKey = 'togesc_hide_piano_labels';
 const String largePianoKey = 'togesc_large_piano';
 const String reduceAnimationsKey = 'togesc_reduce_animations';
@@ -80,14 +82,20 @@ const String sessionHistoryKey = 'togesc_session_history';
 const String srsIntensityProfileKey = 'togesc_srs_intensity_profile';
 const String totalXpKey = 'togesc_total_xp';
 
+/// v2.2, lote D: récords guardados aparte del historial (que tiene un límite
+/// de 50 sesiones) y la lista de hitos conseguidos con su fecha.
+const String bestSessionAccuracyKey = 'togesc_best_session_accuracy';
+const String bestStreakDaysKey = 'togesc_best_streak_days';
+const String milestonesKey = 'togesc_milestones';
+const int maxStoredMilestones = 100;
+
 /// Preferencias de la aplicacion (onboarding, Fase 6, etc.).
 class AppPreferences {
   final SharedPreferences _prefs;
 
   AppPreferences(this._prefs);
 
-  bool get onboardingComplete =>
-      _prefs.getBool(onboardingCompleteKey) ?? false;
+  bool get onboardingComplete => _prefs.getBool(onboardingCompleteKey) ?? false;
 
   Future<void> setOnboardingComplete(bool value) async {
     await _prefs.setBool(onboardingCompleteKey, value);
@@ -201,7 +209,8 @@ class AppPreferences {
     final atRaw = _prefs.getString(lastPracticeAtKey);
     if (modeId == null || atRaw == null) return null;
 
-    final kindRaw = _prefs.getString(lastPracticeKindKey) ?? PracticeKind.game.name;
+    final kindRaw =
+        _prefs.getString(lastPracticeKindKey) ?? PracticeKind.game.name;
     final kind = kindRaw == PracticeKind.speed.name
         ? PracticeKind.speed
         : PracticeKind.game;
@@ -267,8 +276,9 @@ class AppPreferences {
       largePiano: _prefs.getBool(largePianoKey) ?? false,
       reduceAnimations: _prefs.getBool(reduceAnimationsKey) ?? false,
       largeText: _prefs.getBool(largeTextKey) ?? false,
-      themePreference:
-          AppThemePreference.fromId(_prefs.getString(themePreferenceKey)),
+      themePreference: AppThemePreference.fromId(
+        _prefs.getString(themePreferenceKey),
+      ),
     );
   }
 
@@ -301,9 +311,11 @@ class AppPreferences {
 
     try {
       final decoded = (jsonDecode(raw) as List<dynamic>)
-          .map((e) => PracticeSessionLog.fromJson(
-                Map<String, dynamic>.from(e as Map),
-              ))
+          .map(
+            (e) => PracticeSessionLog.fromJson(
+              Map<String, dynamic>.from(e as Map),
+            ),
+          )
           .toList();
       return decoded;
     } catch (_) {
@@ -328,6 +340,60 @@ class AppPreferences {
 
   Future<void> clearSessionHistory() async {
     await _prefs.remove(sessionHistoryKey);
+  }
+
+  /// Mejor precisión guardada del modo de práctica [modeId].
+  double? bestSessionAccuracy(int modeId) {
+    final map = _jsonMap(bestSessionAccuracyKey);
+    final v = map['$modeId'];
+    return v is num ? v.toDouble() : null;
+  }
+
+  Future<void> setBestSessionAccuracy(int modeId, double value) async {
+    final map = _jsonMap(bestSessionAccuracyKey)..['$modeId'] = value;
+    await _prefs.setString(bestSessionAccuracyKey, jsonEncode(map));
+  }
+
+  int get bestStreakDays => _prefs.getInt(bestStreakDaysKey) ?? 0;
+
+  Future<void> setBestStreakDays(int days) async {
+    await _prefs.setInt(bestStreakDaysKey, days);
+  }
+
+  /// Hitos conseguidos, del más antiguo al más reciente.
+  List<Milestone> get milestones {
+    final raw = _prefs.getString(milestonesKey);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      return [
+        for (final e in jsonDecode(raw) as List<dynamic>)
+          if (e is Map) ?Milestone.tryFromJson(Map<String, dynamic>.from(e)),
+      ];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> addMilestones(List<Milestone> items) async {
+    if (items.isEmpty) return;
+    final all = [...milestones, ...items];
+    final kept = all.length > maxStoredMilestones
+        ? all.sublist(all.length - maxStoredMilestones)
+        : all;
+    await _prefs.setString(
+      milestonesKey,
+      jsonEncode([for (final m in kept) m.toJson()]),
+    );
+  }
+
+  Map<String, dynamic> _jsonMap(String key) {
+    final raw = _prefs.getString(key);
+    if (raw == null || raw.isEmpty) return {};
+    try {
+      return Map<String, dynamic>.from(jsonDecode(raw) as Map);
+    } catch (_) {
+      return {};
+    }
   }
 
   SrsIntensityProfile get srsIntensityProfile {
