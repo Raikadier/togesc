@@ -165,32 +165,11 @@ double _changedFraction(
 }
 
 class _FocusTarget {
-  const _FocusTarget(
-    this.screen,
-    this.key,
-    this.what, {
-    this.ringBarrier = _noRing,
-    this.weakIndicator = true,
-  });
+  const _FocusTarget(this.screen, this.key, this.what);
   final A11yScreen screen;
   final String key;
   final String what;
-  final String? ringBarrier;
-
-  /// Solo tiene el velo de foco de Material (no llega a 3:1).
-  final bool weakIndicator;
 }
-
-const _noRing =
-    'A11Y: no hay anillo de foco global; el tema no define '
-    'estilo `focused` (lib/app/app_theme.dart, sin `side`/`overlayColor` '
-    'para WidgetState.focused) y Material solo pinta un velo dentro del '
-    'control. SPEC v2.1 §1.3 (anillo 3 px + 2 px de separación)';
-
-const _weakIndicator =
-    'A11Y: el único indicador es el velo de foco de '
-    'Material (≈10 % de opacidad), que no llega a 3:1 frente al control sin '
-    'foco; WCAG 1.4.11 (y 2.4.13 AAA). Se arregla con el anillo del SPEC';
 
 void main() {
   group('orden de Tab', () {
@@ -300,27 +279,9 @@ void main() {
     final targets = [
       _FocusTarget(a11yScreens[0], 'today-start-cta', 'CTA «Empezar sesión»'),
       _FocusTarget(a11yScreens[0], 'free-tile-singleNote', 'tile de práctica'),
-      _FocusTarget(
-        a11yScreens[0],
-        'ear-map-segment-C',
-        'segmento del mapa',
-        ringBarrier:
-            'A11Y: el segmento resalta su propio contorno (pasa '
-            '1.4.11) pero sin los 2 px de separación del SPEC '
-            '(lib/widgets/ear_map/ear_map_wheel.dart:594-599)',
-        weakIndicator: false,
-      ),
+      _FocusTarget(a11yScreens[0], 'ear-map-segment-C', 'segmento del mapa'),
       _FocusTarget(a11yScreens[0], 'nav-practice', 'barra inferior'),
-      _FocusTarget(
-        a11yScreens[4],
-        'progress-tabs',
-        'pestaña «Resumen»',
-        ringBarrier:
-            'A11Y: la pestaña pinta un borde de 3 px pero por '
-            'dentro (sin los 2 px de separación del SPEC; '
-            'lib/widgets/progress_v2/progress_tabs.dart:147)',
-        weakIndicator: false,
-      ),
+      _FocusTarget(a11yScreens[4], 'progress-tabs', 'pestaña «Resumen»'),
       _FocusTarget(
         a11yScreens[7],
         'settings-large-text',
@@ -358,7 +319,6 @@ void main() {
 
         a11yTestWidgets(
           'WCAG 1.4.11: el indicador contrasta ≥ 3:1 (≥ 1 px de perímetro)',
-          barrier: t.weakIndicator ? _weakIndicator : null,
           (tester) async {
             try {
               final (idle, focused, rect) = await focusAndCapture(tester);
@@ -376,29 +336,27 @@ void main() {
           },
         );
 
-        a11yTestWidgets(
-          'SPEC §1.3: anillo de 3 px a 2 px del control',
-          barrier: t.ringBarrier,
-          (tester) async {
-            try {
-              final (idle, focused, rect) = await focusAndCapture(tester);
-              final ring = _changedFraction(
-                idle,
-                focused,
-                rect,
-                inner: 2,
-                outer: 5,
-              );
-              expect(
-                ring,
-                greaterThan(0.6),
-                reason: 'banda 2–5 px fuera de $rect',
-              );
-            } finally {
-              await leaveA11yScreen(tester);
-            }
-          },
-        );
+        a11yTestWidgets('SPEC §1.3: anillo de 3 px a 2 px del control', (
+          tester,
+        ) async {
+          try {
+            final (idle, focused, rect) = await focusAndCapture(tester);
+            final ring = _changedFraction(
+              idle,
+              focused,
+              rect,
+              inner: 2,
+              outer: 5,
+            );
+            expect(
+              ring,
+              greaterThan(0.6),
+              reason: 'banda 2–5 px fuera de $rect',
+            );
+          } finally {
+            await leaveA11yScreen(tester);
+          }
+        });
       });
     }
   });

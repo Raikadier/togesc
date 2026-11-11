@@ -24,26 +24,12 @@ const _guidelines = <String, AccessibilityGuideline>{
 /// Barreras reales destapadas por estas guías (se mantienen como `skip`
 /// hasta que se arreglen; el informe las prioriza).
 const _known = <String, String>{
-  'Estadísticas|android 48dp':
-      'A11Y: pestañas «Resumen/Historial» de 40 px '
-      'de alto (lib/widgets/progress_v2/progress_tabs.dart:137, minHeight '
-      'touchTargetMin - 8); WCAG 2.5.8 AA (24 px) sí se cumple',
-  'Perfil/Cuenta|etiquetas': _unlabeledCard,
   'Juego · fase «Responde»|android 48dp':
       'A11Y: teclas blancas del piano '
       'de sesión de 44,3 px de ancho a 360 px (lib/widgets/piano_keyboard.dart'
       ':588, minWidth 336 + padding no se respeta dentro del layout de la '
       'sesión); WCAG 2.5.8 AA sí se cumple',
-  'Estadísticas|iOS 44pt':
-      'A11Y: pestañas «Resumen/Historial» de 40 px de '
-      'alto (lib/widgets/progress_v2/progress_tabs.dart:137)',
 };
-
-const _unlabeledCard =
-    'A11Y: las tarjetas pulsables «Ajustes de práctica» y '
-    '«Acerca de TOGESC» exponen un nodo con acción tap y sin nombre: '
-    '`TogescCard` envuelve un `Card` (semanticContainer) en un `InkWell` '
-    '(lib/widgets/togesc_ui.dart:109); WCAG 4.1.2';
 
 /// Alto suficiente para que casi todo el contenido entre en pantalla (las
 /// guías solo miran lo que está dentro del viewport) a ancho de móvil.

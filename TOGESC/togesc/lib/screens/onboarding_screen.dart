@@ -16,7 +16,6 @@ import '../providers/ui_preferences_provider.dart';
 import '../services/app_preferences.dart';
 import '../widgets/onboarding_views.dart';
 import '../widgets/piano_keyboard.dart';
-import '../widgets/progress_v2/progress_metrics.dart' show spokenNoteName;
 import '../widgets/togesc_ui.dart';
 
 /// Onboarding v2.1 (SPEC §2.7): 4 pasos con indicador, «Saltar», ronda de
@@ -88,11 +87,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   padding: EdgeInsets.fromLTRB(margin, 8, margin / 2, 0),
                   child: Row(
                     children: [
-                      ExcludeSemantics(
-                        child: Text(
-                          'TOGESC',
-                          style: DesignTokens.logo.copyWith(
-                            color: theme.colorScheme.primary,
+                      // El logo encoge con texto escalado (lote F).
+                      Flexible(
+                        flex: 3,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: ExcludeSemantics(
+                            child: Text(
+                              'TOGESC',
+                              style: DesignTokens.logo.copyWith(
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
                           ),
                         ),
                       ),

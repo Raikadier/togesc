@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../app/design_tokens.dart';
+import '../../constants/note_naming.dart';
 
 /// Fase visible de la sesión v2 (1b/1d).
 ///
@@ -17,16 +18,22 @@ class SessionPhaseCopy {
   final String? subtitle;
   final Color color;
 
+  /// Inicio hablado si difiere del visible («Correcto, Do sostenido»).
+  final String? spokenLead;
+
   const SessionPhaseCopy({
     required this.overline,
     required this.headline,
     required this.color,
     this.subtitle,
+    this.spokenLead,
   });
 
   /// Texto para el lector de pantalla (región viva).
-  String get announcement =>
-      subtitle == null ? '$overline. $headline' : '$overline. $headline. $subtitle';
+  String get announcement {
+    final lead = spokenLead ?? '$overline. $headline';
+    return subtitle == null ? lead : '$lead. $subtitle';
+  }
 }
 
 /// Datos de la ronda necesarios para el copy.
@@ -126,7 +133,7 @@ SessionPhaseCopy sessionPhaseCopy(SessionPhaseContext c) {
       } else {
         subtitle = many
             ? 'Toca las ${c.requiredNotes} teclas — se envía al completar la '
-                'selección.'
+                  'selección.'
             : 'Toca la tecla — se envía al instante, sin confirmar.';
       }
       return SessionPhaseCopy(
@@ -140,21 +147,32 @@ SessionPhaseCopy sessionPhaseCopy(SessionPhaseContext c) {
       if (c.goalReached) {
         next = c.targetRounds > 0
             ? 'Objetivo cumplido: ${c.targetRounds} rondas. Preparando tu '
-                'resumen…'
+                  'resumen…'
             : null;
       } else {
         next = c.autoAdvance
             ? 'Siguiente ronda en un momento…'
             : 'Pulsa «Siguiente ronda» cuando quieras.';
       }
+      // Lote F: el anuncio nombra la nota, con «sostenido» y no «#».
+      final spokenCorrect = _joinNotes([
+        for (final l in c.correctLabels) spokenNoteName(l),
+      ]);
+      final spokenAnswered = _joinNotes([
+        for (final l in c.answerLabels) spokenNoteName(l),
+      ]);
       if (c.isCorrect ?? false) {
+        final headline = c.streak >= 3
+            ? '¡${c.streak} seguidas!'
+            : (many ? 'Bien identificadas' : 'Bien identificada');
         return SessionPhaseCopy(
           overline: 'Correcto',
-          headline: c.streak >= 3
-              ? '¡${c.streak} seguidas!'
-              : (many ? 'Bien identificadas' : 'Bien identificada'),
+          headline: headline,
           subtitle: next,
           color: DesignTokens.sessionSuccess,
+          spokenLead: spokenCorrect.isEmpty
+              ? null
+              : 'Correcto, $spokenCorrect. $headline',
         );
       }
       final era = _joinNotes(c.correctLabels);
@@ -164,11 +182,14 @@ SessionPhaseCopy sessionPhaseCopy(SessionPhaseContext c) {
         headline: answered.isEmpty
             ? 'Era $era'
             : 'Era $era, respondiste $answered',
+        spokenLead: spokenAnswered.isEmpty
+            ? 'Incorrecto. Era $spokenCorrect'
+            : 'Incorrecto. Era $spokenCorrect, respondiste $spokenAnswered',
         subtitle: c.goalReached
             ? next
             : (many
-                ? 'Las teclas correctas quedan marcadas en verde.'
-                : 'La tecla correcta queda marcada en verde.'),
+                  ? 'Las teclas correctas quedan marcadas en verde.'
+                  : 'La tecla correcta queda marcada en verde.'),
         color: DesignTokens.sessionError,
       );
     case SessionPhase.cluster:

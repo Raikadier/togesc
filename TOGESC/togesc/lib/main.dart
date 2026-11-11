@@ -17,6 +17,7 @@ import 'widgets/app_startup_listener.dart';
 import 'widgets/auth_sync_listener.dart';
 import 'widgets/csat_survey_listener.dart';
 import 'widgets/subscription_checkout_listener.dart';
+import 'widgets/focus_ring_layer.dart';
 
 Future<void> main() async {
   if (ObservabilityConfig.isSentryConfigured) {
@@ -104,7 +105,7 @@ class TogescApp extends ConsumerWidget {
           ),
           // Solo disableAnimations: un TickerMode apagado congelaba las
           // transiciones de ruta y dejaba la página nueva invisible.
-          child: child ?? const SizedBox.shrink(),
+          child: FocusRingLayer(child: child ?? const SizedBox.shrink()),
         );
       },
     );

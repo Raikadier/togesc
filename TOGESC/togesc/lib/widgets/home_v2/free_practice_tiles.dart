@@ -46,10 +46,12 @@ class HomeModeEntry {
   String get semanticsLabel {
     final parts = <String>[title];
     final acc = accuracy;
-    parts.add(acc == null
-        ? 'sin sesiones'
-        : '${acc.round()} % de precisión en $sessions '
-            '${sessions == 1 ? 'sesión' : 'sesiones'}');
+    parts.add(
+      acc == null
+          ? 'sin sesiones'
+          : '${acc.round()} % de precisión en $sessions '
+                '${sessions == 1 ? 'sesión' : 'sesiones'}',
+    );
     if (locked) {
       parts.add('requiere Pro');
     } else if (isPro) {
@@ -115,7 +117,16 @@ class FreePracticeTile extends StatelessWidget {
                   children: [
                     Icon(entry.icon, size: 22, color: colors.brand),
                     const Spacer(),
-                    if (entry.isPro) ProBadge(locked: entry.locked),
+                    // Encoge con texto escalado en lugar de desbordar.
+                    if (entry.isPro)
+                      Flexible(
+                        flex: 4,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: ProBadge(locked: entry.locked),
+                        ),
+                      ),
                   ],
                 ),
                 const SizedBox(height: DesignTokens.spacingSm),
@@ -146,10 +157,12 @@ class FreePracticeTile extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   entry.progressLabel,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ).merge(DesignTokens.tabularNumbers),
+                  style: theme.textTheme.labelSmall
+                      ?.copyWith(
+                        color: colors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      )
+                      .merge(DesignTokens.tabularNumbers),
                 ),
               ],
             ),
@@ -248,7 +261,9 @@ Future<void> showAllModesSheet(
                       color: TogescColors.of(sheetContext).brand,
                     ),
                     title: Text(entry.title),
-                    subtitle: Text('${entry.subtitle} · ${entry.progressLabel}'),
+                    subtitle: Text(
+                      '${entry.subtitle} · ${entry.progressLabel}',
+                    ),
                     trailing: entry.isPro
                         ? ProBadge(locked: entry.locked)
                         : const Icon(Icons.chevron_right_rounded),

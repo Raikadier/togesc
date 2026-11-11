@@ -5,7 +5,6 @@ import '../../app/togesc_colors.dart';
 import '../../constants/note_naming.dart';
 import '../../models/note_progress_summary.dart';
 import '../../utils/srs_level.dart';
-import 'progress_metrics.dart';
 
 /// Las [count] notas vistas más difíciles (menor precisión) y más fáciles
 /// (mayor precisión), sin repetir notas entre las dos listas. Con menos de

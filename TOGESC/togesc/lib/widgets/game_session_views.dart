@@ -50,12 +50,14 @@ class GameSessionPhaseLayout extends StatelessWidget {
             border: Border.all(color: color.withValues(alpha: 0.35)),
           );
 
+    // Con texto escalado no cabe en alto: se desplaza (lote F).
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
           horizontal: DesignTokens.marginMobile,
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (badge != null) ...[
@@ -138,10 +140,7 @@ class GameSessionPhaseLayout extends StatelessWidget {
               SizedBox(
                 width: 36,
                 height: 36,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: color,
-                ),
+                child: CircularProgressIndicator(strokeWidth: 3, color: color),
               ),
             ],
             if (footer != null) ...[
@@ -168,7 +167,8 @@ class GameInstrumentToggleAction extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final prefs = ref.watch(audioPreferencesProvider).valueOrNull ??
+    final prefs =
+        ref.watch(audioPreferencesProvider).valueOrNull ??
         const AudioPreferences();
     final summary = sessionInstrumentSummary(
       prefs: prefs,

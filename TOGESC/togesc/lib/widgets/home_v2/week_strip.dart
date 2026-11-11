@@ -10,11 +10,11 @@ import '../../utils/relative_time.dart';
 
 /// Texto de estado de un día para lectores de pantalla y leyenda.
 String weekDayStatusLabel(WeekDayStatus status) => switch (status) {
-      WeekDayStatus.completed => 'meta cumplida',
-      WeekDayStatus.partial => 'práctica parcial',
-      WeekDayStatus.missed => 'sin practicar',
-      WeekDayStatus.none => 'sin práctica',
-    };
+  WeekDayStatus.completed => 'meta cumplida',
+  WeekDayStatus.partial => 'práctica parcial',
+  WeekDayStatus.missed => 'sin practicar',
+  WeekDayStatus.none => 'sin práctica',
+};
 
 /// Etiqueta semántica completa de un día («Lunes, hoy: práctica parcial,
 /// 5 de 12 rondas»). El color nunca es la única señal: cada celda lleva
@@ -58,10 +58,7 @@ class WeekStrip extends StatelessWidget {
         for (var i = 0; i < week.days.length; i++) ...[
           if (i > 0) const SizedBox(width: 6),
           Expanded(
-            child: _WeekDayCell(
-              day: week.days[i],
-              goal: week.dailyGoalRounds,
-            ),
+            child: _WeekDayCell(day: week.days[i], goal: week.dailyGoalRounds),
           ),
         ],
       ],
@@ -78,36 +75,33 @@ class _WeekDayCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = TogescColors.of(context);
-    final pendingToday =
-        day.isToday && day.status != WeekDayStatus.completed;
+    final pendingToday = day.isToday && day.status != WeekDayStatus.completed;
     // Los rellenos de estado (verde, ámbar y rojo claro) llevan su propio
     // texto AA y valen en ambos temas. El día sin práctica usa la
     // superficie apagada del tema: #F3ECF1 en claro y #241B2A en oscuro.
     final (Color bg, Color fg, IconData? icon) = switch (day.status) {
       WeekDayStatus.completed => (
-          DesignTokens.masteryGreenLight,
-          DesignTokens.onSurface,
-          Icons.check_rounded,
-        ),
+        DesignTokens.masteryGreenLight,
+        DesignTokens.onSurface,
+        Icons.check_rounded,
+      ),
       WeekDayStatus.partial => (
-          DesignTokens.warningLight,
-          DesignTokens.onWarning,
-          Icons.timelapse_rounded,
-        ),
+        DesignTokens.warningLight,
+        DesignTokens.onWarning,
+        Icons.timelapse_rounded,
+      ),
       WeekDayStatus.missed => (
-          DesignTokens.criticalBar,
-          DesignTokens.onSurface,
-          Icons.close_rounded,
-        ),
-      WeekDayStatus.none => (
-          colors.muted,
-          colors.textSecondary,
-          null,
-        ),
+        DesignTokens.criticalBar,
+        DesignTokens.onSurface,
+        Icons.close_rounded,
+      ),
+      WeekDayStatus.none => (colors.muted, colors.textSecondary, null),
     };
 
+    // Alto mínimo, no fijo: con texto escalado la celda crece (lote F).
     final cell = Container(
-      height: 44,
+      constraints: const BoxConstraints(minHeight: 44),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         // Hoy pendiente: superficie de tile con borde discontinuo.
         color: pendingToday && day.status == WeekDayStatus.none
@@ -119,6 +113,7 @@ class _WeekDayCell extends StatelessWidget {
             : null,
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
@@ -174,7 +169,8 @@ class _DashedRRectPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = _stroke
       ..color = color;
-    for (final PathMetric metric in (Path()..addRRect(rrect)).computeMetrics()) {
+    for (final PathMetric metric
+        in (Path()..addRRect(rrect)).computeMetrics()) {
       var distance = 0.0;
       while (distance < metric.length) {
         final end = (distance + _dash).clamp(0.0, metric.length);

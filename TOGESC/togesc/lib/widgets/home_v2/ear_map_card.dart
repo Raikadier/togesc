@@ -29,7 +29,6 @@ int consolidatedNoteCount(List<NoteProgressSummary> summaries) => summaries
     .where((s) => masteryStatusFor(s) == MasteryStatus.mastered)
     .length;
 
-
 /// Card «Mapa del oído» del Home v2.1 (SPEC §2.1.3): rueda con la precisión
 /// global, leyenda, meta de octava y fila de detalle con «Practicar».
 class EarMapCard extends StatefulWidget {
@@ -107,17 +106,19 @@ class _EarMapCardState extends State<EarMapCard> {
                 ),
               ),
               if (widget.onOpenProgress != null)
-                TextButton(
-                  key: const ValueKey('ear-map-open-progress'),
-                  onPressed: widget.onOpenProgress,
-                  style: TextButton.styleFrom(
-                    foregroundColor: colors.brand,
-                    minimumSize: const Size(
-                      DesignTokens.touchTargetMin,
-                      DesignTokens.touchTargetMin,
+                Flexible(
+                  child: TextButton(
+                    key: const ValueKey('ear-map-open-progress'),
+                    onPressed: widget.onOpenProgress,
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.brand,
+                      minimumSize: const Size(
+                        DesignTokens.touchTargetMin,
+                        DesignTokens.touchTargetMin,
+                      ),
                     ),
+                    child: const Text('Ver progreso', textAlign: TextAlign.end),
                   ),
-                  child: const Text('Ver progreso'),
                 ),
             ],
           ),
@@ -129,8 +130,7 @@ class _EarMapCardState extends State<EarMapCard> {
                 summaries: widget.summaries,
                 namingMode: widget.namingMode,
                 learningThreshold: widget.learningThreshold,
-                centerValue:
-                    accuracy == null ? '—' : formatPercentEs(accuracy),
+                centerValue: accuracy == null ? '—' : formatPercentEs(accuracy),
                 centerCaption: accuracy == null
                     ? 'sin datos todavía'
                     : 'precisión global',
@@ -170,11 +170,12 @@ class _Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = TogescColors.of(context);
-    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: colors.textSecondary,
-        );
+    final style = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(color: colors.textSecondary);
     return Semantics(
-      label: 'Leyenda: menos de 50 % crítica, de 50 a 74 % en curso, '
+      label:
+          'Leyenda: menos de 50 % crítica, de 50 a 74 % en curso, '
           '75 % o más consolidada',
       excludeSemantics: true,
       child: Wrap(
@@ -195,7 +196,7 @@ class _Legend extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(label, style: style),
+                Flexible(child: Text(label, style: style)),
               ],
             ),
         ],
@@ -232,8 +233,14 @@ class OctaveGoal extends StatelessWidget {
             width: 44,
             height: 44,
             child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: total == 0 ? 0 : consolidated / total),
-              duration: motionDuration(context, DesignTokens.durationMedium * 3),
+              tween: Tween(
+                begin: 0,
+                end: total == 0 ? 0 : consolidated / total,
+              ),
+              duration: motionDuration(
+                context,
+                DesignTokens.durationMedium * 3,
+              ),
               curve: DesignTokens.easeOut,
               builder: (context, value, _) => CircularProgressIndicator(
                 value: value,
@@ -307,9 +314,10 @@ class _NoteDetailRow extends StatelessWidget {
       MasteryStatus.unseen => 'Aún no la has practicado',
       MasteryStatus.measuring =>
         '${measuringProgressLabel(summary.timesSeen)} intentos para valorarla',
-      _ => '${pct.round()} % · '
-          '${plural(summary.timesSeen, 'intento', 'intentos')} · '
-          'nivel $level de $srsMaxLevel',
+      _ =>
+        '${pct.round()} % · '
+            '${plural(summary.timesSeen, 'intento', 'intentos')} · '
+            'nivel $level de $srsMaxLevel',
     };
 
     return Semantics(

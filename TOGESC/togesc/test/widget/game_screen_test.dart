@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:togesc/constants/note_naming.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:togesc/constants/game_constants.dart';
@@ -107,7 +108,7 @@ void main() {
     return tester.getSemantics(
       find.descendant(
         of: find.byType(PianoKeyboard),
-        matching: find.bySemanticsLabel(label),
+        matching: find.bySemanticsLabel(spokenNoteName(label)),
       ),
     );
   }

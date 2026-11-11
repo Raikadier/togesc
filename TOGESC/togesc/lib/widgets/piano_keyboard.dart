@@ -165,8 +165,9 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
   double _whiteKeyBorderWidth(String note) =>
       widget.selectedNotes.contains(note) ? 2 : 1;
 
+  // «C sostenido», no «C#»: el lector leería «C almohadilla» (lote F).
   String _semanticsLabel(String note) =>
-      formatNoteLabel(note, widget.noteNamingMode);
+      spokenNoteName(formatNoteLabel(note, widget.noteNamingMode));
 
   String? _semanticsHint(String note) {
     if (widget.correctNotes.contains(note)) return 'correcta';

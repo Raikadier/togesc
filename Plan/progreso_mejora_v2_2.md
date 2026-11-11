@@ -2,6 +2,51 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-11 · Lote F: accesibilidad pendiente · Claude Code
+**Prueba del lote E en producción:** no hecha. Con la ventana de Claude oculta el navegador no dibuja y Flutter no arranca; la descarga del bundle salió cortada. El despliegue de `e298d53` terminó bien (CI y Deploy Web en verde).
+
+**Punto de partida:** con `A11Y_RUN_KNOWN=true` fallaban 34 barreras conocidas de `test/qa/a11y_*`.
+
+- **Anillo de foco global** (`widgets/focus_ring_layer.dart`, montado en `MaterialApp.builder`): 3 px a 2 px del control enfocado, solo con foco de teclado. Sigue al foco primario, así que cubre botones, teclas, tiles, chips, pestañas, la rueda y los interruptores sin tocar cada estilo.
+  - Color: `primary` en claro y #DA9CFF en oscuro y en la sesión, según el tema del control enfocado.
+  - Las zonas con fondo propio lo fijan con `FocusRingColor`: el hero del Home usa #DA9CFF (8,5:1 sobre el morado).
+  - Quitadas las 12 barreras de foco visible.
+- **Notas habladas:** `spokenNoteName` pasa a `constants/note_naming.dart`.
+  - Las teclas del piano se anuncian «C sostenido» o «Do sostenido», según la notación, en lugar de «C#».
+  - El resultado de la ronda anuncia la nota: «Correcto, Do sostenido. Bien identificada…» e «Incorrecto. Era C sostenido, respondiste D…». El texto visible no cambia.
+- **Objetivos táctiles:** las pestañas «Resumen | Historial» y `TogescSegmented` pasan a 48 px de alto.
+- **Tarjetas pulsables:** `TogescCard` con `onTap` es ahora un solo nodo con nombre y acción (`MergeSemantics`). Antes había un tap sin etiqueta en «Ajustes de práctica» y «Acerca de».
+- **Desbordes con texto escalado a 360 dp**, en Home, Velocidad, Progreso, Onboarding y Juego:
+  - Celda de la semana con alto mínimo en lugar de fijo.
+  - La insignia Pro de la tile encoge con texto grande.
+  - «Ver progreso» y la leyenda del mapa se ajustan al ancho.
+  - Pestañas flexibles.
+  - Fila «Repetir / Saltar» flexible.
+  - Logo del onboarding flexible.
+  - Vista «Listo» de Velocidad con scroll.
+  - Cifra del temporizador ajustada al anillo.
+  - Insignia y CTA del selector de Velocidad ajustados.
+  - Quitadas las 13 barreras de texto escalado.
+- **Movimiento:** `TogescCta` apaga su fundido de estado con movimiento reducido.
+- **Navegación (punto 5):** ya estaba cubierta. El rail se llama «Navegación principal» con destinos seleccionables, las pestañas tienen rol `tabBar` y las tarjetas de dificultad son un grupo excluyente con estado.
+- **Tests:**
+  - 35 tests de `test/qa/a11y_*` salen del skip.
+  - Nuevo test de los anuncios en `test/unit/session_v2_test.dart`.
+  - El test de semántica del piano busca las teclas por su nombre hablado.
+  - El test del paywall de escritorio se actualizó en el lote E.
+
+**Verificación:** `flutter analyze` sin avisos y `flutter test` +952 ~10 (antes +916 ~45: 35 tests de `test/qa/a11y_*` salen del skip y pasan).
+- Al cambiar el nombre hablado de las teclas se actualizaron `piano_keyboard_test.dart` y el helper `keySemantics` de `game_screen_test.dart`.
+
+**Sin hacer en este lote:**
+- Quedan 2 barreras conocidas:
+  - Teclas blancas del piano de sesión de 44 px de ancho a 360 dp. Pasa WCAG 2.5.8 AA; llegar a 48 pide quitar casi todo el margen lateral.
+  - Con «Reducir animaciones» de la app, el juego encadena 700 ms de animación tras responder. Con el ajuste del sistema no pasa. Falta localizar qué widget no lee la preferencia.
+- Punto 6: los estados vacíos sin acción y los errores silenciosos no se han revisado.
+- Velocidad no anuncia la nota en su resultado.
+- No se ha probado con TalkBack ni VoiceOver.
+- No se ha visto en la app real.
+
 ## 2026-11-11 · Lote E: coherencia visual · Claude Code
 **Antes del lote: prueba de A–D en la app real** (producción, 751×640, datos sembrados en localStorage):
 - Bien: copy del onboarding (A); «midiendo» y «a reforzar», Re al 40 % con 5 intentos en rojo (B); «Primera medición hecha», «Próxima sesión: …», hero «SESIÓN DE HOY HECHA» con «Practicar más», pasos ocultos tras la primera sesión y tira de días bajo el hero (C); píldoras «La, consolidada» y «Tu mejor sesión hasta hoy», «11/12 consolidadas», «🔥 4 Récord» y «Tus hitos» (D).

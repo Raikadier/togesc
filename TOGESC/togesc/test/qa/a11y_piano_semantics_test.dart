@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:togesc/app/router.dart';
+import 'package:togesc/constants/note_naming.dart';
 import 'package:togesc/main.dart';
 import 'package:togesc/models/practice_session_log.dart' show chromaticNotes;
 import 'package:togesc/providers/game_session_provider.dart';
@@ -24,7 +25,7 @@ const _game = A11yScreen('Juego', '${AppRoutes.game}/1');
 SemanticsNode _key(WidgetTester tester, String note) => tester.getSemantics(
   find.descendant(
     of: find.byType(PianoKeyboard),
-    matching: find.bySemanticsLabel(note),
+    matching: find.bySemanticsLabel(spokenNoteName(note)),
   ),
 );
 
@@ -157,11 +158,6 @@ void main() {
 
   a11yTestWidgets(
     'las negras se nombran «sostenido», no con «#»',
-    barrier:
-        'A11Y: las teclas negras se etiquetan «C#», «D#»… '
-        '(lib/widgets/piano_keyboard.dart:168, formatNoteLabel); el lector '
-        'lee «C almohadilla/número». El mapa del oído ya dice «C sostenido»; '
-        'WCAG 1.3.1/4.1.2 (verificar con TalkBack/VoiceOver)',
     (tester) async {
       final handle = tester.ensureSemantics();
       try {

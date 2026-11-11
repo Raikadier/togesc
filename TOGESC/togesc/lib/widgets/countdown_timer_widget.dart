@@ -99,37 +99,43 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
             track: scheme.surfaceContainerHigh,
             color: color,
           ),
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ScaleTransition(
-                  scale: Tween<double>(begin: 1, end: 1.08).animate(
-                    CurvedAnimation(parent: _beat, curve: Curves.easeInOut),
+          // El anillo tiene tamaño fijo: con texto escalado la cifra encoge
+          // dentro en vez de desbordar (lote F).
+          child: Padding(
+            padding: const EdgeInsets.all(DesignTokens.spacingMd),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ScaleTransition(
+                    scale: Tween<double>(begin: 1, end: 1.08).animate(
+                      CurvedAnimation(parent: _beat, curve: Curves.easeInOut),
+                    ),
+                    child: Text(
+                      value,
+                      key: const ValueKey('speed-timer-value'),
+                      style: theme.textTheme.displaySmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -1,
+                            height: 1,
+                            color: low ? colors.incorrect : scheme.onSurface,
+                          )
+                          .merge(DesignTokens.tabularNumbers),
+                    ),
                   ),
-                  child: Text(
-                    value,
-                    key: const ValueKey('speed-timer-value'),
-                    style: theme.textTheme.displaySmall
-                        ?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -1,
-                          height: 1,
-                          color: low ? colors.incorrect : scheme.onSurface,
-                        )
-                        .merge(DesignTokens.tabularNumbers),
+                  const SizedBox(height: DesignTokens.spacingXs),
+                  Text(
+                    low ? '¡Rápido!' : 'segundos',
+                    key: const ValueKey('speed-timer-caption'),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: low ? colors.incorrect : scheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                const SizedBox(height: DesignTokens.spacingXs),
-                Text(
-                  low ? '¡Rápido!' : 'segundos',
-                  key: const ValueKey('speed-timer-caption'),
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: low ? colors.incorrect : scheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
