@@ -5,6 +5,9 @@ import 'dart:ui' show CheckedState;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:togesc/providers/app_preferences_provider.dart';
+import 'package:togesc/services/app_preferences.dart';
+import 'package:togesc/constants/note_naming.dart';
 import 'package:togesc/utils/number_format.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -322,6 +325,32 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
       container.read(speedSessionProvider.notifier).reset();
       await tester.pumpAndSettle();
+    });
+
+    testWidgets('el resultado nombra las notas en la notación elegida', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({noteNamingModeKey: 'solfege'});
+      await tester.pumpWidget(
+        wrap(const SpeedGameScreen(targetMode: GameMode.singleNote)),
+      );
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(SpeedGameScreen)),
+      );
+      await container.read(srsSystemProvider.future);
+      await container.read(noteNamingModeProvider.future);
+      await container.read(speedSessionProvider.notifier).startRound();
+      await tester.pump();
+      final notes = container.read(speedSessionProvider).currentNotes;
+      container.read(speedSessionProvider.notifier).submitAnswer([
+        notes.first == 'C' ? 'D' : 'C',
+      ], 1);
+      await tester.pumpAndSettle();
+      final expected = notes
+          .map((n) => formatNoteLabel(n, NoteNamingMode.solfege))
+          .join(', ');
+      expect(find.text('Las notas eran: $expected'), findsOneWidget);
     });
 
     testWidgets('sin superar la mejor racha no hay píldora', (tester) async {
