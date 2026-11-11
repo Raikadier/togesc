@@ -82,12 +82,14 @@ class _ProgressTabsState extends State<ProgressTabs> {
           mainAxisSize: MainAxisSize.min,
           children: [
             for (final tab in ProgressTab.values)
-              _TabButton(
-                tab: tab,
-                selected: tab == widget.selected,
-                focusNode: _nodes[tab]!,
-                onTap: () => _select(tab, focus: true),
-                onKey: (event) => _onKey(tab, event),
+              Flexible(
+                child: _TabButton(
+                  tab: tab,
+                  selected: tab == widget.selected,
+                  focusNode: _nodes[tab]!,
+                  onTap: () => _select(tab, focus: true),
+                  onKey: (event) => _onKey(tab, event),
+                ),
               ),
           ],
         ),
@@ -136,7 +138,7 @@ class _TabButton extends StatelessWidget {
                 duration: motionDuration(context, DesignTokens.durationFast),
                 curve: DesignTokens.easeOut,
                 constraints: const BoxConstraints(
-                  minHeight: DesignTokens.touchTargetMin - 8,
+                  minHeight: DesignTokens.touchTargetMin,
                   minWidth: 112,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -149,11 +151,15 @@ class _TabButton extends StatelessWidget {
                     width: focused ? 3 : 0,
                   ),
                 ),
-                child: Text(
-                  tab.label,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: selected ? colors.brand : colors.textSecondary,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    tab.label,
+                    maxLines: 1,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: selected ? colors.brand : colors.textSecondary,
+                    ),
                   ),
                 ),
               ),

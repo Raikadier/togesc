@@ -108,10 +108,14 @@ class TogescCard extends StatelessWidget {
 
     if (onTap == null) return card;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: DesignTokens.borderRadiusCard,
-      child: card,
+    // Un solo nodo con nombre y acción: sin esto el `Card` se quedaba el
+    // texto y el `InkWell` exponía un tap sin etiqueta (WCAG 4.1.2).
+    return MergeSemantics(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: DesignTokens.borderRadiusCard,
+        child: card,
+      ),
     );
   }
 }
@@ -283,6 +287,11 @@ class TogescCta extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: DesignTokens.borderRadiusCta),
       textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
       elevation: 0,
+      // Fundido de estado de Material (200 ms): fuera con movimiento reducido.
+      animationDuration: motionDuration(
+        context,
+        const Duration(milliseconds: 200),
+      ),
     );
     final button = icon == null
         ? FilledButton(
@@ -358,7 +367,7 @@ class TogescSegmented<T> extends StatelessWidget {
         duration: motionDuration(context, DesignTokens.durationFast),
         curve: DesignTokens.easeOut,
         constraints: const BoxConstraints(
-          minHeight: DesignTokens.touchTargetMin - 8,
+          minHeight: DesignTokens.touchTargetMin,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         alignment: Alignment.center,

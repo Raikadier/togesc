@@ -31,46 +31,7 @@ const _size = Size(360, 800);
 
 /// Barreras conocidas: clave `pantalla|escala` → motivo con `ruta:línea`
 /// del widget que desborda (salida de `A11Y_RUN_KNOWN=true`).
-const _known = <String, String>{
-  'Home|sistema ×1,5': _home,
-  'Home|sistema ×2,0': _home,
-  'Velocidad (selector)|sistema ×1,5': _speedSelect,
-  'Velocidad (selector)|sistema ×2,0': _speedSelect,
-  'Velocidad (sesión)|sistema ×2,0': _speedIdle,
-  'Estadísticas|Texto más grande ×1,125': _stats,
-  'Estadísticas|sistema ×1,5': _stats,
-  'Estadísticas|sistema ×2,0': _stats,
-  'Progreso por nota|sistema ×2,0':
-      'A11Y: filas etiqueta/valor del detalle '
-      'SRS desbordan (lib/widgets/note_srs_detail_card.dart:147)',
-  'Onboarding|sistema ×1,5': _onboarding,
-  'Onboarding|sistema ×2,0': _onboarding,
-};
-
-const _home =
-    'A11Y: Home desborda: leyenda del mapa del oído '
-    '(lib/widgets/home_v2/ear_map_card.dart:197, y :106 a ×2,0; hasta '
-    '163 px), celda de la semana de alto fijo 44 '
-    '(lib/widgets/home_v2/week_strip.dart:110, desborda en :121) y cabecera '
-    'de la tile de práctica libre (lib/widgets/home_v2/free_practice_tiles'
-    '.dart:114)';
-const _speedSelect =
-    'A11Y: selector de Velocidad desborda en las tarjetas '
-    'de dificultad (lib/widgets/speed_mode_select_views.dart:168) y en la '
-    'fila del CTA (lib/widgets/speed_session_views.dart:567)';
-const _speedIdle =
-    'A11Y: «Listo para el desafío» desborda 86 px en '
-    'vertical a ×2,0 (lib/widgets/game_session_views.dart:58, Column '
-    'centrada sin scroll)';
-const _stats =
-    'A11Y: las pestañas «Resumen/Historial» son una Row sin '
-    'ajuste (lib/widgets/progress_v2/progress_tabs.dart:81; minWidth 112 '
-    'por pestaña) y desbordan ya con «Texto más grande»; a ×1,5 también la '
-    'cabecera de dominio (lib/widgets/progress_v2/mastery_overview.dart:97)';
-const _onboarding =
-    'A11Y: cabecera del onboarding (logo + «Saltar») '
-    'desborda a la derecha (lib/screens/onboarding_screen.dart:88); a ×2,0 '
-    'también el paso (lib/widgets/onboarding_views.dart:100)';
+const _known = <String, String>{};
 
 final _errorDetails = <FlutterErrorDetails>[];
 
@@ -171,21 +132,7 @@ void main() {
       }
     },
   };
-  const keyActions =
-      'A11Y: fila «Repetir / Saltar» de la sesión sin '
-      'ajuste (lib/widgets/session_v2/session_key_actions.dart:29)';
-  const knownStates = <String, String>{
-    'Juego · fase «Responde» (teclado)|sistema ×1,5': keyActions,
-    'Juego · fase «Responde» (teclado)|sistema ×2,0': keyActions,
-    'Velocidad · ráfaga (temporizador)|sistema ×1,5':
-        'A11Y: barra de '
-        'estadísticas de la ráfaga desborda 43 px (lib/widgets/togesc_ui.dart'
-        ':183, Row spaceAround sin ajuste)',
-    'Velocidad · ráfaga (temporizador)|sistema ×2,0':
-        'A11Y: la ráfaga '
-        'desborda 86 px en vertical (lib/widgets/game_session_views.dart:58)',
-    'Onboarding · pasos 2 a 4|sistema ×2,0': _onboarding,
-  };
+  const knownStates = <String, String>{};
   for (final state in states.entries) {
     group(state.key, () {
       for (final scale in _scales) {

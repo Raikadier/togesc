@@ -79,6 +79,35 @@ void main() {
       expect(copy.subtitle, 'La tecla correcta queda marcada en verde.');
     });
 
+    test('el anuncio nombra la nota con «sostenido» (lote F)', () {
+      final ok = sessionPhaseCopy(
+        const SessionPhaseContext(
+          phase: SessionPhase.result,
+          isCorrect: true,
+          correctLabels: ['Do#'],
+        ),
+      );
+      expect(
+        ok.announcement,
+        'Correcto, Do sostenido. Bien identificada. '
+        'Siguiente ronda en un momento…',
+      );
+      final ko = sessionPhaseCopy(
+        const SessionPhaseContext(
+          phase: SessionPhase.result,
+          isCorrect: false,
+          correctLabels: ['C#'],
+          answerLabels: ['D'],
+        ),
+      );
+      expect(ko.headline, 'Era C#, respondiste D');
+      expect(
+        ko.announcement,
+        'Incorrecto. Era C sostenido, respondiste D. '
+        'La tecla correcta queda marcada en verde.',
+      );
+    });
+
     test('acierto con meta cumplida', () {
       final copy = sessionPhaseCopy(
         const SessionPhaseContext(

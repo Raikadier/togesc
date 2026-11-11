@@ -19,8 +19,9 @@ class SessionKeyActions extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = TextButton.styleFrom(
       foregroundColor: DesignTokens.sessionTextLabel,
-      disabledForegroundColor:
-          DesignTokens.sessionTextSecondary.withValues(alpha: 0.5),
+      disabledForegroundColor: DesignTokens.sessionTextSecondary.withValues(
+        alpha: 0.5,
+      ),
       minimumSize: const Size(
         DesignTokens.touchTargetMin,
         DesignTokens.touchTargetMin,
@@ -28,11 +29,13 @@ class SessionKeyActions extends StatelessWidget {
     );
     return Row(
       children: [
-        TextButton.icon(
-          onPressed: onRepeat,
-          style: style,
-          icon: const Icon(Icons.replay_rounded, size: 20),
-          label: const Text('Repetir'),
+        Flexible(
+          child: TextButton.icon(
+            onPressed: onRepeat,
+            style: style,
+            icon: const Icon(Icons.replay_rounded, size: 20),
+            label: const Text('Repetir'),
+          ),
         ),
         Expanded(
           child: Text(
@@ -41,16 +44,18 @@ class SessionKeyActions extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: DesignTokens.sessionTextSecondary,
-                ),
+              color: DesignTokens.sessionTextSecondary,
+            ),
           ),
         ),
-        TextButton.icon(
-          onPressed: onSkip,
-          style: style,
-          iconAlignment: IconAlignment.end,
-          icon: const Icon(Icons.skip_next_rounded, size: 20),
-          label: const Text('Saltar'),
+        Flexible(
+          child: TextButton.icon(
+            onPressed: onSkip,
+            style: style,
+            iconAlignment: IconAlignment.end,
+            icon: const Icon(Icons.skip_next_rounded, size: 20),
+            label: const Text('Saltar'),
+          ),
         ),
       ],
     );

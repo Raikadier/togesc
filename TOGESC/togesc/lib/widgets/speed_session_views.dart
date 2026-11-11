@@ -26,7 +26,8 @@ class SpeedSessionIdleView extends StatelessWidget {
       icon: Icons.speed_rounded,
       accentColor: speed,
       title: 'Listo para el desafío',
-      subtitle: 'Tiempo inicial: ${formatSecondsEs(initialTime, trimZeros: true)}',
+      subtitle:
+          'Tiempo inicial: ${formatSecondsEs(initialTime, trimZeros: true)}',
       footer: FilledButton.icon(
         onPressed: onStart,
         style: FilledButton.styleFrom(
@@ -567,11 +568,13 @@ class SpeedModeOptionCard extends StatelessWidget {
                     const SizedBox(height: DesignTokens.spacingMd),
                     Row(
                       children: [
-                        Text(
-                          'Empieza ahora',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: ctaColor,
-                            fontWeight: FontWeight.w700,
+                        Flexible(
+                          child: Text(
+                            'Empieza ahora',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: ctaColor,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                         Icon(
@@ -620,9 +623,13 @@ class SpeedSessionAnswerHeader extends StatelessWidget {
             children: [
               Icon(Icons.bolt_rounded, size: 16, color: speed.speedAccent),
               const SizedBox(width: DesignTokens.spacingXs),
-              Text(
-                'Modo velocidad'.toUpperCase(),
-                style: DesignTokens.overline.copyWith(color: speed.speedAccent),
+              Flexible(
+                child: Text(
+                  'Modo velocidad'.toUpperCase(),
+                  style: DesignTokens.overline.copyWith(
+                    color: speed.speedAccent,
+                  ),
+                ),
               ),
             ],
           ),

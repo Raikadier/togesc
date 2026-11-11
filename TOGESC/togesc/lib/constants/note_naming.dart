@@ -40,4 +40,13 @@ String formatNoteLabel(String letterName, NoteNamingMode mode) {
   return letterToSolfege[letterName] ?? letterName;
 }
 
+/// Nombre hablado de una nota para lectores de pantalla: «A sostenido»,
+/// «La sostenido». [label] es el nombre ya formateado (letra o solfeo).
+String spokenNoteName(String label) {
+  if (label.endsWith('#')) {
+    return '${label.substring(0, label.length - 1)} sostenido';
+  }
+  return label;
+}
+
 String? letterFromSolfegeToken(String token) => solfegeToLetter[token];

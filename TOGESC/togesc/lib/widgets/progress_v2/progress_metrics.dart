@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import '../../app/togesc_colors.dart';
 import '../../constants/srs_constants.dart';
 
+export '../../constants/note_naming.dart' show spokenNoteName;
+
 /// Latencia media global **aproximada**, en segundos.
 ///
 /// `NoteData.avgResponseTimeSec` es una media móvil exponencial por nota; la
@@ -134,15 +136,6 @@ Color masteryMeasuringColor(BuildContext context) => Color.alphaBlend(
       Theme.of(context).colorScheme.primary.withValues(alpha: 0.28),
       TogescColors.of(context).muted,
     );
-
-/// Nombre hablado de una nota para lectores de pantalla: «A sostenido»,
-/// «La sostenido». [label] es el nombre ya formateado (letra o solfeo).
-String spokenNoteName(String label) {
-  if (label.endsWith('#')) {
-    return '${label.substring(0, label.length - 1)} sostenido';
-  }
-  return label;
-}
 
 /// Texto del delta semanal: «+4,1 pts», «−2,0 pts», «±0,0 pts».
 String formatDeltaPoints(double delta) {

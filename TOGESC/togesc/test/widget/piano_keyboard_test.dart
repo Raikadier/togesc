@@ -163,7 +163,7 @@ void main() {
       await tester.tapAt(Offset(rect.right + 4, rect.top + 40));
       await tester.pump(const Duration(milliseconds: 100));
       expect(tapped, 'C#');
-      final semantics = tester.getSemantics(find.bySemanticsLabel('C#'));
+      final semantics = tester.getSemantics(find.bySemanticsLabel('C sostenido'));
       expect(semantics.rect.width, greaterThanOrEqualTo(48));
     });
 
@@ -199,7 +199,7 @@ void main() {
       expect(find.byIcon(Icons.cancel), findsOneWidget);
       expect(tester.getSemantics(find.bySemanticsLabel('D')).hint, 'correcta');
       expect(
-        tester.getSemantics(find.bySemanticsLabel('F#')).hint,
+        tester.getSemantics(find.bySemanticsLabel('F sostenido')).hint,
         'incorrecta',
       );
 

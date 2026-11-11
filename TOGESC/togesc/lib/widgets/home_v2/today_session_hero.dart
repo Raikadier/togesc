@@ -7,6 +7,7 @@ import '../../utils/today_session.dart';
 import '../../constants/srs_constants.dart';
 import '../progress_v2/progress_metrics.dart';
 import '../../utils/session_summary.dart';
+import '../focus_ring_layer.dart';
 import '../togesc_ui.dart';
 
 /// Texto del hero derivado solo de datos reales del SRS (D10).
@@ -117,166 +118,172 @@ class TodaySessionHero extends StatelessWidget {
       summarySemantics = 'Sesión sin límite de rondas';
     }
 
-    return Container(
-      key: const ValueKey('today-session-hero'),
-      decoration: BoxDecoration(
-        color: DesignTokens.hero,
-        borderRadius: DesignTokens.borderRadiusHero,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          const Positioned(
-            right: -24,
-            top: -18,
-            child: ExcludeSemantics(
-              child: Icon(
-                Icons.graphic_eq_rounded,
-                size: 150,
-                color: Color(0x14FFFFFF),
+    // Sobre el morado del hero el anillo de foco va en #DA9CFF (8,5:1).
+    return FocusRingColor(
+      color: DesignTokens.onHeroAccent,
+      child: Container(
+        key: const ValueKey('today-session-hero'),
+        decoration: BoxDecoration(
+          color: DesignTokens.hero,
+          borderRadius: DesignTokens.borderRadiusHero,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            const Positioned(
+              right: -24,
+              top: -18,
+              child: ExcludeSemantics(
+                child: Icon(
+                  Icons.graphic_eq_rounded,
+                  size: 150,
+                  color: Color(0x14FFFFFF),
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    if (completedToday)
-                      const ExcludeSemantics(
-                        child: Icon(
-                          Icons.check_circle_rounded,
-                          key: ValueKey('today-done-icon'),
-                          size: 16,
-                          color: DesignTokens.onHeroAccent,
-                        ),
-                      )
-                    else
-                      const HeroLiveDot(),
-                    const SizedBox(width: DesignTokens.spacingSm),
-                    Flexible(
-                      child: Text(
-                        completedToday
-                            ? 'SESIÓN DE HOY HECHA'
-                            : 'SESIÓN DE HOY',
-                        semanticsLabel: completedToday
-                            ? 'Sesión de hoy hecha'
-                            : 'Sesión de hoy',
-                        style: DesignTokens.overline.copyWith(
-                          color: DesignTokens.onHeroAccent,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: DesignTokens.spacingSm),
-                if (completedToday && lastAccuracyPercent != null)
-                  Semantics(
-                    label:
-                        '${lastAccuracyPercent!.round()} por ciento de '
-                        'precisión en tu última sesión',
-                    excludeSemantics: true,
-                    child: _DoneSummary(accuracyPercent: lastAccuracyPercent!),
-                  )
-                else
-                  Semantics(
-                    label: summarySemantics,
-                    excludeSemantics: true,
-                    child: _RoundsSummary(rounds: rounds, minutes: minutes),
-                  ),
-                const SizedBox(height: DesignTokens.spacingMd),
-                Text(
-                  completedToday
-                      ? 'Hecho por hoy. '
-                            '${nextSessionLine([for (final n in plan.focusNotes) formatNoteLabel(n.note, namingMode)])}'
-                      : todayHeroCopy(
-                          plan.focusNotes,
-                          custom: plan.isCustomFocus,
-                        ),
-                  key: const ValueKey('today-hero-copy'),
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: DesignTokens.onHero.withValues(alpha: 0.86),
-                    height: 1.4,
-                  ),
-                ),
-                if (plan.focusNotes.isNotEmpty) ...[
-                  const SizedBox(height: DesignTokens.spacingLg),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                   Row(
                     children: [
-                      for (var i = 0; i < plan.focusNotes.length; i++) ...[
-                        if (i > 0)
-                          const SizedBox(width: DesignTokens.spacingSm),
-                        Expanded(
-                          child: FocusNoteMiniCard(
-                            note: plan.focusNotes[i],
-                            namingMode: namingMode,
+                      if (completedToday)
+                        const ExcludeSemantics(
+                          child: Icon(
+                            Icons.check_circle_rounded,
+                            key: ValueKey('today-done-icon'),
+                            size: 16,
+                            color: DesignTokens.onHeroAccent,
+                          ),
+                        )
+                      else
+                        const HeroLiveDot(),
+                      const SizedBox(width: DesignTokens.spacingSm),
+                      Flexible(
+                        child: Text(
+                          completedToday
+                              ? 'SESIÓN DE HOY HECHA'
+                              : 'SESIÓN DE HOY',
+                          semanticsLabel: completedToday
+                              ? 'Sesión de hoy hecha'
+                              : 'Sesión de hoy',
+                          style: DesignTokens.overline.copyWith(
+                            color: DesignTokens.onHeroAccent,
                           ),
                         ),
-                      ],
+                      ),
                     ],
                   ),
-                ],
-                if (showSteps) ...[
+                  const SizedBox(height: DesignTokens.spacingSm),
+                  if (completedToday && lastAccuracyPercent != null)
+                    Semantics(
+                      label:
+                          '${lastAccuracyPercent!.round()} por ciento de '
+                          'precisión en tu última sesión',
+                      excludeSemantics: true,
+                      child: _DoneSummary(
+                        accuracyPercent: lastAccuracyPercent!,
+                      ),
+                    )
+                  else
+                    Semantics(
+                      label: summarySemantics,
+                      excludeSemantics: true,
+                      child: _RoundsSummary(rounds: rounds, minutes: minutes),
+                    ),
+                  const SizedBox(height: DesignTokens.spacingMd),
+                  Text(
+                    completedToday
+                        ? 'Hecho por hoy. '
+                              '${nextSessionLine([for (final n in plan.focusNotes) formatNoteLabel(n.note, namingMode)])}'
+                        : todayHeroCopy(
+                            plan.focusNotes,
+                            custom: plan.isCustomFocus,
+                          ),
+                    key: const ValueKey('today-hero-copy'),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: DesignTokens.onHero.withValues(alpha: 0.86),
+                      height: 1.4,
+                    ),
+                  ),
+                  if (plan.focusNotes.isNotEmpty) ...[
+                    const SizedBox(height: DesignTokens.spacingLg),
+                    Row(
+                      children: [
+                        for (var i = 0; i < plan.focusNotes.length; i++) ...[
+                          if (i > 0)
+                            const SizedBox(width: DesignTokens.spacingSm),
+                          Expanded(
+                            child: FocusNoteMiniCard(
+                              note: plan.focusNotes[i],
+                              namingMode: namingMode,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                  if (showSteps) ...[
+                    const SizedBox(height: DesignTokens.spacingLg),
+                    const HeroSteps(),
+                  ],
                   const SizedBox(height: DesignTokens.spacingLg),
-                  const HeroSteps(),
-                ],
-                const SizedBox(height: DesignTokens.spacingLg),
-                if (!completedToday)
-                  TogescCta(
-                    key: const ValueKey('today-start-cta'),
-                    label: 'Empezar sesión',
-                    icon: Icons.play_arrow_rounded,
-                    expand: true,
-                    onPressed: onStart,
-                  )
-                else
-                  // Con la sesión hecha sigue siendo la única acción
-                  // principal, pero ya no parece una tarea pendiente.
-                  SizedBox(
-                    height: DesignTokens.ctaHeight,
-                    child: FilledButton.icon(
+                  if (!completedToday)
+                    TogescCta(
                       key: const ValueKey('today-start-cta'),
+                      label: 'Empezar sesión',
+                      icon: Icons.play_arrow_rounded,
+                      expand: true,
                       onPressed: onStart,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: DesignTokens.onHero.withValues(
-                          alpha: 0.16,
+                    )
+                  else
+                    // Con la sesión hecha sigue siendo la única acción
+                    // principal, pero ya no parece una tarea pendiente.
+                    SizedBox(
+                      height: DesignTokens.ctaHeight,
+                      child: FilledButton.icon(
+                        key: const ValueKey('today-start-cta'),
+                        onPressed: onStart,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: DesignTokens.onHero.withValues(
+                            alpha: 0.16,
+                          ),
+                          foregroundColor: DesignTokens.onHero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: DesignTokens.borderRadiusCta,
+                          ),
+                          textStyle: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                        foregroundColor: DesignTokens.onHero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: DesignTokens.borderRadiusCta,
-                        ),
-                        textStyle: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      icon: const Icon(Icons.play_arrow_rounded, size: 26),
-                      label: const Text('Practicar más'),
-                    ),
-                  ),
-                const SizedBox(height: DesignTokens.spacingXs),
-                Center(
-                  child: TextButton(
-                    key: const ValueKey('today-adjust-link'),
-                    onPressed: onAdjust,
-                    style: TextButton.styleFrom(
-                      foregroundColor: DesignTokens.onHeroAccent,
-                      minimumSize: const Size(
-                        DesignTokens.touchTargetMin,
-                        DesignTokens.touchTargetMin,
+                        icon: const Icon(Icons.play_arrow_rounded, size: 26),
+                        label: const Text('Practicar más'),
                       ),
                     ),
-                    child: const Text(
-                      'Ajustar enfoque y duración',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                  const SizedBox(height: DesignTokens.spacingXs),
+                  Center(
+                    child: TextButton(
+                      key: const ValueKey('today-adjust-link'),
+                      onPressed: onAdjust,
+                      style: TextButton.styleFrom(
+                        foregroundColor: DesignTokens.onHeroAccent,
+                        minimumSize: const Size(
+                          DesignTokens.touchTargetMin,
+                          DesignTokens.touchTargetMin,
+                        ),
+                      ),
+                      child: const Text(
+                        'Ajustar enfoque y duración',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
