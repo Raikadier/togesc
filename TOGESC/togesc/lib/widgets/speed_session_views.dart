@@ -261,7 +261,12 @@ class SpeedSessionSummaryCard extends StatelessWidget {
             for (final (id, label, value) in kpis)
               SizedBox(
                 width: width,
-                child: _Kpi(id: id, label: label, value: value),
+                child: _Kpi(
+                  id: id,
+                  label: label,
+                  value: value,
+                  hero: id == 'streak',
+                ),
               ),
           ],
         );
@@ -275,7 +280,15 @@ class _Kpi extends StatelessWidget {
   final String label;
   final String value;
 
-  const _Kpi({required this.id, required this.label, required this.value});
+  /// KPI principal (la racha): card `hero`, el resto secundarias.
+  final bool hero;
+
+  const _Kpi({
+    required this.id,
+    required this.label,
+    required this.value,
+    this.hero = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -287,9 +300,9 @@ class _Kpi extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(DesignTokens.spacingMd),
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerLow,
+          color: hero ? DesignTokens.hero : scheme.surfaceContainerLow,
           borderRadius: DesignTokens.borderRadiusCard,
-          border: Border.all(color: scheme.outlineVariant),
+          border: hero ? null : Border.all(color: scheme.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,7 +316,7 @@ class _Kpi extends StatelessWidget {
                 style: theme.textTheme.headlineMedium
                     ?.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: scheme.onSurface,
+                      color: hero ? DesignTokens.onHero : scheme.onSurface,
                     )
                     .merge(DesignTokens.tabularNumbers),
               ),
@@ -312,7 +325,9 @@ class _Kpi extends StatelessWidget {
               label,
               style: theme.textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: scheme.onSurfaceVariant,
+                color: hero
+                    ? DesignTokens.onHeroAccent
+                    : scheme.onSurfaceVariant,
               ),
             ),
           ],

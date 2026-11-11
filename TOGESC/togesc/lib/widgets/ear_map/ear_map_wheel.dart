@@ -534,7 +534,7 @@ class _Center extends StatelessWidget {
               big,
               key: const ValueKey('ear-map-center-value'),
               style: DesignTokens.bigNumber.copyWith(
-                fontSize: 30,
+                fontSize: DesignTokens.isExpanded(context) ? 34 : 30,
                 color: valueColor,
               ),
             ),

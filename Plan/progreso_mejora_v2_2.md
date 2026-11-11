@@ -2,6 +2,37 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-11 · Pulido pendiente del lote E · Claude Code
+Rama `feat/v2.2-pulido`.
+
+- **Escala de escritorio (≥ 840 px):** nuevo `DesignTokens.isExpanded(context)`.
+  - El hero de Home tiene 32 px de relleno y sus dos cifras usan `bigNumberLarge`.
+  - El arte del onboarding mide 220 px de alto.
+  - La cifra central de la rueda va a 34 px.
+- **KPI principal destacada:** cada fila tiene una sola card `hero`.
+  - Progreso: «Pendientes», que ya lo era.
+  - Resumen de sesión: «Precisión».
+  - Resultado de Velocidad: «Seguidas».
+- **Movimiento:** todo respeta `reduceAnimations` y `disableAnimations`.
+  - Entrada escalonada (`StaggeredEntrance`) en Velocidad, Perfil, Ajustes y la pestaña Historial.
+  - El nombre de la nota hace un «pop» (0,7 → 1) dentro del anillo de resultado.
+  - Las píldoras de nivel suben escalonadas.
+  - La precisión del hero de Home cuenta desde 0 (`CountUpText`).
+- **Tokens:** los 12 hex sueltos de `lib/widgets` y `lib/screens` pasan a `DesignTokens`:
+  - Hero: `onHeroTint`, `onHeroBorder` y `onHeroTrack`.
+  - App bar: `primaryContainerTint`.
+  - Piano: `pianoBlackTop`, `pianoBlackPressedTop`, `pianoSession*` y `pianoKeyShadow`.
+  - No había espaciados 10, 20 ni 24 sueltos. Las duraciones ya eran constantes con nombre y no se tocan.
+
+**Sin hacer:**
+- No se ha visto en la app real.
+- Faltan las capturas en `docs/evidence/`.
+- El relleno de 10 px de las celdas de foco del hero sigue como literal.
+
+**Tests:** `today_hero_done_test` espera ahora la duración del conteo antes de buscar «78 %».
+
+**Verificación:** `flutter analyze` sin avisos y `flutter test` +953 ~10.
+
 ## 2026-11-11 · Prueba de E y F en producción · Claude Code
 Producción en `1ebc030`, 590×640, tema oscuro, solfeo, con los datos sembrados de la prueba de A–D.
 

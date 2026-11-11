@@ -148,8 +148,7 @@ class _SessionPhaseRingState extends State<SessionPhaseRing>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final duration =
-        _reduced ? Duration.zero : DesignTokens.durationMedium;
+    final duration = _reduced ? Duration.zero : DesignTokens.durationMedium;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -204,7 +203,19 @@ class _SessionPhaseRingState extends State<SessionPhaseRing>
                               : const [],
                         ),
                         alignment: Alignment.center,
-                        child: child,
+                        // Pop del nombre de la nota en el primer tercio del
+                        // halo (0,7 → 1 con rebote).
+                        child: phase == SessionPhase.result && glowing
+                            ? Transform.scale(
+                                scale:
+                                    0.7 +
+                                    0.3 *
+                                        Curves.easeOutBack.transform(
+                                          (g * 3).clamp(0.0, 1.0),
+                                        ),
+                                child: child,
+                              )
+                            : child,
                       ),
                     );
                   },

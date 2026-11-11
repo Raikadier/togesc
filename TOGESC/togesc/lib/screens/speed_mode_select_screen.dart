@@ -7,6 +7,7 @@ import '../app/router.dart';
 import '../constants/game_constants.dart';
 import '../providers/speed_best_streak_provider.dart';
 import '../providers/speed_difficulty_provider.dart';
+import '../widgets/staggered_entrance.dart';
 import '../widgets/speed_mode_select_views.dart';
 import '../widgets/speed_session_views.dart';
 import '../widgets/togesc_ui.dart';
@@ -40,19 +41,21 @@ class SpeedModeSelectScreen extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SpeedModeSelectHero(),
+                const StaggeredEntrance(index: 0, child: SpeedModeSelectHero()),
                 const SizedBox(height: DesignTokens.spacingLg),
-                if (wide)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 13, child: selector),
-                      const SizedBox(width: DesignTokens.spacingLg),
-                      const Expanded(flex: 10, child: how),
-                    ],
-                  )
-                else
-                  selector,
+                StaggeredEntrance(
+                  index: 1,
+                  child: wide
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(flex: 13, child: selector),
+                            const SizedBox(width: DesignTokens.spacingLg),
+                            const Expanded(flex: 10, child: how),
+                          ],
+                        )
+                      : selector,
+                ),
                 const SizedBox(height: DesignTokens.spacingLg),
                 Semantics(
                   header: true,
@@ -64,9 +67,12 @@ class SpeedModeSelectScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: DesignTokens.spacingMd),
-                _SpeedModeBento(
-                  wide: wide,
-                  onStart: (mode) => _start(context, mode),
+                StaggeredEntrance(
+                  index: 2,
+                  child: _SpeedModeBento(
+                    wide: wide,
+                    onStart: (mode) => _start(context, mode),
+                  ),
                 ),
                 if (!wide) ...[
                   const SizedBox(height: DesignTokens.spacingLg),
