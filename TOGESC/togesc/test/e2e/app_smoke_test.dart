@@ -135,7 +135,7 @@ void main() {
       await tester.tap(_nav(TogescNavDestination.speed));
       await tester.pumpAndSettle();
       expect(find.byType(SpeedModeSelectScreen), findsOneWidget);
-      expect(find.text('Velocidad — Elige modo'), findsOneWidget);
+      expect(find.text('Velocidad'), findsWidgets);
 
       await tester.tap(_nav(TogescNavDestination.profile));
       await tester.pumpAndSettle();

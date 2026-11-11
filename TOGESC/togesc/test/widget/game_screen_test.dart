@@ -609,7 +609,7 @@ void main() {
   });
 
   group('GameScreen v2 · escritorio (1d)', () {
-    testWidgets('≥1024: anillo, panel «Enfoque SRS» y teclado ancho',
+    testWidgets('≥840: anillo, panel «Enfoque SRS» y teclado ancho',
         (tester) async {
       await setUpContainer();
       await pumpToAnswer(tester, size: const Size(1280, 800));
@@ -693,7 +693,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('<1024 usa el layout móvil sin panel', (tester) async {
+    testWidgets('<840 usa el layout móvil sin panel', (tester) async {
       await setUpContainer();
       await pumpToAnswer(tester, size: const Size(800, 900));
 

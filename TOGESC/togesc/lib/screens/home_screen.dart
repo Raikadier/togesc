@@ -30,9 +30,9 @@ import '../utils/milestones.dart';
 import '../utils/session_summary.dart';
 
 /// Ancho máximo del contenido del Home en móvil y tableta.
-const double homeContentMaxWidth = 720;
+const double homeContentMaxWidth = DesignTokens.mediumContentMaxWidth;
 
-/// Ancho máximo del Home de escritorio en dos columnas (≥ 1024).
+/// Ancho máximo del Home de escritorio en dos columnas (≥ 840).
 const double homeDesktopMaxWidth = 1120;
 
 /// Proporción de las columnas de escritorio (1,25 fr / 1 fr).
@@ -93,6 +93,9 @@ class HomeScreen extends ConsumerWidget {
         ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
     final learningThreshold = ref.watch(srsLearningThresholdProvider);
     final engagement = ref.watch(engagementStatsProvider);
+    // Racha viva: sin practicar hoy aún cuenta la que llega hasta ayer, igual
+    // que la tira de días (el chip ya no marca 0 a primera hora).
+    final streakDays = streak.practicedToday ? streak.days : streak.days - 1;
     final streakRecord = streakRecordToday(
       ref.watch(milestoneLogProvider),
       now: now,
@@ -154,7 +157,7 @@ class HomeScreen extends ConsumerWidget {
       // el Home pinta la suya.
       if (desktop) ...[
         HomeAppBar(
-          streakDays: engagement.currentStreakDays,
+          streakDays: streakDays,
           streakRecord: streakRecord,
           onAvatarTap: () => context.go(AppRoutes.account),
         ),
@@ -165,10 +168,7 @@ class HomeScreen extends ConsumerWidget {
           child: Row(
             children: [
               Expanded(child: HomeOverline(formatLongDateEs(now))),
-              StreakChip(
-                streakDays: engagement.currentStreakDays,
-                isRecord: streakRecord,
-              ),
+              StreakChip(streakDays: streakDays, isRecord: streakRecord),
             ],
           ),
         ),
@@ -183,6 +183,7 @@ class HomeScreen extends ConsumerWidget {
       completedToday: streak.practicedToday,
       lastAccuracyPercent: lastAccuracyToday(history, now: now),
       showSteps: history.every((e) => e.roundsCompleted <= 0),
+      namingMode: namingMode,
     );
 
     final resumeRow = resume == null

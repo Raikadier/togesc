@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../app/togesc_colors.dart';
 import '../utils/number_format.dart';
 
 /// Scaffold con AppBar unificado Harmonic Precision.
@@ -238,6 +239,183 @@ class _Metric extends StatelessWidget {
                   .merge(DesignTokens.tabularNumbers),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Botón principal único (v2.2, lote E): ámbar del Home, 17/800, alto
+/// `ctaHeight` y la sombra del prototipo. Una sola acción principal por
+/// pantalla; el resto de botones son secundarios.
+class TogescCta extends StatelessWidget {
+  const TogescCta({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+    this.expand = false,
+    this.compact = false,
+    this.autofocus = false,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final IconData? icon;
+
+  /// Ocupa todo el ancho disponible.
+  final bool expand;
+
+  /// Alto mínimo táctil (48) en lugar de `ctaHeight`, para filas de acciones.
+  final bool compact;
+  final bool autofocus;
+
+  @override
+  Widget build(BuildContext context) {
+    final height = compact
+        ? DesignTokens.touchTargetMin
+        : DesignTokens.ctaHeight;
+    final style = FilledButton.styleFrom(
+      backgroundColor: DesignTokens.ctaAmber,
+      foregroundColor: DesignTokens.onCtaAmber,
+      minimumSize: Size(expand ? double.infinity : 0, height),
+      padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spacingLg),
+      shape: RoundedRectangleBorder(borderRadius: DesignTokens.borderRadiusCta),
+      textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+      elevation: 0,
+    );
+    final button = icon == null
+        ? FilledButton(
+            onPressed: onPressed,
+            autofocus: autofocus,
+            style: style,
+            child: Text(label),
+          )
+        : FilledButton.icon(
+            onPressed: onPressed,
+            autofocus: autofocus,
+            style: style,
+            icon: Icon(icon, size: 24),
+            label: Text(label),
+          );
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: DesignTokens.borderRadiusCta,
+        boxShadow: onPressed == null ? null : DesignTokens.ctaShadow,
+      ),
+      child: button,
+    );
+  }
+}
+
+/// Opción de [TogescSegmented].
+class TogescSegment<T> {
+  const TogescSegment({
+    required this.value,
+    required this.label,
+    this.icon,
+    this.tooltip,
+  });
+
+  final T value;
+  final String label;
+  final IconData? icon;
+  final String? tooltip;
+}
+
+/// Selector segmentado único (v2.2, lote E), con el estilo de «Resumen |
+/// Historial»: pastilla apagada y la opción elegida en `tile` y `brand`.
+/// Cada opción es un botón con estado «seleccionado» para lectores de
+/// pantalla y se activa con Enter o Espacio.
+class TogescSegmented<T> extends StatelessWidget {
+  const TogescSegmented({
+    super.key,
+    required this.segments,
+    required this.selected,
+    required this.onChanged,
+    this.expand = false,
+  });
+
+  final List<TogescSegment<T>> segments;
+
+  /// Opción elegida; `null` si ninguna.
+  final T? selected;
+
+  /// `null` lo deshabilita.
+  final ValueChanged<T>? onChanged;
+
+  /// Reparte todo el ancho entre las opciones.
+  final bool expand;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = TogescColors.of(context);
+    final theme = Theme.of(context);
+    Widget option(TogescSegment<T> s) {
+      final isSelected = s.value == selected;
+      final fg = isSelected ? colors.brand : colors.textSecondary;
+      Widget child = AnimatedContainer(
+        duration: motionDuration(context, DesignTokens.durationFast),
+        curve: DesignTokens.easeOut,
+        constraints: const BoxConstraints(
+          minHeight: DesignTokens.touchTargetMin - 8,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? colors.tile : Colors.transparent,
+          borderRadius: DesignTokens.borderRadiusPill,
+        ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (s.icon != null) ...[
+                Icon(s.icon, size: 18, color: fg),
+                const SizedBox(width: 6),
+              ],
+              Text(
+                s.label,
+                maxLines: 1,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: fg,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      child = Semantics(
+        button: true,
+        selected: isSelected,
+        inMutuallyExclusiveGroup: true,
+        child: InkWell(
+          borderRadius: DesignTokens.borderRadiusPill,
+          onTap: onChanged == null ? null : () => onChanged!(s.value),
+          child: child,
+        ),
+      );
+      if (s.tooltip != null) {
+        child = Tooltip(message: s.tooltip!, child: child);
+      }
+      // Flexible: sin ancho de sobra (texto grande, móvil) la etiqueta
+      // encoge con el FittedBox en lugar de desbordar.
+      return expand ? Expanded(child: child) : Flexible(child: child);
+    }
+
+    return Opacity(
+      opacity: onChanged == null ? 0.6 : 1,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: colors.muted,
+          borderRadius: DesignTokens.borderRadiusPill,
+        ),
+        child: Row(
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+          children: [for (final s in segments) option(s)],
         ),
       ),
     );

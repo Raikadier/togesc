@@ -11,6 +11,7 @@ import '../providers/analytics_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/paywall_views.dart';
+import '../widgets/togesc_ui.dart';
 
 /// Pantalla de paywall (Fase 5).
 /// Cierra el paywall; sin historial (deep link o `replace`) vuelve al Home.
@@ -139,7 +140,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final wide = constraints.maxWidth >= 900;
+            final wide = constraints.maxWidth >= DesignTokens.compactBreakpoint;
             final margin = wide
                 ? DesignTokens.marginDesktop
                 : DesignTokens.marginMobile;
@@ -152,49 +153,49 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             final panel = _buildComparePanel(context);
             return SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(margin, 0, margin, margin),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1040),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(
-                        height: 64,
-                        child: Row(
-                          children: [
-                            ExcludeSemantics(
-                              child: Text(
-                                'TOGESC',
-                                style: DesignTokens.logo.copyWith(
-                                  color: DesignTokens.onHeroAccent,
+              child: ConstrainedBox(
+                // Centrado en vertical cuando cabe (lote E).
+                constraints: BoxConstraints(
+                  minHeight: (constraints.maxHeight - margin).clamp(
+                    0,
+                    double.infinity,
+                  ),
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: DesignTokens.focusedContentMaxWidth,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(
+                          height: 64,
+                          child: Row(
+                            children: [
+                              ExcludeSemantics(
+                                child: Text(
+                                  'TOGESC',
+                                  style: DesignTokens.logo.copyWith(
+                                    color: DesignTokens.onHeroAccent,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              tooltip: 'Cerrar',
-                              color: DesignTokens.onHero,
-                              icon: const Icon(Icons.close_rounded),
-                              onPressed: () => _close(context),
-                            ),
-                          ],
+                              const Spacer(),
+                              IconButton(
+                                tooltip: 'Cerrar',
+                                color: DesignTokens.onHero,
+                                icon: const Icon(Icons.close_rounded),
+                                onPressed: () => _close(context),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      if (wide)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: pitch),
-                            const SizedBox(width: DesignTokens.spacingLg * 2),
-                            Expanded(child: panel),
-                          ],
-                        )
-                      else ...[
                         pitch,
                         const SizedBox(height: DesignTokens.spacingLg),
                         panel,
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -269,19 +270,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               ],
             ),
             const SizedBox(height: DesignTokens.spacingMd),
-            FilledButton(
+            TogescCta(
               key: const ValueKey('paywall-cta'),
+              label: 'Probar $trialDays días gratis',
+              expand: true,
               onPressed: _busy ? null : _startTrial,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(DesignTokens.ctaHeight),
-                backgroundColor: DesignTokens.ctaAmber,
-                foregroundColor: DesignTokens.onCtaAmber,
-                textStyle: const TextStyle(fontWeight: FontWeight.w800),
-                shape: RoundedRectangleBorder(
-                  borderRadius: DesignTokens.borderRadiusCta,
-                ),
-              ),
-              child: const Text('Probar $trialDays días gratis'),
             ),
             const SizedBox(height: DesignTokens.spacingSm),
             OutlinedButton(

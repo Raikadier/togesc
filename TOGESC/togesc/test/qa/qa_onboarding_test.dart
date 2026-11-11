@@ -8,6 +8,7 @@ import 'package:togesc/app/router.dart';
 import 'package:togesc/providers/audio_provider.dart';
 import 'package:togesc/screens/onboarding_screen.dart';
 import 'package:togesc/services/app_preferences.dart';
+import 'package:togesc/widgets/togesc_ui.dart';
 
 import 'qa_support.dart';
 
@@ -78,9 +79,9 @@ void main() {
       tester,
       prefs: {noteNamingModeKey: 'solfege', onboardingStepKey: 3},
     );
-    final selector = tester.widget<SegmentedButton<bool>>(
+    final selector = tester.widget<TogescSegmented<bool>>(
       find.byKey(const ValueKey('onboarding-notation')),
     );
-    expect(selector.selected, {true});
+    expect(selector.selected, isTrue);
   }, skip: qaSkipBug);
 }

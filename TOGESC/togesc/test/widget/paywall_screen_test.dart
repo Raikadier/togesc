@@ -74,16 +74,16 @@ void main() {
     expect(find.textContaining('Desbloquea'), findsOneWidget);
   });
 
-  testWidgets('en escritorio el pitch y el panel van lado a lado', (
+  testWidgets('en escritorio va en una columna de 620 centrada (lote E)', (
     tester,
   ) async {
     await _pump(tester, const Size(1280, 900));
 
-    final pitch = tester.getTopLeft(find.byType(PaywallPitch));
-    final panel = tester.getTopLeft(
-      find.byKey(const ValueKey('paywall-panel')),
-    );
-    expect(panel.dx, greaterThan(pitch.dx));
+    final pitch = tester.getRect(find.byType(PaywallPitch));
+    final panel = tester.getRect(find.byKey(const ValueKey('paywall-panel')));
+    expect(panel.top, greaterThan(pitch.bottom - 1));
+    expect(panel.width, lessThanOrEqualTo(620));
+    expect(panel.center.dx, closeTo(640, 1));
     expect(tester.takeException(), isNull);
   });
 }

@@ -21,7 +21,7 @@ class SpeedModeSelectScreen extends ConsumerWidget {
     final bests = ref.watch(speedBestStreakProvider).valueOrNull ?? const {};
 
     return TogescScaffold(
-      title: 'Velocidad — Elige modo',
+      title: 'Velocidad',
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(DesignTokens.marginMobile),
         child: LayoutBuilder(

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../../constants/note_naming.dart';
 import '../../providers/today_session_provider.dart';
 import '../../utils/today_session.dart';
 import '../../constants/srs_constants.dart';
 import '../progress_v2/progress_metrics.dart';
 import '../../utils/session_summary.dart';
+import '../togesc_ui.dart';
 
 /// Texto del hero derivado solo de datos reales del SRS (D10).
 ///
@@ -48,11 +50,11 @@ String todayHeroCopy(List<TodayFocusNote> focus, {bool custom = false}) {
 }
 
 String _countWord(int n) => switch (n) {
-      2 => 'dos',
-      3 => 'tres',
-      4 => 'cuatro',
-      _ => '$n',
-    };
+  2 => 'dos',
+  3 => 'tres',
+  4 => 'cuatro',
+  _ => '$n',
+};
 
 /// Estado escrito de una nota foco (el color nunca es la única señal).
 String focusNoteStateLabel(TodayFocusNote note) {
@@ -64,11 +66,11 @@ String focusNoteStateLabel(TodayFocusNote note) {
 /// Estado de dominio de una nota foco. Sin intentos conocidos se juzga solo
 /// por la precisión.
 MasteryStatus focusNoteStatus(TodayFocusNote note) => masteryStatusOf(
-      timesSeen: note.accuracyPercent == null
-          ? 0
-          : (note.timesSeen ?? masteryMinAttempts),
-      pct: note.accuracyPercent ?? 0,
-    );
+  timesSeen: note.accuracyPercent == null
+      ? 0
+      : (note.timesSeen ?? masteryMinAttempts),
+  pct: note.accuracyPercent ?? 0,
+);
 
 /// Card hero «Sesión de hoy» (#2A0640) del Home v2.
 class TodaySessionHero extends StatelessWidget {
@@ -94,7 +96,11 @@ class TodaySessionHero extends StatelessWidget {
     this.completedToday = false,
     this.lastAccuracyPercent,
     this.showSteps = true,
+    this.namingMode = NoteNamingMode.letter,
   });
+
+  /// Notación elegida por el usuario (C·D·E o Do·Re·Mi).
+  final NoteNamingMode namingMode;
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +158,9 @@ class TodaySessionHero extends StatelessWidget {
                     const SizedBox(width: DesignTokens.spacingSm),
                     Flexible(
                       child: Text(
-                        completedToday ? 'SESIÓN DE HOY HECHA' : 'SESIÓN DE HOY',
+                        completedToday
+                            ? 'SESIÓN DE HOY HECHA'
+                            : 'SESIÓN DE HOY',
                         semanticsLabel: completedToday
                             ? 'Sesión de hoy hecha'
                             : 'Sesión de hoy',
@@ -166,7 +174,8 @@ class TodaySessionHero extends StatelessWidget {
                 const SizedBox(height: DesignTokens.spacingSm),
                 if (completedToday && lastAccuracyPercent != null)
                   Semantics(
-                    label: '${lastAccuracyPercent!.round()} por ciento de '
+                    label:
+                        '${lastAccuracyPercent!.round()} por ciento de '
                         'precisión en tu última sesión',
                     excludeSemantics: true,
                     child: _DoneSummary(accuracyPercent: lastAccuracyPercent!),
@@ -181,7 +190,7 @@ class TodaySessionHero extends StatelessWidget {
                 Text(
                   completedToday
                       ? 'Hecho por hoy. '
-                          '${nextSessionLine([for (final n in plan.focusNotes) n.note])}'
+                            '${nextSessionLine([for (final n in plan.focusNotes) formatNoteLabel(n.note, namingMode)])}'
                       : todayHeroCopy(
                           plan.focusNotes,
                           custom: plan.isCustomFocus,
@@ -197,9 +206,13 @@ class TodaySessionHero extends StatelessWidget {
                   Row(
                     children: [
                       for (var i = 0; i < plan.focusNotes.length; i++) ...[
-                        if (i > 0) const SizedBox(width: DesignTokens.spacingSm),
+                        if (i > 0)
+                          const SizedBox(width: DesignTokens.spacingSm),
                         Expanded(
-                          child: FocusNoteMiniCard(note: plan.focusNotes[i]),
+                          child: FocusNoteMiniCard(
+                            note: plan.focusNotes[i],
+                            namingMode: namingMode,
+                          ),
                         ),
                       ],
                     ],
@@ -210,33 +223,38 @@ class TodaySessionHero extends StatelessWidget {
                   const HeroSteps(),
                 ],
                 const SizedBox(height: DesignTokens.spacingLg),
-                SizedBox(
-                  height: DesignTokens.ctaHeight,
-                  child: FilledButton.icon(
+                if (!completedToday)
+                  TogescCta(
                     key: const ValueKey('today-start-cta'),
+                    label: 'Empezar sesión',
+                    icon: Icons.play_arrow_rounded,
+                    expand: true,
                     onPressed: onStart,
-                    // Con la sesión hecha sigue siendo la única acción
-                    // principal, pero ya no parece una tarea pendiente.
-                    style: FilledButton.styleFrom(
-                      backgroundColor: completedToday
-                          ? DesignTokens.onHero.withValues(alpha: 0.16)
-                          : DesignTokens.ctaAmber,
-                      foregroundColor: completedToday
-                          ? DesignTokens.onHero
-                          : DesignTokens.onCtaAmber,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: DesignTokens.borderRadiusCta,
+                  )
+                else
+                  // Con la sesión hecha sigue siendo la única acción
+                  // principal, pero ya no parece una tarea pendiente.
+                  SizedBox(
+                    height: DesignTokens.ctaHeight,
+                    child: FilledButton.icon(
+                      key: const ValueKey('today-start-cta'),
+                      onPressed: onStart,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: DesignTokens.onHero.withValues(
+                          alpha: 0.16,
+                        ),
+                        foregroundColor: DesignTokens.onHero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: DesignTokens.borderRadiusCta,
+                        ),
+                        textStyle: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                      textStyle: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    icon: const Icon(Icons.play_arrow_rounded, size: 26),
-                    label: Text(
-                      completedToday ? 'Practicar más' : 'Empezar sesión',
+                      icon: const Icon(Icons.play_arrow_rounded, size: 26),
+                      label: const Text('Practicar más'),
                     ),
                   ),
-                ),
                 const SizedBox(height: DesignTokens.spacingXs),
                 Center(
                   child: TextButton(
@@ -285,9 +303,9 @@ class _DoneSummary extends StatelessWidget {
           child: Text(
             'de precisión en tu última sesión',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: DesignTokens.onHero.withValues(alpha: 0.86),
-                  fontWeight: FontWeight.w600,
-                ),
+              color: DesignTokens.onHero.withValues(alpha: 0.86),
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -304,9 +322,9 @@ class _RoundsSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final secondary = Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: DesignTokens.onHero.withValues(alpha: 0.86),
-          fontWeight: FontWeight.w600,
-        );
+      color: DesignTokens.onHero.withValues(alpha: 0.86),
+      fontWeight: FontWeight.w600,
+    );
     if (rounds <= 0) {
       return Text('Sin límite de rondas', style: secondary);
     }
@@ -321,9 +339,7 @@ class _RoundsSummary extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: 4),
           child: Text(
-            minutes == null
-                ? 'rondas'
-                : 'rondas · ≈ $minutes min (estimado)',
+            minutes == null ? 'rondas' : 'rondas · ≈ $minutes min (estimado)',
             style: secondary,
           ),
         ),
@@ -335,23 +351,29 @@ class _RoundsSummary extends StatelessWidget {
 /// Mini-card de una nota de foco: nombre, barra de 3 px y %.
 class FocusNoteMiniCard extends StatelessWidget {
   final TodayFocusNote note;
+  final NoteNamingMode namingMode;
 
-  const FocusNoteMiniCard({super.key, required this.note});
+  const FocusNoteMiniCard({
+    super.key,
+    required this.note,
+    this.namingMode = NoteNamingMode.letter,
+  });
 
   @override
   Widget build(BuildContext context) {
     final pct = note.accuracyPercent;
     final textTheme = Theme.of(context).textTheme;
-    final state = focusNoteStateLabel(note);
-    final measuring = pct != null &&
-        focusNoteStatus(note) == MasteryStatus.measuring;
+    final label = formatNoteLabel(note.note, namingMode);
+    // Va detrás de la cifra («64 % en curso»): en minúscula.
+    final state = focusNoteStateLabel(note).toLowerCase();
+    final measuring =
+        pct != null && focusNoteStatus(note) == MasteryStatus.measuring;
     final attempts = measuringProgressLabel(note.timesSeen ?? 0);
     final semantics = pct == null
-        ? 'Nota ${note.note}: nueva, sin datos de precisión'
+        ? 'Nota $label: nueva, sin datos de precisión'
         : measuring
-            ? 'Nota ${note.note}: midiendo, $attempts intentos'
-            : 'Nota ${note.note}: ${pct.round()} % de precisión, '
-                '${state.toLowerCase()}';
+        ? 'Nota $label: midiendo, $attempts intentos'
+        : 'Nota $label: ${pct.round()} % de precisión, $state';
     final labelStyle = textTheme.labelMedium
         ?.copyWith(
           color: DesignTokens.onHero.withValues(alpha: 0.86),
@@ -374,7 +396,7 @@ class FocusNoteMiniCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              note.note,
+              label,
               style: textTheme.titleMedium?.copyWith(
                 color: DesignTokens.onHero,
                 fontWeight: FontWeight.w800,
@@ -389,9 +411,11 @@ class FocusNoteMiniCard extends StatelessWidget {
                   value: pct == null
                       ? 0
                       : measuring
-                          ? ((note.timesSeen ?? 0) / masteryMinAttempts)
-                              .clamp(0.0, 1.0)
-                          : (pct / 100).clamp(0.0, 1.0),
+                      ? ((note.timesSeen ?? 0) / masteryMinAttempts).clamp(
+                          0.0,
+                          1.0,
+                        )
+                      : (pct / 100).clamp(0.0, 1.0),
                   backgroundColor: const Color(0x29FFFFFF),
                   color: pct == null || measuring
                       ? DesignTokens.onHeroAccent
@@ -447,7 +471,8 @@ class _HeroLiveDotState extends State<HeroLiveDot>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final reduced = motionDuration(context, HeroLiveDot.period) == Duration.zero;
+    final reduced =
+        motionDuration(context, HeroLiveDot.period) == Duration.zero;
     if (reduced) {
       _controller
         ..stop()
@@ -457,8 +482,8 @@ class _HeroLiveDotState extends State<HeroLiveDot>
       _controller
           .repeat(reverse: true, count: HeroLiveDot.pulses * 2)
           .whenComplete(() {
-        if (mounted) _controller.value = 0;
-      });
+            if (mounted) _controller.value = 0;
+          });
     }
   }
 
@@ -507,13 +532,14 @@ class HeroSteps extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: DesignTokens.onHero.withValues(alpha: 0.86),
-          fontSize: 13,
-        );
+      color: DesignTokens.onHero.withValues(alpha: 0.86),
+      fontSize: 13,
+    );
     return Semantics(
       key: const ValueKey('today-steps'),
       container: true,
-      label: 'Cómo funciona: escucha, toca la tecla y el repaso se ajusta '
+      label:
+          'Cómo funciona: escucha, toca la tecla y el repaso se ajusta '
           'a ti',
       excludeSemantics: true,
       child: Wrap(

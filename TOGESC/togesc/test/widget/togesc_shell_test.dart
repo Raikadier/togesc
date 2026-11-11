@@ -163,7 +163,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('a 800 px sigue la barra inferior (rail solo ≥1024)', (
+    testWidgets('a 800 px sigue la barra inferior (rail solo ≥840)', (
       tester,
     ) async {
       await pumpShell(tester, size: const Size(800, 900));
@@ -223,7 +223,7 @@ void main() {
   });
 
   group('rail de escritorio', () {
-    testWidgets('a ≥1024 muestra el rail de 76 con TG y 4 destinos', (
+    testWidgets('a ≥840 muestra el rail de 76 con TG y 4 destinos', (
       tester,
     ) async {
       await pumpShell(tester, size: const Size(1200, 800));

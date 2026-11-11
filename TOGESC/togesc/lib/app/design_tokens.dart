@@ -75,7 +75,7 @@ abstract final class DesignTokens {
 
   // --- Forma y espaciado ---
   static const double radiusMd = 12;
-  static const double shellBreakpoint = 600;
+  static const double shellBreakpoint = 600; // = compactBreakpoint
   static const double contentMaxWidth = 1200;
   static const double touchTargetMin = 48;
   static const double spacingXs = 4;
@@ -242,7 +242,10 @@ abstract final class DesignTokens {
   /// Ámbar (50–74 %). Texto `onWarning` #3A2B00: 9,0:1 y 7,7:1.
   static const Color masteryAmberLight = warningLight;
   static const Color masteryAmber = Color(0xFFFFB300);
-  static const List<Color> masteryAmberScale = [masteryAmberLight, masteryAmber];
+  static const List<Color> masteryAmberScale = [
+    masteryAmberLight,
+    masteryAmber,
+  ];
 
   /// Verde (≥75 %), por nivel SRS 3 / 4 / 5.
   /// - #4E9A52 + texto `#1E1B1E`: 4,9:1 (blanco daría 3,5:1).
@@ -353,7 +356,29 @@ abstract final class DesignTokens {
   static const double navBarHeight = 76;
   static const double railWidth = 76;
   static const double ctaHeight = 58;
-  static const double desktopBreakpoint = 1024;
+
+  /// Sombra del botón principal (prototipo: 0 6px 18px -8px ámbar al 80 %).
+  static const List<BoxShadow> ctaShadow = [
+    BoxShadow(
+      color: Color(0xCCFFB300),
+      offset: Offset(0, 6),
+      blurRadius: 18,
+      spreadRadius: -8,
+    ),
+  ];
+
+  /// Breakpoints únicos (v2.2, lote E): compacto < 600 ≤ medio < 840 ≤
+  /// expandido. Desde 840, rail lateral y dos columnas.
+  static const double compactBreakpoint = 600;
+  static const double expandedBreakpoint = 840;
+
+  /// Alias de [expandedBreakpoint] para el código existente.
+  static const double desktopBreakpoint = expandedBreakpoint;
+
+  /// Ancho máximo del contenido entre 600 y 840 (Home) y de las pantallas
+  /// de una columna centrada (onboarding, «Preparado», paywall).
+  static const double mediumContentMaxWidth = 640;
+  static const double focusedContentMaxWidth = 620;
   static const double sessionProgressBarHeight = 3;
   static const double sessionRingSize = 150;
   static const double sessionRingSizeDesktop = 170;

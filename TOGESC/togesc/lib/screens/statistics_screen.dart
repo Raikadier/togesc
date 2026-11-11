@@ -102,7 +102,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     final now = ref.watch(clockProvider)();
     final naming =
         ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
-    final learningThreshold = ref
+    final learningThreshold =
+        ref
             .watch(appPreferencesProvider)
             .valueOrNull
             ?.srsIntensityProfile
@@ -200,10 +201,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         child: Text(
           'Progreso',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: Theme.of(context).colorScheme.primary,
-                letterSpacing: -0.4,
-              ),
+            fontWeight: FontWeight.w800,
+            color: Theme.of(context).colorScheme.primary,
+            letterSpacing: -0.4,
+          ),
         ),
       ),
       const SizedBox(height: DesignTokens.spacingMd),
@@ -310,16 +311,13 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
       const SizedBox(height: DesignTokens.spacingSm),
       Align(
         alignment: Alignment.centerLeft,
-        child: SegmentedButton<StatsPeriod>(
+        child: TogescSegmented<StatsPeriod>(
           segments: [
             for (final p in StatsPeriod.values)
-              ButtonSegment(value: p, label: Text(p.label)),
+              TogescSegment(value: p, label: p.label),
           ],
-          selected: {_period},
-          onSelectionChanged: (next) {
-            if (next.isEmpty) return;
-            setState(() => _period = next.first);
-          },
+          selected: _period,
+          onChanged: (p) => setState(() => _period = p),
         ),
       ),
       const SizedBox(height: DesignTokens.spacingMd),

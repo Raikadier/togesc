@@ -2,6 +2,47 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-11 · Lote E: coherencia visual · Claude Code
+**Antes del lote: prueba de A–D en la app real** (producción, 751×640, datos sembrados en localStorage):
+- Bien: copy del onboarding (A); «midiendo» y «a reforzar», Re al 40 % con 5 intentos en rojo (B); «Primera medición hecha», «Próxima sesión: …», hero «SESIÓN DE HOY HECHA» con «Practicar más», pasos ocultos tras la primera sesión y tira de días bajo el hero (C); píldoras «La, consolidada» y «Tu mejor sesión hasta hoy», «11/12 consolidadas», «🔥 4 Récord» y «Tus hitos» (D).
+- Corregido en este lote:
+  - El hero ignoraba la notación (salía «C#» con solfeo): ahora usa `formatNoteLabel`.
+  - El estado de la mini-card iba con mayúscula tras la cifra («64 % En curso»).
+  - El chip de racha del Home contaba un día de más antes de practicar hoy.
+  - «15s» pasa a «15 s».
+- Visto y sin corregir:
+  - El nivel SRS de una nota baja a 0 mientras sigue «consolidada»; confunde.
+  - El hero dice «notas naturales» y sonó un Do#.
+  - A 640 px de alto, «Probar otra vez» del onboarding queda bajo el pliegue (se llega con scroll).
+  - «33,3 %» en Progreso frente a «33 %» en el Home.
+  - «12 rondas · 1 nota · foco en…» se lee ambiguo.
+  - No se vieron el pop de la rueda ni el chip ⚡.
+
+**Lote E:**
+- **`TogescCta`** (`widgets/togesc_ui.dart`): ámbar #FFB300, 17/800, `ctaHeight` (o 48 en filas de acciones) y la sombra del prototipo (`DesignTokens.ctaShadow`). Lo usan «Empezar sesión» del hero, «Estoy listo», «Reanudar», «Confirmar», «Ver resumen», «Siguiente ronda», «Continuar» de la pausa, «Volver al inicio», «Entendido, empezar» y el CTA del paywall. Mantienen sus `ValueKey`.
+  - La sesión pasa del ámbar claro (`sessionAmber`) al del Home; `sessionAmber` queda para iconos y chips.
+  - «Practicar más» (sesión hecha) sigue translúcido a propósito.
+- **`TogescSegmented`**: sustituye los 9 `SegmentedButton` (notación del onboarding, periodo de Estadísticas, Entrar/Crear cuenta, duración de «Ajustar», Rueda/Rejilla, timbre, duración del cluster y del tono, tema). Valor único en lugar de `Set`; anuncia «seleccionado» y grupo excluyente.
+- **Anchos:** breakpoints únicos 600 y 840 en `DesignTokens`; `desktopBreakpoint` es ahora 840 (antes 1024), así que el rail, el Home en dos columnas y el layout de escritorio de la sesión empiezan en 840. Entre 600 y 840 el Home se limita a 640. Onboarding, «Preparado» y paywall a 620; onboarding y paywall se centran en vertical cuando caben.
+  - El paywall pierde su versión en dos columnas (≥ 900): con 620 px va siempre apilado.
+- **Velocidad:**
+  - Botón de volver (`speed-back`) en todas las fases de la ráfaga; antes no había, porque se entra con `pushReplacement`.
+  - Un solo título: la app bar dice «Velocidad» y la cabecera «Modo velocidad» desaparece.
+  - En la respuesta, temporizador, botón y campo se limitan al ancho del piano (500, o 640 con piano grande).
+- **Paywall:** el panel ya estaba en `surfaceContainerLowest`.
+- **Tests:** 4 nuevos en `home_screen_test.dart` (columnas del Home a 360, 768, 840 y 1280). Actualizados el test QA de notación (`TogescSegmented`), el smoke e2e («Velocidad»), el del paywall en escritorio y los nombres de los tests de 1024 → 840.
+
+**Verificación:** `flutter analyze` sin avisos y `flutter test` +916 ~45.
+- La primera pasada dio 22 fallos: `TogescSegmented` desbordaba con texto grande en Ajustes y el onboarding (las opciones no encogían). Ahora cada opción va en `Flexible` y la etiqueta se reduce con el `FittedBox`.
+- El test del paywall «lado a lado» pasa a comprobar la columna de 620 centrada.
+
+**Sin hacer en este lote:**
+- Escala de escritorio del prototipo (hero 52/32, arte 220, centro de rueda 34), fila de KPI destacada y limpieza de tokens (punto 8).
+- Movimiento: `CountUpText` en el Home (el valor central de la rueda es texto, pide cambiar la API de `EarMapWheel`), entradas escalonadas y pop del resultado.
+- Capturas en `docs/evidence/`: no hechas; hace falta un build web local o el despliegue de la rama.
+- D4 (envío al tocar en Velocidad) sigue sin decidir.
+- No se ha visto en la app real.
+
 ## 2026-11-11 · Lote D: hitos reales · Claude Code
 - **Función pura** `utils/milestones.dart`: `sessionMilestones` recibe el estado de las notas al empezar y al acabar, y los récords anteriores; devuelve los hitos de la sesión.
   - **Nota consolidada:** la que pasa a «Consolidada» en esta sesión (con el mínimo de 5 intentos del lote B). Sin estado inicial no se declara ninguna.

@@ -3,8 +3,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../app/app_theme.dart';
+import '../app/router.dart';
 import '../app/design_tokens.dart';
 import '../app/togesc_colors.dart';
 import '../constants/game_constants.dart';
@@ -244,6 +246,14 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
   ) {
     return TogescScaffold(
       title: 'Velocidad · ${widget.targetMode.displayName}',
+      // Se llega con pushReplacement: sin esto no hay forma de volver en
+      // ninguna fase (lote E).
+      leading: IconButton(
+        key: const ValueKey('speed-back'),
+        tooltip: 'Volver a Velocidad',
+        icon: const Icon(Icons.arrow_back_rounded),
+        onPressed: () => context.go(AppRoutes.speedSelect),
+      ),
       actions: [
         GameInstrumentToggleAction(
           sessionInstrumentOverride: session.sessionInstrumentOverride,
@@ -355,79 +365,85 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
         : 'C E G o Do Re Mi';
 
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: CountdownTimerWidget(
-              remainingTime: session.remainingTime,
-              totalTime: session.currentTimeLimit,
-            ),
+      child: Center(
+        child: ConstrainedBox(
+          // Mismo ancho máximo que el piano (500, o 640 con piano grande).
+          constraints: BoxConstraints(maxWidth: ui.largePiano ? 640 : 500),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: CountdownTimerWidget(
+                  remainingTime: session.remainingTime,
+                  totalTime: session.currentTimeLimit,
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spacingLg),
+              SpeedSessionAnswerHeader(numNotes: required),
+              const SizedBox(height: DesignTokens.spacingSm),
+              Text(
+                '${_selectedNotes.length}/$required '
+                '${required == 1 ? 'nota seleccionada' : 'notas seleccionadas'}',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    )
+                    .merge(DesignTokens.tabularNumbers),
+              ),
+              const SizedBox(height: DesignTokens.spacingLg),
+              Center(
+                child: PianoKeyboard(
+                  selectedNotes: _selectedNotes,
+                  onNoteTapped: (note) => _toggleNote(note, required),
+                  noteNamingMode: namingMode,
+                  variant: PianoKeyboardVariant.session,
+                  large: ui.largePiano,
+                ),
+              ),
+              if (_selectedNotes.isNotEmpty) ...[
+                const SizedBox(height: DesignTokens.spacingMd),
+                Wrap(
+                  spacing: DesignTokens.spacingSm,
+                  runSpacing: DesignTokens.spacingSm,
+                  alignment: WrapAlignment.center,
+                  children: _selectedNotes.map((note) {
+                    return InputChip(
+                      label: Text(note),
+                      onDeleted: () => _toggleNote(note, required),
+                      // `primaryContainer` es #2A0640 en la sesión (1,2:1 sobre
+                      // el fondo): borde e icono van en el ámbar de selección.
+                      deleteIconColor: TogescColors.of(context).selection,
+                      side: BorderSide(
+                        color: TogescColors.of(context).selection,
+                        width: 2,
+                      ),
+                      backgroundColor: TogescColors.of(
+                        context,
+                      ).selection.withValues(alpha: 0.15),
+                    );
+                  }).toList(),
+                ),
+              ],
+              const SizedBox(height: DesignTokens.spacingLg),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _selectedNotes.isEmpty
+                      ? null
+                      : () => _confirmSelection(required),
+                  icon: const Icon(Icons.check_rounded),
+                  label: const Text('Confirmar'),
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spacingLg),
+              NoteInputField(
+                onSubmitted: (notes) => _submitNotes(notes, required),
+                hintText: hint,
+              ),
+            ],
           ),
-          const SizedBox(height: DesignTokens.spacingLg),
-          SpeedSessionAnswerHeader(numNotes: required),
-          const SizedBox(height: DesignTokens.spacingSm),
-          Text(
-            '${_selectedNotes.length}/$required '
-            '${required == 1 ? 'nota seleccionada' : 'notas seleccionadas'}',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium
-                ?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                )
-                .merge(DesignTokens.tabularNumbers),
-          ),
-          const SizedBox(height: DesignTokens.spacingLg),
-          Center(
-            child: PianoKeyboard(
-              selectedNotes: _selectedNotes,
-              onNoteTapped: (note) => _toggleNote(note, required),
-              noteNamingMode: namingMode,
-              variant: PianoKeyboardVariant.session,
-              large: ui.largePiano,
-            ),
-          ),
-          if (_selectedNotes.isNotEmpty) ...[
-            const SizedBox(height: DesignTokens.spacingMd),
-            Wrap(
-              spacing: DesignTokens.spacingSm,
-              runSpacing: DesignTokens.spacingSm,
-              alignment: WrapAlignment.center,
-              children: _selectedNotes.map((note) {
-                return InputChip(
-                  label: Text(note),
-                  onDeleted: () => _toggleNote(note, required),
-                  // `primaryContainer` es #2A0640 en la sesión (1,2:1 sobre
-                  // el fondo): borde e icono van en el ámbar de selección.
-                  deleteIconColor: TogescColors.of(context).selection,
-                  side: BorderSide(
-                    color: TogescColors.of(context).selection,
-                    width: 2,
-                  ),
-                  backgroundColor: TogescColors.of(
-                    context,
-                  ).selection.withValues(alpha: 0.15),
-                );
-              }).toList(),
-            ),
-          ],
-          const SizedBox(height: DesignTokens.spacingLg),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: _selectedNotes.isEmpty
-                  ? null
-                  : () => _confirmSelection(required),
-              icon: const Icon(Icons.check_rounded),
-              label: const Text('Confirmar'),
-            ),
-          ),
-          const SizedBox(height: DesignTokens.spacingLg),
-          NoteInputField(
-            onSubmitted: (notes) => _submitNotes(notes, required),
-            hintText: hint,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -437,8 +453,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
       icon: Icons.check_circle_rounded,
       accentColor: TogescColors.of(context).correct,
       title: 'Correcto',
-      subtitle:
-          'Tiempo límite: ${formatSecondsEs(session.currentTimeLimit)}',
+      subtitle: 'Tiempo límite: ${formatSecondsEs(session.currentTimeLimit)}',
       footer: FilledButton.icon(
         onPressed: _startRound,
         icon: const Icon(Icons.skip_next_rounded),

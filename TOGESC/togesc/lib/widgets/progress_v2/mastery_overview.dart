@@ -8,6 +8,7 @@ import '../ear_map/ear_map_wheel.dart';
 import '../home_v2/ear_map_card.dart' show consolidatedNoteCount;
 import 'note_mastery_grid.dart';
 import 'progress_metrics.dart';
+import '../togesc_ui.dart';
 
 /// Vista de la card «Dominio por nota».
 enum MasteryView {
@@ -117,18 +118,14 @@ class _MasteryOverviewState extends State<MasteryOverview> {
                 ),
               ),
               if (!wide)
-                SegmentedButton<MasteryView>(
+                TogescSegmented<MasteryView>(
                   key: const Key('progress-mastery-view'),
-                  showSelectedIcon: false,
                   segments: [
                     for (final v in MasteryView.values)
-                      ButtonSegment(value: v, label: Text(v.label)),
+                      TogescSegment(value: v, label: v.label),
                   ],
-                  selected: {_view},
-                  onSelectionChanged: (next) {
-                    if (next.isEmpty) return;
-                    setState(() => _view = next.first);
-                  },
+                  selected: _view,
+                  onChanged: (v) => setState(() => _view = v),
                 ),
             ],
           );

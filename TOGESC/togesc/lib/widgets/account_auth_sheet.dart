@@ -8,6 +8,7 @@ import '../providers/srs_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../providers/sync_provider.dart';
 import 'account_auth_views.dart';
+import 'togesc_ui.dart';
 
 enum AccountAuthMode { signIn, signUp, forgotPassword }
 
@@ -184,20 +185,18 @@ class _AccountAuthSheetState extends ConsumerState<AccountAuthSheet> {
             ),
             const SizedBox(height: DesignTokens.spacingMd),
             if (!forgot) ...[
-              SegmentedButton<AccountAuthMode>(
+              TogescSegmented<AccountAuthMode>(
                 key: const ValueKey('account-auth-mode'),
+                expand: true,
                 segments: const [
-                  ButtonSegment(
-                    value: AccountAuthMode.signIn,
-                    label: Text('Entrar'),
-                  ),
-                  ButtonSegment(
+                  TogescSegment(value: AccountAuthMode.signIn, label: 'Entrar'),
+                  TogescSegment(
                     value: AccountAuthMode.signUp,
-                    label: Text('Crear cuenta'),
+                    label: 'Crear cuenta',
                   ),
                 ],
-                selected: {_mode},
-                onSelectionChanged: _busy ? null : (s) => _setMode(s.first),
+                selected: _mode,
+                onChanged: _busy ? null : _setMode,
               ),
               const SizedBox(height: DesignTokens.spacingMd),
             ],

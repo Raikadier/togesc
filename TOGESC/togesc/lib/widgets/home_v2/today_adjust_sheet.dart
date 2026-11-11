@@ -15,6 +15,7 @@ import '../../providers/srs_provider.dart';
 import '../../providers/today_session_provider.dart';
 import '../../utils/srs_level.dart';
 import '../progress_v2/progress_metrics.dart';
+import '../togesc_ui.dart';
 
 /// Duraciones de la hoja (SPEC v2.1 §2.1): 6 · 3 min, 12 · 6 min, 20 · 10 min.
 const todayAdjustRoundGoals = [
@@ -39,9 +40,9 @@ Future<void> showTodayAdjustSheet(BuildContext context, WidgetRef ref) async {
     builder: (_) => const TodayAdjustSheet(),
   );
   if (saved == true && context.mounted) {
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-      const SnackBar(content: Text('Sesión de hoy actualizada')),
-    );
+    ScaffoldMessenger.maybeOf(
+      context,
+    )?.showSnackBar(const SnackBar(content: Text('Sesión de hoy actualizada')));
   }
 }
 
@@ -143,28 +144,21 @@ class _TodayAdjustSheetState extends ConsumerState<TodayAdjustSheet> {
             const SizedBox(height: DesignTokens.spacingLg),
             Text('Duración', style: labelStyle),
             const SizedBox(height: DesignTokens.spacingSm),
-            SegmentedButton<SessionRoundGoal>(
+            TogescSegmented<SessionRoundGoal>(
               key: const ValueKey('today-adjust-duration'),
+              expand: true,
               segments: [
                 for (final goal in todayAdjustRoundGoals)
-                  ButtonSegment(
+                  TogescSegment(
                     value: goal,
-                    label: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(_goalLabel(goal)),
-                    ),
+                    label: _goalLabel(goal),
                     tooltip:
                         '${goal.rounds} rondas, unos ${goal.estimatedMinutes} '
                         'minutos estimados',
                   ),
               ],
-              selected: {?_goal},
-              emptySelectionAllowed: true,
-              showSelectedIcon: false,
-              onSelectionChanged: (value) {
-                if (value.isEmpty) return;
-                setState(() => _goal = value.first);
-              },
+              selected: _goal,
+              onChanged: (goal) => setState(() => _goal = goal),
             ),
             const SizedBox(height: DesignTokens.spacingLg + 4),
             Text.rich(
@@ -172,7 +166,8 @@ class _TodayAdjustSheetState extends ConsumerState<TodayAdjustSheet> {
                 text: 'Notas foco ',
                 children: [
                   TextSpan(
-                    text: '(elige de $minTodayFocusNotes a '
+                    text:
+                        '(elige de $minTodayFocusNotes a '
                         '$maxPracticeFocusNotes)',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colors.textSecondary,
@@ -204,9 +199,9 @@ class _TodayAdjustSheetState extends ConsumerState<TodayAdjustSheet> {
               child: Text(
                 _limitHit
                     ? 'Máximo $maxPracticeFocusNotes notas foco. Quita una '
-                        'para elegir otra.'
+                          'para elegir otra.'
                     : 'Las notas foco suenan más a menudo; el resto mantiene '
-                        'el repaso normal.',
+                          'el repaso normal.',
                 key: const ValueKey('today-adjust-hint'),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: _limitHit
@@ -279,15 +274,13 @@ class _NoteChip extends StatelessWidget {
         ? masteryCellColors(
             context,
             s,
-            level: srsLevelForSummary(
-              s,
-              learningThreshold: learningThreshold,
-            ),
+            level: srsLevelForSummary(s, learningThreshold: learningThreshold),
           ).background
         : colors.muted;
     final spoken = spokenNoteName(label);
-    final semantics =
-        seen ? '$spoken, ${s.accuracyPercent.round()} %' : '$spoken, sin datos';
+    final semantics = seen
+        ? '$spoken, ${s.accuracyPercent.round()} %'
+        : '$spoken, sin datos';
 
     return Semantics(
       label: semantics,

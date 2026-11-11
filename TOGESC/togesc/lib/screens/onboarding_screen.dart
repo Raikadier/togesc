@@ -17,6 +17,7 @@ import '../services/app_preferences.dart';
 import '../widgets/onboarding_views.dart';
 import '../widgets/piano_keyboard.dart';
 import '../widgets/progress_v2/progress_metrics.dart' show spokenNoteName;
+import '../widgets/togesc_ui.dart';
 
 /// Onboarding v2.1 (SPEC §2.7): 4 pasos con indicador, «Saltar», ronda de
 /// prueba (paso 3) y preferencias (paso 4). El paso actual se guarda para
@@ -79,7 +80,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(
-              maxWidth: DesignTokens.contentMaxWidth,
+              maxWidth: DesignTokens.focusedContentMaxWidth,
             ),
             child: Column(
               children: [
@@ -116,17 +117,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    key: ValueKey('onboarding-step-$_step'),
-                    padding: EdgeInsets.all(margin),
-                    child: AnimatedSwitcher(
-                      duration: motionDuration(
-                        context,
-                        DesignTokens.motionMedium,
-                      ),
-                      child: KeyedSubtree(
-                        key: ValueKey(_step),
-                        child: _buildStep(context),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
+                      key: ValueKey('onboarding-step-$_step'),
+                      padding: EdgeInsets.all(margin),
+                      // Centrado en vertical cuando el paso cabe (lote E).
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: (constraints.maxHeight - 2 * margin).clamp(
+                            0,
+                            double.infinity,
+                          ),
+                        ),
+                        child: Center(
+                          child: AnimatedSwitcher(
+                            duration: motionDuration(
+                              context,
+                              DesignTokens.motionMedium,
+                            ),
+                            child: KeyedSubtree(
+                              key: ValueKey(_step),
+                              child: _buildStep(context),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -156,11 +170,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     final Widget next;
     if (last) {
-      next = FilledButton(
+      next = TogescCta(
         key: const ValueKey('onboarding-start'),
-        style: FilledButton.styleFrom(minimumSize: minSize),
+        label: 'Entendido, empezar',
+        compact: true,
         onPressed: () => _complete(context),
-        child: const Text('Entendido, empezar'),
       );
     } else if (untried) {
       next = OutlinedButton(
@@ -333,22 +347,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         const SizedBox(height: DesignTokens.spacingLg),
         Text('Notación', style: theme.textTheme.titleSmall),
         const SizedBox(height: DesignTokens.spacingSm),
-        SegmentedButton<bool>(
+        TogescSegmented<bool>(
           key: const ValueKey('onboarding-notation'),
           segments: const [
-            ButtonSegment(
-              value: false,
-              label: Text('C · D · E'),
-              tooltip: 'Letras',
-            ),
-            ButtonSegment(
+            TogescSegment(value: false, label: 'C · D · E', tooltip: 'Letras'),
+            TogescSegment(
               value: true,
-              label: Text('Do · Re · Mi'),
+              label: 'Do · Re · Mi',
               tooltip: 'Solfeo',
             ),
           ],
-          selected: {_useSolfege},
-          onSelectionChanged: (s) => setState(() => _useSolfege = s.first),
+          selected: _useSolfege,
+          onChanged: (v) => setState(() => _useSolfege = v),
         ),
         const SizedBox(height: DesignTokens.spacingSm),
         Semantics(
