@@ -47,6 +47,7 @@ import '../widgets/session_v2/session_srs_panel.dart';
 import '../widgets/session_v2/session_summary_view.dart';
 import '../widgets/session_v2/session_top_bar.dart';
 import '../widgets/session_v2/srs_level_pill.dart';
+import '../widgets/togesc_ui.dart';
 
 /// Sesión de juego v2 «La sesión como instrumento» (1b móvil, 1d escritorio).
 ///
@@ -815,28 +816,20 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   Widget? _ringFooter(GameSessionState session, SessionPhase phase) {
     final ui = _uiPrefs();
     final required = _requiredNotes(session);
-    final amber = FilledButton.styleFrom(
-      backgroundColor: DesignTokens.sessionAmber,
-      foregroundColor: DesignTokens.sessionOnAccent,
-      minimumSize: const Size(160, DesignTokens.touchTargetMin),
-      shape: RoundedRectangleBorder(borderRadius: DesignTokens.borderRadiusCta),
-      textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-    );
     switch (phase) {
       case SessionPhase.idle:
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FilledButton.icon(
-              key: const ValueKey('session-start'),
-              onPressed: _startRound,
-              style: amber.copyWith(
-                minimumSize: const WidgetStatePropertyAll(
-                  Size(220, DesignTokens.ctaHeight),
-                ),
+            SizedBox(
+              width: 220,
+              child: TogescCta(
+                key: const ValueKey('session-start'),
+                label: 'Estoy listo',
+                icon: Icons.play_arrow_rounded,
+                expand: true,
+                onPressed: _startRound,
               ),
-              icon: const Icon(Icons.play_arrow_rounded),
-              label: const Text('Estoy listo'),
             ),
             const SizedBox(height: DesignTokens.spacingSm),
             TextButton.icon(
@@ -855,44 +848,44 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           ],
         );
       case SessionPhase.paused:
-        return FilledButton.icon(
+        return TogescCta(
+          label: 'Reanudar',
+          icon: Icons.play_arrow_rounded,
+          compact: true,
           onPressed: _resumeRound,
-          style: amber,
-          icon: const Icon(Icons.play_arrow_rounded),
-          label: const Text('Reanudar'),
         );
       case SessionPhase.answer:
         final pianoInput =
             ui.inputMode == GameInputMode.pianoOnly ||
             ui.inputMode == GameInputMode.both;
         if (!ui.confirmBeforeSubmit || !pianoInput) return null;
-        return FilledButton.icon(
+        return TogescCta(
+          label: 'Confirmar',
+          icon: Icons.check_rounded,
+          compact: true,
           onPressed: _selectedNotes.isEmpty
               ? null
               : () => _confirmSelection(required),
-          style: amber,
-          icon: const Icon(Icons.check_rounded),
-          label: const Text('Confirmar'),
         );
       case SessionPhase.result:
         final pills = _srsPills(session);
         final Widget? action;
         if (session.goalReached && !_sessionPrefs().autoAdvanceAfterResult) {
-          action = FilledButton.icon(
+          action = TogescCta(
             key: const ValueKey('session-show-summary'),
+            label: 'Ver resumen',
+            icon: Icons.flag_rounded,
+            compact: true,
             onPressed: _showSessionSummary,
-            style: amber,
-            icon: const Icon(Icons.flag_rounded),
-            label: const Text('Ver resumen'),
           );
         } else if (session.goalReached) {
           action = null;
         } else if (!_sessionPrefs().autoAdvanceAfterResult) {
-          action = FilledButton.icon(
+          action = TogescCta(
+            label: 'Siguiente ronda',
+            icon: Icons.skip_next_rounded,
+            compact: true,
             onPressed: _advance,
-            style: amber,
-            icon: const Icon(Icons.skip_next_rounded),
-            label: const Text('Siguiente ronda'),
           );
         } else {
           action = null;
@@ -1057,7 +1050,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   ) {
     final stats = _stats(session);
     final compactLandscape =
-        constraints.maxWidth >= 600 && constraints.maxHeight < 560;
+        constraints.maxWidth >= DesignTokens.compactBreakpoint &&
+        constraints.maxHeight < 560;
     final topBar = SessionTopBar(
       stats: stats,
       onBack: _onBack,
@@ -1097,7 +1091,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     if (!_started) {
       return Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
+          constraints: const BoxConstraints(
+            maxWidth: DesignTokens.focusedContentMaxWidth,
+          ),
           child: Column(
             children: [
               topBar,

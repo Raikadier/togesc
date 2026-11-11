@@ -450,21 +450,21 @@ class SettingsSoundGroup extends ConsumerWidget {
               'Durante el juego puedes cambiar el timbre solo para esa sesión '
               'desde el icono de la barra superior.',
         ),
-        SegmentedButton<InstrumentMode>(
+        TogescSegmented<InstrumentMode>(
           segments: const [
-            ButtonSegment(
+            TogescSegment(
               value: InstrumentMode.random,
-              label: Text('Aleatorio'),
-              icon: Icon(Icons.shuffle_rounded, size: 18),
+              label: 'Aleatorio',
+              icon: Icons.shuffle_rounded,
             ),
-            ButtonSegment(
+            TogescSegment(
               value: InstrumentMode.fixed,
-              label: Text('Fijo'),
-              icon: Icon(Icons.piano_rounded, size: 18),
+              label: 'Fijo',
+              icon: Icons.piano_rounded,
             ),
           ],
-          selected: {prefs.instrumentMode},
-          onSelectionChanged: (s) => notifier.setInstrumentMode(s.first),
+          selected: prefs.instrumentMode,
+          onChanged: notifier.setInstrumentMode,
         ),
         const SizedBox(height: DesignTokens.spacingMd),
         InstrumentTimbreGrid(
@@ -529,25 +529,25 @@ class SettingsSoundGroup extends ConsumerWidget {
         ),
         if (prefs.clusterEnabled) ...[
           const _FieldLabel('Duración del cluster'),
-          SegmentedButton<double>(
+          TogescSegmented<double>(
             segments: const [
-              ButtonSegment(value: 2.0, label: Text('2 s')),
-              ButtonSegment(value: 3.0, label: Text('3 s')),
-              ButtonSegment(value: 5.0, label: Text('5 s')),
+              TogescSegment(value: 2.0, label: '2 s'),
+              TogescSegment(value: 3.0, label: '3 s'),
+              TogescSegment(value: 5.0, label: '5 s'),
             ],
-            selected: {prefs.clusterDurationSec},
-            onSelectionChanged: (s) => notifier.setClusterDuration(s.first),
+            selected: prefs.clusterDurationSec,
+            onChanged: notifier.setClusterDuration,
           ),
         ],
         const _FieldLabel('Duración del tono'),
-        SegmentedButton<double>(
+        TogescSegmented<double>(
           segments: const [
-            ButtonSegment(value: 0.5, label: Text('0,5 s')),
-            ButtonSegment(value: 1.0, label: Text('1 s')),
-            ButtonSegment(value: 1.5, label: Text('1,5 s')),
+            TogescSegment(value: 0.5, label: '0,5 s'),
+            TogescSegment(value: 1.0, label: '1 s'),
+            TogescSegment(value: 1.5, label: '1,5 s'),
           ],
-          selected: {prefs.toneDurationSec},
-          onSelectionChanged: (s) => notifier.setToneDuration(s.first),
+          selected: prefs.toneDurationSec,
+          onChanged: notifier.setToneDuration,
         ),
         const SizedBox(height: DesignTokens.spacingMd),
         const AudioTestButton(),
@@ -571,19 +571,19 @@ class SettingsAppearanceGroup extends ConsumerWidget {
       title: 'Apariencia',
       children: [
         const _FieldLabel('Tema de la app'),
-        SegmentedButton<AppThemePreference>(
+        TogescSegmented<AppThemePreference>(
           segments: [
             for (final option in const [
               AppThemePreference.light,
               AppThemePreference.dark,
               AppThemePreference.system,
             ])
-              ButtonSegment(value: option, label: Text(option.label)),
+              TogescSegment(value: option, label: option.label),
           ],
-          selected: {ui.themePreference},
-          onSelectionChanged: (s) => ref
+          selected: ui.themePreference,
+          onChanged: ref
               .read(uiPreferencesProvider.notifier)
-              .setThemePreference(s.first),
+              .setThemePreference,
         ),
         const SizedBox(height: DesignTokens.spacingSm),
         Text(

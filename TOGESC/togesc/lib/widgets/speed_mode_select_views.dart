@@ -6,47 +6,19 @@ import '../constants/game_constants.dart';
 import 'togesc_ui.dart';
 import '../utils/number_format.dart';
 
-
 /// Cabecera del selector de velocidad (v2.1, SPEC §2.4.1).
 class SpeedModeSelectHero extends StatelessWidget {
   const SpeedModeSelectHero({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // El título lo pone la app bar («Velocidad»): aquí solo la entradilla.
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final speed = TogescColors.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Semantics(
-          header: true,
-          child: Row(
-            children: [
-              Icon(Icons.bolt_rounded, size: 32, color: speed.speedAccent),
-              const SizedBox(width: DesignTokens.spacingSm),
-              Expanded(
-                child: Text(
-                  'Modo velocidad',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.5,
-                    color: scheme.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: DesignTokens.spacingSm),
-        Text(
-          'Elige un desafío de ráfagas. El tiempo límite baja con cada acierto.',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: scheme.onSurfaceVariant,
-          ),
-        ),
-      ],
+    return Text(
+      'Elige un desafío de ráfagas. El tiempo límite baja con cada acierto.',
+      style: theme.textTheme.bodyLarge?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
     );
   }
 }
@@ -172,7 +144,7 @@ class SpeedDifficultyCard extends StatelessWidget {
                     borderRadius: DesignTokens.borderRadiusMd,
                   ),
                   child: Text(
-                    '${seconds}s',
+                    '$seconds s',
                     style: theme.textTheme.titleLarge
                         ?.copyWith(
                           fontWeight: FontWeight.w800,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../togesc_ui.dart';
 
 /// Acción elegida en la hoja «Sesión en pausa».
 enum SessionPauseAction { resume, restart, exit, finish }
@@ -50,18 +51,17 @@ class SessionPauseSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final roundText =
-        targetRounds > 0 ? 'Ronda $round de $targetRounds' : 'Ronda $round';
+    final roundText = targetRounds > 0
+        ? 'Ronda $round de $targetRounds'
+        : 'Ronda $round';
     final hits = correctRounds == 1 ? '1 acierto' : '$correctRounds aciertos';
 
     ButtonStyle secondary() => OutlinedButton.styleFrom(
-          foregroundColor: DesignTokens.sessionTextPrimary,
-          side: const BorderSide(color: DesignTokens.sessionBorder),
-          minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
-          shape: RoundedRectangleBorder(
-            borderRadius: DesignTokens.borderRadiusCta,
-          ),
-        );
+      foregroundColor: DesignTokens.sessionTextPrimary,
+      side: const BorderSide(color: DesignTokens.sessionBorder),
+      minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
+      shape: RoundedRectangleBorder(borderRadius: DesignTokens.borderRadiusCta),
+    );
 
     return Padding(
       key: const ValueKey('session-pause-sheet'),
@@ -102,25 +102,15 @@ class SessionPauseSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: DesignTokens.spacingLg + 4),
-          FilledButton.icon(
+          TogescCta(
             key: const ValueKey('session-pause-resume'),
+            label: 'Continuar',
+            icon: Icons.play_arrow_rounded,
+            expand: true,
+            compact: true,
             autofocus: true,
             onPressed: () =>
                 Navigator.of(context).pop(SessionPauseAction.resume),
-            style: FilledButton.styleFrom(
-              backgroundColor: DesignTokens.sessionAmber,
-              foregroundColor: DesignTokens.sessionOnAccent,
-              minimumSize: const Size.fromHeight(DesignTokens.touchTargetMin),
-              shape: RoundedRectangleBorder(
-                borderRadius: DesignTokens.borderRadiusCta,
-              ),
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-              ),
-            ),
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: const Text('Continuar'),
           ),
           if (canFinish) ...[
             const SizedBox(height: DesignTokens.spacingSm),

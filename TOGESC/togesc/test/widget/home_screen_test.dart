@@ -383,8 +383,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('today-live-dot')), findsOneWidget);
-      expect(find.text('A reforzar'), findsOneWidget);
-      expect(find.text('En curso'), findsNWidgets(2));
+      expect(find.text('a reforzar'), findsOneWidget);
+      expect(find.text('en curso'), findsNWidgets(2));
       expect(find.text('1 · Escucha'), findsOneWidget);
       expect(find.text('2 · Toca la tecla'), findsOneWidget);
       expect(find.text('3 · El repaso se ajusta a ti'), findsOneWidget);
@@ -591,5 +591,34 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(HomeAppBar), findsNothing);
     });
+
+    // Lote E: una columna < 840 (limitada a 640 desde 600) y dos desde 840.
+    for (final (width, columns) in const [
+      (360.0, 1),
+      (768.0, 1),
+      (840.0, 2),
+      (1280.0, 2),
+    ]) {
+      testWidgets('a ${width.toInt()} px: $columns columna(s)', (tester) async {
+        tester.view.physicalSize = Size(width, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(_app(resume: _resume));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(
+          find.byKey(const ValueKey('home-desktop-columns')),
+          columns == 2 ? findsOneWidget : findsNothing,
+        );
+        if (columns == 1) {
+          final hero = tester.getRect(
+            find.byKey(const ValueKey('today-session-hero')),
+          );
+          expect(hero.width, lessThanOrEqualTo(homeContentMaxWidth));
+        }
+      });
+    }
   });
 }

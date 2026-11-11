@@ -12,6 +12,7 @@ import '../progress_v2/progress_metrics.dart';
 import '../staggered_entrance.dart';
 import 'srs_level_pill.dart';
 import '../../constants/srs_constants.dart';
+import '../togesc_ui.dart';
 
 /// Resumen al terminar la sesión (SPEC v2.1 §2.2.7, clave `session-summary`).
 ///
@@ -281,7 +282,7 @@ class SessionSummaryView extends StatelessWidget {
               const SizedBox(height: DesignTokens.spacingLg + 8),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  if (constraints.maxWidth >= 720) {
+                  if (constraints.maxWidth >= DesignTokens.expandedBreakpoint) {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -307,23 +308,12 @@ class SessionSummaryView extends StatelessWidget {
                 spacing: DesignTokens.spacingMd,
                 runSpacing: DesignTokens.spacingSm,
                 children: [
-                  FilledButton.icon(
+                  TogescCta(
                     key: const ValueKey('session-summary-home'),
+                    label: 'Volver al inicio',
+                    icon: Icons.home_rounded,
+                    compact: true,
                     onPressed: onHome,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: DesignTokens.sessionAmber,
-                      foregroundColor: DesignTokens.sessionOnAccent,
-                      minimumSize: const Size(200, DesignTokens.touchTargetMin),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: DesignTokens.borderRadiusCta,
-                      ),
-                      textStyle: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                      ),
-                    ),
-                    icon: const Icon(Icons.home_rounded),
-                    label: const Text('Volver al inicio'),
                   ),
                   OutlinedButton.icon(
                     key: const ValueKey('session-summary-progress'),
