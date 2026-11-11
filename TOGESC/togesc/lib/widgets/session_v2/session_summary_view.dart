@@ -30,7 +30,23 @@ class SessionSummaryView extends StatelessWidget {
     required this.onProgress,
     this.namingMode = NoteNamingMode.letter,
     this.learningThreshold = 5,
+    this.sessionNumber,
+    this.previousAccuracyPercent,
+    this.nextFocusLabels,
+    this.bestStreak = 0,
   });
+
+  /// Número de esta sesión (1 = la primera). `null`: no se conoce.
+  final int? sessionNumber;
+
+  /// Precisión de la sesión anterior del mismo modo; `null` si no la hay.
+  final double? previousAccuracyPercent;
+
+  /// Notas que el repaso prioriza ahora; `null` oculta la línea.
+  final List<String>? nextFocusLabels;
+
+  /// Mayor número de aciertos seguidos de la sesión.
+  final int bestStreak;
 
   final int rounds;
   final int correctRounds;
@@ -53,6 +69,20 @@ class SessionSummaryView extends StatelessWidget {
     final theme = Theme.of(context);
     final medal = SessionMedal.forAccuracy(accuracyPercent);
     final acc = accuracyPercent.round();
+    final measuring = isMeasuringSession(sessionNumber);
+    final headline = sessionHeadline(
+      sessionNumber: sessionNumber,
+      accuracyPercent: accuracyPercent,
+    );
+    // Solo datos reales (D10): cada línea se oculta si no tiene dato.
+    final recap = [
+      sessionDeltaLine(
+        accuracyPercent: accuracyPercent,
+        previousAccuracyPercent: previousAccuracyPercent,
+      ),
+      bestStreakLine(bestStreak),
+      if (nextFocusLabels != null) nextSessionLine(nextFocusLabels!),
+    ].whereType<String>().toList();
     final overline = DesignTokens.overline.copyWith(
       color: DesignTokens.sessionTextLabel,
     );
@@ -116,7 +146,9 @@ class SessionSummaryView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Cabecera con medalla.
-              _MedalBadge(medal: medal),
+              _MedalBadge(
+                icon: measuring ? Icons.hearing_rounded : medal.icon,
+              ),
               const SizedBox(height: DesignTokens.spacingMd),
               Text(
                 'SESIÓN COMPLETADA',
@@ -129,11 +161,12 @@ class SessionSummaryView extends StatelessWidget {
               Semantics(
                 liveRegion: true,
                 header: true,
-                label: 'Sesión completada. ${medal.headline}. '
-                    '$correctRounds de $rounds aciertos, $acc por ciento.',
+                label: 'Sesión completada. $headline. '
+                    '$correctRounds de $rounds aciertos, $acc por ciento.'
+                    '${recap.isEmpty ? '' : ' ${recap.join(' ')}'}',
                 child: ExcludeSemantics(
                   child: Text(
-                    medal.headline,
+                    headline,
                     key: const ValueKey('session-summary-headline'),
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineSmall?.copyWith(
@@ -151,6 +184,20 @@ class SessionSummaryView extends StatelessWidget {
                   color: DesignTokens.sessionTextSecondary,
                 ),
               ),
+              if (recap.isNotEmpty) ...[
+                const SizedBox(height: DesignTokens.spacingXs),
+                ExcludeSemantics(
+                  child: Text(
+                    recap.join(' '),
+                    key: const ValueKey('session-summary-recap'),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: DesignTokens.sessionTextPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: DesignTokens.spacingLg + 4),
               // KPI.
               Row(
@@ -276,9 +323,9 @@ const _kpiStyle = TextStyle(
 );
 
 class _MedalBadge extends StatelessWidget {
-  const _MedalBadge({required this.medal});
+  const _MedalBadge({required this.icon});
 
-  final SessionMedal medal;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -301,7 +348,7 @@ class _MedalBadge extends StatelessWidget {
                 DesignTokens.sessionSurface,
               ),
             ),
-            child: Icon(medal.icon, size: 40, color: DesignTokens.sessionAmber),
+            child: Icon(icon, size: 40, color: DesignTokens.sessionAmber),
           ),
         ),
       ),

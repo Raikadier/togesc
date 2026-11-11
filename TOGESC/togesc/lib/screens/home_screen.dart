@@ -25,6 +25,8 @@ import '../widgets/home_v2/today_adjust_sheet.dart';
 import '../widgets/home_v2/today_session_hero.dart';
 import '../widgets/home_v2/week_strip.dart';
 import '../widgets/staggered_entrance.dart';
+import '../providers/session_history_provider.dart';
+import '../utils/session_summary.dart';
 
 /// Ancho máximo del contenido del Home en móvil y tableta.
 const double homeContentMaxWidth = 720;
@@ -174,10 +176,14 @@ class HomeScreen extends ConsumerWidget {
       const SizedBox(height: DesignTokens.spacingMd),
     ];
 
+    final history = ref.watch(sessionHistoryProvider).valueOrNull ?? const [];
     final hero = TodaySessionHero(
       plan: plan,
       onStart: startTodaySession,
       onAdjust: () => showTodayAdjustSheet(context, ref),
+      completedToday: streak.practicedToday,
+      lastAccuracyPercent: lastAccuracyToday(history, now: now),
+      showSteps: history.every((e) => e.roundsCompleted <= 0),
     );
 
     final resumeRow = resume == null
@@ -267,20 +273,38 @@ class HomeScreen extends ConsumerWidget {
     Widget rise(Widget child) =>
         StaggeredEntrance(index: index++, child: child);
 
-    final left = <Widget>[
-      rise(hero),
-      if (resumeRow != null) ...[
-        const SizedBox(height: DesignTokens.spacingLg),
-        rise(resumeRow),
-      ],
-      const SizedBox(height: DesignTokens.spacingLg + 8),
-      rise(freePractice),
-    ];
-    final right = <Widget>[
-      rise(earMap),
-      const SizedBox(height: DesignTokens.spacingLg + 8),
-      rise(recentDays),
-    ];
+    const blockGap = SizedBox(height: DesignTokens.spacingLg + 8);
+    // Móvil: la tira de días sube bajo el hero, porque es lo que motiva a
+    // volver; el mapa del oído cierra la página (v2.2, lote C).
+    final mobile = desktop
+        ? const <Widget>[]
+        : <Widget>[
+            rise(hero),
+            blockGap,
+            rise(recentDays),
+            if (resumeRow != null) ...[
+              const SizedBox(height: DesignTokens.spacingLg),
+              rise(resumeRow),
+            ],
+            blockGap,
+            rise(freePractice),
+            blockGap,
+            rise(earMap),
+          ];
+    final left = !desktop
+        ? const <Widget>[]
+        : <Widget>[
+            rise(hero),
+            if (resumeRow != null) ...[
+              const SizedBox(height: DesignTokens.spacingLg),
+              rise(resumeRow),
+            ],
+            blockGap,
+            rise(freePractice),
+          ];
+    final right = !desktop
+        ? const <Widget>[]
+        : <Widget>[rise(earMap), blockGap, rise(recentDays)];
 
     const padding = EdgeInsets.fromLTRB(
       DesignTokens.marginMobile,
@@ -305,9 +329,7 @@ class HomeScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       ...header,
-                      ...left,
-                      const SizedBox(height: DesignTokens.spacingLg + 8),
-                      ...right,
+                      ...mobile,
                     ],
                   ),
                 ),

@@ -2,6 +2,23 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-10 · Lote C: primera sesión y bucle diario · Claude Code
+- **Resumen de la sesión** (`session_summary_view.dart`, funciones puras en `utils/session_summary.dart`):
+  - Las tres primeras sesiones titulan «Primera/Segunda/Tercera medición hecha», con el icono de oído, sin valorar la precisión. Desde la cuarta vuelve la medalla.
+  - Línea de recapitulación (`session-summary-recap`), solo con datos reales (D10): «5 puntos más que la última vez.» (frente a la sesión anterior del mismo modo), «Tu mejor racha: N seguidas.» (desde 3) y «Próxima sesión: Fa, La# y Si.». El mismo texto va en la etiqueta semántica del resumen.
+- **Hero del Home con la sesión de hoy hecha** (`today_session_hero.dart`): icono de check en lugar del punto vivo, «SESIÓN DE HOY HECHA», «78 % de precisión en tu última sesión» y «Hecho por hoy. Próxima sesión: …». El CTA mantiene `today-start-cta`, pasa a «Practicar más» y pierde el ámbar, para que no parezca una tarea pendiente.
+- **Pasos «1 · Escucha…»** solo hasta completar la primera sesión.
+- **Móvil:** la tira de días sube bajo el hero; el mapa del oído cierra la página. Escritorio no cambia.
+- **Resto de «latencia»** en el estado vacío de Progreso: «tu tiempo de respuesta».
+- **Tests:** `test/unit/session_recap_test.dart` (8) y `test/widget/today_hero_done_test.dart` (3) nuevos; `game_screen_test.dart` actualizado al titular de primera medición.
+
+**Verificación:** `flutter analyze` sin avisos y `flutter test` +895 ~45.
+
+**Sin hacer en este lote:**
+- No se ha visto en la app real (hero hecho en claro y oscuro, recap a 360 px).
+- La sesión se registra al salir del juego, así que el número de sesión se calcula como historial + 1; si el registro cambia de momento, hay que revisarlo.
+- «Próxima sesión» usa el foco recalculado en ese instante, no una predicción de mañana; por eso no dice «mañana».
+
 ## 2026-11-10 · Lote B: estados honestos del dominio · Claude Code
 **Decisión aplicada:** D3 = 5 intentos mínimos antes de juzgar una nota (`masteryMinAttempts` en `constants/srs_constants.dart`).
 

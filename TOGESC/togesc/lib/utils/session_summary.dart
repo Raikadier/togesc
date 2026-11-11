@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../constants/srs_constants.dart';
+import '../models/last_practice_session.dart';
 import '../models/note_progress_summary.dart';
+import '../models/practice_session_log.dart';
+import 'number_format.dart';
 import 'srs_level.dart';
 export 'number_format.dart' show formatSecondsEs;
 
@@ -150,3 +153,91 @@ String sessionSummaryLead(List<SessionLevelChange> changes) {
   return '$up notas subieron de nivel.';
 }
 
+// --- v2.2, lote C: el resumen dice qué ha pasado y qué viene después ---
+
+/// Las tres primeras sesiones son mediciones: aún no hay datos para juzgar.
+bool isMeasuringSession(int? sessionNumber) =>
+    sessionNumber != null && sessionNumber >= 1 && sessionNumber <= 3;
+
+/// Titular del resumen. En las tres primeras sesiones no se valora la
+/// precisión; después, la medalla de v2.1.
+String sessionHeadline({
+  required int? sessionNumber,
+  required double accuracyPercent,
+}) {
+  return switch (sessionNumber) {
+    1 => 'Primera medición hecha',
+    2 => 'Segunda medición hecha',
+    3 => 'Tercera medición hecha',
+    _ => SessionMedal.forAccuracy(accuracyPercent).headline,
+  };
+}
+
+/// Precisión de la última sesión de práctica del mismo modo; `null` si no
+/// hay ninguna. No depende del orden de [history].
+double? previousSessionAccuracy(
+  List<PracticeSessionLog> history, {
+  required int modeId,
+}) {
+  PracticeSessionLog? last;
+  for (final e in history) {
+    if (e.modeId != modeId ||
+        e.kind != PracticeKind.game ||
+        e.roundsCompleted <= 0) {
+      continue;
+    }
+    if (last == null || e.endedAt.isAfter(last.endedAt)) last = e;
+  }
+  return last?.accuracyPercent;
+}
+
+/// Precisión de la última sesión terminada hoy; `null` si hoy no hay ninguna.
+double? lastAccuracyToday(
+  List<PracticeSessionLog> history, {
+  required DateTime now,
+}) {
+  PracticeSessionLog? last;
+  for (final e in history) {
+    final d = e.endedAt.toLocal();
+    final sameDay = d.year == now.year && d.month == now.month && d.day == now.day;
+    if (!sameDay || e.roundsCompleted <= 0) continue;
+    if (last == null || e.endedAt.isAfter(last.endedAt)) last = e;
+  }
+  return last?.accuracyPercent;
+}
+
+/// «5 puntos más que la última vez». `null` si no hay sesión anterior.
+String? sessionDeltaLine({
+  required double accuracyPercent,
+  required double? previousAccuracyPercent,
+}) {
+  if (previousAccuracyPercent == null) return null;
+  final diff = accuracyPercent.round() - previousAccuracyPercent.round();
+  if (diff == 0) return 'Igual que la última vez.';
+  final points = plural(diff.abs(), 'punto', 'puntos');
+  return diff > 0
+      ? '$points más que la última vez.'
+      : '$points menos que la última vez.';
+}
+
+/// «Próxima sesión: Fa, La# y Si.» con las notas que el repaso prioriza
+/// ahora. No dice «mañana»: el foco se recalcula al abrir la app.
+String nextSessionLine(List<String> noteLabels) {
+  if (noteLabels.isEmpty) return 'Próxima sesión: notas nuevas.';
+  const shown = 3;
+  final head = noteLabels.take(shown).toList();
+  final rest = noteLabels.length - head.length;
+  final String list;
+  if (rest > 0) {
+    list = '${head.join(', ')} y $rest más';
+  } else if (head.length == 1) {
+    list = head.single;
+  } else {
+    list = '${head.sublist(0, head.length - 1).join(', ')} y ${head.last}';
+  }
+  return 'Próxima sesión: $list.';
+}
+
+/// «Tu mejor racha: 5 seguidas.» desde 3 aciertos seguidos; si no, `null`.
+String? bestStreakLine(int bestStreak) =>
+    bestStreak >= 3 ? 'Tu mejor racha: $bestStreak seguidas.' : null;
