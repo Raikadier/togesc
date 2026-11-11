@@ -244,6 +244,7 @@ class SessionSummaryView extends StatelessWidget {
                       key: const ValueKey('session-summary-accuracy'),
                       label: 'Precisión',
                       semantics: 'Precisión, $acc por ciento',
+                      hero: true,
                       child: CountUpText(
                         value: accuracyPercent,
                         format: (v) => '${v.round()} %',
@@ -427,11 +428,15 @@ class _Kpi extends StatelessWidget {
     required this.label,
     required this.semantics,
     required this.child,
+    this.hero = false,
   });
 
   final String label;
   final String semantics;
   final Widget child;
+
+  /// KPI principal de la fila: card `hero`, el resto secundarias.
+  final bool hero;
 
   @override
   Widget build(BuildContext context) {
@@ -445,9 +450,13 @@ class _Kpi extends StatelessWidget {
           horizontal: DesignTokens.spacingSm,
         ),
         decoration: BoxDecoration(
-          color: DesignTokens.sessionSurface,
+          color: hero ? DesignTokens.hero : DesignTokens.sessionSurface,
           borderRadius: DesignTokens.borderRadiusCard,
-          border: Border.all(color: DesignTokens.sessionBorder),
+          border: Border.all(
+            color: hero
+                ? DesignTokens.sessionAccent
+                : DesignTokens.sessionBorder,
+          ),
         ),
         child: Column(
           children: [
@@ -457,7 +466,10 @@ class _Kpi extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: DesignTokens.sessionTextSecondary,
+                color: hero
+                    ? DesignTokens.onHeroAccent
+                    : DesignTokens.sessionTextSecondary,
+                fontWeight: hero ? FontWeight.w700 : null,
               ),
             ),
           ],

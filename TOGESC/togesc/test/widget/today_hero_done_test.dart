@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:togesc/widgets/count_up_text.dart';
 import 'package:togesc/app/app_theme.dart';
 import 'package:togesc/models/practice_session_preferences.dart';
 import 'package:togesc/providers/today_session_provider.dart';
@@ -78,6 +79,8 @@ void main() {
       lastAccuracy: 78.4,
       showSteps: false,
     );
+    // La precisión cuenta desde 0 (pulido del lote E).
+    await tester.pump(CountUpText.defaultDuration);
 
     expect(find.text('SESIÓN DE HOY HECHA'), findsOneWidget);
     expect(find.text('78 %'), findsOneWidget);

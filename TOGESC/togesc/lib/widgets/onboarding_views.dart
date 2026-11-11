@@ -91,7 +91,7 @@ class _OnboardingWelcomeArtState extends State<OnboardingWelcomeArt>
     return ExcludeSemantics(
       child: Container(
         key: const ValueKey('onboarding-welcome-art'),
-        height: 180,
+        height: DesignTokens.isExpanded(context) ? 220 : 180,
         padding: const EdgeInsets.all(DesignTokens.spacingLg),
         decoration: BoxDecoration(
           color: DesignTokens.hero,

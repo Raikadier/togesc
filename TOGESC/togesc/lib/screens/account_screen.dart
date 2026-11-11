@@ -11,6 +11,7 @@ import '../providers/auth_provider.dart';
 import '../providers/srs_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../providers/sync_provider.dart';
+import '../widgets/staggered_entrance.dart';
 import '../widgets/account_auth_sheet.dart';
 import '../widgets/account_auth_views.dart';
 import '../widgets/account_data_section.dart';
@@ -192,10 +193,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           scrollable: false,
           child: ListView(
             children: [
-              ProfileIdentityHeader(
-                email: email,
-                verified: verified,
-                onSignIn: available ? _openAuthSheet : null,
+              StaggeredEntrance(
+                index: 0,
+                child: ProfileIdentityHeader(
+                  email: email,
+                  verified: verified,
+                  onSignIn: available ? _openAuthSheet : null,
+                ),
               ),
               if (_recoveryMode) ...[
                 gap,
@@ -217,19 +221,25 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 ),
               ],
               gap,
-              const ProfileEarStats(),
-              const ProfileMilestones(),
+              const StaggeredEntrance(index: 1, child: ProfileEarStats()),
+              const StaggeredEntrance(index: 2, child: ProfileMilestones()),
               gap,
               // D8: Pro sale de la nav; Perfil es su entrada permanente.
-              ProfilePlanCard(
-                hasPro: hasPro,
-                monetizationActive: SubscriptionConfig.isActive,
-                onOpen: () => context.push(
-                  hasPro ? AppRoutes.subscription : AppRoutes.paywall,
+              StaggeredEntrance(
+                index: 3,
+                child: ProfilePlanCard(
+                  hasPro: hasPro,
+                  monetizationActive: SubscriptionConfig.isActive,
+                  onOpen: () => context.push(
+                    hasPro ? AppRoutes.subscription : AppRoutes.paywall,
+                  ),
                 ),
               ),
               gap,
-              ProfileSyncStatus(state: syncState),
+              StaggeredEntrance(
+                index: 4,
+                child: ProfileSyncStatus(state: syncState),
+              ),
               if (signedIn) ...[
                 if (!verified) ...[
                   const SizedBox(height: DesignTokens.spacingMd),

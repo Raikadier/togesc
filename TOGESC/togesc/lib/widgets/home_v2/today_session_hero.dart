@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/design_tokens.dart';
+import '../count_up_text.dart';
 import '../../constants/note_naming.dart';
 import '../../providers/today_session_provider.dart';
 import '../../utils/today_session.dart';
@@ -137,12 +138,15 @@ class TodaySessionHero extends StatelessWidget {
                 child: Icon(
                   Icons.graphic_eq_rounded,
                   size: 150,
-                  color: Color(0x14FFFFFF),
+                  color: DesignTokens.onHeroTint,
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(20),
+              // 32 en escritorio, como el prototipo (lote E).
+              padding: EdgeInsets.all(
+                DesignTokens.isExpanded(context) ? 32 : 20,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -301,9 +305,14 @@ class _DoneSummary extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.end,
       spacing: DesignTokens.spacingSm,
       children: [
-        Text(
-          '${accuracyPercent.round()} %',
-          style: DesignTokens.bigNumber.copyWith(color: DesignTokens.onHero),
+        CountUpText(
+          value: accuracyPercent,
+          format: (v) => '${v.round()} %',
+          style:
+              (DesignTokens.isExpanded(context)
+                      ? DesignTokens.bigNumberLarge
+                      : DesignTokens.bigNumber)
+                  .copyWith(color: DesignTokens.onHero),
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 4),
@@ -341,7 +350,11 @@ class _RoundsSummary extends StatelessWidget {
       children: [
         Text(
           '$rounds',
-          style: DesignTokens.bigNumber.copyWith(color: DesignTokens.onHero),
+          style:
+              (DesignTokens.isExpanded(context)
+                      ? DesignTokens.bigNumberLarge
+                      : DesignTokens.bigNumber)
+                  .copyWith(color: DesignTokens.onHero),
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 4),
@@ -395,9 +408,9 @@ class FocusNoteMiniCard extends StatelessWidget {
         key: ValueKey('focus-note-${note.note}'),
         padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
         decoration: BoxDecoration(
-          color: const Color(0x14FFFFFF),
+          color: DesignTokens.onHeroTint,
           borderRadius: DesignTokens.borderRadiusCell,
-          border: Border.all(color: const Color(0x1FFFFFFF)),
+          border: Border.all(color: DesignTokens.onHeroBorder),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -423,7 +436,7 @@ class FocusNoteMiniCard extends StatelessWidget {
                           1.0,
                         )
                       : (pct / 100).clamp(0.0, 1.0),
-                  backgroundColor: const Color(0x29FFFFFF),
+                  backgroundColor: DesignTokens.onHeroTrack,
                   color: pct == null || measuring
                       ? DesignTokens.onHeroAccent
                       : masteryBarColorOnDark(pct),

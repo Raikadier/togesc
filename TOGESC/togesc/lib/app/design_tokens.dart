@@ -56,6 +56,20 @@ abstract final class DesignTokens {
   static const Color pianoWhite = Color(0xFFFFFFFF);
   static const Color pianoBlack = Color(0xFF212121);
 
+  /// Degradado de tecla negra: arriba en reposo y arriba pulsada.
+  static const Color pianoBlackTop = Color(0xFF333333);
+  static const Color pianoBlackPressedTop = Color(0xFF4D4351);
+
+  /// Tinta sobre teclas blancas de sesión: acierto, fallo, nombre y nombre
+  /// atenuado.
+  static const Color pianoSessionCorrectInk = Color(0xFF1B5E20);
+  static const Color pianoSessionWrongInk = Color(0xFF7A1010);
+  static const Color pianoSessionLabel = Color(0xFF4D4351);
+  static const Color pianoSessionLabelDimmed = Color(0xFF2A2230);
+
+  /// Sombra bajo la tecla negra (40 % negro).
+  static const Color pianoKeyShadow = Color(0x66000000);
+
   // --- Tema oscuro Harmonic Precision (base: paleta de sesión v2) ---
   // Superficies #1A121E/#241B2A, bordes #3A2E42, texto #ECE0E8/#9C8FA3.
   static const Color darkBackground = Color(0xFF141018);
@@ -156,6 +170,15 @@ abstract final class DesignTokens {
 
   /// Texto secundario sobre `hero` (paywall v2.1): 13,4:1.
   static const Color onHeroMuted = Color(0xFFE9DDF0);
+
+  /// Velos blancos sobre `hero`: tinte de fondo (8 %), borde (12 %) y pista
+  /// de barra (16 %).
+  static const Color onHeroTint = Color(0x14FFFFFF);
+  static const Color onHeroBorder = Color(0x1FFFFFFF);
+  static const Color onHeroTrack = Color(0x29FFFFFF);
+
+  /// `primaryContainer` al 15 %: fondo del logo de la app bar.
+  static const Color primaryContainerTint = Color(0x266A1B9A);
 
   /// CTA ámbar de Home. Texto `onCtaAmber` (#2A0640): 9,8:1.
   /// Nunca texto blanco encima (1,8:1).
@@ -379,6 +402,10 @@ abstract final class DesignTokens {
   /// de una columna centrada (onboarding, «Preparado», paywall).
   static const double mediumContentMaxWidth = 640;
   static const double focusedContentMaxWidth = 620;
+
+  /// Escala de escritorio del prototipo (lote E): desde [expandedBreakpoint].
+  static bool isExpanded(BuildContext context) =>
+      MediaQuery.sizeOf(context).width >= expandedBreakpoint;
   static const double sessionProgressBarHeight = 3;
   static const double sessionRingSize = 150;
   static const double sessionRingSizeDesktop = 170;

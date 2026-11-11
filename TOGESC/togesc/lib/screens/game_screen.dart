@@ -47,6 +47,7 @@ import '../widgets/session_v2/session_srs_panel.dart';
 import '../widgets/session_v2/session_summary_view.dart';
 import '../widgets/session_v2/session_top_bar.dart';
 import '../widgets/session_v2/srs_level_pill.dart';
+import '../widgets/staggered_entrance.dart';
 import '../widgets/togesc_ui.dart';
 
 /// Sesión de juego v2 «La sesión como instrumento» (1b móvil, 1d escritorio).
@@ -928,10 +929,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       );
       if (change == null) continue;
       pills.add(
-        SrsLevelPill(
-          key: ValueKey('srs-pill-$note'),
-          noteLabel: _label(note),
-          change: change,
+        StaggeredEntrance(
+          index: pills.length + 1,
+          offset: 8,
+          child: SrsLevelPill(
+            key: ValueKey('srs-pill-$note'),
+            noteLabel: _label(note),
+            change: change,
+          ),
         ),
       );
       if (pills.length == 3) break;

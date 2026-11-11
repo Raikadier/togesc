@@ -50,7 +50,7 @@ class HomeAppBar extends StatelessWidget {
                     width: 32,
                     height: 32,
                     decoration: const BoxDecoration(
-                      color: Color(0x266A1B9A),
+                      color: DesignTokens.primaryContainerTint,
                       shape: BoxShape.circle,
                     ),
                     // #6A1B9A en claro; en oscuro daría 1,9:1 y pasa a

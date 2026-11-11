@@ -183,15 +183,16 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
       ],
     ];
 
+    index = 0;
     final historyTab = <Widget>[
       if (proAccess) ...[
-        SessionAccuracyBars(entries: history),
+        rise(SessionAccuracyBars(entries: history)),
         const SizedBox(height: DesignTokens.spacingLg),
       ],
-      ..._buildProSection(context, history, now, proAccess),
+      ..._buildProSection(context, history, now, proAccess).map(rise),
       if (proAccess) ...[
         const SizedBox(height: DesignTokens.spacingLg),
-        const SessionHistoryCard(),
+        rise(const SessionHistoryCard()),
       ],
     ];
 

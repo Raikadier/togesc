@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../widgets/staggered_entrance.dart';
 import '../widgets/settings_groups.dart';
 import '../widgets/togesc_ui.dart';
 
@@ -42,19 +43,21 @@ class SettingsScreen extends StatelessWidget {
           return ListView(
             padding: EdgeInsets.all(margin),
             children: [
-              intro,
+              StaggeredEntrance(index: 0, child: intro),
               const SizedBox(height: DesignTokens.spacingLg),
-              if (wide)
-                const Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: Column(children: left)),
-                    SizedBox(width: DesignTokens.spacingLg),
-                    Expanded(child: Column(children: right)),
-                  ],
-                )
-              else
-                const Column(children: [...left, gap, ...right]),
+              StaggeredEntrance(
+                index: 1,
+                child: wide
+                    ? const Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: Column(children: left)),
+                          SizedBox(width: DesignTokens.spacingLg),
+                          Expanded(child: Column(children: right)),
+                        ],
+                      )
+                    : const Column(children: [...left, gap, ...right]),
+              ),
             ],
           );
         },

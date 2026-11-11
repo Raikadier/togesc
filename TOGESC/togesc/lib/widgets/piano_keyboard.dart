@@ -144,13 +144,17 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
       return const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xFF4D4351), Color(0xFF333333)],
+        colors: [DesignTokens.pianoBlackPressedTop, DesignTokens.pianoBlackTop],
       );
     }
     return const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFF333333), DesignTokens.pianoBlack, Colors.black],
+      colors: [
+        DesignTokens.pianoBlackTop,
+        DesignTokens.pianoBlack,
+        Colors.black,
+      ],
       stops: [0, 0.8, 1],
     );
   }
@@ -216,9 +220,9 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
   }
 
   /// Tinta sobre las teclas blancas de sesión con feedback.
-  static const _sessionCorrectInk = Color(0xFF1B5E20);
-  static const _sessionWrongInk = Color(0xFF7A1010);
-  static const _sessionWhiteLabel = Color(0xFF4D4351);
+  static const _sessionCorrectInk = DesignTokens.pianoSessionCorrectInk;
+  static const _sessionWrongInk = DesignTokens.pianoSessionWrongInk;
+  static const _sessionWhiteLabel = DesignTokens.pianoSessionLabel;
 
   void _tap(String note) {
     if (widget.disabled) return;
@@ -539,7 +543,9 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
     } else if (widget.incorrectNotes.contains(note)) {
       color = _sessionWrongInk;
     } else {
-      color = _isDimmed(note) ? const Color(0xFF2A2230) : _sessionWhiteLabel;
+      color = _isDimmed(note)
+          ? DesignTokens.pianoSessionLabelDimmed
+          : _sessionWhiteLabel;
     }
     return ExcludeSemantics(
       child: Text(
@@ -703,7 +709,7 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
                               ),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Color(0x66000000),
+                                  color: DesignTokens.pianoKeyShadow,
                                   blurRadius: 4,
                                   offset: Offset(0, 2),
                                 ),
