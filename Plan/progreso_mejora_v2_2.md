@@ -2,6 +2,27 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-11 · Prueba de E y F en producción · Claude Code
+Producción en `1ebc030`, 590×640, tema oscuro, solfeo, con los datos sembrados de la prueba de A–D.
+
+**Bien:**
+- Hero: «Próxima sesión: Si, Re y Do.» en solfeo y «64 % en curso» en minúscula.
+- El anillo de foco aparece con Tab: lila, separado del botón «Practicar más» y visible sobre el hero.
+- Velocidad: un solo título («Velocidad»). Botón de volver en «Listo» y en «Fin de sesión», y vuelve a la selección.
+- Sesión: «Estoy listo» y «Continuar» de la pausa en el ámbar nuevo, que se lee bien sobre el fondo oscuro.
+- El piano se anuncia «Do sostenido», «Re sostenido»…
+- El resultado se anuncia «Incorrecto. Era Si, respondiste Do sostenido. La tecla correcta queda marcada en verde.»
+- Progreso: pestañas «Resumen | Historial» más altas y selector «Rueda | Rejilla» nuevo.
+
+**Hallazgo nuevo, corregido:** el resultado de Velocidad decía «Las notas eran: B» con la app en solfeo, porque ignoraba la notación.
+- Ahora «Incorrecto» y «Tiempo agotado» usan `formatNoteLabel` con la notación del usuario, y los chips de notas elegidas también.
+- Test nuevo en `speed_screens_test.dart`.
+
+**No visto:**
+- La fase de respuesta de Velocidad: cada acción del navegador tarda unos 25 s y el límite es de 10 s.
+- El paywall a 620 px y el Home en dos columnas: el panel mide 590 px de ancho.
+- El tema claro.
+
 ## 2026-11-11 · Lote F: accesibilidad pendiente · Claude Code
 **Prueba del lote E en producción:** no hecha. Con la ventana de Claude oculta el navegador no dibuja y Flutter no arranca; la descarga del bundle salió cortada. El despliegue de `e298d53` terminó bien (CI y Deploy Web en verde).
 

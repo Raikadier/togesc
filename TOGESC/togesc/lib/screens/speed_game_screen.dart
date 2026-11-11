@@ -354,6 +354,13 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     }
   }
 
+  /// Notas en la notación del usuario («Do#, Mi»), no siempre en letra.
+  String _noteNames(Iterable<String> notes) {
+    final mode =
+        ref.read(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
+    return notes.map((n) => formatNoteLabel(n, mode)).join(', ');
+  }
+
   Widget _buildAnswerView(BuildContext context, SpeedSessionState session) {
     final namingMode =
         ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
@@ -409,7 +416,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
                   alignment: WrapAlignment.center,
                   children: _selectedNotes.map((note) {
                     return InputChip(
-                      label: Text(note),
+                      label: Text(formatNoteLabel(note, namingMode)),
                       onDeleted: () => _toggleNote(note, required),
                       // `primaryContainer` es #2A0640 en la sesión (1,2:1 sobre
                       // el fondo): borde e icono van en el ámbar de selección.
@@ -475,7 +482,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
       icon: Icons.cancel_rounded,
       accentColor: TogescColors.of(context).incorrect,
       title: 'Incorrecto',
-      subtitle: 'Las notas eran: ${session.currentNotes.join(", ")}',
+      subtitle: 'Las notas eran: ${_noteNames(session.currentNotes)}',
       newRecord: _newRecord,
       summary: _summary(session),
       onRetry: _retrySession,
@@ -488,7 +495,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
       icon: Icons.timer_off_rounded,
       accentColor: TogescColors.of(context).selection,
       title: 'Tiempo agotado',
-      subtitle: 'Las notas eran: ${session.currentNotes.join(", ")}',
+      subtitle: 'Las notas eran: ${_noteNames(session.currentNotes)}',
       newRecord: _newRecord,
       summary: _summary(session),
       onRetry: _retrySession,
