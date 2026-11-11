@@ -471,7 +471,7 @@ class _ProgressEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: DesignTokens.spacingXs),
           Text(
-            'Haz tu primera sesión y aquí verás tu precisión, tu latencia '
+            'Haz tu primera sesión y aquí verás tu precisión, tu tiempo de respuesta '
             'y el dominio de cada una de las 12 notas.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: scheme.onSurfaceVariant,

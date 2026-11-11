@@ -5,6 +5,7 @@ import '../../providers/today_session_provider.dart';
 import '../../utils/today_session.dart';
 import '../../constants/srs_constants.dart';
 import '../progress_v2/progress_metrics.dart';
+import '../../utils/session_summary.dart';
 
 /// Texto del hero derivado solo de datos reales del SRS (D10).
 ///
@@ -75,11 +76,24 @@ class TodaySessionHero extends StatelessWidget {
   final VoidCallback onStart;
   final VoidCallback onAdjust;
 
+  /// Hoy ya hay una sesión registrada: el hero lo reconoce y deja de
+  /// presentarla como tarea pendiente (v2.2, lote C).
+  final bool completedToday;
+
+  /// Precisión de la última sesión de hoy; `null` si no se conoce.
+  final double? lastAccuracyPercent;
+
+  /// Pasos «1 · Escucha…»: solo hasta completar la primera sesión.
+  final bool showSteps;
+
   const TodaySessionHero({
     super.key,
     required this.plan,
     required this.onStart,
     required this.onAdjust,
+    this.completedToday = false,
+    this.lastAccuracyPercent,
+    this.showSteps = true,
   });
 
   @override
@@ -124,12 +138,24 @@ class TodaySessionHero extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const HeroLiveDot(),
+                    if (completedToday)
+                      const ExcludeSemantics(
+                        child: Icon(
+                          Icons.check_circle_rounded,
+                          key: ValueKey('today-done-icon'),
+                          size: 16,
+                          color: DesignTokens.onHeroAccent,
+                        ),
+                      )
+                    else
+                      const HeroLiveDot(),
                     const SizedBox(width: DesignTokens.spacingSm),
                     Flexible(
                       child: Text(
-                        'SESIÓN DE HOY',
-                        semanticsLabel: 'Sesión de hoy',
+                        completedToday ? 'SESIÓN DE HOY HECHA' : 'SESIÓN DE HOY',
+                        semanticsLabel: completedToday
+                            ? 'Sesión de hoy hecha'
+                            : 'Sesión de hoy',
                         style: DesignTokens.overline.copyWith(
                           color: DesignTokens.onHeroAccent,
                         ),
@@ -138,14 +164,28 @@ class TodaySessionHero extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: DesignTokens.spacingSm),
-                Semantics(
-                  label: summarySemantics,
-                  excludeSemantics: true,
-                  child: _RoundsSummary(rounds: rounds, minutes: minutes),
-                ),
+                if (completedToday && lastAccuracyPercent != null)
+                  Semantics(
+                    label: '${lastAccuracyPercent!.round()} por ciento de '
+                        'precisión en tu última sesión',
+                    excludeSemantics: true,
+                    child: _DoneSummary(accuracyPercent: lastAccuracyPercent!),
+                  )
+                else
+                  Semantics(
+                    label: summarySemantics,
+                    excludeSemantics: true,
+                    child: _RoundsSummary(rounds: rounds, minutes: minutes),
+                  ),
                 const SizedBox(height: DesignTokens.spacingMd),
                 Text(
-                  todayHeroCopy(plan.focusNotes, custom: plan.isCustomFocus),
+                  completedToday
+                      ? 'Hecho por hoy. '
+                          '${nextSessionLine([for (final n in plan.focusNotes) n.note])}'
+                      : todayHeroCopy(
+                          plan.focusNotes,
+                          custom: plan.isCustomFocus,
+                        ),
                   key: const ValueKey('today-hero-copy'),
                   style: textTheme.bodyMedium?.copyWith(
                     color: DesignTokens.onHero.withValues(alpha: 0.86),
@@ -165,17 +205,25 @@ class TodaySessionHero extends StatelessWidget {
                     ],
                   ),
                 ],
-                const SizedBox(height: DesignTokens.spacingLg),
-                const HeroSteps(),
+                if (showSteps) ...[
+                  const SizedBox(height: DesignTokens.spacingLg),
+                  const HeroSteps(),
+                ],
                 const SizedBox(height: DesignTokens.spacingLg),
                 SizedBox(
                   height: DesignTokens.ctaHeight,
                   child: FilledButton.icon(
                     key: const ValueKey('today-start-cta'),
                     onPressed: onStart,
+                    // Con la sesión hecha sigue siendo la única acción
+                    // principal, pero ya no parece una tarea pendiente.
                     style: FilledButton.styleFrom(
-                      backgroundColor: DesignTokens.ctaAmber,
-                      foregroundColor: DesignTokens.onCtaAmber,
+                      backgroundColor: completedToday
+                          ? DesignTokens.onHero.withValues(alpha: 0.16)
+                          : DesignTokens.ctaAmber,
+                      foregroundColor: completedToday
+                          ? DesignTokens.onHero
+                          : DesignTokens.onCtaAmber,
                       shape: RoundedRectangleBorder(
                         borderRadius: DesignTokens.borderRadiusCta,
                       ),
@@ -184,7 +232,9 @@ class TodaySessionHero extends StatelessWidget {
                       ),
                     ),
                     icon: const Icon(Icons.play_arrow_rounded, size: 26),
-                    label: const Text('Empezar sesión'),
+                    label: Text(
+                      completedToday ? 'Practicar más' : 'Empezar sesión',
+                    ),
                   ),
                 ),
                 const SizedBox(height: DesignTokens.spacingXs),
@@ -210,6 +260,37 @@ class TodaySessionHero extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// «78 % de precisión en tu última sesión», con el número grande del hero.
+class _DoneSummary extends StatelessWidget {
+  const _DoneSummary({required this.accuracyPercent});
+
+  final double accuracyPercent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.end,
+      spacing: DesignTokens.spacingSm,
+      children: [
+        Text(
+          '${accuracyPercent.round()} %',
+          style: DesignTokens.bigNumber.copyWith(color: DesignTokens.onHero),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Text(
+            'de precisión en tu última sesión',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: DesignTokens.onHero.withValues(alpha: 0.86),
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ),
+      ],
     );
   }
 }

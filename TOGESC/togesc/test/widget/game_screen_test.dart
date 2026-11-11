@@ -544,7 +544,15 @@ void main() {
 
       expect(find.byKey(const ValueKey('session-summary')), findsOneWidget);
       expect(find.text('SESIÓN COMPLETADA'), findsOneWidget);
-      expect(find.text('Gran oído hoy'), findsOneWidget);
+      // v2.2 (lote C): la primera sesión es una medición, sin medalla, y el
+      // resumen cuenta la mejor racha y qué viene después.
+      expect(find.text('Primera medición hecha'), findsOneWidget);
+      final recap = tester
+          .widget<Text>(find.byKey(const ValueKey('session-summary-recap')))
+          .data!;
+      expect(recap, contains('Tu mejor racha: 5 seguidas.'));
+      expect(recap, contains('Próxima sesión: '));
+      expect(recap, isNot(contains('la última vez')));
       await pumpFor(tester, const Duration(seconds: 1));
       expect(find.text('100 %'), findsOneWidget);
       expect(find.text('5/5'), findsOneWidget);
@@ -568,7 +576,7 @@ void main() {
       );
       expect(find.byKey(const ValueKey('ear-map')), findsOneWidget);
       expect(
-        find.bySemanticsLabel(RegExp(r'^Sesión completada\. Gran oído hoy')),
+        find.bySemanticsLabel(RegExp(r'^Sesión completada\. Primera medición hecha')),
         findsOneWidget,
       );
       expect(find.text('Volver al inicio'), findsOneWidget);

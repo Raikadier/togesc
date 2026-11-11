@@ -1219,6 +1219,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   Widget _buildSummary(GameSessionState session) {
     final summaries = ref.watch(noteProgressSummariesProvider);
     final threshold = ref.watch(srsLearningThresholdProvider);
+    final history = ref.watch(sessionHistoryProvider).valueOrNull ?? const [];
     final changes = buildSessionLevelChanges(
       before: session.srsSnapshot ?? const {},
       after: summaries,
@@ -1263,6 +1264,17 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             summaries: summaries,
             namingMode: _namingMode(),
             learningThreshold: threshold,
+            // La sesión se registra al salir: el historial aún no la incluye.
+            sessionNumber: history.where((e) => e.roundsCompleted > 0).length + 1,
+            previousAccuracyPercent: previousSessionAccuracy(
+              history,
+              modeId: session.mode.id,
+            ),
+            nextFocusLabels: [
+              for (final n in ref.watch(todayFocusNotesProvider))
+                formatNoteLabel(n.note, _namingMode()),
+            ],
+            bestStreak: session.bestStreak,
             onHome: _leave,
             onProgress: _openProgress,
           ),
