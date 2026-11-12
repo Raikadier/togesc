@@ -105,6 +105,23 @@ void main() {
         70,
       );
     });
+
+    test('lastAccuracyToday: una ráfaga de Velocidad no es la sesión del día', () {
+      final burst = _log(
+        DateTime(2026, 11, 10, 14),
+        kind: PracticeKind.speed,
+        rounds: 1,
+        correct: 0,
+      );
+      expect(lastAccuracyToday([burst], now: now), isNull);
+      expect(
+        lastAccuracyToday(
+          [_log(DateTime(2026, 11, 10, 9), correct: 6), burst],
+          now: now,
+        ),
+        60,
+      );
+    });
   });
 
   group('nextSessionLine', () {

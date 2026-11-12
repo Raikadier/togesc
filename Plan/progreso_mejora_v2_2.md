@@ -2,6 +2,46 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-11 · Fix: una ráfaga de Velocidad no es la sesión del día · Claude Code
+Rama `fix/v2.2-rafaga-no-es-sesion`.
+
+- `lastAccuracyToday` (`lib/utils/session_summary.dart`) cuenta ahora solo las sesiones de juego, con el mismo filtro que `previousSessionAccuracy`.
+  - Si hoy solo hubo ráfagas, el hero queda en «hecha» sin línea de precisión, como cuando falta el dato.
+  - La ráfaga sigue contando como práctica para la racha.
+- Test nuevo en `test/unit/session_recap_test.dart`.
+
+**Sin tocar:**
+- «Precisión por sesión» del Historial: la ráfaga sigue saliendo como barra. Su texto alternativo la nombra «Velocidad · …», así que parece intencionado.
+- La tile «Una nota» lee el dominio del modo, no el historial, y no está comprobado que cuente las ráfagas.
+
+**Verificación:** `flutter analyze` sin avisos y `flutter test` +954 ~10.
+
+## 2026-11-11 · Prueba del pulido en producción · Claude Code
+Producción en `3f1a648`, ventana de 1280×800, tema oscuro y solfeo. Las capturas están en `docs/evidence/2026-11-11_v2_2_pulido/`, reducidas a 800×500.
+
+**Funciona:**
+- Home: el hero tiene relleno de 32 px y cifra grande, con la rueda al lado.
+- Progreso: «Pendientes» es la única KPI destacada.
+- Historial: la pestaña se monta entera.
+- Velocidad: el selector y «Cómo funciona» van en dos columnas.
+- Resultado de Velocidad: «Seguidas» es la card `hero` y las otras tres son secundarias.
+- Perfil y Ajustes: se montan completos. Ajustes va en dos columnas.
+
+**Hallazgos:**
+- **Fallo previo, no del pulido: una ráfaga de Velocidad cuenta como la sesión del día.** `lastAccuracyToday` (`lib/utils/session_summary.dart`) no filtra por tipo de sesión.
+  - Tras una ráfaga de 0/1, el hero dice «0 % de precisión en tu última sesión».
+  - La ráfaga sale también como barra de 0 en «Precisión por sesión» del Historial.
+  - Es probable que también entre en el contador de la tile «Una nota» (18 % · 6 ses.).
+- **Escritorio sin ancho máximo:**
+  - En el estado inicial de la ráfaga de Velocidad, «Comenzar» ocupa unos 1120 px.
+  - En Perfil, las cards y «Ver TOGESC Pro» ocupan unos 1100 px.
+
+**Sin ver:**
+- Las animaciones: cada captura tarda más de 5 s, así que solo se ve el estado final.
+- El conteo del hero, porque el valor era 0.
+- El resumen de sesión con «Precisión» destacada y el pop de la nota: hace falta una sesión entera de 12 rondas.
+- El tema claro.
+
 ## 2026-11-11 · Pulido pendiente del lote E · Claude Code
 Rama `feat/v2.2-pulido`.
 

@@ -191,7 +191,8 @@ double? previousSessionAccuracy(
   return last?.accuracyPercent;
 }
 
-/// Precisión de la última sesión terminada hoy; `null` si hoy no hay ninguna.
+/// Precisión de la última sesión de juego terminada hoy; `null` si hoy no
+/// hay ninguna. Las ráfagas de Velocidad no cuentan: no son la sesión del día.
 double? lastAccuracyToday(
   List<PracticeSessionLog> history, {
   required DateTime now,
@@ -200,7 +201,9 @@ double? lastAccuracyToday(
   for (final e in history) {
     final d = e.endedAt.toLocal();
     final sameDay = d.year == now.year && d.month == now.month && d.day == now.day;
-    if (!sameDay || e.roundsCompleted <= 0) continue;
+    if (!sameDay || e.kind != PracticeKind.game || e.roundsCompleted <= 0) {
+      continue;
+    }
     if (last == null || e.endedAt.isAfter(last.endedAt)) last = e;
   }
   return last?.accuracyPercent;
