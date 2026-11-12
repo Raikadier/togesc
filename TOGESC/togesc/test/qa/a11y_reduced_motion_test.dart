@@ -38,13 +38,6 @@ Future<int> _longestAnimationStreak(
   return longest;
 }
 
-const _buttonStateFades =
-    'A11Y: con la preferencia de la app, los botones '
-    'de Material del resultado encadenan fundidos de estado de 200 ms '
-    '(ButtonStyle.animationDuration). Son cambios de color, no movimiento; el '
-    'ajuste del sistema los acorta solo porque Flutter escala todos los '
-    'AnimationController';
-
 void main() {
   for (final pref in const {
     'sistema (disableAnimations)': false,
@@ -93,7 +86,7 @@ void main() {
         } finally {
           await leaveA11yScreen(tester);
         }
-      }, barrier: pref.value ? _buttonStateFades : null);
+      });
 
       testWidgets('Velocidad · cuenta atrás y ráfaga', (tester) async {
         try {

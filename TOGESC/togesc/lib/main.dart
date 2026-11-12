@@ -87,8 +87,8 @@ class TogescApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: reduceAnimations ? AppTheme.lightStill : AppTheme.light,
+      darkTheme: reduceAnimations ? AppTheme.darkStill : AppTheme.dark,
       themeMode: themeMode,
       // El fundido de tema vive por encima de `builder`, así que no ve el
       // disableAnimations que añade la preferencia.

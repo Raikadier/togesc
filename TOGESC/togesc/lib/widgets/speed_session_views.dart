@@ -73,6 +73,9 @@ class SpeedSessionFeedbackView extends StatelessWidget {
   final String? subtitle;
   final Widget? footer;
 
+  /// Lo que lee el lector de pantalla al aparecer («Correcto, Do sostenido»).
+  final String? announcement;
+
   const SpeedSessionFeedbackView({
     super.key,
     required this.icon,
@@ -80,16 +83,22 @@ class SpeedSessionFeedbackView extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.footer,
+    this.announcement,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GameSessionPhaseLayout(
-      icon: icon,
-      accentColor: accentColor,
-      title: title,
-      subtitle: subtitle,
-      footer: footer,
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: announcement,
+      child: GameSessionPhaseLayout(
+        icon: icon,
+        accentColor: accentColor,
+        title: title,
+        subtitle: subtitle,
+        footer: footer,
+      ),
     );
   }
 }
@@ -349,6 +358,9 @@ class SpeedSessionResultView extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback onMenu;
 
+  /// Lo que lee el lector de pantalla al aparecer; si falta, el título.
+  final String? announcement;
+
   const SpeedSessionResultView({
     super.key,
     required this.icon,
@@ -359,6 +371,7 @@ class SpeedSessionResultView extends StatelessWidget {
     required this.summary,
     required this.onRetry,
     required this.onMenu,
+    this.announcement,
   });
 
   @override
@@ -385,6 +398,8 @@ class SpeedSessionResultView extends StatelessWidget {
               Semantics(
                 header: true,
                 liveRegion: true,
+                label: announcement,
+                excludeSemantics: announcement != null,
                 child: Text(
                   title,
                   textAlign: TextAlign.center,

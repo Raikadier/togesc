@@ -207,10 +207,7 @@ class SessionAccuracyBars extends StatelessWidget {
           ),
           const SizedBox(height: DesignTokens.spacingLg),
           if (sessions.isEmpty)
-            Text(
-              'Aún no hay sesiones registradas.',
-              style: theme.textTheme.bodyMedium,
-            )
+            const TogescEmptyState(message: 'Aún no hay sesiones registradas.')
           else
             Semantics(
               container: true,

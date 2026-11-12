@@ -313,7 +313,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ),
         const SizedBox(height: DesignTokens.spacingLg),
         Theme(
-          data: AppTheme.session,
+          data: AppTheme.sessionOf(context),
           child: Container(
             key: const ValueKey('onboarding-try-piano'),
             padding: const EdgeInsets.all(DesignTokens.spacingMd),

@@ -91,7 +91,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     final stats = ref.watch(srsStatisticsProvider);
     if (stats.isEmpty) {
       return const Scaffold(
-        body: Center(child: Text('Aún no hay estadísticas disponibles.')),
+        body: Center(
+          child: TogescEmptyState(
+            message: 'Aún no hay estadísticas disponibles.',
+          ),
+        ),
       );
     }
 
@@ -328,11 +332,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           title: 'Precisión diaria · ${_period.label}',
         )
       else
-        TogescCard(
-          child: Text(
-            'Sin sesiones en este periodo.',
-            style: theme.textTheme.bodyMedium,
-          ),
+        const TogescCard(
+          child: TogescEmptyState(message: 'Sin sesiones en este periodo.'),
         ),
       const SizedBox(height: DesignTokens.spacingMd),
       Align(

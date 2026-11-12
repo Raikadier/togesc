@@ -351,6 +351,21 @@ void main() {
           .map((n) => formatNoteLabel(n, NoteNamingMode.solfege))
           .join(', ');
       expect(find.text('Las notas eran: $expected'), findsOneWidget);
+
+      // El lector oye el resultado y la nota en voz («Era Do sostenido.»).
+      final spoken = notes
+          .map(
+            (n) => spokenNoteName(formatNoteLabel(n, NoteNamingMode.solfege)),
+          )
+          .join(', ');
+      final semantics = tester.ensureSemantics();
+      expect(
+        find.bySemanticsLabel(
+          'Incorrecto. ${notes.length == 1 ? 'Era' : 'Eran'} $spoken.',
+        ),
+        findsOneWidget,
+      );
+      semantics.dispose();
     });
 
     testWidgets('sin superar la mejor racha no hay píldora', (tester) async {

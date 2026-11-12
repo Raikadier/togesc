@@ -580,7 +580,8 @@ class _PianoKeyboardState extends State<PianoKeyboard> {
       (false, true) => DesignTokens.pianoSessionLargeBlackKeySize,
       (false, false) => DesignTokens.pianoSessionBlackKeySize,
     };
-    const padding = 8.0;
+    // 6 y no 8: con el borde, a 360 dp cada blanca mide 48 dp de ancho.
+    const padding = 6.0;
     // Zona táctil de las negras: nunca menos de 48 (WCAG 2.5.8), aunque
     // visualmente midan 38.
     final blackHitWidth = blackSize.width < DesignTokens.touchTargetMin
