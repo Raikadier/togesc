@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../app/design_tokens.dart';
 import '../../constants/note_naming.dart';
+import '../../utils/number_format.dart';
 
 /// Fase visible de la sesión v2 (1b/1d).
 ///
@@ -100,11 +101,12 @@ SessionPhaseCopy sessionPhaseCopy(SessionPhaseContext c) {
   final many = c.requiredNotes > 1;
   switch (c.phase) {
     case SessionPhase.idle:
+      // «de N notas» dice que las notas son por ronda, no en total.
+      final notes = plural(many ? c.requiredNotes : 1, 'nota', 'notas');
       final parts = <String>[
         c.targetRounds > 0
-            ? '${c.targetRounds} rondas'
-            : 'Sin límite de rondas',
-        many ? '${c.requiredNotes} notas' : '1 nota',
+            ? '${plural(c.targetRounds, 'ronda', 'rondas')} de $notes'
+            : 'Sin límite de rondas · $notes por ronda',
         if (c.focusLabels.isNotEmpty) 'foco en ${c.focusLabels.join(', ')}',
       ];
       return SessionPhaseCopy(

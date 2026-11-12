@@ -245,8 +245,8 @@ Una palabra por concepto. La interfaz no usa jerga técnica: «SRS» solo aparec
 No se juzga sin datos: con menos de 5 intentos no hay rojo ni porcentaje. En la rueda, el relleno mínimo es del 18 % y cada segmento lleva un contorno de 1 px.
 
 **Números:** siempre con `lib/utils/number_format.dart`.
-- Coma decimal y espacio antes de la unidad: «33,3 %», «2,4 s».
-- `formatPercentEs` quita el «,0»: «50 %».
+- Coma decimal y espacio antes de la unidad: «2,4 s».
+- Los porcentajes van siempre enteros (`formatPercentEs`): «33 %», nunca «33,3 %», para que la misma cifra no cambie de forma entre pantallas.
 - `plural(n, 'ronda', 'rondas')` para concordar: «1 ronda», «3 rondas».
 - No uses `toStringAsFixed` en pantallas ni widgets.
 

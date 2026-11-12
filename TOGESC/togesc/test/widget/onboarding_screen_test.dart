@@ -156,6 +156,27 @@ void main() {
     expect(find.text('Seguir sin probar'), findsOneWidget);
   });
 
+  testWidgets('paso 3 a 751×640: al responder, «Probar otra vez» queda a la '
+      'vista', (tester) async {
+    await _pump(tester, size: const Size(751, 640));
+    await _tapVisible(tester, _next);
+    await _tapVisible(tester, _next);
+    // La tecla negra tapa el centro de la blanca: se toca abajo.
+    await tester.ensureVisible(_key('C'));
+    await tester.pumpAndSettle();
+    await tester.tapAt(
+      tester.getRect(_key('C')).bottomCenter - const Offset(0, 12),
+    );
+    await tester.pumpAndSettle();
+
+    final again = find.byKey(const ValueKey('onboarding-try-again'));
+    final viewport = tester.getRect(
+      find.ancestor(of: again, matching: find.byType(Scrollable)).first,
+    );
+    expect(tester.getRect(again).bottom, lessThanOrEqualTo(viewport.bottom));
+    expect(tester.getRect(again).top, greaterThanOrEqualTo(viewport.top));
+  });
+
   testWidgets('completar onboarding guarda preferencia y resetea el paso', (
     tester,
   ) async {

@@ -125,12 +125,14 @@ class TogescPageBody extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final bool scrollable;
+  final double maxWidth;
 
   const TogescPageBody({
     super.key,
     required this.child,
     this.padding,
     this.scrollable = true,
+    this.maxWidth = DesignTokens.contentMaxWidth,
   });
 
   @override
@@ -143,9 +145,7 @@ class TogescPageBody extends StatelessWidget {
     final content = Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: DesignTokens.contentMaxWidth,
-        ),
+        constraints: BoxConstraints(maxWidth: maxWidth),
         child: Padding(
           padding: padding ?? EdgeInsets.all(margin),
           child: child,

@@ -40,6 +40,11 @@ void main() {
         todayHeroCopy([_note('C', null), _note('D', null), _note('E', null)]),
         startsWith('Aún no hay datos de precisión'),
       );
+      // No promete solo naturales: puede sonar un sostenido.
+      expect(
+        todayHeroCopy([_note('C', null)]),
+        contains('puede sonar cualquier nota'),
+      );
     });
 
     test('dos de tres vistas', () {

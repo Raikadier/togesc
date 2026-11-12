@@ -42,6 +42,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   String? _tryAnswer;
   bool _heard = false;
 
+  /// Resultado de la ronda de prueba: se trae a la vista al responder, porque
+  /// en pantallas bajas queda bajo el pliegue.
+  final _tryResultKey = GlobalKey();
+
+  void _answerTry(String note) {
+    setState(() => _tryAnswer = note);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _tryResultKey.currentContext;
+      if (ctx == null || !ctx.mounted) return;
+      Scrollable.ensureVisible(
+        ctx,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        duration: motionDuration(ctx, DesignTokens.durationMedium),
+        curve: DesignTokens.easeOut,
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -312,22 +330,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ? const {}
                   : {answer},
               dimOthers: answer != null,
-              onNoteTapped: (note) => setState(() => _tryAnswer = note),
+              onNoteTapped: _answerTry,
             ),
           ),
         ),
         const SizedBox(height: DesignTokens.spacingMd),
-        status,
-        if (answer != null)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              key: const ValueKey('onboarding-try-again'),
-              onPressed: () => setState(() => _tryAnswer = null),
-              icon: const Icon(Icons.replay_rounded),
-              label: const Text('Probar otra vez'),
-            ),
-          ),
+        Column(
+          key: _tryResultKey,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            status,
+            if (answer != null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: const ValueKey('onboarding-try-again'),
+                  onPressed: () => setState(() => _tryAnswer = null),
+                  icon: const Icon(Icons.replay_rounded),
+                  label: const Text('Probar otra vez'),
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }

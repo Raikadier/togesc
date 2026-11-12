@@ -12,10 +12,11 @@ void main() {
     expect(formatDecimalEs(10, decimals: 0, trimZeros: true), '10');
   });
 
-  test('formatPercentEs quita el «,0» y separa el símbolo', () {
+  test('formatPercentEs redondea a entero y separa el símbolo', () {
     expect(formatPercentEs(0), '0 %');
     expect(formatPercentEs(1), '1 %');
-    expect(formatPercentEs(33.333), '33,3 %');
+    expect(formatPercentEs(33.333), '33 %');
+    expect(formatPercentEs(68.5), '69 %');
     expect(formatPercentEs(99.96), '100 %');
   });
 

@@ -180,7 +180,7 @@ void main() {
     await pumpScreen(tester, history: [log(0)]);
 
     expect(
-      find.bySemanticsLabel(RegExp(r'^A sostenido, 42 %, a reforzar, nivel \d de 5$')),
+      find.bySemanticsLabel(RegExp(r'^A sostenido, 42 %, a reforzar, repaso \d de 5$')),
       findsOneWidget,
     );
     expect(

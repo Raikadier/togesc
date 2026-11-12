@@ -2,6 +2,38 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-11 · Bugs vistos en las pruebas en producción · Claude Code
+Rama `fix/v2.2-bugs`. Son los bugs anotados en la prueba de A–D y en la del pulido.
+
+- **«Nivel 0» con la nota «consolidada».** Son dos escalas distintas:
+  - El nivel es la etapa del repaso espaciado y vuelve a 0 con un fallo tras graduarse.
+  - «Consolidada» sale de la precisión acumulada.
+  - **Arreglo:** la escala se llama ahora «repaso» en todos los textos: «Repaso 3/5 → 0/5», «Nivel de repaso 1 de 5», «C# · repaso 1/5». También las etiquetas semánticas («…, consolidada, repaso 1 de 5»).
+- **«notas naturales» y sonó un Do#.** El foco solo pesa más: suena cualquier nota de la práctica.
+  - **Arreglo:** el hero dice ahora «el foco empieza por notas naturales, pero puede sonar cualquier nota de tu práctica».
+- **«33,3 %» frente a «33 %».**
+  - **Arreglo:** `formatPercentEs` redondea siempre a entero. Afecta a la precisión global de la rueda y de la cabecera de Progreso. `DESIGN.md` recoge la regla.
+- **«12 rondas · 1 nota».**
+  - **Arreglo:** pasa a «12 rondas de 1 nota · foco en …». Sin límite: «Sin límite de rondas · 2 notas por ronda».
+- **Onboarding a 640 px de alto.** Al responder la ronda de prueba, el resultado y «Probar otra vez» suben a la vista con `Scrollable.ensureVisible`, sin animación con movimiento reducido.
+- **Anchos de escritorio:**
+  - `GameSessionPhaseLayout` (estado inicial, escucha y resultado de Velocidad y de la sesión) se limita a 620 px.
+  - Perfil se limita a 960 px, como Progreso, con el nuevo `maxWidth` de `TogescPageBody`.
+
+**Tests:**
+- Nuevo test del onboarding a 751×640. Falla sin el arreglo y pasa con él.
+- Aserción nueva sobre el texto del hero.
+- `formatPercentEs` redondea a entero.
+- Actualizados los textos de nivel en 6 ficheros y la línea de «Preparado».
+- «Repaso» es más largo que «Nivel»: la píldora desbordaba 0,7 px en el test de movimiento reducido. El texto central encoge ahora con `FittedBox`.
+
+**Verificación:**
+- `flutter analyze` sin avisos.
+- `flutter test` +954 ~10 con un fallo, el de la píldora.
+- Tras el arreglo de la píldora pasan de nuevo los ficheros que la usan, el de movimiento reducido y el del juego. No se ha repetido la suite entera.
+
+**Sin ver** en la app real.
+
 ## 2026-11-11 · Fix: una ráfaga de Velocidad no es la sesión del día · Claude Code
 Rama `fix/v2.2-rafaga-no-es-sesion`.
 

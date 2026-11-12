@@ -29,7 +29,7 @@ class SrsLevelPill extends StatelessWidget {
           color: DesignTokens.sessionTextPrimary,
           fontWeight: FontWeight.w700,
         ).merge(DesignTokens.tabularNumbers);
-    final semantics = '$noteLabel: nivel de ${change.before} a '
+    final semantics = '$noteLabel: repaso de ${change.before} a '
         '${change.after} de $srsMaxLevel';
 
     return Semantics(
@@ -51,12 +51,17 @@ class SrsLevelPill extends StatelessWidget {
             children: [
               Text(noteLabel, style: textStyle),
               const SizedBox(width: DesignTokens.spacingSm),
-              Text(
-                'Nivel ${change.before}/$srsMaxLevel → '
-                '${change.after}/$srsMaxLevel',
-                style: textStyle?.copyWith(
-                  color: DesignTokens.sessionTextLabel,
-                  fontWeight: FontWeight.w600,
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Repaso ${change.before}/$srsMaxLevel → '
+                    '${change.after}/$srsMaxLevel',
+                    style: textStyle?.copyWith(
+                      color: DesignTokens.sessionTextLabel,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: DesignTokens.spacingSm),

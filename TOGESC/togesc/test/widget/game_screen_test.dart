@@ -125,7 +125,7 @@ void main() {
 
       expect(find.text('PREPARADO'), findsOneWidget);
       expect(find.text('Ponte los auriculares'), findsOneWidget);
-      expect(find.text('12 rondas · 1 nota · foco en D'), findsOneWidget);
+      expect(find.text('12 rondas de 1 nota · foco en D'), findsOneWidget);
       expect(find.byIcon(Icons.headphones_rounded), findsOneWidget);
       expect(find.byKey(const ValueKey('session-test-sound')), findsOneWidget);
       // Teclado y controles ocultos hasta empezar.
@@ -221,7 +221,7 @@ void main() {
       expect(find.byIcon(Icons.cancel), findsNothing);
       // Píldora SRS de la nota.
       expect(find.byKey(const ValueKey('srs-pill-D')), findsOneWidget);
-      expect(find.textContaining('Nivel 0/5 →'), findsOneWidget);
+      expect(find.textContaining('Repaso 0/5 →'), findsOneWidget);
       // Chips actualizadas.
       expect(find.text('100 %'), findsOneWidget);
       expect(container.read(gameSessionProvider).currentStreak, 1);
@@ -572,7 +572,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.bySemanticsLabel(RegExp(r'^D: nivel 0 a [1-5] de 5, sube$')),
+        find.bySemanticsLabel(RegExp(r'^D: repaso 0 a [1-5] de 5, sube$')),
         findsOneWidget,
       );
       expect(find.byKey(const ValueKey('ear-map')), findsOneWidget);
@@ -663,7 +663,7 @@ void main() {
 
       Finder row(String label) =>
           find.bySemanticsLabel(RegExp('^${RegExp.escape(label)}'));
-      expect(row('D, Sin datos, sin datos de precisión, nivel 0 de 5'),
+      expect(row('D, Sin datos, sin datos de precisión, repaso 0 de 5'),
           findsOneWidget);
 
       // Ronda 1: acierto → Midiendo (menos de 5 intentos), 100 %, nivel 0.
@@ -671,7 +671,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('CORRECTO'), findsOneWidget);
       expect(find.text('Sin datos'), findsNothing);
-      expect(row('D, Midiendo, 100 por ciento, nivel 0 de 5'),
+      expect(row('D, Midiendo, 100 por ciento, repaso 0 de 5'),
           findsOneWidget);
 
       // Ronda 2: segundo acierto seguido → nivel 1.
@@ -679,7 +679,7 @@ void main() {
       await pumpFor(tester, const Duration(milliseconds: 1900));
       await tester.sendKeyEvent(LogicalKeyboardKey.keyD);
       await tester.pump(const Duration(milliseconds: 100));
-      expect(row('D, Midiendo, 100 por ciento, nivel 1 de 5'),
+      expect(row('D, Midiendo, 100 por ciento, repaso 1 de 5'),
           findsOneWidget);
 
       // Ronda 3: fallo → 67 %, la racha vuelve a 0.
@@ -688,7 +688,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.keyE);
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('INCORRECTO'), findsOneWidget);
-      expect(row('D, Midiendo, 67 por ciento, nivel 0 de 5'),
+      expect(row('D, Midiendo, 67 por ciento, repaso 0 de 5'),
           findsOneWidget);
       await pumpFor(tester, const Duration(milliseconds: 2400));
       handle.dispose();
