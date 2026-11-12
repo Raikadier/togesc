@@ -191,6 +191,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       body: SafeArea(
         child: TogescPageBody(
           scrollable: false,
+          // Mismo ancho que Progreso: en escritorio las cards no se estiran.
+          maxWidth: 960,
           child: ListView(
             children: [
               StaggeredEntrance(

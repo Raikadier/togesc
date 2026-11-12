@@ -418,12 +418,12 @@ void main() {
       await tester.ensureVisible(segment);
       await tester.pumpAndSettle();
       tester.semantics.tap(find.semantics.byLabel(
-        'C sostenido, 40 %, a reforzar, nivel 1 de 5',
+        'C sostenido, 40 %, a reforzar, repaso 1 de 5',
       ));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('ear-map-detail')), findsOneWidget);
       expect(find.text('C sostenido · A reforzar'), findsOneWidget);
-      expect(find.text('40 % · 10 intentos · nivel 1 de 5'), findsOneWidget);
+      expect(find.text('40 % · 10 intentos · repaso 1 de 5'), findsOneWidget);
 
       await tester.ensureVisible(find.byKey(const ValueKey('ear-map-practice')));
       await tester.tap(find.byKey(const ValueKey('ear-map-practice')));

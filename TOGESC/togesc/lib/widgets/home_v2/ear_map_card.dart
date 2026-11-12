@@ -317,7 +317,7 @@ class _NoteDetailRow extends StatelessWidget {
       _ =>
         '${pct.round()} % · '
             '${plural(summary.timesSeen, 'intento', 'intentos')} · '
-            'nivel $level de $srsMaxLevel',
+            'repaso $level de $srsMaxLevel',
     };
 
     return Semantics(

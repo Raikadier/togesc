@@ -514,7 +514,7 @@ class _ChangeRow extends StatelessWidget {
       key: ValueKey('session-summary-change-${change.note}'),
       container: true,
       label:
-          '$spoken: nivel ${change.before} a ${change.after} de '
+          '$spoken: repaso ${change.before} a ${change.after} de '
           '$srsMaxLevel, $trend',
       excludeSemantics: true,
       child: Padding(
@@ -550,7 +550,7 @@ class _ChangeRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Nivel ${change.before} → ${change.after}',
+                    'Repaso ${change.before} → ${change.after}',
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: DesignTokens.sessionTextSecondary)
                         .merge(DesignTokens.tabularNumbers),

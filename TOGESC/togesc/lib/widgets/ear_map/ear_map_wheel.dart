@@ -519,7 +519,7 @@ class _Center extends StatelessWidget {
       };
       small = s.status == MasteryStatus.measuring
           ? '${s.label} · midiendo'
-          : '${s.label} · nivel ${s.level}/$srsMaxLevel';
+          : '${s.label} · repaso ${s.level}/$srsMaxLevel';
     } else {
       big = value;
       small = caption;

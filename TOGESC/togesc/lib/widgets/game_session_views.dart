@@ -56,98 +56,107 @@ class GameSessionPhaseLayout extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           horizontal: DesignTokens.marginMobile,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (badge != null) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: DesignTokens.spacingMd,
-                  vertical: DesignTokens.spacingXs,
-                ),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: color.withValues(alpha: 0.2)),
-                ),
-                child: Text(
-                  badge!,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
+        // En escritorio el botón no se estira a todo el ancho.
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: DesignTokens.focusedContentMaxWidth,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (badge != null) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: DesignTokens.spacingMd,
+                    vertical: DesignTokens.spacingXs,
                   ),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: color.withValues(alpha: 0.2)),
+                  ),
+                  child: Text(
+                    badge!,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: DesignTokens.spacingLg),
+              ],
+              SizedBox(
+                width: 120,
+                height: 120,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (usePulse) ...[
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: color.withValues(alpha: 0.15),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: color.withValues(alpha: 0.06),
+                        ),
+                      ),
+                    ],
+                    Container(
+                      width: 88,
+                      height: 88,
+                      decoration: iconFill,
+                      child: Icon(icon, size: 44, color: color),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: DesignTokens.spacingLg),
-            ],
-            SizedBox(
-              width: 120,
-              height: 120,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  if (usePulse) ...[
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: color.withValues(alpha: 0.15),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: color.withValues(alpha: 0.06),
-                      ),
-                    ),
-                  ],
-                  Container(
-                    width: 88,
-                    height: 88,
-                    decoration: iconFill,
-                    child: Icon(icon, size: 44, color: color),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: DesignTokens.spacingLg),
-            Text(
-              title,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: DesignTokens.spacingSm),
               Text(
-                subtitle!,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: scheme.onSurfaceVariant,
+                title,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
                 textAlign: TextAlign.center,
               ),
+              if (subtitle != null) ...[
+                const SizedBox(height: DesignTokens.spacingSm),
+                Text(
+                  subtitle!,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (showProgress && !reduceMotion) ...[
+                const SizedBox(height: DesignTokens.spacingLg),
+                SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: color,
+                  ),
+                ),
+              ],
+              if (footer != null) ...[
+                const SizedBox(height: DesignTokens.spacingLg * 1.5),
+                footer!,
+              ],
             ],
-            if (showProgress && !reduceMotion) ...[
-              const SizedBox(height: DesignTokens.spacingLg),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: CircularProgressIndicator(strokeWidth: 3, color: color),
-              ),
-            ],
-            if (footer != null) ...[
-              const SizedBox(height: DesignTokens.spacingLg * 1.5),
-              footer!,
-            ],
-          ],
+          ),
         ),
       ),
     );

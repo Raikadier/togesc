@@ -14,7 +14,7 @@ import '../togesc_ui.dart';
 /// Texto del hero derivado solo de datos reales del SRS (D10).
 ///
 /// - Sin notas de foco (SRS vacío o cargando): primera sesión.
-/// - Ninguna nota vista: usuario nuevo, se empieza por notas naturales.
+/// - Ninguna nota vista: usuario nuevo, el foco empieza por notas naturales.
 /// - Menos de 3 vistas: se dice cuántas tienen datos.
 /// - Todas vistas: el motivo real de la selección (atrasadas, en
 ///   aprendizaje o menor precisión).
@@ -30,8 +30,9 @@ String todayHeroCopy(List<TodayFocusNote> focus, {bool custom = false}) {
   }
   final seen = focus.where((f) => f.accuracyPercent != null).length;
   if (seen == 0) {
-    return 'Aún no hay datos de precisión: empezarás por notas naturales '
-        'para que el repaso conozca tu oído.';
+    // El foco solo pesa más: suena cualquier nota de la práctica.
+    return 'Aún no hay datos de precisión: el foco empieza por notas '
+        'naturales, pero puede sonar cualquier nota de tu práctica.';
   }
   if (seen < focus.length) {
     final notas = seen == 1 ? '1 nota' : '$seen notas';

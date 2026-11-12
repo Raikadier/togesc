@@ -149,7 +149,7 @@ class NoteMasteryCell extends StatelessWidget {
       learningThreshold: learningThreshold,
     );
     final due = summary.isOverdue ? ', pendiente de repaso' : '';
-    return '$name, $pct %, ${status.label}, nivel $level de $srsMaxLevel$due';
+    return '$name, $pct %, ${status.label}, repaso $level de $srsMaxLevel$due';
   }
 
   @override

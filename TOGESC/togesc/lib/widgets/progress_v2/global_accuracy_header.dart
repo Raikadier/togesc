@@ -53,10 +53,7 @@ class GlobalAccuracyHeader extends StatelessWidget {
           child: CountUpText(
             key: const Key('progress-global-accuracy'),
             value: accuracy,
-            // Durante la cuenta se fija un decimal para que el ancho no baile.
-            format: (v) => v == accuracy
-                ? accuracyText
-                : '${formatDecimalEs(v)} %',
+            format: formatPercentEs,
             semanticsLabel: 'Precisión global por nota: $accuracyText',
             style: DesignTokens.bigNumberLarge.copyWith(
               color: scheme.primary,

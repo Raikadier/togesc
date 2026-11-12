@@ -134,7 +134,7 @@ void main() {
       );
       expect(copy.overline, 'Preparado');
       expect(copy.headline, 'Ponte los auriculares');
-      expect(copy.subtitle, '12 rondas · 1 nota · foco en C#, F#, A#');
+      expect(copy.subtitle, '12 rondas de 1 nota · foco en C#, F#, A#');
 
       final unlimited = sessionPhaseCopy(
         const SessionPhaseContext(
@@ -142,7 +142,7 @@ void main() {
           requiredNotes: 2,
         ),
       );
-      expect(unlimited.subtitle, 'Sin límite de rondas · 2 notas');
+      expect(unlimited.subtitle, 'Sin límite de rondas · 2 notas por ronda');
     });
 
     test('«¡N seguidas!» desde 3 aciertos seguidos', () {

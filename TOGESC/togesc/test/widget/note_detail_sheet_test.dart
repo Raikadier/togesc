@@ -73,7 +73,7 @@ void main() {
       expect(find.text('42 %'), findsOneWidget);
       expect(find.text('12'), findsOneWidget);
       expect(find.text('2,4 s'), findsOneWidget);
-      expect(find.text('Nivel 1 de 5'), findsOneWidget);
+      expect(find.text('Nivel de repaso 1 de 5'), findsOneWidget);
       expect(
         find.text(noteDetailAdvice(MasteryStatus.critical)),
         findsOneWidget,

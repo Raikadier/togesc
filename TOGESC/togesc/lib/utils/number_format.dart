@@ -1,7 +1,7 @@
 /// Formato de números y plurales para la UI en español (es-ES).
 ///
 /// Único sitio donde se formatean decimales: coma decimal y espacio antes de
-/// la unidad («33,3 %», «2,4 s»). No uses `toStringAsFixed` en widgets.
+/// la unidad («2,4 s», «33 %»). No uses `toStringAsFixed` en widgets.
 library;
 
 /// «2,4» con coma decimal. Con [trimZeros], «3,0» → «3» y «1,50» → «1,5».
@@ -17,9 +17,9 @@ String formatDecimalEs(
   return text.replaceAll('.', ',');
 }
 
-/// «68,5 %» y «33 %»: un decimal como máximo y sin «,0».
-String formatPercentEs(double value) =>
-    '${formatDecimalEs(value, trimZeros: true)} %';
+/// «33 %»: los porcentajes van siempre enteros, para que la misma cifra no
+/// salga como «33,3 %» en un sitio y «33 %» en otro.
+String formatPercentEs(double value) => '${value.round()} %';
 
 /// «2,4 s». Con [trimZeros], «3 s» en lugar de «3,0 s».
 String formatSecondsEs(

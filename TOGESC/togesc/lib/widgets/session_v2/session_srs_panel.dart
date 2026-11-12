@@ -196,7 +196,7 @@ class _FocusRow extends StatelessWidget {
         : '${entry.accuracyPercent!.round()} por ciento';
     return Semantics(
       container: true,
-      label: '$name, ${entry.status.label}, $pctSemantics, nivel '
+      label: '$name, ${entry.status.label}, $pctSemantics, repaso '
           '${entry.srsLevel} de $srsMaxLevel'
           '${highlighted ? ', nota de esta ronda' : ''}',
       child: ExcludeSemantics(

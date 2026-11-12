@@ -181,7 +181,7 @@ class NoteDetailSheet extends StatelessWidget {
           ),
           const SizedBox(height: DesignTokens.spacingLg),
           Text(
-            'Nivel $level de $srsMaxLevel',
+            'Nivel de repaso $level de $srsMaxLevel',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: colors.textPrimary,
