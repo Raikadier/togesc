@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../app/design_tokens.dart';
+import '../config/supabase_config.dart';
 import '../providers/auth_provider.dart';
 import '../providers/srs_provider.dart';
 import '../providers/subscription_provider.dart';
@@ -81,7 +82,7 @@ class _AccountAuthSheetState extends ConsumerState<AccountAuthSheet> {
         await client.auth.signUp(
           email: email,
           password: password,
-          emailRedirectTo: Uri.base.origin,
+          emailRedirectTo: SupabaseConfig.authRedirect(),
         );
         _show(
           'Cuenta creada. Revisa tu email para verificar la cuenta.',
@@ -131,7 +132,7 @@ class _AccountAuthSheetState extends ConsumerState<AccountAuthSheet> {
     try {
       await client.auth.resetPasswordForEmail(
         email,
-        redirectTo: Uri.base.origin,
+        redirectTo: SupabaseConfig.authRedirect(),
       );
       setState(() => _mode = AccountAuthMode.signIn);
       _show('Revisa tu email para restablecer la contraseña.', error: false);

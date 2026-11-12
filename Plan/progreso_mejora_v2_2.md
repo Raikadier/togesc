@@ -2,6 +2,16 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-11 · Cuentas en móvil · Claude Code
+Rama `fix/cuentas-movil`. El plan completo está en `Plan/plan_cuentas.md`.
+
+- **En Android e iOS el registro y la recuperación de contraseña fallaban siempre.** `emailRedirectTo: Uri.base.origin` lanza fuera de web, porque `Uri.base` es `file:///`, y el usuario solo veía «No se pudo completar la operación.».
+  - **Arreglo:** `SupabaseConfig.authRedirect()` devuelve el origen en web y `com.raikadier.togesc://login-callback` en móvil.
+- **Los enlaces de los emails no tenían por dónde volver a la app.**
+  - **Arreglo:** esquema propio en `AndroidManifest.xml` e `Info.plist`, y `flutter_deeplinking_enabled` y `FlutterDeepLinkingEnabled` en falso. Así el enlace lo recoge supabase_flutter y go_router no muestra «Page Not Found».
+- **Test:** `test/unit/supabase_config_test.dart`.
+- **Sin probar en un dispositivo.** Falta añadir la URL de vuelta en Supabase y poner un SMTP propio (lo hace el propietario, ver el plan).
+
 ## 2026-11-11 · Accesibilidad pendiente · Claude Code
 Rama `feat/v2.2-a11y-pendiente`. Cierra lo que quedaba del lote F y las 2 barreras conocidas de `test/qa/a11y_*`.
 
