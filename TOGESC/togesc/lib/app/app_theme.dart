@@ -349,6 +349,43 @@ abstract final class AppTheme {
   /// animaciones implícitas de Material (texto y elevación de los botones).
   static final ThemeData session = _buildSession();
 
+  /// Variantes sin fundidos de estado (200 ms) ni ondas de tinta.
+  /// Flutter solo los acorta con el ajuste del sistema; la preferencia
+  /// «Reducir animaciones» de la app llega por `MediaQuery` y necesita estas.
+  static final ThemeData lightStill = _still(light);
+  static final ThemeData darkStill = _still(dark);
+  static final ThemeData sessionStill = _still(session);
+
+  /// Tema de sesión que respeta `MediaQuery.disableAnimations`.
+  static ThemeData sessionOf(BuildContext context) =>
+      MediaQuery.disableAnimationsOf(context) ? sessionStill : session;
+
+  static ButtonStyle _noFade(ButtonStyle? style) =>
+      (style ?? const ButtonStyle()).copyWith(
+        animationDuration: Duration.zero,
+        splashFactory: NoSplash.splashFactory,
+      );
+
+  // Las ondas de tinta de Material tampoco leen `MediaQuery`.
+  static ThemeData _still(ThemeData t) => t.copyWith(
+    splashFactory: NoSplash.splashFactory,
+    filledButtonTheme: FilledButtonThemeData(
+      style: _noFade(t.filledButtonTheme.style),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: _noFade(t.outlinedButtonTheme.style),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: _noFade(t.textButtonTheme.style),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: _noFade(t.elevatedButtonTheme.style),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: _noFade(t.iconButtonTheme.style),
+    ),
+  );
+
   static ThemeData _buildSession() {
     final scheme =
         ColorScheme.fromSeed(

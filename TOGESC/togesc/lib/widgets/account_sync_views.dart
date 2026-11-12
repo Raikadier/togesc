@@ -28,7 +28,13 @@ class AccountSyncDiagnosticsPanel extends ConsumerWidget {
           child: Center(child: CircularProgressIndicator(strokeWidth: 2.5)),
         ),
       ),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (_, _) => TogescCard(
+        padding: EdgeInsets.zero,
+        child: TogescLoadError(
+          message: 'No se pudo comprobar la sincronización.',
+          onRetry: () => ref.invalidate(syncDiagnosticsProvider),
+        ),
+      ),
       data: (SyncDiagnostics d) {
         final globalOk = d.isInSync && d.remoteReachable;
 
@@ -298,7 +304,10 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
                   padding: EdgeInsets.all(DesignTokens.spacingMd),
                   child: LinearProgressIndicator(),
                 ),
-                error: (_, _) => const SizedBox.shrink(),
+                error: (_, _) => TogescLoadError(
+                  message: 'No se pudo leer la notación.',
+                  onRetry: () => ref.invalidate(noteNamingModeProvider),
+                ),
               ),
               Divider(
                 height: 1,
@@ -346,7 +355,11 @@ class AccountPracticePreferencesCard extends ConsumerWidget {
                       : null,
                 ),
                 loading: () => const SizedBox.shrink(),
-                error: (_, _) => const SizedBox.shrink(),
+                error: (_, _) => TogescLoadError(
+                  message: 'No se pudieron leer los recordatorios.',
+                  onRetry: () =>
+                      ref.invalidate(practiceRemindersEnabledProvider),
+                ),
               ),
             ],
           ),

@@ -751,7 +751,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         if (!didPop) _openPause();
       },
       child: Theme(
-        data: AppTheme.session,
+        data: AppTheme.sessionOf(context),
         child: Builder(
           builder: (context) {
             return Scaffold(
@@ -969,6 +969,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
+  static const _pianoInset = DesignTokens.marginMobile - DesignTokens.spacingXs;
+
   /// Entrada de respuesta: piano (por defecto, D6), texto o micrófono.
   Widget _answerInput(
     GameSessionState session, {
@@ -983,6 +985,13 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final showPiano = !showMic && ui.inputMode != GameInputMode.textOnly;
     final showText = !showMic && ui.inputMode != GameInputMode.pianoOnly;
     final answering = phase == SessionPhase.answer;
+    // En móvil el bloque solo deja 4 px para el piano; el resto vuelve a 16.
+    Widget inset(Widget child) => variant == PianoKeyboardVariant.session
+        ? Padding(
+            padding: const EdgeInsets.symmetric(horizontal: _pianoInset),
+            child: child,
+          )
+        : child;
 
     final children = <Widget>[];
     if (showPiano) {
@@ -1005,10 +1014,12 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     }
     if (showMic && answering) {
       children.add(
-        MicrophoneAnswerPanel(
-          requiredNotes: required,
-          onNoteDetected: (note) => _toggleNote(note, required),
-          onSubmit: () => _confirmSelection(required),
+        inset(
+          MicrophoneAnswerPanel(
+            requiredNotes: required,
+            onNoteDetected: (note) => _toggleNote(note, required),
+            onSubmit: () => _confirmSelection(required),
+          ),
         ),
       );
     }
@@ -1017,12 +1028,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         children.add(const SizedBox(height: DesignTokens.spacingMd));
       }
       children.add(
-        NoteInputField(
-          enabled: answering,
-          onSubmitted: (notes) => _submitNotes(notes, required),
-          hintText: namingMode == NoteNamingMode.solfege
-              ? 'Escribe notas (Do, Re, Mi…)'
-              : 'Escribe notas (C, E, G…)',
+        inset(
+          NoteInputField(
+            enabled: answering,
+            onSubmitted: (notes) => _submitNotes(notes, required),
+            hintText: namingMode == NoteNamingMode.solfege
+                ? 'Escribe notas (Do, Re, Mi…)'
+                : 'Escribe notas (C, E, G…)',
+          ),
         ),
       );
     }
@@ -1075,18 +1088,23 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       ),
       child: _ring(session, size: DesignTokens.sessionRingSize),
     );
+    // El piano casi a sangre (4 px): a 360 dp las blancas llegan a 48 dp.
+    // El resto de controles conserva el margen de 16.
     final keyboardBlock = Padding(
       padding: const EdgeInsets.fromLTRB(
-        DesignTokens.marginMobile,
+        DesignTokens.spacingXs,
         0,
-        DesignTokens.marginMobile,
+        DesignTokens.spacingXs,
         DesignTokens.marginMobile,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _keyActions(session),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: _pianoInset),
+            child: _keyActions(session),
+          ),
           const SizedBox(height: DesignTokens.spacingSm),
           _answerInput(session, variant: PianoKeyboardVariant.session),
         ],

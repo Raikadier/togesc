@@ -230,7 +230,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     final showMetrics = session.state != SpeedState.idle;
 
     return Theme(
-      data: AppTheme.session,
+      data: AppTheme.sessionOf(context),
       // El Builder da un contexto bajo el tema de sesión a todo el contenido
       // (TogescColors y colorScheme de sesión).
       child: Builder(
@@ -361,6 +361,19 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
     return notes.map((n) => formatNoteLabel(n, mode)).join(', ');
   }
 
+  /// Notas en forma hablada para el lector («Do sostenido, Mi»).
+  String _spokenNames(List<String> notes) {
+    final mode =
+        ref.read(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
+    return notes
+        .map((n) => spokenNoteName(formatNoteLabel(n, mode)))
+        .join(', ');
+  }
+
+  /// «Era Do sostenido» o «Eran Do sostenido, Mi».
+  String _wasLine(List<String> notes) =>
+      '${notes.length == 1 ? 'Era' : 'Eran'} ${_spokenNames(notes)}.';
+
   Widget _buildAnswerView(BuildContext context, SpeedSessionState session) {
     final namingMode =
         ref.watch(noteNamingModeProvider).valueOrNull ?? NoteNamingMode.letter;
@@ -461,6 +474,9 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
       accentColor: TogescColors.of(context).correct,
       title: 'Correcto',
       subtitle: 'Tiempo límite: ${formatSecondsEs(session.currentTimeLimit)}',
+      announcement:
+          'Correcto, ${_spokenNames(session.currentNotes)}. Tiempo límite: '
+          '${formatSecondsEs(session.currentTimeLimit)}.',
       footer: FilledButton.icon(
         onPressed: _startRound,
         icon: const Icon(Icons.skip_next_rounded),
@@ -483,6 +499,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
       accentColor: TogescColors.of(context).incorrect,
       title: 'Incorrecto',
       subtitle: 'Las notas eran: ${_noteNames(session.currentNotes)}',
+      announcement: 'Incorrecto. ${_wasLine(session.currentNotes)}',
       newRecord: _newRecord,
       summary: _summary(session),
       onRetry: _retrySession,
@@ -496,6 +513,7 @@ class _SpeedGameScreenState extends ConsumerState<SpeedGameScreen> {
       accentColor: TogescColors.of(context).selection,
       title: 'Tiempo agotado',
       subtitle: 'Las notas eran: ${_noteNames(session.currentNotes)}',
+      announcement: 'Tiempo agotado. ${_wasLine(session.currentNotes)}',
       newRecord: _newRecord,
       summary: _summary(session),
       onRetry: _retrySession,

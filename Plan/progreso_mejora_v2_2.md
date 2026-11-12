@@ -2,6 +2,45 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-11 · Accesibilidad pendiente · Claude Code
+Rama `feat/v2.2-a11y-pendiente`. Cierra lo que quedaba del lote F y las 2 barreras conocidas de `test/qa/a11y_*`.
+
+- **Estados vacíos (punto 6).** Nuevo `TogescEmptyState`: el texto y «Empezar a practicar», que lleva al Home. Lo usan Progreso por nota, Estadísticas (sin datos y periodo vacío), la evolución por sesión, el historial y los extremos.
+- **Errores silenciosos.** Nuevo `TogescLoadError`: icono, texto, «Reintentar» y región viva para el lector. Sustituye a los 4 errores que no decían nada: diagnóstico de sincronización, notación, recordatorios e historial.
+- **Velocidad anuncia la nota.** Los resultados de la ráfaga son regiones vivas con la nota hablada:
+  - «Correcto, Do sostenido. Tiempo límite: 1,5 s.»
+  - «Incorrecto. Era Do sostenido.»
+  - «Tiempo agotado. Eran Do, Mi.»
+- **Barrera de movimiento reducido (700 ms tras responder).** La causa era doble. Los fundidos de estado de los botones (200 ms) y las ondas de tinta de Material no leen `MediaQuery`. Con el ajuste del sistema se acortan solo porque Flutter escala todos los `AnimationController`, y la preferencia de la app no llega ahí.
+  - **Arreglo:** `AppTheme.lightStill`, `darkStill` y `sessionStill` llevan los botones con `animationDuration: 0` y sin ondas. `main.dart` los usa con «Reducir animaciones», y las 4 pantallas de sesión piden `AppTheme.sessionOf(context)`.
+  - Son instancias únicas, para no reiniciar las animaciones implícitas.
+- **Barrera de las teclas de 44 px.** En la sesión móvil el piano va ahora a 4 px del borde, y el resto de controles sigue a 16. El relleno interior del teclado de sesión baja de 8 a 6. A 360 dp cada blanca mide 48,3 dp.
+
+**Tests:**
+- 2 tests nuevos de estados vacíos y errores.
+- Test del anuncio en Velocidad, con notación de solfeo.
+- `_known` de las guías queda vacío y la prueba de movimiento reducido ya no tiene `barrier`.
+- Con `A11Y_RUN_KNOWN=true` pasan las guías y el movimiento reducido.
+- `flutter analyze` sin avisos. `flutter test`: 959 tests en verde y 8 omitidos.
+
+**Sin probar:** TalkBack y VoiceOver en un dispositivo real. No lo puedo hacer desde aquí. Los anuncios están verificados con el árbol semántico de los tests.
+
+## 2026-11-11 · Prueba de los bugs en producción · Claude Code
+Producción en `b2eab52`. El navegador del panel había perdido sus datos, así que arranca con un usuario nuevo. Las capturas están en `docs/evidence/2026-11-11_v2_2_bugs/`.
+
+**Funciona:**
+- **Onboarding a 751×640:** al responder la prueba, la página sube y «Probar otra vez» queda visible sobre la barra.
+- **Hero de usuario nuevo:** «el foco empieza por notas naturales, pero puede sonar cualquier nota de tu práctica». En la primera ronda sonó un C#.
+- **«Preparado»:** «12 rondas de 1 nota · foco en C, D, E».
+- **Progreso:** «0 %» entero. El detalle de C# dice «Nivel de repaso 0 de 5».
+- **A 1280 px:**
+  - Perfil va centrado a 960 px.
+  - «Comenzar» de la ráfaga en reposo se limita a 620 px.
+
+**Sin ver:** la píldora «Repaso 0/5 → …». La fase de resultado dura unos 2 s y cada captura tarda más. La cubren los tests.
+
+**Observación:** un usuario nuevo con 2 intentos ve «Pendientes: 10 · repasar ahora», porque las notas sin datos cuentan como pendientes. Se puede discutir, pero no es parte de estos bugs.
+
 ## 2026-11-11 · Bugs vistos en las pruebas en producción · Claude Code
 Rama `fix/v2.2-bugs`. Son los bugs anotados en la prueba de A–D y en la del pulido.
 

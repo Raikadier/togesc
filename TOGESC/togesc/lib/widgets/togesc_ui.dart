@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../app/design_tokens.dart';
+import '../app/router.dart';
 import '../app/togesc_colors.dart';
 import '../utils/number_format.dart';
 
@@ -115,6 +117,75 @@ class TogescCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: DesignTokens.borderRadiusCard,
         child: card,
+      ),
+    );
+  }
+}
+
+/// Estado vacío con salida: el mensaje y «Empezar a practicar», que por
+/// defecto lleva al Home. Ningún vacío se queda sin acción.
+class TogescEmptyState extends StatelessWidget {
+  final String message;
+  final VoidCallback? onAction;
+
+  const TogescEmptyState({super.key, required this.message, this.onAction});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          message,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: DesignTokens.spacingSm),
+        TextButton.icon(
+          onPressed: onAction ?? () => context.go(AppRoutes.home),
+          icon: const Icon(Icons.play_arrow_rounded),
+          label: const Text('Empezar a practicar'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Error al cargar un dato: mensaje y «Reintentar», nunca un hueco vacío.
+/// Se anuncia al lector de pantalla al aparecer (región viva).
+class TogescLoadError extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const TogescLoadError({
+    super.key,
+    required this.message,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      liveRegion: true,
+      child: Padding(
+        padding: const EdgeInsets.all(DesignTokens.spacingMd),
+        child: Row(
+          children: [
+            Icon(Icons.error_outline_rounded, color: scheme.error),
+            const SizedBox(width: DesignTokens.spacingMd),
+            Expanded(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            TextButton(onPressed: onRetry, child: const Text('Reintentar')),
+          ],
+        ),
       ),
     );
   }

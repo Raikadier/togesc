@@ -54,7 +54,9 @@ class NoteProgressScreen extends ConsumerWidget {
     if (summaries.isEmpty) {
       return const TogescScaffold(
         title: 'Progreso por nota',
-        body: Center(child: Text('Aún no hay progreso por nota.')),
+        body: Center(
+          child: TogescEmptyState(message: 'Aún no hay progreso por nota.'),
+        ),
       );
     }
 

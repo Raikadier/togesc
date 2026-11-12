@@ -209,7 +209,7 @@ class SettingsPianoPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: AppTheme.session,
+      data: AppTheme.sessionOf(context),
       child: Builder(
         builder: (context) {
           final scheme = Theme.of(context).colorScheme;

@@ -31,11 +31,8 @@ class SessionHistoryCard extends ConsumerWidget {
       data: (history) {
         final source = entries ?? history;
         if (source.isEmpty) {
-          return TogescCard(
-            child: Text(
-              'Aún no hay sesiones guardadas.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+          return const TogescCard(
+            child: TogescEmptyState(message: 'Aún no hay sesiones guardadas.'),
           );
         }
 
@@ -72,7 +69,13 @@ class SessionHistoryCard extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (_, _) => TogescCard(
+        padding: EdgeInsets.zero,
+        child: TogescLoadError(
+          message: 'No se pudo cargar el historial.',
+          onRetry: () => ref.invalidate(sessionHistoryProvider),
+        ),
+      ),
     );
   }
 }

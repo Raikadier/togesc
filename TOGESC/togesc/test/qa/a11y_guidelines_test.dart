@@ -23,13 +23,7 @@ const _guidelines = <String, AccessibilityGuideline>{
 
 /// Barreras reales destapadas por estas guías (se mantienen como `skip`
 /// hasta que se arreglen; el informe las prioriza).
-const _known = <String, String>{
-  'Juego · fase «Responde»|android 48dp':
-      'A11Y: teclas blancas del piano '
-      'de sesión de 44,3 px de ancho a 360 px (lib/widgets/piano_keyboard.dart'
-      ':588, minWidth 336 + padding no se respeta dentro del layout de la '
-      'sesión); WCAG 2.5.8 AA sí se cumple',
-};
+const _known = <String, String>{};
 
 /// Alto suficiente para que casi todo el contenido entre en pantalla (las
 /// guías solo miran lo que está dentro del viewport) a ancho de móvil.

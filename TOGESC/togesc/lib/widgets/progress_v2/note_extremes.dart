@@ -5,6 +5,7 @@ import '../../app/togesc_colors.dart';
 import '../../constants/note_naming.dart';
 import '../../models/note_progress_summary.dart';
 import '../../utils/srs_level.dart';
+import '../togesc_ui.dart';
 
 /// Las [count] notas vistas más difíciles (menor precisión) y más fáciles
 /// (mayor precisión), sin repetir notas entre las dos listas. Con menos de
@@ -133,11 +134,8 @@ class NoteExtremes extends StatelessWidget {
         children: [
           header,
           const SizedBox(height: DesignTokens.spacingSm),
-          Text(
-            'Practica al menos dos notas para ver tus extremos.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.textSecondary,
-            ),
+          const TogescEmptyState(
+            message: 'Practica al menos dos notas para ver tus extremos.',
           ),
         ],
       );
