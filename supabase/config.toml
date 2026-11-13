@@ -6,18 +6,36 @@ project_id = "puetlvcsrntwweuxinee"
 [api]
 enabled = true
 port = 54321
-schemas = ["public"]
+schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
 [db]
 port = 54322
-major_version = 15
+major_version = 17
 
 [auth]
 enabled = true
 site_url = "https://togesc.vercel.app"
-additional_redirect_urls = ["http://localhost:*", "https://togesc.vercel.app/**"]
+additional_redirect_urls = [
+  "http://localhost:*",
+  "https://togesc.vercel.app/**",
+  # Vuelta de los enlaces de Auth a la app en Android e iOS.
+  "com.raikadier.togesc://login-callback",
+]
+
+# Plantillas en español (supabase/templates).
+[auth.email.template.confirmation]
+subject = "Confirma tu cuenta de TOGESC"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Nueva contraseña para TOGESC"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Confirma tu nuevo email"
+content_path = "./supabase/templates/email_change.html"
 
 [functions.stripe-webhook]
 verify_jwt = false

@@ -2,6 +2,12 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-13 · Configuración de Auth como código · Claude Code
+- CLI de Supabase v3.1.0 en `%LOCALAPPDATA%\supabase-cli\supabase.exe`, descargado de la release oficial con el checksum comprobado. El propietario hizo `supabase login` y el proyecto está enlazado.
+- `supabase/config.toml` declara ahora las Redirect URLs (con la de la app móvil), 3 plantillas en español en `supabase/templates/`, `graphql_public` en la API (para no quitarla) y Postgres 17.
+- **Hallazgo:** en producción las Redirect URLs estaban vacías.
+- **Sin aplicar:** el clasificador de permisos bloqueó `config push --yes` contra producción. Lo lanza el propietario.
+
 ## 2026-11-11 · Cuentas en móvil · Claude Code
 Rama `fix/cuentas-movil`. El plan completo está en `Plan/plan_cuentas.md`.
 
