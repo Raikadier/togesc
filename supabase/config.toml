@@ -24,18 +24,20 @@ additional_redirect_urls = [
   "com.raikadier.togesc://login-callback",
 ]
 
+# En el plan Free, Supabase solo deja cambiar las plantillas con SMTP propio.
+# Descomentar al configurar el SMTP (Plan/plan_cuentas.md).
 # Plantillas en español (supabase/templates).
-[auth.email.template.confirmation]
-subject = "Confirma tu cuenta de TOGESC"
-content_path = "./supabase/templates/confirmation.html"
+# [auth.email.template.confirmation]
+# subject = "Confirma tu cuenta de TOGESC"
+# content_path = "./supabase/templates/confirmation.html"
 
-[auth.email.template.recovery]
-subject = "Nueva contraseña para TOGESC"
-content_path = "./supabase/templates/recovery.html"
+# [auth.email.template.recovery]
+# subject = "Nueva contraseña para TOGESC"
+# content_path = "./supabase/templates/recovery.html"
 
-[auth.email.template.email_change]
-subject = "Confirma tu nuevo email"
-content_path = "./supabase/templates/email_change.html"
+# [auth.email.template.email_change]
+# subject = "Confirma tu nuevo email"
+# content_path = "./supabase/templates/email_change.html"
 
 [functions.stripe-webhook]
 verify_jwt = false

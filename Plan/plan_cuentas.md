@@ -15,7 +15,8 @@ Objetivo: que cualquiera pueda crear una cuenta, confirmarla, entrar, recuperar 
 
 ## 2. Panel de Supabase (propietario) · bloquea el lanzamiento
 - [ ] **SMTP propio** (Auth → SMTP), con Resend, Brevo o similar, y con un dominio verificado (SPF y DKIM). El correo por defecto de Supabase es solo para pruebas: envía a muy pocas direcciones y con un límite por hora muy bajo (inferido de la documentación de Supabase; confirmarlo en el panel).
-- [ ] **Redirect URLs y plantillas en español:** ya están declaradas en `supabase/config.toml` y `supabase/templates/`. Se aplican con `supabase config push`. El diff del 2026-11-13 mostró que **producción no tenía ninguna Redirect URL** (`[]`), aunque `docs/supabase_setup.md` las daba por puestas. El push solo cambia lo declarado; lo no declarado (como `enable_confirmations = true`) queda como está.
+- [x] **Redirect URLs** aplicadas el 2026-11-13 con `supabase config push`. Antes producción no tenía ninguna (`[]`).
+- [ ] **Plantillas en español** (`supabase/templates/`): en el plan Free Supabase solo deja cambiarlas con SMTP propio. Al configurar el SMTP, descomentarlas en `config.toml` y hacer `config push`.
 - [ ] **Protección contra contraseñas filtradas:** el proyecto está en el plan Free y, según la documentación de Supabase, es una función de Pro (inferido; confirmar en el panel). Si es así, se descarta hasta pasar a Pro.
 - [ ] Revisar los límites de Auth (Rate Limits) una vez puesto el SMTP.
 
