@@ -15,9 +15,9 @@ Objetivo: que cualquiera pueda crear una cuenta, confirmarla, entrar, recuperar 
 - [x] **Borrar la cuenta borra todos los datos** (revisado en producción el 2026-11-18). `delete_own_account` borra el usuario de `auth.users`. `user_progress` y `user_subscriptions` se borran en cascada. `analytics_events` pasa `user_id` a null y sus propiedades solo guardan el modo y el resultado, así que quedan anónimos. `processed_webhook_events` no guarda usuarios. Falta probarlo de extremo a extremo (paso 3.4).
 
 ## 2. Panel de Supabase (propietario) · bloquea el lanzamiento
-- [ ] **SMTP propio** (Auth → SMTP), con Resend, Brevo o similar, y con un dominio verificado (SPF y DKIM). El correo por defecto de Supabase es solo para pruebas: envía a muy pocas direcciones y con un límite por hora muy bajo (inferido de la documentación de Supabase; confirmarlo en el panel).
+- [x] **SMTP propio** (2026-11-18): Resend con `mail.togesc.online` (DNS en Hostinger: DKIM, SPF y MX comprobados). Remitente `no-reply@mail.togesc.online`, «TOGESC».
 - [x] **Redirect URLs** aplicadas el 2026-11-13 con `supabase config push`. Antes producción no tenía ninguna (`[]`).
-- [ ] **Plantillas en español** (`supabase/templates/`): en el plan Free Supabase solo deja cambiarlas con SMTP propio. Al configurar el SMTP, descomentarlas en `config.toml` y hacer `config push`.
+- [x] **Plantillas en español** aplicadas con `config push` (confirmación, recuperación y cambio de email).
 - [ ] **Protección contra contraseñas filtradas:** el proyecto está en el plan Free y, según la documentación de Supabase, es una función de Pro (inferido; confirmar en el panel). Si es así, se descarta hasta pasar a Pro.
 - [ ] Revisar los límites de Auth (Rate Limits) una vez puesto el SMTP.
 
