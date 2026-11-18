@@ -2,6 +2,11 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-18 · Borrado de cuenta revisado · Claude Code
+- El SMTP propio sigue sin configurar (no aparece en `supabase config diff`). Bloquea las plantillas y la prueba de extremo a extremo.
+- **Borrar la cuenta borra todos los datos personales.** Lo comprobé en producción, solo con lecturas: cascada en `user_progress` y `user_subscriptions`, y `analytics_events` anonimizado (`user_id` a null, sin datos personales en las propiedades).
+- La app llama a la RPC, cierra la sesión y avisa de que el progreso local se conserva.
+
 ## 2026-11-13 · Configuración de Auth como código · Claude Code
 - CLI de Supabase v3.1.0 en `%LOCALAPPDATA%\supabase-cli\supabase.exe`, descargado de la release oficial con el checksum comprobado. El propietario hizo `supabase login` y el proyecto está enlazado.
 - `supabase/config.toml` declara ahora las Redirect URLs (con la de la app móvil), 3 plantillas en español en `supabase/templates/`, `graphql_public` en la API (para no quitarla) y Postgres 17.

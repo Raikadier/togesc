@@ -12,6 +12,7 @@ Objetivo: que cualquiera pueda crear una cuenta, confirmarla, entrar, recuperar 
 - [x] En Android e iOS el registro y la recuperación fallaban siempre: `Uri.base.origin` lanza fuera de web. Ahora usan `SupabaseConfig.authRedirect()`: el origen en web y `com.raikadier.togesc://login-callback` en móvil.
 - [x] Esquema propio en `AndroidManifest.xml` e `Info.plist`, y el deep linking de Flutter apagado. Así el enlace llega a supabase_flutter (`app_links`) y no a go_router, que mostraba «Page Not Found».
 - [ ] Borrar la cuenta debe cancelar la suscripción (auditoría 2026-11-10). Solo importa cuando se active el cobro.
+- [x] **Borrar la cuenta borra todos los datos** (revisado en producción el 2026-11-18). `delete_own_account` borra el usuario de `auth.users`. `user_progress` y `user_subscriptions` se borran en cascada. `analytics_events` pasa `user_id` a null y sus propiedades solo guardan el modo y el resultado, así que quedan anónimos. `processed_webhook_events` no guarda usuarios. Falta probarlo de extremo a extremo (paso 3.4).
 
 ## 2. Panel de Supabase (propietario) · bloquea el lanzamiento
 - [ ] **SMTP propio** (Auth → SMTP), con Resend, Brevo o similar, y con un dominio verificado (SPF y DKIM). El correo por defecto de Supabase es solo para pruebas: envía a muy pocas direcciones y con un límite por hora muy bajo (inferido de la documentación de Supabase; confirmarlo en el panel).
