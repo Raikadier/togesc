@@ -32,6 +32,10 @@ User? _sessionUser(Ref ref) {
 }
 
 /// ID del usuario autenticado, o null si no hay sesion.
+/// Llegó un enlace de «nueva contraseña»: Cuenta pide la nueva hasta guardarla.
+/// Lo activa `AuthSyncListener`, porque el enlace abre la app en el Home.
+final passwordRecoveryProvider = StateProvider<bool>((ref) => false);
+
 final currentUserIdProvider = Provider<String?>((ref) {
   return _sessionUser(ref)?.id;
 });

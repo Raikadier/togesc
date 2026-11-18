@@ -34,7 +34,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   final _newPasswordController = TextEditingController();
   bool _busy = false;
   String? _message;
-  bool _recoveryMode = false;
 
   @override
   void dispose() {
@@ -61,10 +60,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
     try {
       await client.auth.updateUser(UserAttributes(password: password));
-      setState(() {
-        _recoveryMode = false;
-        _message = 'Contraseña actualizada correctamente.';
-      });
+      ref.read(passwordRecoveryProvider.notifier).state = false;
+      setState(() => _message = 'Contraseña actualizada correctamente.');
     } on AuthException catch (e) {
       setState(() => _message = e.message);
     } catch (_) {
@@ -158,16 +155,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(authStateChangesProvider, (prev, next) {
-      next.whenData((state) {
-        if (state.event == AuthChangeEvent.passwordRecovery && mounted) {
-          setState(() {
-            _recoveryMode = true;
-            _message = 'Introduce tu nueva contraseña.';
-          });
-        }
-      });
-    });
+    final recoveryMode = ref.watch(passwordRecoveryProvider);
 
     final available = ref.watch(supabaseAvailableProvider);
     final email = ref.watch(currentUserEmailProvider);
@@ -203,7 +191,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   onSignIn: available ? _openAuthSheet : null,
                 ),
               ),
-              if (_recoveryMode) ...[
+              if (recoveryMode) ...[
                 gap,
                 AccountAuthFormCard(
                   badge: 'Recuperación',
