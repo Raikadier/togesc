@@ -2,6 +2,11 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-18 · SMTP propio y plantillas en español · Claude Code
+- El propietario compró `togesc.online`, verificó `mail.togesc.online` en Resend (DNS en Hostinger) y guardó el SMTP en Supabase. `config diff` lo confirma: `smtp.resend.com:465`, remitente `no-reply@mail.togesc.online`.
+- Plantillas en español activas en `config.toml` y aplicadas con `config push`. `config diff` queda en 0 cambios.
+- Email de prueba: recuperación de contraseña a la cuenta del propietario. Supabase respondió 200. Falta confirmar que llega a la bandeja de entrada y no a spam.
+
 ## 2026-11-18 · Borrado de cuenta revisado · Claude Code
 - El SMTP propio sigue sin configurar (no aparece en `supabase config diff`). Bloquea las plantillas y la prueba de extremo a extremo.
 - **Borrar la cuenta borra todos los datos personales.** Lo comprobé en producción, solo con lecturas: cascada en `user_progress` y `user_subscriptions`, y `analytics_events` anonimizado (`user_id` a null, sin datos personales en las propiedades).
