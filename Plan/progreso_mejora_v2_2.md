@@ -2,6 +2,12 @@
 
 Log en orden cronológico inverso. Qué cambia: `docs/design_v2_2/SPEC_mejora_v2_2.md`. Por qué: `docs/auditoria/2026-11-09_evaluacion_rediseno_v2_1.md`.
 
+## 2026-11-18 · «Nueva contraseña» desde cualquier pantalla · Claude Code
+- **Fallo:** el enlace de recuperación abre la app en el Home, y solo Cuenta escuchaba el evento `passwordRecovery`. El usuario entraba en la sesión sin que se le pidiera la contraseña nueva.
+- **Arreglo:** `passwordRecoveryProvider`. `AuthSyncListener` lo activa al recibir el evento y lleva a Cuenta, que muestra «Nueva contraseña» hasta guardarla. gotrue usa un `BehaviorSubject`, así que el evento llega aunque se emita durante `Supabase.initialize`.
+- **Test:** `test/widget/password_recovery_test.dart` (la app arranca en Home y llega el evento).
+- `flutter analyze` sin avisos. Esta máquina va muy lenta (el análisis tardó 24 min), así que la suite completa se deja al CI.
+
 ## 2026-11-18 · SMTP propio y plantillas en español · Claude Code
 - El propietario compró `togesc.online`, verificó `mail.togesc.online` en Resend (DNS en Hostinger) y guardó el SMTP en Supabase. `config diff` lo confirma: `smtp.resend.com:465`, remitente `no-reply@mail.togesc.online`.
 - Plantillas en español activas en `config.toml` y aplicadas con `config push`. `config diff` queda en 0 cambios.

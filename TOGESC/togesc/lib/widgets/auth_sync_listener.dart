@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../app/router.dart';
 import '../config/subscription_config.dart';
 import '../providers/auth_provider.dart';
+import '../providers/router_provider.dart';
 import '../providers/srs_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../providers/sync_provider.dart';
@@ -53,6 +55,11 @@ class _AuthSyncListenerState extends ConsumerState<AuthSyncListener>
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<AuthState>>(authStateChangesProvider, (prev, next) {
       next.whenData((state) {
+        if (state.event == AuthChangeEvent.passwordRecovery) {
+          ref.read(passwordRecoveryProvider.notifier).state = true;
+          ref.read(goRouterProvider).go(AppRoutes.account);
+          return;
+        }
         if (state.event == AuthChangeEvent.signedOut) {
           ref.invalidate(progressRepositoryProvider);
           ref.invalidate(syncDiagnosticsProvider);
